@@ -1,0 +1,45 @@
+# Sub-repositories: not committed; see meta/repos.yaml and scripts/sync_repos.py
+repos/research/*
+!repos/research/.gitkeep
+repos/develop/*
+!repos/develop/.gitkeep
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Testing
+.coverage
+.pytest_cache/
+
+# Local env (proxy, etc.); README "Network / HTTP proxy"
+.env
+
+# Video assets (large binaries; do not commit)
+*.mp4
+*.webm
+*.mov
+*.mkv
+*.avi
+*.m4v
+*.wmv
+*.flv
+
+# OS
+.DS_Store
+*.swp
+
+# IDEs
+.idea/
+.vscode/
+
+# Agent runtime (local, personal)
+.openclaw/
+memory/*
+!memory/.gitkeep
+!memory/README.md

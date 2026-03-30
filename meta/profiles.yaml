@@ -1,0 +1,58 @@
+# Shared AI/runtime profiles.
+# These profiles are canonical and tool-neutral.
+# Adapters may translate them for specific tools, but should not redefine intent.
+#
+# Suggested fields:
+#   id              — Stable profile id
+#   name            — Human-friendly profile name
+#   description     — Purpose of the profile
+#   mode            — High-level operating mode
+#   behavior        — Expectations for planning, editing, testing, and safety
+#   context_policy  — How much context to load and from where
+#   output_style    — Preferred answer and change-reporting style
+
+version: 1
+
+profiles:
+  - id: default-coding
+    name: Default Coding
+    description: Balanced editing profile for normal implementation work across repositories.
+    mode: edit
+    behavior:
+      plan_first: false
+      test_expectation: targeted
+      safety_level: standard
+      change_scope: focused
+    context_policy:
+      load:
+        - repo-readme
+        - local-docs
+        - workspace-knowledge
+      prefer:
+        - canonical-rules
+        - existing-project-conventions
+    output_style:
+      tone: concise
+      include_verification: true
+
+  - id: repo-architecture
+    name: Repository Architecture
+    description: Planning and review profile for structure, boundaries, and system design.
+    mode: review
+    behavior:
+      plan_first: true
+      test_expectation: advisory
+      safety_level: conservative
+      change_scope: broad
+    context_policy:
+      load:
+        - repo-readme
+        - manifest-files
+        - workspace-knowledge
+      prefer:
+        - architecture-docs
+        - conventions
+        - migration-notes
+    output_style:
+      tone: structured
+      include_verification: false

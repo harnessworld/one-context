@@ -1,0 +1,15 @@
+﻿---
+description: aips-personal metadata, knowledge layer, and where sub-repositories live
+---
+
+# aips-personal — this repository
+
+Canonical project intent lives in **tool-neutral** files: `meta/` and `knowledge/`. Vendor-specific AI config should be adapters that derive from those sources, not duplicate them.
+
+- **`meta/repos.yaml`**: every registered sub-repo (`url`, local `path` or `category`, optional `id` / `alias`, description).
+- **`meta/workspaces.yaml`**: task- or theme-oriented workspace definitions; repo membership references `id`s from `repos.yaml`.
+- **`meta/profiles.yaml`**: shared profiles (behavior, context policy) for tooling to interpret or export.
+- **`knowledge/`**: standards, playbooks, prompts — write once for all tools.
+- **`features/`**: umbrella-level feature specs (`spec.md`, design, test/MR/deliver docs). Convention: `features/README.md`; index: `features/INDEX.md`. Link code to repo **`id`**s from `repos.yaml`.
+- **Working copies**: under `repos/` (e.g. `repos/research/…`, `repos/develop/…`); **not** committed here. After `pip install -e ./packages/aips-personal`: sync with `aiws sync` or `python -m aiws sync` (use the latter if `aiws` is not on `PATH`). Legacy: `python scripts/sync_repos.py`. Validate manifests with `aiws doctor` or `python -m aiws doctor`.
+- When answering questions or editing code in this umbrella repo, use the manifests above; do not guess remotes or paths. For deeper structure, see `docs/architecture.md`.

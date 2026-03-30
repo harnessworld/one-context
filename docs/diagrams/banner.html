@@ -1,0 +1,341 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>aips-personal — Clean Architecture</title>
+<style>
+  
+
+  /* RESET */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: #fcfcfd;
+    font-family: 'Inter', -apple-system, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* CANVAS (Fixed size to prevent any misalignment) */
+  .canvas {
+    position: relative;
+    width: 1200px;
+    height: 680px;
+    background-color: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+    overflow: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background-image: 
+      linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* SVG CONNECTIONS (Fixed layer) */
+  svg.connections {
+    position: absolute;
+    inset: 0;
+    width: 1200px;
+    height: 680px;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .line {
+    fill: none;
+    stroke: #1e293b;
+    stroke-width: 1.5;
+    marker-end: url(#arrow);
+  }
+  .line-dashed {
+    fill: none;
+    stroke: #64748b;
+    stroke-width: 1.5;
+    stroke-dasharray: 6 4;
+    marker-end: url(#arrow-gray);
+    animation: dash-flow 2s linear infinite;
+  }
+  @keyframes dash-flow { from { stroke-dashoffset: 20; } to { stroke-dashoffset: 0; } }
+
+  /* COMPONENT: LEFT CONTAINER (PROJECT STRUCTURE) */
+  .project-wrapper {
+    position: absolute;
+    left: 80px;
+    top: 140px;
+    width: 260px;
+    height: 400px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+  }
+  .project-wrapper-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .folder-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .folder-icon {
+    width: 32px;
+    height: 28px;
+    background: #475569;
+    border-radius: 4px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .folder-icon::before {
+    content: ''; position: absolute; top: -4px; left: 0;
+    width: 14px; height: 6px; background: #475569; border-radius: 3px 3px 0 0;
+  }
+  .folder-name {
+    font-size: 13px; font-weight: 600; color: #1e293b;
+  }
+  .folder-desc {
+    font-size: 10px; font-family: 'JetBrains Mono', monospace; color: #64748b; margin-top: 2px;
+  }
+
+  /* COMPONENT: CENTER ENGINE (aips-personal) */
+  .engine-box {
+    position: absolute;
+    left: 450px;
+    top: 280px;
+    width: 300px;
+    height: 120px;
+    background: #0f172a;
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(15,23,42,0.2), 0 0 0 1px rgba(255,255,255,0.1) inset;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    color: white;
+  }
+  .engine-icon {
+    font-size: 36px;
+    width: 64px; height: 64px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .engine-text h1 {
+    font-size: 18px; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 4px;
+  }
+  .engine-text p {
+    font-size: 11px; color: #94a3b8; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  /* decorative knowledge pills inside engine */
+  .engine-pills { position: absolute; bottom: 12px; right: 20px; display: flex; gap: 6px; }
+  .epill { font-size: 8px; font-weight: 700; background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 4px; color: #e2e8f0; }
+
+  /* COMPONENT: RIGHT OUTPUTS (AI TOOLS) */
+  .tool-box {
+    position: absolute;
+    right: 80px;
+    width: 250px;
+    background: #334155;
+    border-radius: 10px;
+    border: 1px solid #1e293b;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    z-index: 10;
+    padding: 16px;
+    color: white;
+  }
+  .tb-1 { top: 90px; }
+  .tb-2 { top: 260px; }
+  .tb-3 { top: 430px; }
+
+  .tool-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;
+  }
+  .tool-name { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; display: flex; align-items: center; gap: 6px; }
+  .tool-badge {
+    background: rgba(0,0,0,0.3); padding: 3px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #cbd5e1;
+  }
+  .tool-body {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .status-row {
+    font-size: 11px; color: #cbd5e1; display: flex; align-items: center; gap: 8px; font-weight: 500;
+  }
+  .status-icon { color: #4ade80; font-size: 12px; line-height: 1.2; font-weight: bold;}
+
+  /* Header Brand */
+  .page-header {
+    position: absolute; top: 32px; left: 0; width: 100%; z-index: 10;
+    display: flex; justify-content: center; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .page-header h2 { font-size: 16px; font-weight: 800; color: #1e293b; letter-spacing: 0.1em; }
+  .page-header p { font-size: 12px; color: #64748b; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="grid-bg"></div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <h2>aips-personal ARCHITECTURE</h2>
+    <p>Unified Knowledge Layer & Tool Synchronization</p>
+  </div>
+
+  <!-- SVG Orthogonal Connections -->
+  <svg class="connections">
+    <defs>
+      <!-- Solid Arrow -->
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#1e293b" />
+      </marker>
+      <!-- Dashed Arrow -->
+      <marker id="arrow-gray" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+      </marker>
+    </defs>
+
+    <!-- Lines from Repos (left: ~340) to Engine Center-Left (left: 450, top: 340) -->
+    <!-- repo 1 -->
+    <path class="line" d="M 340 195 L 400 195 L 400 320 L 440 320" />
+    <!-- repo 2 -->
+    <path class="line" d="M 340 270 L 415 270 L 415 330 L 440 330" />
+    <!-- repo 3 -->
+    <path class="line" d="M 340 345 L 440 345" />
+    <!-- repo 4 -->
+    <path class="line" d="M 340 420 L 415 420 L 415 360 L 440 360" />
+    <!-- repo 5 -->
+    <path class="line" d="M 340 495 L 400 495 L 400 370 L 440 370" />
+
+    <!-- Lines from Engine Center-Right (left: 750, top: 340) to Tool Boxes (left: 870) -->
+    <!-- to Cursor (tb-1: y~160) -->
+    <path class="line-dashed" d="M 750 320 L 800 320 L 800 160 L 860 160" />
+    <!-- to Claude (tb-2: y~330) -->
+    <path class="line-dashed" d="M 750 340 L 860 340" />
+    <!-- to Windsurf (tb-3: y~500) -->
+    <path class="line-dashed" d="M 750 360 L 800 360 L 800 500 L 860 500" />
+  </svg>
+
+  <!-- Left: Repos -->
+  <div class="project-wrapper">
+    <div class="project-wrapper-title">Registered Repositories</div>
+    <div class="folder-row">
+      <div class="folder-icon">🤍</div>
+      <div>
+        <div class="folder-name">repo-api</div>
+        <div class="folder-desc">/backend/services</div>
+      </div>
+    </div>
+    <div class="folder-row">
+      <div class="folder-icon">🤍</div>
+      <div>
+        <div class="folder-name">repo-web</div>
+        <div class="folder-desc">/frontend/nextjs</div>
+      </div>
+    </div>
+    <div class="folder-row">
+      <div class="folder-icon">🤍</div>
+      <div>
+        <div class="folder-name">repo-infra</div>
+        <div class="folder-desc">/devops/terraform</div>
+      </div>
+    </div>
+    <div class="folder-row">
+      <div class="folder-icon">🤍</div>
+      <div>
+        <div class="folder-name">repo-mobile</div>
+        <div class="folder-desc">/apps/react-native</div>
+      </div>
+    </div>
+    <div class="folder-row" style="margin-bottom:0">
+      <div class="folder-icon" style="background:#94a3b8">🤍</div>
+      <div>
+        <div class="folder-name" style="color:#64748b">repo-docs</div>
+        <div class="folder-desc">/docs/public</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Center: aips-personal Engine -->
+  <div class="engine-box">
+    <div class="engine-icon">⚡</div>
+    <div class="engine-text">
+      <h1>aips-personal</h1>
+      <p>Control Plane & Hub</p>
+    </div>
+    <div class="engine-pills">
+      <div class="epill">RULES</div>
+      <div class="epill">SKILLS</div>
+      <div class="epill">PROFILES</div>
+    </div>
+  </div>
+
+  <!-- Right: Tool Boxes -->
+  <div class="tool-box tb-1">
+    <div class="tool-header">
+      <div class="tool-name">⬛ Cursor</div>
+      <div class="tool-badge">.cursorrules</div>
+    </div>
+    <div class="tool-body">
+      <div class="status-row"><span class="status-icon">✓</span> Project rules synced</div>
+      <div class="status-row"><span class="status-icon">✓</span> Agent skills loaded</div>
+      <div class="status-row"><span class="status-icon">✓</span> Context ready</div>
+    </div>
+  </div>
+
+  <div class="tool-box tb-2">
+    <div class="tool-header">
+      <div class="tool-name">🔶 Claude Code</div>
+      <div class="tool-badge">CLAUDE.md</div>
+    </div>
+    <div class="tool-body">
+      <div class="status-row"><span class="status-icon">✓</span> Memory tracking active</div>
+      <div class="status-row"><span class="status-icon">✓</span> Playbooks translated</div>
+      <div class="status-row"><span class="status-icon">✓</span> Workspaces synced</div>
+    </div>
+  </div>
+
+  <div class="tool-box tb-3">
+    <div class="tool-header">
+      <div class="tool-name">🌀 Windsurf</div>
+      <div class="tool-badge">windsurf.json</div>
+    </div>
+    <div class="tool-body">
+      <div class="status-row"><span class="status-icon">✓</span> AI behaviors applied</div>
+      <div class="status-row"><span class="status-icon">✓</span> Standards enforced</div>
+      <div class="status-row"><span class="status-icon">✓</span> Repo scope linked</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

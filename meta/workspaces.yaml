@@ -1,0 +1,37 @@
+# Task- or theme-oriented workspace definitions.
+# A workspace is a context view across one or more repositories.
+#
+# Canonical intent lives here in a tool-neutral format.
+# AI-specific integrations should adapt from this file instead of copying it.
+#
+# Suggested fields:
+#   id            — Stable workspace id
+#   name          — Human-friendly name
+#   description   — What the workspace is for
+#   repos         — Repo ids from meta/repos.yaml
+#   profiles      — Shared profiles from meta/profiles.yaml
+#   context       — Tool-neutral context sources and focus areas
+#   tags          — Optional labels for discovery/filtering
+
+version: 1
+
+workspaces:
+  # Example workspace - customize for your needs
+  - id: example-workspace
+    name: Example Workspace
+    description: A sample workspace demonstrating the configuration format.
+    repos:
+      # List repo ids from meta/repos.yaml
+      # - your-repo-id
+    profiles:
+      - default-coding
+    tags:
+      - example
+    context:
+      summary: Describe what this workspace is focused on.
+      focus:
+        - area 1
+        - area 2
+      knowledge:
+        - knowledge/standards/
+        - knowledge/playbooks/

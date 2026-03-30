@@ -1,0 +1,32 @@
+﻿# Sub-repository manifest (single source of truth for humans + tooling).
+#
+# Related manifests (cross-reference by stable repo `id`):
+#   meta/workspaces.yaml  — task/theme workspaces list `repos` by id here
+#   meta/profiles.yaml    — shared AI/runtime profiles referenced by workspaces
+#
+# Sync:
+#   pip install -e ./packages/aips-personal && python -m aiws sync
+#   # or: python scripts/sync_repos.py
+#
+# Fields:
+#   url         — Git remote (required)
+#   category    — Subfolder under repos/ when path is omitted (required unless path is set)
+#   path        — Relative path from aips-personal根目录; default: repos/<category>/<repo_name>
+#                 repo_name is taken from the last segment of the URL (GitHub name, case preserved)
+#   id          — Stable id for CLI; default: repo_name from URL
+#   alias       — Optional string or list of strings; extra names for sync_repos.py
+#   description — Shown to humans / AI; keep concise
+
+version: 1
+
+repos:
+  # Example: Register a repository under the 'develop' category
+  # - url: git@test.local:your-org/your-repo
+  #   category: develop
+  #   alias: yr
+  #   description: Your project description here.
+
+  # Example: Register a repository under the 'research' category
+  # - url: git@test.local:your-org/research-notes
+  #   category: research
+  #   description: Research notes and documentation.

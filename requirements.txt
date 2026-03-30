@@ -1,0 +1,6 @@
+﻿# Root convenience: PyYAML is enough for ad-hoc scripts.
+# For the `aiws` CLI, install the package (pulls in PyYAML):
+#   pip install -e ./packages/aips-personal
+PyYAML>=6.0.1
+
+# CLI (aiws): pip install -e ./packages/aips-personal
