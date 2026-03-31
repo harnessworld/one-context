@@ -300,10 +300,10 @@ cd packages/one-context && python -m pytest tests/ -v
 
 ## 后续规划
 
-**one-context** 是 AI Station 产品线的第一款。后续方向包括：
+**one-context** 是 harnessworld 产品线的第一款。后续方向包括：
 
-- **AI Teamstation** — 团队规模的 workspace 编排、共享知识库与基于角色的 profile
-- **AI Corpstation** — 企业级治理、审计与多租户 workspace 管理
+- **one-team** — 团队知识技能管理、OKR 跟踪、日报/周报自动化
+- **one-corp** — 公司级研发宪法、战略拆解、跨团队治理
 
 ## 商标声明
 
