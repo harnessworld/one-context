@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>one-context — Architecture Blueprint</title>
+<style>
+  
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #06111f;
+    font-family: 'Share Tech Mono', monospace;
+    color: #a0bfe0;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .blueprint {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background:
+      linear-gradient(rgba(20,60,120,0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20,60,120,0.15) 1px, transparent 1px),
+      linear-gradient(rgba(20,60,120,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(20,60,120,0.06) 1px, transparent 1px);
+    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    background-color: #0a1a32;
+    border: 3px solid #1a4a8a;
+  }
+
+  /* Corner marks */
+  .c-tl,.c-tr,.c-bl,.c-br { position:absolute; width:36px; height:36px; border-color:#3a7bd5; border-style:solid; z-index:5; }
+  .c-tl { top:6px; left:6px; border-width:2px 0 0 2px; }
+  .c-tr { top:6px; right:6px; border-width:2px 2px 0 0; }
+  .c-bl { bottom:6px; left:6px; border-width:0 0 2px 2px; }
+  .c-br { bottom:6px; right:6px; border-width:0 2px 2px 0; }
+
+  /* Title */
+  .title-area {
+    position: absolute;
+    top: 1.2%; left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+    white-space: nowrap;
+  }
+  .title-area h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2vw;
+    font-weight: 900;
+    letter-spacing: 0.6vw;
+    color: #e8f4ff;
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(58,123,213,0.5), 0 0 60px rgba(58,123,213,0.2);
+  }
+  .title-area .sub {
+    font-size: 0.85vw;
+    letter-spacing: 0.3vw;
+    color: #5a8ec0;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+
+  /* Legend — right side, above cartouche (larger bottom % = higher on screen) */
+  .legend {
+    position: absolute;
+    bottom: 24%; right: 1.2%;
+    width: 14%;
+    border: 1px solid #1a4a8a;
+    padding: 0.5% 0.8%;
+    background: rgba(8,18,38,0.92);
+    font-size: 0.5vw;
+    z-index: 10;
+  }
+  .legend h3 { font-family:'Orbitron',sans-serif; font-size:0.55vw; color:#4a9af5; letter-spacing:2px; margin-bottom:0.35vh; text-transform:uppercase; }
+  .legend-item { display:flex; align-items:center; gap:6px; margin-bottom:2px; }
+  .leg-line { width:20px; height:0; flex-shrink:0; }
+  .leg-line.data { border-top: 2px solid #4a9af5; }
+  .leg-line.ctrl { border-top: 2px dashed #f5a623; }
+  .leg-line.adapt { border-top: 2px solid #50e3c2; }
+  .leg-line.know { border-top: 3px dotted #b07af5; }
+  .leg-line.gen { border-top: 2px solid #f55a71; }
+
+  /* Tech Notes */
+  .tech-notes {
+    position: absolute;
+    top: 1.5%; right: 1.2%;
+    width: 16%;
+    font-size: 0.5vw;
+    color: #4a7ab5;
+    line-height: 1.6;
+    z-index: 10;
+  }
+  .tech-notes .tn-title { font-family:'Orbitron',sans-serif; font-size:0.55vw; color:#5a8ec0; letter-spacing:2px; margin-bottom:4px; border-bottom:1px solid #1a4a8a; padding-bottom:3px; }
+  .tech-notes p { margin-bottom: 0.7vh; }
+  .tech-notes strong { color: #7ab0e0; }
+
+  /* Cartouche */
+  .cartouche {
+    position: absolute;
+    bottom: 1.2%; right: 1.2%;
+    z-index: 10;
+    font-size: 0.5vw;
+  }
+  .cartouche table { border-collapse:collapse; }
+  .cartouche td { padding:2px 8px; border:1px solid #1a4a8a; }
+  .cartouche .lbl { color:#4a7ab5; }
+  .cartouche .val { color:#a0bfe0; }
+
+  /* ---- BOX ---- */
+  .box {
+    position: absolute;
+    border: 1.5px solid #2a5a9a;
+    background: rgba(8,18,38,0.88);
+    padding: 0.4% 0.6%;
+    text-align: center;
+    z-index: 4;
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .box:hover { border-color: #4a9af5; box-shadow: 0 0 20px rgba(74,154,245,0.2); }
+  /* Single 3-step scale for all schematic boxes (.bf = spec / path tier) */
+  .box .bt { font-size: 0.63vw; font-weight: bold; color: #e0eeff; letter-spacing: 0.5px; margin-bottom: 1px; line-height: 1.15; }
+  .box .bd { font-size: 0.5vw; color: #6a90b8; line-height: 1.28; }
+  .box .bf { font-size: 0.43vw; color: #50e3c2; margin-top: 1px; font-style: italic; }
+
+  .box.yaml { border-color: #4a9af5; }
+  .box.know { border-color: #b07af5; }
+  .box.engine { border-color: #f5a623; }
+  .box.adapter { border-color: #50e3c2; }
+  .box.output { border-color: #f55a71; }
+  .box.tool { border-color: #4a7ab5; border-style: dashed; }
+
+  /* Layer 1 — compact, lower in band (uses same .bt/.bd/.bf as all boxes) */
+  .box.layer1-cell {
+    padding: 0.14% 0.45%;
+    top: 17% !important;
+  }
+  .box.layer1-cell .bt { margin-bottom: 0; }
+  .box.layer1-cell .bf { margin-top: 0; }
+
+  /* Zone */
+  .zone {
+    position: absolute;
+    z-index: 3;
+    border: 1px solid rgba(26,74,138,0.5);
+    background: rgba(10,26,50,0.3);
+  }
+  .zone-label {
+    position: absolute;
+    top: -9px; left: 14px;
+    background: #0a1a32;
+    padding: 0 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55vw;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 4;
+  }
+  .zone-label.blue { color: #4a9af5; }
+  .zone-label.orange { color: #f5a623; }
+  .zone-label.green { color: #50e3c2; }
+  .zone-label.red { color: #f55a71; }
+  .zone-label.gray { color: #5a8ec0; }
+
+  /* SVG — uses percentage-based viewBox matching the layout */
+  svg.wires {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .wire-data { stroke: #4a9af5; stroke-width: 0.2; fill: none; }
+  .wire-ctrl { stroke: #f5a623; stroke-width: 0.18; fill: none; stroke-dasharray: 0.8,0.5; }
+  .wire-adapt { stroke: #50e3c2; stroke-width: 0.2; fill: none; }
+  .wire-know { stroke: #b07af5; stroke-width: 0.22; fill: none; stroke-dasharray: 0.4,0.6; }
+  .wire-gen { stroke: #f55a71; stroke-width: 0.2; fill: none; }
+
+  /* Spec label — same size tier as .box .bf */
+  .spec {
+    position: absolute;
+    font-size: 0.43vw;
+    color: #3a6a9a;
+    z-index: 5;
+    letter-spacing: 0.5px;
+  }
+
+  /* CLI panel */
+  .cli-panel {
+    position: absolute;
+    border: 1.5px solid #f55a71;
+    background: rgba(8,18,38,0.92);
+    padding: 0.6% 0.8%;
+    z-index: 10;
+  }
+  .cli-panel h3 { font-family:'Orbitron',sans-serif; font-size:0.55vw; color:#f55a71; letter-spacing:2px; margin-bottom:0.4vh; text-transform:uppercase; border-bottom:1px solid rgba(245,90,113,0.3); padding-bottom:3px; }
+  .cli-cmd { font-size: 0.5vw; margin-bottom: 2px; padding-left: 5px; border-left: 2px solid #f55a71; }
+  .cli-cmd .c { color: #5a7a9a; }
+
+  /* Pulse */
+  @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+  .pulse-dot {
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    z-index: 6;
+    animation: pulse 2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+<div class="blueprint">
+  <div class="c-tl"></div><div class="c-tr"></div><div class="c-bl"></div><div class="c-br"></div>
+
+  <!-- TITLE -->
+  <div class="title-area">
+    <h1>one-context</h1>
+    <div class="sub">Software Routing Architecture &mdash; System Overview &amp; Datapath Schematic</div>
+  </div>
+
+  <!-- LEGEND — right side, between tech notes and CLI panel -->
+  <div class="legend">
+    <h3>Legend</h3>
+    <div class="legend-item"><div class="leg-line data"></div><span>Primary Data Flow</span></div>
+    <div class="legend-item"><div class="leg-line ctrl"></div><span>Control Signals (CLI)</span></div>
+    <div class="legend-item"><div class="leg-line adapt"></div><span>Adapter Output Path</span></div>
+    <div class="legend-item"><div class="leg-line know"></div><span>Knowledge Injection</span></div>
+    <div class="legend-item"><div class="leg-line gen"></div><span>Generated File Write</span></div>
+  </div>
+
+  <!-- TECH NOTES -->
+  <div class="tech-notes">
+    <div class="tn-title">Technical Notes</div>
+    <p><strong>RUNTIME:</strong> Python 3.10+ stdlib only, zero deps</p>
+    <p><strong>PROFILES:</strong> FieldRule matching + priority sort</p>
+    <p><strong>KNOWLEDGE:</strong> @file refs / content inline (hybrid)</p>
+    <p><strong>EXTEND:</strong> AdapterBase + @register ~60 LOC</p>
+  </div>
+
+  <!-- ==================== SVG WIRES ==================== -->
+  <!-- ViewBox 100x100 = percentage coordinates. x=left%, y=top% -->
+  <svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <marker id="arr-blue" markerWidth="1" markerHeight="0.7" refX="1" refY="0.35" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 1 0.35, 0 0.7" fill="#4a9af5"/></marker>
+      <marker id="arr-orange" markerWidth="1" markerHeight="0.7" refX="1" refY="0.35" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 1 0.35, 0 0.7" fill="#f5a623"/></marker>
+      <marker id="arr-green" markerWidth="1" markerHeight="0.7" refX="1" refY="0.35" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 1 0.35, 0 0.7" fill="#50e3c2"/></marker>
+      <marker id="arr-purple" markerWidth="1" markerHeight="0.7" refX="1" refY="0.35" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 1 0.35, 0 0.7" fill="#b07af5"/></marker>
+      <marker id="arr-red" markerWidth="1" markerHeight="0.7" refX="1" refY="0.35" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 1 0.35, 0 0.7" fill="#f55a71"/></marker>
+    </defs>
+
+    <!-- ===== Layer 1 → Context Assembly (y nudged +1.5 with lowered boxes) ===== -->
+    <path class="wire-data" d="M 12.5 20.5 L 12.5 27.5 L 34 27.5 L 34 32.5" marker-end="url(#arr-blue)"/>
+    <path class="wire-data" d="M 28 20.5 L 28 28.5 L 35 28.5 L 35 32.5" marker-end="url(#arr-blue)"/>
+    <path class="wire-data" d="M 43.5 20.5 L 43.5 27.5 L 38 27.5 L 38 32.5" marker-end="url(#arr-blue)"/>
+
+    <!-- ===== Knowledge flows ===== -->
+    <path class="wire-know" d="M 64 20.5 L 64 29 L 40 29 L 40 32.5" marker-end="url(#arr-purple)"/>
+    <path class="wire-know" d="M 62 20.5 L 62 62.5 L 17 62.5 L 17 64.5" marker-end="url(#arr-purple)"/>
+    <path class="wire-know" d="M 66 20.5 L 66 64.5" marker-end="url(#arr-purple)"/>
+
+    <!-- ===== YAML Loader → Context Assembly ===== -->
+    <path class="wire-data" d="M 20 35.5 L 25 35.5" marker-end="url(#arr-blue)" opacity="0.6"/>
+    <path class="wire-ctrl" d="M 22 44.5 L 30 44.5 L 30 40.5" marker-end="url(#arr-orange)" opacity="0.5"/>
+
+    <!-- ===== Context Assembly → Rule Engine ===== -->
+    <path class="wire-data" d="M 43 36.5 L 49 36.5 L 49 41" marker-end="url(#arr-blue)"/>
+    <path class="wire-data" d="M 34 40.5 L 34 53.5 L 38 53.5 L 38 56.5" marker-end="url(#arr-blue)"/>
+
+    <!-- ===== Rule Engine → AdapterBase ===== -->
+    <path class="wire-adapt" d="M 55 49.5 L 55 53.5 L 42 53.5 L 42 56.5" marker-end="url(#arr-green)"/>
+
+    <!-- ===== AdapterBase → 3 Adapters ===== -->
+    <path class="wire-adapt" d="M 30 61.5 L 30 63 L 17 63 L 17 64.5" marker-end="url(#arr-green)"/>
+    <path class="wire-adapt" d="M 38 61.5 L 38 63 L 42 63 L 42 64.5" marker-end="url(#arr-green)"/>
+    <path class="wire-adapt" d="M 46 61.5 L 46 63 L 66 63 L 66 64.5" marker-end="url(#arr-green)"/>
+
+    <!-- ===== 3 Adapters → 3 Outputs ===== -->
+    <path class="wire-gen" d="M 17 78.5 L 17 84.5" marker-end="url(#arr-red)"/>
+    <path class="wire-gen" d="M 42 78.5 L 42 84.5" marker-end="url(#arr-red)"/>
+    <path class="wire-gen" d="M 66 78.5 L 66 84.5" marker-end="url(#arr-red)"/>
+
+    <!-- ===== 3 Outputs → 3 Tools ===== -->
+    <path class="wire-data" d="M 16 90.5 L 16 94.5" marker-end="url(#arr-blue)" opacity="0.4"/>
+    <path class="wire-data" d="M 41 90.5 L 41 94.5" marker-end="url(#arr-blue)" opacity="0.4"/>
+    <path class="wire-data" d="M 66 90.5 L 66 94.5" marker-end="url(#arr-blue)" opacity="0.4"/>
+
+    <!-- ===== CLI Control Lines ===== -->
+    <path class="wire-ctrl" d="M 83.5 32.5 L 75 32.5 L 75 28.5 L 15.5 28.5 L 15.5 32.5" marker-end="url(#arr-orange)"/>
+    <path class="wire-ctrl" d="M 83.5 34.5 L 36 34.5 L 36 32.5" marker-end="url(#arr-orange)"/>
+    <path class="wire-ctrl" d="M 83.5 36.5 L 57 36.5 L 57 41" marker-end="url(#arr-orange)"/>
+    <path class="wire-ctrl" d="M 83.5 38.5 L 50 38.5 L 50 56.5" marker-end="url(#arr-orange)"/>
+  </svg>
+
+  <!-- ==================== ZONES ==================== -->
+  <div class="zone" style="top:10%; left:4%; width:73%; height:14%;">
+    <div class="zone-label blue">Layer 1 &mdash; Declarative Input (YAML + Markdown)</div>
+  </div>
+  <div class="zone" style="top:28%; left:8%; width:58%; height:22%;">
+    <div class="zone-label orange">Layer 2 &mdash; Core Processing Engine</div>
+  </div>
+  <div class="zone" style="top:53%; left:4%; width:73%; height:27%;">
+    <div class="zone-label green">Layer 3 &mdash; Adapter Translation Framework</div>
+  </div>
+  <div class="zone" style="top:81%; left:4%; width:73%; height:9%;">
+    <div class="zone-label red">Layer 4 &mdash; Generated Tool Configs</div>
+  </div>
+  <div class="zone" style="top:91%; left:4%; width:73%; height:8%; border-style:dashed;">
+    <div class="zone-label gray">Layer 5 &mdash; AI Tool Runtime (External)</div>
+  </div>
+
+  <!-- ==================== LAYER 1 ==================== -->
+  <div class="box yaml layer1-cell" style="left:5%; width:13%;">
+    <div class="bt">repos.yaml</div>
+    <div class="bd">Repository registry<br>URL, path, id, aliases, category</div>
+    <div class="bf">meta/repos.yaml</div>
+  </div>
+  <div class="box yaml layer1-cell" style="left:20%; width:14%;">
+    <div class="bt">workspaces.yaml</div>
+    <div class="bd">Task-oriented context views<br>Repos, profiles, focus areas</div>
+    <div class="bf">meta/workspaces.yaml</div>
+  </div>
+  <div class="box yaml layer1-cell" style="left:36%; width:13%;">
+    <div class="bt">profiles.yaml</div>
+    <div class="bd">Behavior specification<br>plan_first, safety_level, tone</div>
+    <div class="bf">meta/profiles.yaml</div>
+  </div>
+  <div class="box know layer1-cell" style="left:52%; width:23%;">
+    <div class="bt">knowledge/</div>
+    <div class="bd">standards/ &mdash; Conventions &nbsp; playbooks/ &mdash; Procedures<br>prompts/ &mdash; Fragments &nbsp; tools/ &mdash; Tool-specific docs</div>
+    <div class="bf">knowledge/**/*.md</div>
+  </div>
+
+  <div class="spec" style="top:11%; left:53%;">FORMAT: MARKDOWN</div>
+
+  <!-- ==================== LAYER 2 ==================== -->
+  <div class="box engine" style="top:31.5%; left:10%; width:10%; padding:0.35% 0.45%;">
+    <div class="bt">YAML Loader</div>
+    <div class="bd">Parse &amp; validate<br>schema checks</div>
+  </div>
+  <div class="box engine" style="top:40.5%; left:10%; width:11%; padding:0.35% 0.45%;">
+    <div class="bt">Manifest Validator</div>
+    <div class="bd">Cross-ref integrity<br>onecxt doctor</div>
+  </div>
+  <div class="box engine" style="top:31.5%; left:24%; width:18%;">
+    <div class="bt">Context Assembly Engine</div>
+    <div class="bd">build_workspace_context()<br>Merge repos + profiles + knowledge &rarr; unified dict</div>
+    <div class="bf">one_context/context/</div>
+  </div>
+  <div class="box engine" style="top:31.5%; left:46%; width:9%; padding:0.35% 0.45%;">
+    <div class="bt">Profile Resolver</div>
+    <div class="bd">Merge profile chain</div>
+  </div>
+  <div class="box engine" style="top:40.5%; left:46%; width:17%;">
+    <div class="bt">Rule Matching Engine</div>
+    <div class="bd">FieldRule dataclass + _resolve()<br>Priority sort, section grouping</div>
+    <div class="bf">one_context/adapters/_rules.py</div>
+  </div>
+
+  <div class="spec" style="top:39.5%; left:25%;">OUTPUT: dict[str, Any]</div>
+  <div class="spec" style="top:49.5%; left:47%;">OUTPUT: list[FieldRule]</div>
+
+  <!-- ==================== LAYER 3 ==================== -->
+  <div class="box adapter" style="top:56.5%; left:20%; width:34%; border-color:#f5a623; padding:0.25% 0.55%;">
+    <div class="bt">AdapterBase (ABC) + ADAPTERS Registry + @register() Decorator</div>
+    <div class="bd">supports_file_ref: bool &nbsp;|&nbsp; generate(root, workspace, context) &rarr; list[GeneratedFile]</div>
+    <div class="bf">one_context/adapters/__init__.py</div>
+  </div>
+
+  <div class="box adapter" style="top:64.5%; left:5%; width:22%;">
+    <div class="bt">CursorAdapter</div>
+    <div class="bd">supports_file_ref = <strong style="color:#f55a71;">false</strong><br>MDC frontmatter + Markdown<br>Knowledge: <strong style="color:#b07af5;">inlined</strong> w/ source markers<br>12 PROFILE_RULES</div>
+    <div class="bf">one_context/adapters/cursor.py ~100 LOC</div>
+  </div>
+  <div class="box adapter" style="top:64.5%; left:29%; width:24%;">
+    <div class="bt">ClaudeCodeAdapter</div>
+    <div class="bd">supports_file_ref = <strong style="color:#50e3c2;">true</strong><br>Workspace header + focus areas<br>Knowledge: <strong style="color:#50e3c2;">@file</strong> refs (always fresh)<br>12 PROFILE_RULES</div>
+    <div class="bf">one_context/adapters/claude_code.py ~80 LOC</div>
+  </div>
+  <div class="box adapter" style="top:64.5%; left:55%; width:21%;">
+    <div class="bt">OpenClawAdapter</div>
+    <div class="bd">supports_file_ref = <strong style="color:#f55a71;">false</strong><br>Structured JSON w/ metadata<br>Knowledge: <strong style="color:#b07af5;">inlined</strong> {source, content}<br>12 PROFILE_RULES</div>
+    <div class="bf">one_context/adapters/openclaw.py ~80 LOC</div>
+  </div>
+
+  <!-- ==================== LAYER 4 ==================== -->
+  <div class="box output" style="top:84.5%; left:5%; width:21%; padding:0.25% 0.45%;">
+    <div class="bt">.cursor/rules/onecxt-{id}.mdc</div>
+    <div class="bd">alwaysApply: true | Profile rules + inlined knowledge</div>
+  </div>
+  <div class="box output" style="top:84.5%; left:29%; width:23%; padding:0.25% 0.45%;">
+    <div class="bt">.claude/adapters/onecxt-{id}.md</div>
+    <div class="bd">Workspace header + profile rules + @knowledge/ refs</div>
+  </div>
+  <div class="box output" style="top:84.5%; left:55%; width:21%; padding:0.25% 0.45%;">
+    <div class="bt">.openclaw/onecxt-{id}.json</div>
+    <div class="bd">{workspace_id, instructions, profiles, knowledge}</div>
+  </div>
+
+  <!-- ==================== LAYER 5 ==================== -->
+  <div class="box tool" style="top:94%; left:6%; width:18%; padding:0.25% 0.35%;">
+    <div class="bt" style="color:#6a90b8;">Cursor IDE</div>
+    <div class="bd">Reads .cursor/rules/*.mdc at session start</div>
+  </div>
+  <div class="box tool" style="top:94%; left:30%; width:20%; padding:0.25% 0.35%;">
+    <div class="bt" style="color:#6a90b8;">Claude Code CLI</div>
+    <div class="bd">Reads .claude/ files, resolves @file refs live</div>
+  </div>
+  <div class="box tool" style="top:94%; left:55.5%; width:20%; padding:0.25% 0.35%;">
+    <div class="bt" style="color:#6a90b8;">OpenClaw / Your Tool</div>
+    <div class="bd">Reads .openclaw/*.json | Write adapter ~60 LOC</div>
+  </div>
+
+  <!-- ==================== CLI PANEL ==================== -->
+  <div class="cli-panel" style="top:30.5%; right:2.5%; width:14%;">
+    <h3>CLI Control Plane</h3>
+    <div class="cli-cmd">onecxt doctor <span class="c"># validate</span></div>
+    <div class="cli-cmd">onecxt sync <span class="c"># clone/pull</span></div>
+    <div class="cli-cmd">onecxt adapt <span class="c"># generate all</span></div>
+    <div class="cli-cmd">onecxt adapt --only <span class="c"># single</span></div>
+    <div class="cli-cmd">onecxt adapt --dry-run <span class="c"># preview</span></div>
+    <div class="cli-cmd">onecxt repo list <span class="c"># registry</span></div>
+    <div class="cli-cmd">onecxt workspace show <span class="c"># inspect</span></div>
+    <div class="cli-cmd">onecxt context export <span class="c"># bundle</span></div>
+    <div class="cli-cmd">onecxt profile list <span class="c"># profiles</span></div>
+    <div style="margin-top:4px; padding-top:4px; border-top:1px solid rgba(245,90,113,0.3); font-size:0.52vw; color:#5a7a9a;">
+      ENTRY: python -m one_context<br>
+      FILE: one_context/cli.py
+    </div>
+  </div>
+
+  <!-- ==================== PULSE DOTS ==================== -->
+  <div class="pulse-dot" style="top:30.5%; left:33%; background:#4a9af5;"></div>
+  <div class="pulse-dot" style="top:49.5%; left:55%; background:#f5a623;"></div>
+  <div class="pulse-dot" style="top:63.5%; left:16%; background:#50e3c2;"></div>
+  <div class="pulse-dot" style="top:63.5%; left:42%; background:#50e3c2;"></div>
+  <div class="pulse-dot" style="top:63.5%; left:65%; background:#50e3c2;"></div>
+  <div class="pulse-dot" style="top:83.5%; left:16%; background:#f55a71;"></div>
+  <div class="pulse-dot" style="top:83.5%; left:42%; background:#f55a71;"></div>
+  <div class="pulse-dot" style="top:83.5%; left:65%; background:#f55a71;"></div>
+
+  <!-- ==================== BOTTOM CARTOUCHE ==================== -->
+  <div class="cartouche">
+    <table>
+      <tr><td class="lbl">PROJECT</td><td class="val">one-context</td></tr>
+      <tr><td class="lbl">PACKAGE</td><td class="val">packages/one-context/one_context/</td></tr>
+      <tr><td class="lbl">ADAPTERS</td><td class="val">Cursor, Claude Code, OpenClaw</td></tr>
+      <tr><td class="lbl">DEPS</td><td class="val">Zero (stdlib only)</td></tr>
+      <tr><td class="lbl">LICENSE</td><td class="val">MIT</td></tr>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>

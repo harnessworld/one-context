@@ -1,6 +1,6 @@
 ﻿# Agent Configuration Templates
 
-This directory contains **template files** that demonstrate how to configure personal AI agent behavior in an aips-personal workspace.
+This directory contains **template files** that demonstrate how to configure personal AI agent behavior in an one-context workspace.
 
 | File | Purpose |
 |------|---------|

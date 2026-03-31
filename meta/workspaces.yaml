@@ -35,3 +35,9 @@ workspaces:
       knowledge:
         - knowledge/standards/
         - knowledge/playbooks/
+        # Agent framework — required for all agents to work correctly
+        # Include per-agent knowledge so tools can find templates and playbooks
+        - meta/agents.yaml
+        - features/README.md
+        - features/INDEX.md
+        - features/_template/

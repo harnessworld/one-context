@@ -1,14 +1,14 @@
-# Contributing to aips-personal
+# Contributing to one-context
 
-Thank you for your interest in contributing to aips-personal!
+Thank you for your interest in contributing to one-context!
 
 ## Development Setup
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/superaistation/aips-personal.git
-cd aips-personal
+git clone https://github.com/harnessworld/one-context.git
+cd one-context
 ```
 
 2. Create a virtual environment and install dependencies:
@@ -17,24 +17,29 @@ cd aips-personal
 python -m venv .venv
 source .venv/bin/activate  # macOS/Linux
 # .venv\Scripts\activate   # Windows
+pip install -e ./packages/one-context[dev]
 pip install -r requirements.txt
-pip install -e ./packages/aips-personal[dev]
 ```
+
+**Dependency sources (read this once):**
+
+- **`packages/one-context/pyproject.toml`** — source of truth for the `onecxt` / `one_context` runtime deps (and `dev` extras such as pytest).
+- **Root `requirements.txt`** — minimal pins for **umbrella-root scripts** (for example `scripts/sync_repos.py` needs PyYAML). It is not a duplicate “full” app manifest; use the editable install above for CLI development.
 
 3. Verify the setup:
 
 ```bash
-python -m aiws doctor
-python -m pytest packages/aips-personal/tests/ -v
+python -m one_context doctor
+cd packages/one-context && python -m pytest tests/ -v
 ```
 
 ## Project Structure
 
-- `packages/aips-personal/` — the core Python package (`aiws` CLI)
+- `packages/one-context/` — **CLI implementation and usage docs** (console command `onecxt`, import package `one_context`). Install with `pip install -e ./packages/one-context` (add `[dev]` for pytest). Command reference: `packages/one-context/README.md`.
 - `meta/` — YAML manifests (repos, workspaces, profiles)
-- `knowledge/` — tool-neutral standards, playbooks, and prompts
+- `knowledge/` — tool-neutral standards, playbooks, prompts, and related layout (see `knowledge/README.md`)
 - `docs/` — architecture and contributor documentation
-- `scripts/` — utility scripts
+- `scripts/` — utility scripts (root `requirements.txt` is mainly for running these without a full editable install)
 
 ## Making Changes
 
@@ -44,8 +49,8 @@ python -m pytest packages/aips-personal/tests/ -v
 4. Run the test suite:
 
 ```bash
-python -m aiws doctor
-python -m pytest packages/aips-personal/tests/ -v
+python -m one_context doctor
+cd packages/one-context && python -m pytest tests/ -v
 ```
 
 5. Commit with a clear, descriptive message following Conventional Commits:

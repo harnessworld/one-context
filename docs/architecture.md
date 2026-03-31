@@ -1,10 +1,10 @@
-﻿# aips-personal Architecture Notes
+# one-context Architecture Notes
 
-This document captures the current target architecture for `aips-personal`.
+This document captures the current target architecture for `one-context`.
 
 ## Product Position
 
-aips-personal is a local-first, cross-platform workspace hub for people who manage many Git repositories and want AI tools to share one common context model.
+one-context is a local-first, cross-platform workspace hub for people who manage many Git repositories and want AI tools to share one common context model.
 
 ## Main Layers
 
@@ -18,7 +18,7 @@ Files under `meta/` describe what exists.
 
 ### 2. Working Copy Layer
 
-`repos/` contains local clones. Repositories remain independent Git repos; aips-personal does not merge them into one traditional single-tree monorepo.
+`repos/` contains local clones. Repositories remain independent Git repos; one-context does not merge them into one traditional single-tree monorepo.
 
 ### 3. Knowledge Layer
 
@@ -27,6 +27,9 @@ Files under `meta/` describe what exists.
 - `standards/`: conventions and policies
 - `playbooks/`: reusable procedures
 - `prompts/`: reusable context fragments
+- `tools/`: optional notes about how tools consume the layer (not a second source of truth for vendor-specific config)
+
+The tree under `knowledge/` may gain more folders over time. If this list lags, treat **`knowledge/README.md` and the repository** as authoritative.
 
 ### 4. Features Layer
 
@@ -34,11 +37,11 @@ Files under `meta/` describe what exists.
 
 ### 5. Adapter Layer
 
-Tool-specific exports should live in adapters (today: `aiws.adapters` inside `packages/aips-personal`; later optionally split into separate packages). Adapters are translation boundaries, not sources of truth.
+Tool-specific exports should live in adapters (today: `one_context.adapters` inside `packages/one-context`; later optionally split into separate packages). Adapters are translation boundaries, not sources of truth.
 
 ### 6. Entry Layer
 
-The `aiws` CLI (from the `packages/aips-personal` installable package) is the user-facing entrypoint for sync, inspection, and manifest validation. See `apps/cli/README.md`.
+The `onecxt` CLI is implemented in the **`packages/one-context`** installable package (import package `one_context`). It is the user-facing entrypoint for sync, inspection, and manifest validation. Install and command examples: `packages/one-context/README.md`.
 
 Future work: workspace selection helpers, context bundle export, and adapter-driven output for specific AI tools.
 

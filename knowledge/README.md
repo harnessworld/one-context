@@ -1,6 +1,6 @@
 ﻿# Knowledge
 
-This directory is the canonical, tool-neutral knowledge layer for `aips-personal`.
+This directory is the canonical, tool-neutral knowledge layer for `one-context`.
 
 Its purpose is to store guidance once, then let different AI tools consume or adapt that guidance without rewriting the same intent in multiple vendor-specific formats.
 

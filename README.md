@@ -1,76 +1,88 @@
 <p align="center">
-  <strong>aips-personal</strong><br>
-  <em>The Agent-Agnostic Control Plane for Multi-Repo AI Development</em>
+  <strong>one-context</strong><br>
+  <em>面向多仓库 AI 开发的智能体无关控制平面</em>
 </p>
 
 <p align="center">
-  <em>One source of truth. Every AI tool in sync. Always.</em>
+  <em>一处定义，处处同步，长期一致。</em>
 </p>
 
 <p align="center">
-  <img src="docs/images/banner.jpg" alt="aips-personal banner" width="920" />
+  <img src="docs/images/banner.jpg" alt="one-context 横幅" width="920" />
 </p>
 
 <p align="center">
-  <a href="#the-problem">The Problem</a> &middot;
-  <a href="#how-it-works">How It Works</a> &middot;
-  <a href="#quick-start">Quick Start</a> &middot;
-  <a href="#architecture">Architecture</a> &middot;
-  <a href="#adapters">Adapters</a> &middot;
-  <a href="#contributing">Contributing</a>
+  <a href="#the-problem">痛点与挑战</a> &middot;
+  <a href="#how-it-works">工作原理</a> &middot;
+  <a href="#quick-start">快速开始</a> &middot;
+  <a href="#architecture">架构</a> &middot;
+  <a href="#adapters">适配器</a> &middot;
+  <a href="#contributing">参与贡献</a>
 </p>
 
 ---
 
-**aips-personal** is an open-source, local-first, and tool-agnostic control plane for cross-repository AI workflows. 
+**one-context** 是一套开源、本地优先、与具体 AI 工具解耦的控制平面，用于跨仓库的 AI 辅助研发工作流。
 
-### ✨ Core Capabilities
-By establishing a unified **knowledge layer and semantic model**, aips-personal breaks down the silos between heterogeneous AI tools (like Cursor, Claude Code, Windsurf, OpenClaw). Developers only need to define engineering standards, AI skills, and context memory **once**. The lightweight translation adapter system then automatically synchronizes these rules across all AI tools natively. This enables true **knowledge sharing and rule consistency** across multiple repos and tools.
+### ✨ 核心能力
 
-### 🌍 Why We Open Sourced It
-In an era of exploding but fragmented AI coding tools, we open-source this "AI workflow control plane" to define a standard protocol for AI-assisted development. We want to free teams from vendor lock-in and single-repo constraints, pushing the community toward a more efficient, AI-native collaborative development era.
+通过统一的 **知识层与语义模型**，one-context 打通 Cursor、Claude Code、Windsurf、OpenClaw 等不同 AI 工具之间的壁垒。工程规范、AI 技能与上下文记忆 **只需维护一份**；轻量适配器会把这些内容自动同步为各工具的原生配置，从而在多仓库、多工具之间实现真正的 **知识共享与规则一致**。
 
-> *It is **not** a monorepo. Sub-repositories stay normal Git repos on disk. This project is the **control plane and knowledge layer** above them.*
+### 🌍 为何开源
 
-1. **The single-repo blind spot.** Every major AI coding tool — Cursor, Claude Code, Copilot — operates within the boundaries of one repository. Real engineering work spans many. aips-personal gives your AI tools a unified view across all of them.
+在 AI 编程工具爆发但彼此割裂的当下，我们开源这套「AI 工作流控制平面」，希望为 AI 辅助开发沉淀一套可协作的约定。让团队少受厂商绑定和「单仓视野」的限制，一起走向更高效、更 AI 原生的协作开发。
 
-2. **The tool fragmentation tax.** Teams using multiple AI tools pay a hidden cost: duplicating rules into `.cursorrules`, `CLAUDE.md`, and vendor-specific configs — then watching them drift apart. aips-personal eliminates this by maintaining one canonical source of truth, automatically translated into every tool's native format.
+> *它 **不是** monorepo：子仓库在磁盘上仍是普通 Git 仓库；本项目是叠在上面的 **控制平面与知识层**。*
 
-**Write shared meaning once. Adapt it many times.**
+1. **单仓盲区。** Cursor、Claude Code、Copilot 等主要工具，大多以「一个仓库」为边界；真实工程往往横跨许多仓库。one-context 为 AI 工具提供跨仓库的统一视图。
 
-This is **not** a monorepo. Your repositories stay exactly where they are — normal Git repos on disk. aips-personal is the intelligence layer above them: a centralized metadata registry, a declarative knowledge base, and a lightweight adapter framework that projects your engineering standards, context, and conventions into any AI platform you use.
+2. **多工具碎片化成本。** 同时使用多种 AI 工具时，同一份规范要抄进 `.cursorrules`、`CLAUDE.md` 和各家配置里，还很容易漂移。one-context 用 **一份权威来源** 自动生成各工具格式，消除重复与不一致。
 
-## The Problem
+**共享语义写一次，多工具自动适配。**
 
-You maintain 5 repositories. You use Cursor and Claude Code. You've written coding standards, architectural decisions, and project conventions that your AI tools need to understand.
+这 **不是** monorepo：你的仓库仍在原处，仍是普通 Git 仓库。one-context 是叠在上面的智能层：集中式元数据注册表、声明式知识库，以及轻量适配框架，把工程规范、上下文与约定投影到你使用的任意 AI 平台。
 
-Today, you copy-paste those rules into 10 different config files (5 repos × 2 tools). When a convention changes, you update one file and forget the other nine. Your AI tools give inconsistent suggestions. Your team wastes time debugging AI behavior instead of shipping code.
+<h2 id="the-problem">痛点与挑战</h2>
 
-**aips-personal reduces 10 config files to 1 source of truth — and keeps all of them in sync automatically.**
+典型的多仓库 AI 协作里，常见三类问题：**工具配置分散**、**跨仓工作上下文不一致**，以及 **缺少可沉淀的标准与编排层**（规范散落在各厂商配置文件和聊天记录里，而不是一处可治理的来源）。
 
-## How It Works
+<p align="center">
+  <img
+    src="docs/images/AI工具配置繁杂+工作上下文混乱+项目管理落后.横版.png"
+    alt="痛点示意：AI 工具配置繁杂、工作上下文混乱、项目知识难以沉淀（repo 困境解析）"
+    width="920"
+  />
+</p>
+
+假设你维护 5 个仓库，同时使用 Cursor 与 Claude Code；你已经写好了编码规范、架构决策和项目约定，并希望 AI 工具都能理解。
+
+今天，这些规则往往被复制进 10 个配置文件（5 个仓库 × 2 套工具）。约定一变，你改了一处，另外九处忘记同步，AI 给出的建议就不一致，团队把时间耗在「调试 AI 行为」而不是交付上。
+
+**one-context 把多份配置收敛为 1 份事实来源，并自动保持各工具侧同步。**
+
+<h2 id="how-it-works">工作原理</h2>
 
 ```
-                          ┌─ CursorAdapter ──→ .cursor/rules/aiws-dev.mdc
+                          ┌─ CursorAdapter ──→ .cursor/rules/onecxt-dev.mdc
 profiles.yaml ────┐      │
-workspaces.yaml ──┼──→───┼─ ClaudeCodeAdapter ──→ .claude/adapters/aiws-dev.md
+workspaces.yaml ──┼──→───┼─ ClaudeCodeAdapter ──→ .claude/adapters/onecxt-dev.md
 knowledge/ ───────┘      │
-                          └─ OpenClawAdapter ──→ .openclaw/aiws-dev.json
+                          └─ OpenClawAdapter ──→ .openclaw/onecxt-dev.json
 ```
 
-| Tool | Generated Format | Knowledge Strategy |
-|------|------------------|--------------------|
-| **Cursor** | `.cursor/rules/aiws-{id}.mdc` | Content inlined |
-| **Claude Code** | `.claude/adapters/aiws-{id}.md` | `@file` references |
-| **OpenClaw** | `.openclaw/aiws-{id}.json` | Content inlined |
+| 工具 | 生成格式 | 知识策略 |
+|------|----------|----------|
+| **Cursor** | `.cursor/rules/onecxt-{id}.mdc` | 内容内联 |
+| **Claude Code** | `.claude/adapters/onecxt-{id}.md` | `@file` 引用 |
+| **OpenClaw** | `.openclaw/onecxt-{id}.json` | 内容内联 |
 
-One `aiws adapt` command generates all of them. Add a new tool? Write a 60-line adapter. Done.
+一条 `onecxt adapt` 即可生成上述全部。要接新工具？写一个约 60 行的适配器即可。
 
-## Use Cases
+## 适用场景
 
-**Personal multi-repo development** — You maintain several projects, side experiments, and note repositories. aips-personal gives you one unified context view and generates consistent AI tool configs across all of them.
+**个人多仓库开发** — 你同时维护若干项目、实验仓和笔记仓。one-context 提供统一的上下文视图，并在所有仓库上生成一致的 AI 工具配置。
 
-**Team repo as one of many** — Your team has its own collaboration platform (a monorepo, a shared workspace, etc.). From your personal workstation, that team repo is simply one of the repositories you work with daily. Register it alongside your other repos and build workspaces that span both personal and team contexts:
+**团队仓库只是其中之一** — 团队有自己的协作载体（monorepo、共享工作区等）。在你本机上，那个团队仓库只是日常涉及的多个仓库之一。把它与个人、研究类仓库一起登记，即可构建跨个人与团队语境的 workspace：
 
 ```yaml
 # meta/repos.yaml
@@ -84,105 +96,109 @@ repos:
     category: research
 ```
 
-**Cross-project knowledge sharing** — Engineering standards, playbooks, and conventions defined once in `knowledge/` are shared across all workspaces and all AI tools. Update once, every tool sees the change — zero manual sync.
+**跨项目知识共享** — 在 `knowledge/` 中定义一次的工程标准、playbook 与约定，可共享给所有 workspace 与所有 AI 工具；改一次，处处生效，无需手工同步。
 
-## Quick Start
+<h2 id="quick-start">快速开始</h2>
 
 ```bash
-# Clone
-git clone https://github.com/superaistation/aips-personal.git
-cd aips-personal
+# 克隆
+git clone https://github.com/harnessworld/one-context.git
+cd one-context
 
-# Install
-python -m venv .venv && source .venv/bin/activate
-pip install -e "./packages/aips-personal[dev]"
+# 安装
+python -m venv .venv
+# macOS/Linux:   source .venv/bin/activate
+# Windows:       .venv\Scripts\activate
+pip install -e "./packages/one-context[dev]"
 
-# Validate manifests
-aiws doctor
+# 校验清单
+onecxt doctor
 
-# Sync registered repositories
-aiws sync
+# 同步已登记的仓库
+onecxt sync
 
-# Generate tool configs for a workspace
-aiws adapt dev --dry-run          # Preview
-aiws adapt dev                    # Write files
-aiws adapt dev --only cursor      # Cursor only
-aiws adapt --all                  # All workspaces
+# 为某个 workspace 生成工具配置
+onecxt adapt dev --dry-run          # 仅预览
+onecxt adapt dev                    # 写入文件
+onecxt adapt dev --only cursor      # 仅 Cursor
+onecxt adapt --all                  # 所有 workspace
 ```
 
-> **Tip:** If `aiws` is not on `PATH`, use `python -m aiws` instead.
+> **提示：** 若命令行找不到 `onecxt`，可用 `python -m one_context` 代替。
 
-> **Proxy:** `git clone` and `git pull` inherit environment variables. Set `HTTP_PROXY` / `HTTPS_PROXY` in your shell, or create a root `.env` file (loaded at startup without overriding existing variables).
+> **代理：** `git clone` / `git pull` 会继承环境变量。可在 shell 中设置 `HTTP_PROXY` / `HTTPS_PROXY`，或在仓库根目录放置 `.env`（启动时加载，且不覆盖已有环境变量）。
 
-## Architecture
+<h2 id="architecture">架构</h2>
 
-System overview (declarative manifests → core engine → adapters → generated tool configs):
+系统概览（声明式清单 → 核心引擎 → 适配器 → 生成的工具配置）：
 
 <p align="center">
-  <img src="docs/images/architecture.jpg" alt="AIWS architecture — YAML and knowledge through adapters to Cursor, Claude Code, and OpenClaw" width="920" />
+  <img src="docs/images/architecture.png" alt="one-context 架构：YAML 与知识经适配器到达 Cursor、Claude Code、OpenClaw" width="920" />
 </p>
 
-On-disk layout:
+磁盘布局：
 
 ```
-aips-personal/
-├── meta/                    # Registry — what exists
-│   ├── repos.yaml           #   Repository registry (URL, path, id, aliases)
-│   ├── workspaces.yaml      #   Task-oriented views across repos
-│   └── profiles.yaml        #   Shared AI behavior profiles
-├── knowledge/               # Knowledge — canonical guidance
-│   ├── standards/           #   Engineering conventions
-│   ├── playbooks/           #   Reusable procedures
-│   ├── prompts/             #   Context fragments
-│   └── tools/               #   Tool-specific docs
-├── features/                # Features — umbrella-level specs
-├── packages/aips-personal/  # Core — Python package
-│   └── aiws/
-│       ├── adapters/        #   Tool adapters (Cursor, Claude Code, OpenClaw)
-│       ├── context/         #   Context assembly engine
-│       └── ...              #   CLI, sync, validation, profiles, repos
-├── repos/                   # Working copies (gitignored)
-└── docs/                    # Documentation
+one-context/
+├── meta/                    # 注册表 — 管理哪些实体
+│   ├── repos.yaml           #   仓库登记（URL、路径、id、别名）
+│   ├── workspaces.yaml      #   跨仓库的任务视角
+│   └── profiles.yaml        #   共享的 AI 行为配置
+├── knowledge/               # 知识 — 权威指引
+│   ├── standards/           #   工程约定
+│   ├── playbooks/           #   可复用流程
+│   ├── prompts/             #   上下文片段
+│   └── tools/               #   面向工具的说明（权威规则保持工具中立）
+├── features/                # 特性 — 伞形规格
+├── packages/one-context/    # 核心 — Python 包 + CLI（`onecxt`）；详见 packages/one-context/README.md
+│   └── one_context/
+│       ├── adapters/        #   工具适配器（Cursor、Claude Code、OpenClaw）
+│       ├── context/         #   上下文组装引擎
+│       └── ...              #   CLI、同步、校验、profile、repos 等
+├── repos/                   # 工作副本（通常 gitignore）
+└── docs/                    # 文档
 ```
 
-### Design Principles
+**CLI 代码在哪？** 所有 `onecxt` / `one_context` 实现位于 `packages/one-context/`。安装、运行与常用命令见 [packages/one-context/README.md](packages/one-context/README.md)。贡献者依赖与流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
-| Principle | What it means |
-|-----------|--------------|
-| **Agent-agnostic** | Rules, context, and skills are defined once in a tool-neutral format — never rewritten per vendor |
-| **Local-first** | Everything runs on your machine. No cloud service, no telemetry, no lock-in |
-| **Zero external deps** | The adapter system is pure Python stdlib. No Jinja2, no templating engines, no build step |
-| **Cross-platform** | Core workflow runs on Windows, macOS, and Linux |
-| **Composable** | Repos, workspaces, profiles, and knowledge are orthogonal building blocks — mix and match freely |
+### 设计原则
 
-### Core Concepts
+| 原则 | 含义 |
+|------|------|
+| **智能体无关（Agent-agnostic）** | 规则、上下文与技能以与厂商无关的格式定义一次，无需按每家工具重写 |
+| **本地优先（Local-first）** | 全部在本地运行：无云服务、无遥测、无绑定 |
+| **零额外依赖** | 适配层为纯 Python 标准库，无 Jinja2、无模板引擎、无构建步骤 |
+| **跨平台** | 核心工作流支持 Windows、macOS、Linux |
+| **可组合** | 仓库、workspace、profile、知识正交组合，自由搭配 |
 
-**Repository Registry** (`meta/repos.yaml`) — The single source of truth for every managed repository: remote URL, local path, identity, aliases, and description.
+### 核心概念
 
-**Workspace** — A task-oriented context view that spans multiple repositories. Not a folder — a *perspective*. Examples: "build feature X across 3 repos", "investigate memory design", "prepare release".
+**仓库注册表（Repository Registry）**（`meta/repos.yaml`）— 每个被管理仓库的单一事实来源：远程 URL、本地路径、身份、别名与描述。
 
-**Profile** (`meta/profiles.yaml`) — A shared, tool-neutral behavior specification. Defines planning strategy, safety level, test expectations, and output style. The adapter framework translates each profile into every tool's native configuration format.
+**Workspace** — 跨多个仓库的任务导向上下文视图。不是文件夹，而是一种 **视角**。例如：「在 3 个仓库上实现某功能」「排查内存设计」「准备发布」。
 
-**Knowledge** (`knowledge/`) — Canonical human-and-AI guidance: engineering standards, playbooks, prompt fragments. Write it once, every AI tool consumes it automatically.
+**Profile**（`meta/profiles.yaml`）— 共享的、与工具无关的行为规格：规划策略、安全级别、测试期望、输出风格等。适配框架把 profile 翻译为各工具的原生配置格式。
 
-## Adapters
+**Knowledge**（`knowledge/`）— 面向人与 AI 的权威指引：工程标准、playbook、提示片段。写一次，各 AI 工具自动消费。
 
-The adapter framework is the core differentiator. It translates canonical workspace + profile + knowledge data into tool-specific configuration files via a **declarative rule-matching engine** — no templates, no external dependencies.
+<h2 id="adapters">适配器</h2>
 
-Each adapter declares its capabilities:
+适配框架是核心差异点：通过 **声明式规则匹配引擎**，把 workspace + profile + knowledge 的权威数据翻译为各工具的配置文件 —— 无模板引擎、无外部依赖。
+
+各适配器声明自身能力：
 
 ```python
 class ClaudeCodeAdapter(AdapterBase):
-    supports_file_ref = True    # Uses @file references — always fresh
+    supports_file_ref = True    # 使用 @file 引用 — 始终读最新
 
 class CursorAdapter(AdapterBase):
-    supports_file_ref = False   # Inlines content into .mdc
+    supports_file_ref = False   # 内容内联进 .mdc
 
 class OpenClawAdapter(AdapterBase):
-    supports_file_ref = False   # Inlines as structured JSON
+    supports_file_ref = False   # 以内联结构化 JSON 输出
 ```
 
-Profile fields are translated via declarative rules:
+Profile 字段通过声明式规则翻译：
 
 ```python
 FieldRule("behavior.plan_first", True,
@@ -191,70 +207,74 @@ FieldRule("behavior.safety_level", "conservative",
           "Take a conservative approach: prefer minimal, reversible changes.")
 ```
 
-**Adding a new tool adapter takes ~60 lines:**
+**新增一个工具适配器大约只需 ~60 行：**
 
-1. Subclass `AdapterBase`
-2. Define profile translation rules
-3. Register with `@register("tool_name")`
+1. 继承 `AdapterBase`
+2. 定义 profile 翻译规则
+3. 使用 `@register("tool_name")` 注册
 
-## CLI Reference
+## CLI 速查
 
 ```
-aiws [--root PATH] [--verbose]
-├── doctor                                  # Validate manifests
-├── sync [ID...] [--jobs N]                 # Clone / fast-forward repos
+onecxt [--root PATH] [--verbose]
+├── doctor                                  # 校验清单
+├── sync [ID...] [--jobs N]                 # 克隆 / 快进更新仓库
 ├── adapt WORKSPACE [--only ADAPTER] [--dry-run] [--all]
-│                                           # Generate tool configs
-├── repo list                               # List registered repos
-├── workspace list | show ID                # Inspect workspaces
-├── context export ID [--format json|md]    # Export context bundle
-└── profile list                            # List profiles
+│                                           # 生成工具配置
+├── repo list                               # 列出已登记仓库
+├── workspace list | show ID                # 查看 workspace
+├── context export ID [--format json|md]    # 导出上下文包
+└── profile list                            # 列出 profile
 ```
 
-## Project Status
+## 项目状态
 
-| Component | Status |
-|-----------|--------|
-| Repository registry + sync | Stable |
-| Workspace + profile manifests | Stable |
-| Context export (JSON / Markdown) | Stable |
-| Manifest validation (`doctor`) | Stable |
-| **Adapter framework** | **Production-ready** — Cursor, Claude Code, OpenClaw |
-| Declarative rule-matching engine | Production-ready |
-| Test suite | 152 tests, 100% passing |
+| 组件 | 状态 |
+|------|------|
+| 仓库注册表 + 同步 | 稳定 |
+| Workspace + profile 清单 | 稳定 |
+| 上下文导出（JSON / Markdown） | 稳定 |
+| 清单校验（`doctor`） | 稳定 |
+| **适配框架** | **可用于生产** — Cursor、Claude Code、OpenClaw |
+| 声明式规则匹配引擎 | 可用于生产 |
+| 测试套件 | 见 CI — `packages/one-context/tests/` 下 pytest |
 
-## What aips-personal Is Not
+## one-context 不是什么
 
-- **Not a monorepo tool.** Your repos stay independent. This is a control plane above them.
-- **Not tied to any vendor.** Cursor, Claude Code, OpenClaw today. Your custom tool tomorrow.
-- **Not a cloud service.** Everything runs locally. Your code and knowledge never leave your machine.
-- **Not a Git submodule manager.** No nested repos, no subtrees, no submodule hell.
+- **不是 monorepo 工具。** 各仓库仍相互独立；本项目是叠在上面的控制平面。
+- **不绑定某一厂商。** 今天是 Cursor、Claude Code、OpenClaw；明天可以是你的自研工具。
+- **不是云服务。** 一切在本地运行，代码与知识不离开你的机器。
+- **不是 Git submodule 管理器。** 不搞嵌套仓库、subtree 或 submodule 泥潭。
 
-## Contributing
+<h2 id="contributing">参与贡献</h2>
 
-Contributions are welcome. Please open an issue to discuss your idea before submitting a PR.
+欢迎贡献。提交 PR 前请先开 issue 简要讨论想法。
 
 ```bash
-# Run the test suite (from repository root)
-python -m aiws doctor
-python -m pytest packages/aips-personal/tests/ -v
+# 运行测试（在仓库根目录）
+python -m one_context doctor
+cd packages/one-context && python -m pytest tests/ -v
 
-# Add a new adapter
-# 1. Create aiws/adapters/your_tool.py
-# 2. Define PROFILE_RULES and implement generate()
-# 3. Add tests in tests/test_adapters.py
-# 4. Import in cli.py _cmd_adapt()
+# 新增适配器
+# 1. 新建 one_context/adapters/your_tool.py
+# 2. 定义 PROFILE_RULES 并实现 generate()
+# 3. 在 tests/test_adapters.py 中补充测试
+# 4. 在 cli.py 的 _cmd_adapt() 中 import
 ```
 
-For architecture details see `docs/architecture.md`; for project conventions see `knowledge/standards/aips-personal-conventions.md`.
+架构细节见 `docs/architecture.md`；项目约定见 `knowledge/standards/one-context-conventions.md`。
 
-## Coming Soon
+## 后续规划
 
-**aips-personal** is the first product in the AI Station family. Stay tuned for:
+**one-context** 是 AI Station 产品线的第一款。后续方向包括：
 
-- **AI Teamstation** — Team-scale workspace orchestration with shared knowledge bases and role-based profiles
-- **AI Corpstation** — Enterprise-grade governance, audit trails, and multi-tenant workspace management
+- **AI Teamstation** — 团队规模的 workspace 编排、共享知识库与基于角色的 profile
+- **AI Corpstation** — 企业级治理、审计与多租户 workspace 管理
 
-## License
+## 商标声明
 
-MIT
+Cursor、Claude Code、GitHub Copilot、Windsurf、OpenClaw 等名称均为各自权利人的商标。one-context 与上述厂商无关联，亦不代表其背书。
+
+## 许可证
+
+本项目采用 [MIT License](LICENSE) 授权。

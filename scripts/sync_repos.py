@@ -1,13 +1,13 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Clone or update sub-repositories declared in meta/repos.yaml (cross-platform).
 
 Prefer the unified CLI after installing the package:
 
-  pip install -e ./packages/aips-personal
-  aiws sync
+  pip install -e ./packages/one-context
+  onecxt sync
 
-This script remains for convenience; it always uses the aips-personal根目录 that
+This script remains for convenience; it always uses the one-context repository root that
 contains this `scripts/` directory (not cwd discovery).
 """
 from __future__ import annotations
@@ -17,16 +17,16 @@ import sys
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parent.parent
-_PKG = _ROOT / "packages" / "aips-personal"
+_PKG = _ROOT / "packages" / "one-context"
 if _PKG.is_dir():
     sys.path.insert(0, str(_PKG))
 
 try:
-    from aiws.dotenv import load_dotenv
-    from aiws.sync import sync_repositories
+    from one_context.dotenv import load_dotenv
+    from one_context.sync import sync_repositories
 except ImportError:
     print(
-        "Missing aiws package. Run: pip install -e ./packages/aips-personal",
+        "Missing one-context package. Run: pip install -e ./packages/one-context",
         file=sys.stderr,
     )
     sys.exit(1)

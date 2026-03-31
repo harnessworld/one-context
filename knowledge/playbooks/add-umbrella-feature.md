@@ -1,6 +1,6 @@
 ﻿# Playbook: 新增伞仓级需求（`features/`）
 
-适用于在 aips-personal 根目录记录跨仓库或产品级需求，而非仅在某一子仓库内写 issue 的场景。
+适用于在 one-context 根目录记录跨仓库或产品级需求，而非仅在某一子仓库内写 issue 的场景。
 
 ## 前置阅读
 

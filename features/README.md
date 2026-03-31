@@ -11,7 +11,7 @@ features/
   README.md          # 本约定（权威）
   INDEX.md           # 需求索引表（人类维护）
   _template/         # 新建需求时复制其中的 Markdown 模板
-  <category>/        # 类别（小写 kebab-case，例如 aips-personal-cli、content-pipeline）
+  <category>/        # 类别（小写 kebab-case，例如 one-context-cli、content-pipeline）
     <feature-id>/    # 单个需求目录（kebab-case，全局唯一优先）
       spec.md
       tech_design.md
@@ -58,4 +58,4 @@ features/
 - 修改或新增需求文档后 → 同步更新 `features/INDEX.md` 的 `status` 与路径。
 - 不要在 `test_report.md` / `mr_report.md` 中粘贴密钥；内部 URL 若仓库可能对外公开，需脱敏。
 
-更完整的 aips-personal 约定见根目录 `README.md`、`knowledge/standards/aips-personal-conventions.md`。
+更完整的 one-context 约定见根目录 `README.md`、`knowledge/standards/one-context-conventions.md`。

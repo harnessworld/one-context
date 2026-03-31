@@ -1,6 +1,6 @@
-﻿# Manifest reference
+# Manifest reference
 
-This document describes the YAML files under `meta/` for `aips-personal`.
+This document describes the YAML files under `meta/` for `one-context`.
 
 ## `meta/repos.yaml`
 
@@ -10,9 +10,9 @@ Registers Git remotes and where they should live locally.
 |-------|----------|--------|
 | `url` | yes | Git remote URL |
 | `category` | if `path` omitted | Subfolder under `repos/`; default local path is `repos/<category>/<repo_name>` |
-| `path` | no | Override local path relative to aips-personal root |
+| `path` | no | Override local path relative to one-context root |
 | `id` | no | Stable id; default: repository name from URL |
-| `alias` / `aliases` | no | Extra names accepted by `aiws sync` (case-insensitive) |
+| `alias` / `aliases` | no | Extra names accepted by `onecxt sync` (case-insensitive) |
 | `description` | no | Short human-readable summary |
 
 ## `meta/workspaces.yaml`
@@ -50,7 +50,7 @@ Adapters for specific AI products map these fields to their own configuration; t
 Run:
 
 ```bash
-aiws doctor
+onecxt doctor
 ```
 
 This checks YAML consistency (e.g. workspace repo ids and profile ids exist) and warns when registered local paths are missing or not Git repositories.
