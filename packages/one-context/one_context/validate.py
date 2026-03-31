@@ -4,10 +4,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from one_context.agents import load_agents
 from one_context.context import build_workspace_context
-from one_context.profiles import load_profiles
+from one_context.profiles import load_mixins, load_profiles
 from one_context.repos import load_repos
 from one_context.workspaces import load_workspaces
+
+VALID_ROLES = {"pm", "architect", "dev", "qa", "sre", "knowledge-keeper"}
 
 
 @dataclass
@@ -39,12 +42,57 @@ def doctor(root: Path) -> DoctorResult:
         workspaces = []
 
     try:
-        profiles, _ = load_profiles(root)
+        profiles, profiles_by_id = load_profiles(root)
     except Exception as e:
         errors.append(str(e))
         profiles = []
+        profiles_by_id = {}
+
+    try:
+        mixins, mixins_by_id = load_mixins(root)
+    except Exception as e:
+        errors.append(str(e))
+        mixins = []
+        mixins_by_id = {}
 
     profile_ids = {p["id"] for p in profiles}
+
+    # --- Inheritance & mixin validation ---
+    for p in profiles:
+        pid = p["id"]
+        parent_id = p.get("extends")
+        if parent_id:
+            plk = parent_id.casefold()
+            if plk not in profiles_by_id:
+                errors.append(
+                    f"profile {pid!r}: extends unknown profile {parent_id!r}"
+                )
+            else:
+                parent = profiles_by_id[plk]
+                if parent.get("extends"):
+                    errors.append(
+                        f"profile {pid!r}: multi-layer inheritance not allowed "
+                        f"(parent {parent_id!r} also has 'extends')"
+                    )
+                if parent.get("mixins"):
+                    errors.append(
+                        f"profile {pid!r}: parent {parent_id!r} must not have 'mixins'"
+                    )
+
+        mixin_refs = p.get("mixins") or []
+        for mid in mixin_refs:
+            mlk = mid.casefold()
+            if mlk not in mixins_by_id:
+                errors.append(
+                    f"profile {pid!r}: references unknown mixin {mid!r}"
+                )
+
+    for m in mixins:
+        mid = m["id"]
+        if m.get("extends"):
+            errors.append(f"mixin {mid!r}: mixins must not have 'extends'")
+        if m.get("mixins"):
+            errors.append(f"mixin {mid!r}: mixins must not have 'mixins'")
 
     for ws in workspaces:
         wid = ws.get("id", "?")
@@ -79,6 +127,47 @@ def doctor(root: Path) -> DoctorResult:
                 errors.append(
                     f"workspace {wid!r}: unknown profile id {pid!r} "
                     f"(not in meta/profiles.yaml)"
+                )
+
+    # --- Agents validation ---
+    try:
+        agents, agents_by_id = load_agents(root)
+    except Exception as e:
+        errors.append(str(e))
+        agents = []
+        agents_by_id = {}
+
+    for agent in agents:
+        aid = agent.get("id", "?")
+
+        # Validate role
+        role = agent.get("role")
+        if not role:
+            errors.append(f"agent {aid!r}: missing required 'role' field")
+        elif role not in VALID_ROLES:
+            errors.append(
+                f"agent {aid!r}: invalid role {role!r}. "
+                f"Must be one of: {', '.join(sorted(VALID_ROLES))}"
+            )
+
+        # Validate profile reference
+        profile_ref = agent.get("profile")
+        if profile_ref:
+            plk = profile_ref.casefold()
+            if plk not in profiles_by_id:
+                errors.append(
+                    f"agent {aid!r}: references unknown profile {profile_ref!r}"
+                )
+
+        # Validate knowledge paths (warn only)
+        knowledge_paths = agent.get("knowledge") or []
+        for kp in knowledge_paths:
+            if not isinstance(kp, str) or not kp.strip():
+                continue
+            target = (root / kp.strip()).resolve()
+            if not target.exists():
+                warnings.append(
+                    f"agent {aid!r}: knowledge path not found: {kp}"
                 )
 
     for entry in repo_entries:

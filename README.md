@@ -64,19 +64,41 @@
 
 ```
                           ┌─ CursorAdapter ──→ .cursor/rules/onecxt-dev.mdc
-profiles.yaml ────┐      │
+profiles.yaml ────┐      │                      .cursor/rules/agent-pm.mdc
 workspaces.yaml ──┼──→───┼─ ClaudeCodeAdapter ──→ .claude/adapters/onecxt-dev.md
-knowledge/ ───────┘      │
-                          └─ OpenClawAdapter ──→ .openclaw/onecxt-dev.json
+knowledge/ ───────┤      │                         .claude/agents/pm.md
+agents.yaml ──────┘      └─ OpenClawAdapter ──→ .openclaw/onecxt-dev.json
+                                                     .openclaw/agents/pm.json
 ```
 
-| 工具 | 生成格式 | 知识策略 |
-|------|----------|----------|
-| **Cursor** | `.cursor/rules/onecxt-{id}.mdc` | 内容内联 |
-| **Claude Code** | `.claude/adapters/onecxt-{id}.md` | `@file` 引用 |
-| **OpenClaw** | `.openclaw/onecxt-{id}.json` | 内容内联 |
+| 工具 | Workspace 配置 | Agent 配置 | 知识策略 |
+|------|---------------|-----------|----------|
+| **Cursor** | `.cursor/rules/onecxt-{id}.mdc` | `.cursor/rules/agent-{id}.mdc` | 内容内联 |
+| **Claude Code** | `.claude/adapters/onecxt-{id}.md` | `.claude/agents/{id}.md` | `@file` 引用 |
+| **OpenClaw** | `.openclaw/onecxt-{id}.json` | `.openclaw/agents/{id}.json` | 内容内联 |
 
-一条 `onecxt adapt` 即可生成上述全部。要接新工具？写一个约 60 行的适配器即可。
+一条 `onecxt adapt` 即可生成上述全部（workspace + 所有 agent 配置）。要接新工具？写一个约 60 行的适配器即可。
+
+## Agent Framework
+
+智能体（Agent）是one-context的一等公民，每个智能体负责开发生命周期中的特定环节：
+
+| 智能体 | 角色 | 产物所有权 |
+|--------|------|-----------|
+| **pm** | 需求管理 | `features/**/spec.md`, `features/INDEX.md` |
+| **architect** | 技术设计 | `features/**/tech_design.md`, `docs/architecture.md` |
+| **dev** | 功能实现 | `features/**/worktrees.yaml` |
+| **qa** | 测试验收 | `features/**/test_report.md`, `features/**/mr_report.md` |
+| **sre** | 发布部署 | `features/**/deliver.md` |
+| **knowledge-keeper** | 知识维护 | `knowledge/standards/`, `knowledge/playbooks/` |
+
+每个智能体定义：
+- **profile** — 行为规格引用
+- **knowledge** — 知识文件/目录引用
+- **owns** — 负责创建/维护的产物（glob 模式）
+- **instructions** — 工具无关的角色说明
+
+详细规范见 `knowledge/standards/agent-framework.md`。
 
 ## 适用场景
 
@@ -143,7 +165,8 @@ one-context/
 ├── meta/                    # 注册表 — 管理哪些实体
 │   ├── repos.yaml           #   仓库登记（URL、路径、id、别名）
 │   ├── workspaces.yaml      #   跨仓库的任务视角
-│   └── profiles.yaml        #   共享的 AI 行为配置
+│   ├── profiles.yaml        #   共享的 AI 行为配置
+│   └── agents.yaml          #   智能体注册表（角色、知识、产物所有权）
 ├── knowledge/               # 知识 — 权威指引
 │   ├── standards/           #   工程约定
 │   ├── playbooks/           #   可复用流程
@@ -154,7 +177,7 @@ one-context/
 │   └── one_context/
 │       ├── adapters/        #   工具适配器（Cursor、Claude Code、OpenClaw）
 │       ├── context/         #   上下文组装引擎
-│       └── ...              #   CLI、同步、校验、profile、repos 等
+│       └── ...              #   CLI、同步、校验、profile、repos、agents 等
 ├── repos/                   # 工作副本（通常 gitignore）
 └── docs/                    # 文档
 ```
@@ -180,6 +203,8 @@ one-context/
 **Profile**（`meta/profiles.yaml`）— 共享的、与工具无关的行为规格：规划策略、安全级别、测试期望、输出风格等。适配框架把 profile 翻译为各工具的原生配置格式。
 
 **Knowledge**（`knowledge/`）— 面向人与 AI 的权威指引：工程标准、playbook、提示片段。写一次，各 AI 工具自动消费。
+
+**Agent**（`meta/agents.yaml`）— 智能体是一等公民配置对象，定义角色、知识引用、产物所有权和行为规格。每个智能体负责特定的开发生命周期环节（需求、设计、开发、测试、发布、知识维护）。适配器自动为每个智能体生成工具原生配置文件。
 
 <h2 id="adapters">适配器</h2>
 
@@ -217,14 +242,22 @@ FieldRule("behavior.safety_level", "conservative",
 
 ```
 onecxt [--root PATH] [--verbose]
-├── doctor                                  # 校验清单
+├── doctor                                  # 校验清单（含 agents.yaml）
 ├── sync [ID...] [--jobs N]                 # 克隆 / 快进更新仓库
 ├── adapt WORKSPACE [--only ADAPTER] [--dry-run] [--all]
-│                                           # 生成工具配置
+│                                           # 生成工具配置 + agent 配置
 ├── repo list                               # 列出已登记仓库
 ├── workspace list | show ID                # 查看 workspace
 ├── context export ID [--format json|md]    # 导出上下文包
-└── profile list                            # 列出 profile
+├── profile list | show ID [--resolved]     # 列出/查看 profile
+└── agent list | show ID                    # 列出/查看智能体
+```
+
+### Agent 子命令
+
+```
+onecxt agent list                           # 列出所有智能体
+onecxt agent show pm                        # 查看 PM 智能体详情
 ```
 
 ## 项目状态
@@ -237,6 +270,7 @@ onecxt [--root PATH] [--verbose]
 | 清单校验（`doctor`） | 稳定 |
 | **适配框架** | **可用于生产** — Cursor、Claude Code、OpenClaw |
 | 声明式规则匹配引擎 | 可用于生产 |
+| **Agent Framework** | **可用于生产** — 6 个标准智能体 + 适配器生成 |
 | 测试套件 | 见 CI — `packages/one-context/tests/` 下 pytest |
 
 ## one-context 不是什么

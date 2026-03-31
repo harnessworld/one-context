@@ -90,11 +90,11 @@ one-context 目前是一个优秀的"上下文控制平面"：它管理多仓注
 
 # 实现分阶段建议
 
-## Phase 1 — 规范与数据层（当前）
+## Phase 1 — 规范与数据层（已完成）
 - [x] `knowledge/standards/agent-framework.md` 框架规范落盘
 - [x] `meta/agents.yaml` starter 注册表（6 个智能体）
-- [ ] `onecxt doctor` 支持校验 `agents.yaml`
-- [ ] `onecxt agent list / show` CLI
+- [x] `onecxt doctor` 支持校验 `agents.yaml`
+- [x] `onecxt agent list / show` CLI
 
 ## Phase 2 — 适配器扩展
 - [ ] 各适配器（Cursor / Claude Code / OpenClaw）支持生成 agent 配置文件
@@ -117,3 +117,12 @@ one-context 目前是一个优秀的"上下文控制平面"：它管理多仓注
 1. `tech_design.md` 的 owns 归 `architect` 还是 `dev`？建议：架构师负责设计，开发可以追加实现细节，但 architect 是首要 owner。需在规范里明确"追加而非覆盖"的协作模式。
 2. `onecxt adapt-agent` 是独立命令还是 `onecxt adapt` 的选项（`--include-agents`）？
 3. `deploy.yaml` 是否需要支持多环境继承（staging extends base）？
+
+---
+
+# 后续演进
+
+本 feature 建立了基础框架，以下两个 feature 在此基础上进一步增强：
+
+- **[agent-collaboration](../agent-collaboration/spec.md)** — 智能体协作增强：轻量状态流转、决策手册、条件知识加载、生成文件保护、knowledge-keeper 触发策略
+- **[profile-inheritance](../profile-inheritance/spec.md)** — Profile 继承与 Mixin 机制：支持 10+ Profile 变体的高效管理

@@ -44,3 +44,10 @@ build/
 memory/*
 !memory/.gitkeep
 !memory/README.md
+
+# Generated tool configs (run `onecxt adapt` locally)
+# These are local-first: each developer generates their own
+.cursor/rules/onecxt-*.mdc
+.cursor/rules/agent-*.mdc
+.claude/
+CLAUDE.md

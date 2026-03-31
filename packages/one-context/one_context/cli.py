@@ -11,7 +11,7 @@ from one_context.context import build_workspace_context, render_workspace_contex
 from one_context.dotenv import load_dotenv
 from one_context.errors import ManifestError
 from one_context.log import setup_logging
-from one_context.profiles import load_profiles
+from one_context.profiles import load_mixins, load_profiles, resolve_profile
 from one_context.repos import load_repos
 from one_context.root import find_root
 from one_context.sync import sync_repositories
@@ -115,8 +115,74 @@ def _cmd_context_export(root: Path, args: argparse.Namespace) -> int:
     return 0
 
 
-def _cmd_profile_list(root: Path, args: argparse.Namespace) -> int:
-    return _cmd_manifest_list(load_profiles, "profiles", root, args)
+def _cmd_profile_list(root: Path, _args: argparse.Namespace) -> int:
+    profiles, _ = load_profiles(root)
+    mixins, _ = load_mixins(root)
+    if not profiles and not mixins:
+        print("(no profiles.yaml or empty)")
+        return 0
+    for p in profiles:
+        pid = p.get("id", "")
+        name = p.get("name", "")
+        extends = p.get("extends", "")
+        tag = f"[extends {extends}]" if extends else ""
+        mxs = p.get("mixins")
+        if mxs:
+            tag += f" [mixins: {', '.join(mxs)}]"
+        print(f"{pid}\t{name}\tprofile\t{tag}".rstrip())
+    for m in mixins:
+        mid = m.get("id", "")
+        name = m.get("name", "")
+        print(f"{mid}\t{name}\tmixin")
+    return 0
+
+
+def _cmd_profile_show(root: Path, args: argparse.Namespace) -> int:
+    profiles, profiles_by_id = load_profiles(root)
+    mixins, mixins_by_id = load_mixins(root)
+
+    lk = args.id.casefold()
+    # Look in profiles first, then mixins
+    entry = profiles_by_id.get(lk) or mixins_by_id.get(lk)
+    if entry is None:
+        print(f"error: unknown profile or mixin id {args.id!r}", file=sys.stderr)
+        return 2
+
+    if args.resolved and lk in profiles_by_id:
+        import json
+        resolved = resolve_profile(args.id, profiles_by_id, mixins_by_id)
+        print(json.dumps(resolved, indent=2, ensure_ascii=False))
+    else:
+        import json
+        print(json.dumps(entry, indent=2, ensure_ascii=False))
+    return 0
+
+
+def _cmd_agent_list(root: Path, _args: argparse.Namespace) -> int:
+    agents, _ = load_agents(root)
+    if not agents:
+        print("(no agents.yaml or empty agents list)")
+        return 0
+    for a in agents:
+        aid = a.get("id", "")
+        name = a.get("name", "")
+        role = a.get("role", "")
+        print(f"{aid}\t{name}\t{role}")
+    return 0
+
+
+def _cmd_agent_show(root: Path, args: argparse.Namespace) -> int:
+    agents, agents_by_id = load_agents(root)
+
+    lk = args.id.casefold()
+    entry = agents_by_id.get(lk)
+    if entry is None:
+        print(f"error: unknown agent id {args.id!r}", file=sys.stderr)
+        return 2
+
+    import json
+    print(json.dumps(entry, indent=2, ensure_ascii=False))
+    return 0
 
 
 def _print_dry_run_block(rel_path: str, description: str, body: str) -> None:
@@ -305,8 +371,22 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_prof = sub.add_parser("profile", help="Profile commands")
     prof_sub = p_prof.add_subparsers(dest="prof_command", required=True)
-    p_prof_list = prof_sub.add_parser("list", help="List profiles from meta/profiles.yaml")
+    p_prof_list = prof_sub.add_parser(
+        "list", help="List profiles and mixins from meta/profiles.yaml",
+    )
     p_prof_list.set_defaults(func=_cmd_profile_list)
+
+    p_prof_show = prof_sub.add_parser(
+        "show", help="Show a profile or mixin definition",
+    )
+    p_prof_show.add_argument("id", metavar="PROFILE_ID", help="Profile or mixin id")
+    p_prof_show.add_argument(
+        "--resolved",
+        action="store_true",
+        default=False,
+        help="Output the fully-resolved profile after inheritance and mixin merge",
+    )
+    p_prof_show.set_defaults(func=_cmd_profile_show)
 
     p_adapt = sub.add_parser(
         "adapt",
@@ -338,6 +418,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print generated content without writing files",
     )
     p_adapt.set_defaults(func=_cmd_adapt)
+
+    p_agent = sub.add_parser("agent", help="Agent commands")
+    agent_sub = p_agent.add_subparsers(dest="agent_command", required=True)
+    p_agent_list = agent_sub.add_parser(
+        "list", help="List agents from meta/agents.yaml",
+    )
+    p_agent_list.set_defaults(func=_cmd_agent_list)
+
+    p_agent_show = agent_sub.add_parser(
+        "show", help="Show an agent definition",
+    )
+    p_agent_show.add_argument("id", metavar="AGENT_ID", help="Agent id")
+    p_agent_show.set_defaults(func=_cmd_agent_show)
 
     return parser
 
