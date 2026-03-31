@@ -173,6 +173,7 @@ one-context/
 │   ├── prompts/             #   上下文片段
 │   └── tools/               #   面向工具的说明（权威规则保持工具中立）
 ├── features/                # 特性 — 伞形规格
+├── memory/                  # 记忆 — 运行时状态（本地，通常 gitignore）
 ├── packages/one-context/    # 核心 — Python 包 + CLI（`onecxt`）；详见 packages/one-context/README.md
 │   └── one_context/
 │       ├── adapters/        #   工具适配器（Cursor、Claude Code、OpenClaw）

@@ -96,9 +96,9 @@ one-context 目前是一个优秀的"上下文控制平面"：它管理多仓注
 - [x] `onecxt doctor` 支持校验 `agents.yaml`
 - [x] `onecxt agent list / show` CLI
 
-## Phase 2 — 适配器扩展
-- [ ] 各适配器（Cursor / Claude Code / OpenClaw）支持生成 agent 配置文件
-- [ ] `onecxt adapt-agent <id>` 命令
+## Phase 2 — 适配器扩展（已完成）
+- [x] 各适配器（Cursor / Claude Code / OpenClaw）支持生成 agent 配置文件
+- [x] `onecxt adapt` 自动生成所有 agent 配置（无需单独命令）
 
 ## Phase 3 — Worktree 管理
 - [ ] `worktree.py` 模块
