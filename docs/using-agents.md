@@ -48,6 +48,13 @@ onecxt adapt my-project
 | Claude Code | `.claude/adapters/onecxt-<id>.md` | `.claude/agents/<id>.md`（内含 `@path` 知识引用） |
 | OpenClaw | `.openclaw/onecxt-<id>.json` | `.openclaw/agents/<id>.json` |
 
+**项目根（一次生成）**
+
+| 工具 | 文件 | 说明 |
+|------|------|------|
+| Claude Code | `CLAUDE.md` | 自动 `@` 本次 adapt 涉及的所有 workspace 适配器 + 所有智能体，无需手改 |
+| OpenClaw | `.openclaw/onecxt-project.json` | 清单：列出要加载的 workspace JSON 与 agent JSON 路径（供 OpenClaw 或脚本消费） |
+
 ### 第三步：一句话调用（各工具差异）
 
 **Cursor**：在 `features/` 下打开或新建与 PM 职责相关的文件（例如任意 `**/spec.md`）时，`agent-pm.mdc` 会因 glob 自动参与上下文。此时只说任务即可，例如：
@@ -58,15 +65,9 @@ onecxt adapt my-project
 
 若当前对话没有命中 glob，仍可显式说一句「按 PM 智能体」或打开 `features/INDEX.md` / 某个 `spec.md` 再发任务。
 
-**Claude Code**：在仓库根目录的 `CLAUDE.md` 里**各加一行**（一次性设置），例如：
+**Claude Code**：运行 `onecxt adapt` 后，**根目录 `CLAUDE.md` 已写好**，内含对所有 `.claude/adapters/onecxt-*.md` 与 `.claude/agents/*.md` 的 `@` 引用；Claude Code 读项目时即可加载，无需再手改 `CLAUDE.md`。
 
-```markdown
-@.claude/agents/pm.md
-```
-
-之后同一句自然语言即可；`pm.md` 内的 `@` 会在运行时拉齐模板与 playbook。
-
-**OpenClaw**：按该工具加载 `.openclaw/agents/*.json` 的方式挂接后，同样只需一句自然语言（具体入口以 OpenClaw 文档为准）。
+**OpenClaw**：根目录会生成 **`.openclaw/onecxt-project.json`**，其中列出本次 adapt 生成的 workspace 与 agent JSON 路径；按 OpenClaw 的加载方式指向该清单或逐个文件即可（具体以 OpenClaw 文档为准）。
 
 其他角色（dev / qa / sre 等）同理：Cursor 靠对应 `owns` 的 glob 自动带上下文；Claude Code 可在 `CLAUDE.md` 里按需增加 `@.claude/agents/dev.md` 等。
 
@@ -84,16 +85,7 @@ onecxt adapt my-project
 
 ### Claude Code
 
-Workspace 级：`@.claude/adapters/onecxt-<workspace>.md`（可选，与以前相同）。
-
-智能体级（**推荐，实现「一句话」**）：在 `CLAUDE.md` 里为常用角色各加一行，例如：
-
-```markdown
-@.claude/agents/pm.md
-@.claude/agents/dev.md
-```
-
-每个 `agents/<id>.md` 已包含该角色的说明，并用 `@path` 列出知识文件；Claude Code 会在需要时读取。设置一次后，对话里直接说任务即可，无需每次手动 `@` 四个文件。
+根目录 **`CLAUDE.md` 由 `onecxt adapt` 生成**，已聚合所有 workspace 适配器与智能体文件的 `@` 引用。你只需保证在 one-context 根目录打开项目并运行过 adapt。
 
 **调用示例：**
 

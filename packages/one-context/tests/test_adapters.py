@@ -74,6 +74,24 @@ def adapter_root(tmp_path: Path) -> Path:
         """),
         encoding="utf-8",
     )
+    (meta / "agents.yaml").write_text(
+        textwrap.dedent("""\
+            version: "1"
+            agents:
+              - id: pm
+                name: PM Agent
+                role: pm
+                profile: default-coding
+                description: Test PM agent.
+                knowledge:
+                  - knowledge/standards/
+                owns:
+                  - "features/**/spec.md"
+                instructions: |
+                  You are the PM agent for tests.
+        """),
+        encoding="utf-8",
+    )
 
     # Create knowledge files
     knowledge_dir = tmp_path / "knowledge" / "standards"
@@ -169,6 +187,17 @@ class TestClaudeCodeAdapter:
 
         assert "Focus Areas" in content
         assert "feature development" in content
+
+    def test_generate_project_artifacts_writes_claude_md(self, adapter_root):
+        from one_context.agents import load_agents
+
+        adapter = get_adapter("claude_code")
+        agents, _ = load_agents(adapter_root)
+        files = adapter.generate_project_artifacts(adapter_root, ["dev"], agents)
+        assert len(files) == 1
+        assert files[0].rel_path == "CLAUDE.md"
+        assert "@.claude/adapters/onecxt-dev.md" in files[0].content
+        assert "@.claude/agents/pm.md" in files[0].content
 
 
 # ---------------------------------------------------------------------------
@@ -273,6 +302,20 @@ class TestOpenClawAdapter:
         assert "profiles" in data
         assert data["profiles"][0]["id"] == "default-coding"
 
+    def test_generate_project_artifacts_manifest(self, adapter_root):
+        from one_context.agents import load_agents
+
+        adapter = get_adapter("openclaw")
+        agents, _ = load_agents(adapter_root)
+        files = adapter.generate_project_artifacts(adapter_root, ["dev"], agents)
+        assert len(files) == 1
+        assert files[0].rel_path == ".openclaw/onecxt-project.json"
+        data = json.loads(files[0].content)
+        oc = data["one_context"]
+        assert oc["version"] == 1
+        assert oc["workspaces"][0]["path"] == ".openclaw/onecxt-dev.json"
+        assert any(a["id"] == "pm" for a in oc["agents"])
+
 
 # ---------------------------------------------------------------------------
 # CLI adapt command (integration)
@@ -306,6 +349,13 @@ class TestAdaptCLI:
         assert (adapter_root / ".claude" / "adapters" / "onecxt-dev.md").is_file()
         assert (adapter_root / ".cursor" / "rules" / "onecxt-dev.mdc").is_file()
         assert (adapter_root / ".openclaw" / "onecxt-dev.json").is_file()
+        assert (adapter_root / "CLAUDE.md").is_file()
+        assert "@.claude/adapters/onecxt-dev.md" in (adapter_root / "CLAUDE.md").read_text(
+            encoding="utf-8",
+        )
+        assert (adapter_root / ".openclaw" / "onecxt-project.json").is_file()
+        assert (adapter_root / ".claude" / "agents" / "pm.md").is_file()
+        assert (adapter_root / ".openclaw" / "agents" / "pm.json").is_file()
 
     def test_adapt_only_filter(self, adapter_root):
         from one_context.cli import build_parser

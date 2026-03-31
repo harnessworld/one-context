@@ -81,6 +81,19 @@ class AdapterBase(ABC):
         """
         return []
 
+    def generate_project_artifacts(
+        self,
+        root: Path,
+        workspace_ids: list[str],
+        agents: list[dict[str, Any]],
+    ) -> list[GeneratedFile]:
+        """Produce project-root integration files (e.g. ``CLAUDE.md``, OpenClaw manifest).
+
+        Called once per ``onecxt adapt`` run after all workspace-level files
+        and agent files are defined. Default: no extra files.
+        """
+        return []
+
 
 # ---------------------------------------------------------------------------
 # Adapter registry

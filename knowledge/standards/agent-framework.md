@@ -171,7 +171,7 @@ SRE 智能体在工作前：
 
 ## 6. 适配器生成（Adapter Output）
 
-`onecxt adapt <workspace>` 在现有逻辑基础上，**额外**为每个智能体生成一份 agent 配置文件：
+`onecxt adapt <workspace>` 在现有逻辑基础上，**额外**为每个智能体生成一份 agent 配置文件，并在项目根写入工具入口文件：
 
 | 工具 | 生成路径 |
 |------|----------|
@@ -179,20 +179,19 @@ SRE 智能体在工作前：
 | Claude Code | `.claude/agents/{id}.md` |
 | OpenClaw | `.openclaw/agents/{id}.json` |
 
-每份生成文件包含：
+| 工具 | 项目根 / 聚合文件 |
+|------|-------------------|
+| Claude Code | `CLAUDE.md` — `@` 引用本次 adapt 的全部 `onecxt-<workspace>.md` 与全部 `agents/{id}.md` |
+| OpenClaw | `.openclaw/onecxt-project.json` — 列出上述 workspace JSON 与 agent JSON 的相对路径 |
+
+每份 agent 生成文件包含：
 1. 智能体身份与角色说明（来自 `instructions`）
 2. 关联 profile 转译后的行为规格
 3. 内联/引用的 knowledge 内容
 4. `owns` 产物清单（告知 AI 工具自己负责哪些文件）
 5. role 专属配置（worktree 路径模式 / deploy_manifest 位置）
 
-也可单独生成某个智能体的配置：
-
-```bash
-onecxt adapt-agent <agent-id> [--only cursor|claudecode|openclaw]
-onecxt agent list
-onecxt agent show <agent-id>
-```
+（计划中的 CLI：`onecxt adapt-agent`、`onecxt agent list/show` — 当前由 `onecxt adapt` 一次性生成全部 agent 与项目根文件。）
 
 ---
 

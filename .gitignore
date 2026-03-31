@@ -38,8 +38,9 @@ build/
 .idea/
 .vscode/
 
-# Agent runtime (local, personal)
-.openclaw/
+# Agent runtime (local, personal) — keep small project manifest committable
+.openclaw/**
+!.openclaw/onecxt-project.json
 memory/*
 !memory/.gitkeep
 !memory/README.md

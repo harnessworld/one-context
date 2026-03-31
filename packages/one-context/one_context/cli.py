@@ -189,17 +189,27 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
                     target.write_text(gf.content, encoding="utf-8")
                     print(f"wrote: {gf.rel_path} ({gf.description})")
 
-            # Per-agent configs (one file per agent, per adapter)
-            if agents:
-                agent_files = adapter.generate_agents(root, agents, profiles_by_id)
-                for gf in agent_files:
-                    if dry_run:
-                        _print_dry_run_block(gf.rel_path, gf.description, gf.content)
-                    else:
-                        target = root / gf.rel_path
-                        target.parent.mkdir(parents=True, exist_ok=True)
-                        target.write_text(gf.content, encoding="utf-8")
-                        print(f"wrote: {gf.rel_path} ({gf.description})")
+    # Agent files and project-root hooks — once per adapt run (not per workspace)
+    for aname in adapter_names:
+        adapter = get_adapter(aname)
+        if agents:
+            for gf in adapter.generate_agents(root, agents, profiles_by_id):
+                if dry_run:
+                    _print_dry_run_block(gf.rel_path, gf.description, gf.content)
+                else:
+                    target = root / gf.rel_path
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text(gf.content, encoding="utf-8")
+                    print(f"wrote: {gf.rel_path} ({gf.description})")
+
+        for gf in adapter.generate_project_artifacts(root, workspace_ids, agents):
+            if dry_run:
+                _print_dry_run_block(gf.rel_path, gf.description, gf.content)
+            else:
+                target = root / gf.rel_path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(gf.content, encoding="utf-8")
+                print(f"wrote: {gf.rel_path} ({gf.description})")
 
     return 0
 
