@@ -388,3 +388,126 @@ class TestAdaptCLI:
         from one_context.cli import _cmd_adapt
         rc = _cmd_adapt(adapter_root, args)
         assert rc == 2
+
+
+# ---------------------------------------------------------------------------
+# generate_agents unit tests
+# ---------------------------------------------------------------------------
+
+@pytest.fixture()
+def agents_and_profiles(adapter_root: Path) -> tuple:
+    """Load agents and resolved profiles from adapter_root."""
+    from one_context.agents import load_agents
+    from one_context.profiles import load_mixins, load_profiles, resolve_profile
+
+    agents, _ = load_agents(adapter_root)
+    _, profiles_by_id = load_profiles(adapter_root)
+    _, mixins_by_id = load_mixins(adapter_root)
+
+    resolved: dict = {}
+    for pid in profiles_by_id:
+        try:
+            resolved[pid] = resolve_profile(pid, profiles_by_id, mixins_by_id)
+        except Exception:
+            resolved[pid] = profiles_by_id[pid]
+
+    return adapter_root, agents, resolved
+
+
+class TestClaudeCodeGenerateAgents:
+    def test_generates_agent_file(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("claude_code")
+        files = adapter.generate_agents(root, agents, profiles)
+        assert len(files) >= 1
+        assert any("pm.md" in gf.rel_path for gf in files)
+
+    def test_content_has_instructions(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("claude_code")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "PM agent" in content or "PM Agent" in content
+
+    def test_content_has_artifact_ownership(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("claude_code")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "Artifact Ownership" in content or "spec.md" in content
+
+    def test_content_has_profile_section(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("claude_code")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "Profile" in content
+
+    def test_content_has_knowledge_refs(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("claude_code")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "@knowledge/" in content
+
+
+class TestCursorGenerateAgents:
+    def test_generates_agent_mdc(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("cursor")
+        files = adapter.generate_agents(root, agents, profiles)
+        assert len(files) >= 1
+        assert any("agent-pm.mdc" in gf.rel_path for gf in files)
+
+    def test_has_mdc_frontmatter(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("cursor")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert content.startswith("---\n")
+        assert "alwaysApply:" in content
+
+    def test_content_has_instructions(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("cursor")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "PM agent" in content or "PM Agent" in content
+
+    def test_inlines_knowledge(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("cursor")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "Conventions" in content
+
+
+class TestOpenClawGenerateAgents:
+    def test_generates_agent_json(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("openclaw")
+        files = adapter.generate_agents(root, agents, profiles)
+        assert len(files) >= 1
+        assert any("pm.json" in gf.rel_path for gf in files)
+
+    def test_valid_json_with_instructions(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("openclaw")
+        files = adapter.generate_agents(root, agents, profiles)
+        data = json.loads(files[0].content)
+        assert "instructions" in data
+        assert len(data["instructions"]) > 0
+
+    def test_has_knowledge(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("openclaw")
+        files = adapter.generate_agents(root, agents, profiles)
+        data = json.loads(files[0].content)
+        assert "knowledge" in data
+
+    def test_has_artifact_ownership(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("openclaw")
+        files = adapter.generate_agents(root, agents, profiles)
+        data = json.loads(files[0].content)
+        assert "owns" in data or "artifact" in json.dumps(data).lower()

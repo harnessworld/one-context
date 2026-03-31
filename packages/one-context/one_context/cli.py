@@ -199,6 +199,17 @@ def _print_dry_run_block(rel_path: str, description: str, body: str) -> None:
         sys.stdout.buffer.write(block.encode("utf-8", errors="replace"))
 
 
+def _emit_file(root: Path, gf, dry_run: bool) -> None:
+    """Write a generated file to disk, or print in dry-run mode."""
+    if dry_run:
+        _print_dry_run_block(gf.rel_path, gf.description, gf.content)
+    else:
+        target = root / gf.rel_path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(gf.content, encoding="utf-8")
+        print(f"wrote: {gf.rel_path} ({gf.description})")
+
+
 def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
     # Lazy import to avoid circular deps and keep startup fast
     from one_context.adapters import ADAPTERS, get_adapter, list_adapters
@@ -233,6 +244,15 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
     agents, _ = load_agents(root)
     _, profiles_by_id = load_profiles(root)
 
+    # Resolve profile inheritance so adapters see fully merged profiles
+    _, mixins_by_id = load_mixins(root)
+    resolved_profiles: dict = {}
+    for pid in profiles_by_id:
+        try:
+            resolved_profiles[pid] = resolve_profile(pid, profiles_by_id, mixins_by_id)
+        except Exception:
+            resolved_profiles[pid] = profiles_by_id[pid]  # fallback to raw
+
     for ws_id in workspace_ids:
         try:
             ctx = build_workspace_context(root, ws_id)
@@ -245,37 +265,18 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
             adapter = get_adapter(aname)
 
             # Workspace-level config (existing behaviour)
-            files = adapter.generate(root, workspace, ctx)
-            for gf in files:
-                if dry_run:
-                    _print_dry_run_block(gf.rel_path, gf.description, gf.content)
-                else:
-                    target = root / gf.rel_path
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(gf.content, encoding="utf-8")
-                    print(f"wrote: {gf.rel_path} ({gf.description})")
+            for gf in adapter.generate(root, workspace, ctx):
+                _emit_file(root, gf, dry_run)
 
     # Agent files and project-root hooks — once per adapt run (not per workspace)
     for aname in adapter_names:
         adapter = get_adapter(aname)
         if agents:
-            for gf in adapter.generate_agents(root, agents, profiles_by_id):
-                if dry_run:
-                    _print_dry_run_block(gf.rel_path, gf.description, gf.content)
-                else:
-                    target = root / gf.rel_path
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_text(gf.content, encoding="utf-8")
-                    print(f"wrote: {gf.rel_path} ({gf.description})")
+            for gf in adapter.generate_agents(root, agents, resolved_profiles):
+                _emit_file(root, gf, dry_run)
 
         for gf in adapter.generate_project_artifacts(root, workspace_ids, agents):
-            if dry_run:
-                _print_dry_run_block(gf.rel_path, gf.description, gf.content)
-            else:
-                target = root / gf.rel_path
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_text(gf.content, encoding="utf-8")
-                print(f"wrote: {gf.rel_path} ({gf.description})")
+            _emit_file(root, gf, dry_run)
 
     return 0
 

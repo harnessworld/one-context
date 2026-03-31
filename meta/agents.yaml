@@ -90,7 +90,9 @@ agents:
     description: "Review 实现，生成测试，产出 test_report.md 和 mr_report.md。"
     knowledge:
       - knowledge/standards/
-      - features/
+      - features/INDEX.md
+      - features/README.md
+      - features/_template/
     owns:
       - "features/**/test_report.md"
       - "features/**/mr_report.md"

@@ -232,3 +232,88 @@ class TestDoctorInheritance:
         )
         result = doctor(tmp_root)
         assert result.errors == []
+
+
+class TestDoctorAgents:
+    """Doctor checks for agents.yaml validation."""
+
+    def test_agent_missing_role(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: bad-agent
+                    name: Bad
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("missing required 'role'" in e for e in result.errors)
+
+    def test_agent_invalid_role(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: bad-agent
+                    name: Bad
+                    role: nonexistent-role
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("invalid role" in e for e in result.errors)
+
+    def test_agent_unknown_profile_reference(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: bad-agent
+                    name: Bad
+                    role: dev
+                    profile: nonexistent-profile
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("unknown profile" in e for e in result.errors)
+
+    def test_agent_missing_knowledge_path_warning(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: test-agent
+                    name: Test
+                    role: dev
+                    knowledge:
+                      - nonexistent/path/
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("knowledge path not found" in w for w in result.warnings)
+
+    def test_valid_agent_no_errors(self, tmp_root: Path):
+        (tmp_root / "meta" / "profiles.yaml").write_text(
+            textwrap.dedent("""\
+                profiles:
+                  - id: default-coding
+                    name: Default
+            """),
+            encoding="utf-8",
+        )
+        kdir = tmp_root / "knowledge" / "standards"
+        kdir.mkdir(parents=True)
+        (kdir / "example.md").write_text("example", encoding="utf-8")
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: test-dev
+                    name: Dev
+                    role: dev
+                    profile: default-coding
+                    knowledge:
+                      - knowledge/standards/
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert not any("test-dev" in e for e in result.errors)

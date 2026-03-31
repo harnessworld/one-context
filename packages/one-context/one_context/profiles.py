@@ -61,6 +61,7 @@ def _parse_entries(
         if not eid or not isinstance(eid, str) or not eid.strip():
             raise ManifestError(f"{kind}[{i}] needs a non-empty string 'id'")
         eid = eid.strip()
+        item["id"] = eid  # write back normalized id
 
         lk = eid.casefold()
         if lk in by_id:

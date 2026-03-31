@@ -41,6 +41,11 @@ def load_agents(root: Path) -> tuple[list[dict[str, Any]], dict[str, dict[str, A
         if not aid or not isinstance(aid, str) or not aid.strip():
             raise ManifestError(f"agents[{i}] needs a non-empty string 'id'")
         aid = aid.strip()
+        item["id"] = aid  # write back normalized id
+
+        role = item.get("role")
+        if not role or not isinstance(role, str) or not role.strip():
+            raise ManifestError(f"agents[{i}] ({aid}): missing required 'role' field")
 
         lk = aid.casefold()
         if lk in by_id:
