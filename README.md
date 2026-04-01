@@ -46,7 +46,7 @@
 
 典型的多仓库 AI 协作里，常见三类问题：**工具配置分散**、**跨仓工作上下文不一致**，以及 **缺少可沉淀的标准与编排层**（规范散落在各厂商配置文件和聊天记录里，而不是一处可治理的来源）。下面三张图分别对应这三类痛点的应对方向。
 
-**一次配置，多端共享** — 在 umbrella 的 `meta/` 里声明一次事实：`repos.yaml` 登记跨仓克隆与路径，`workspaces.yaml` 定义任务视角，`profiles.yaml` 与 `agents.yaml` 描述行为规格与智能体。`onecxt adapt` 经声明式规则引擎，把同一套语义编译为 Cursor（`.mdc` 规则）、Claude Code（适配器 Markdown + `@file` 知识引用）、OpenClaw（JSON）等**原生格式**，一条命令生成 workspace 与全部 agent 配置，**多终端、多工具共用同一套事实来源**；配合 `onecxt sync` 对齐本地仓库、`onecxt context export` 导出 Markdown/JSON 上下文包。新工具侧接入以约 60 行适配器扩展，无需复制粘贴多份约定。
+**一次配置，多端共享** — 在 **one-context 仓库根目录**（`meta/`、`knowledge/`、`features/` 等控制平面内容都在这里，与各子业务仓库分离）声明一次事实：`repos.yaml` 登记跨仓克隆与路径，`workspaces.yaml` 定义任务视角，`profiles.yaml` 与 `agents.yaml` 描述行为规格与智能体。`onecxt adapt` 经声明式规则引擎，把同一套语义编译为 Cursor（`.mdc` 规则）、Claude Code（适配器 Markdown + `@file` 知识引用）、OpenClaw（JSON）等**原生格式**，一条命令生成 workspace 与全部 agent 配置，**多终端、多工具共用同一套事实来源**；配合 `onecxt sync` 对齐本地仓库、`onecxt context export` 导出 Markdown/JSON 上下文包。新工具侧接入以约 60 行适配器扩展，无需复制粘贴多份约定。
 
 <p align="center">
   <img
