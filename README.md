@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/banner.jpg" alt="one-context 横幅" width="300" />
+  <img src="docs/images/banner.jpg" alt="one-context 横幅" width="920" />
 </p>
 
 <p align="center">
@@ -177,7 +177,7 @@ onecxt adapt --all                  # 所有 workspace
 系统概览（声明式清单 → 核心引擎 → 适配器 → 生成的工具配置）：
 
 <p align="center">
-  <img src="docs/images/architecture.png" alt="one-context 架构：YAML 与知识经适配器到达 Cursor、Claude Code、OpenClaw" width="300" />
+  <img src="docs/images/architecture.png" alt="one-context 架构：YAML 与知识经适配器到达 Cursor、Claude Code、OpenClaw" width="920" />
 </p>
 
 磁盘布局：
