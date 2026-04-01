@@ -46,32 +46,32 @@
 
 典型的多仓库 AI 协作里，常见三类问题：**工具配置分散**、**跨仓工作上下文不一致**，以及 **缺少可沉淀的标准与编排层**（规范散落在各厂商配置文件和聊天记录里，而不是一处可治理的来源）。下面三张图分别对应这三类痛点的应对方向。
 
-**一次配置，多端使用** — 规范、Profile 与技能只在 umbrella 里维护一份；通过适配器投影到 Cursor、Claude Code、OpenClaw、CLI 等不同入口，避免在每个工具里重复抄写、彼此漂移。
+**一次配置，多端共享** — 在 umbrella 的 `meta/` 里声明一次事实：`repos.yaml` 登记跨仓克隆与路径，`workspaces.yaml` 定义任务视角，`profiles.yaml` 与 `agents.yaml` 描述行为规格与智能体。`onecxt adapt` 经声明式规则引擎，把同一套语义编译为 Cursor（`.mdc` 规则）、Claude Code（适配器 Markdown + `@file` 知识引用）、OpenClaw（JSON）等**原生格式**，一条命令生成 workspace 与全部 agent 配置，**多终端、多工具共用同一套事实来源**；配合 `onecxt sync` 对齐本地仓库、`onecxt context export` 导出 Markdown/JSON 上下文包。新工具侧接入以约 60 行适配器扩展，无需复制粘贴多份约定。
 
 <p align="center">
   <img
-    src="docs/images/一次配置，多端使用.png"
-    alt="一次配置多端使用：中央 hub 连接知识库、Cursor、Claude Code、OpenClaw、CLI 与 skill"
+    src="docs/images/一次配置%20多端共享.png"
+    alt="一次配置多端共享：one-context 中心 hub 辐射 Cursor、Claude、OpenClaw 等不同 AI 开发入口"
     width="920"
   />
 </p>
 
-**智能资产，开箱即用** — `knowledge/` 中的标准、playbook 与提示是权威语义；与 workspace、profile、智能体组合后，团队拿到的是可复用的「智能资产」，而不是散落在各厂商配置和聊天记录里的口头约定。
+**知识工具，开箱即用** — 可复用语义放在工具中立的 `knowledge/`（`standards/`、`playbooks/`、`prompts/` 等），由 profile 的声明式字段规则翻译为各 AI 可读指令；每个智能体在 `agents.yaml` 中绑定 profile、knowledge 与 `owns`（负责维护的产物 glob），`adapt` 后为 pm、architect、dev、qa、sre、knowledge-keeper 等生成各端一致的角色配置，**知识库、CLI 工作流与技能约定**随工具配置一起落地，无需从零拼装。伞形需求与交付物落在 `features/`，模板与索引见 `features/README.md`、`INDEX.md`，并与 `repos.yaml` 的仓库 **id** 对齐，避免规范只存在于聊天记录或某一家工具的配置里。
 
 <p align="center">
   <img
-    src="docs/images/智能资产，开箱即用.png"
-    alt="智能资产开箱即用：知识库、技能与资产在团队内即取即用"
+    src="docs/images/知识工具%20开箱即用.png"
+    alt="知识工具开箱即用：one-context 中心连接知识库、skill、CLI 与 Cursor、Claude Code、OpenClaw 等"
     width="920"
   />
 </p>
 
-**项目进度，自动上报** — 以 Agent 框架与 `features/` 等载体贯通需求、设计、开发、测试与交付；流程与产物可追踪、可汇总，减轻「信息割裂、进度靠人肉同步」的负担。
+**项目进度，自动同步** — **当前能力**：以 `features/<category>/<feature-id>/` 下的 `spec.md` → `tech_design.md` → `test_report.md` / `mr_report.md` → `deliver.md` 沉淀阶段产物，`features/INDEX.md` 维护需求状态一览；各智能体对产物有明确所有权，需求—设计—开发—测试—交付在**同一套文档链**上推进，避免「信息割裂、进度失真」；`onecxt context export` 可拉整包上下文，作为站会、评审或周报素材。**规划**：与产品线中的 **one-team** 衔接（OKR、日报/周报自动化等），在控制平面之上再补「自动汇总与对外上报」；今日重点是**结构化事实链与可追溯文档**，而非内置定时推送。
 
 <p align="center">
   <img
-    src="docs/images/项目进度，自动上报.png"
-    alt="项目进度自动上报：PM 与 DEV 等智能体协同，流程同步与日报周报类可见性"
+    src="docs/images/项目进度%20自动同步.png"
+    alt="项目进度自动同步：DEV 与 QA 等智能体协同，需求到测试流程与进度可视"
     width="920"
   />
 </p>
