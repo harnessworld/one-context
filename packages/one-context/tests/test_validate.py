@@ -317,3 +317,146 @@ class TestDoctorAgents:
         )
         result = doctor(tmp_root)
         assert not any("test-dev" in e for e in result.errors)
+
+    def test_worktree_missing_branch_pattern(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: dev
+                    name: Dev
+                    role: dev
+                    worktree:
+                      path_pattern: "repos/{repo_id}/.worktrees/{feature_id}"
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("branch_pattern" in e for e in result.errors)
+
+    def test_worktree_missing_path_pattern(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: dev
+                    name: Dev
+                    role: dev
+                    worktree:
+                      branch_pattern: "feature/{feature_id}"
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("path_pattern" in e for e in result.errors)
+
+    def test_worktree_on_non_dev_warns(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: pm
+                    name: PM
+                    role: pm
+                    worktree:
+                      branch_pattern: "feature/{feature_id}"
+                      path_pattern: "repos/{repo_id}/.worktrees/{feature_id}"
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("intended for role=dev" in w for w in result.warnings)
+
+    def test_worktree_placeholder_warnings(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: dev
+                    name: Dev
+                    role: dev
+                    worktree:
+                      branch_pattern: "feature/hardcoded"
+                      path_pattern: "repos/hardcoded"
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("feature_id" in w for w in result.warnings)
+        assert any("repo_id" in w for w in result.warnings)
+
+
+class TestDoctorDeployYaml:
+    """Doctor checks for deploy.yaml validation in repos."""
+
+    def test_valid_deploy_yaml_no_errors(self, tmp_root: Path):
+        # Set up sre agent
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: sre
+                    name: SRE
+                    role: sre
+                    deploy_manifest: deploy.yaml
+            """),
+            encoding="utf-8",
+        )
+        # Create repo dir with valid deploy.yaml
+        repo_dir = tmp_root / "repos" / "develop" / "alpha"
+        repo_dir.mkdir(parents=True)
+        (repo_dir / ".git").mkdir()
+        (repo_dir / "deploy.yaml").write_text(
+            textwrap.dedent("""\
+                version: "1"
+                name: alpha-svc
+                strategy: manual
+                stages:
+                  - id: staging
+                    cmd: "echo deploy"
+                    health_check: "echo ok"
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert not any("deploy.yaml" in e for e in result.errors)
+
+    def test_invalid_deploy_yaml_errors(self, tmp_root: Path):
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: sre
+                    name: SRE
+                    role: sre
+                    deploy_manifest: deploy.yaml
+            """),
+            encoding="utf-8",
+        )
+        repo_dir = tmp_root / "repos" / "develop" / "alpha"
+        repo_dir.mkdir(parents=True)
+        (repo_dir / ".git").mkdir()
+        (repo_dir / "deploy.yaml").write_text(
+            textwrap.dedent("""\
+                version: "2"
+                name: ""
+                strategy: invalid
+                stages: []
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        deploy_errors = [e for e in result.errors if "deploy.yaml" in e]
+        assert len(deploy_errors) >= 3  # version, name, strategy, stages
+
+    def test_missing_deploy_yaml_no_error(self, tmp_root: Path):
+        """Repos without deploy.yaml should not cause errors."""
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: sre
+                    name: SRE
+                    role: sre
+                    deploy_manifest: deploy.yaml
+            """),
+            encoding="utf-8",
+        )
+        repo_dir = tmp_root / "repos" / "develop" / "alpha"
+        repo_dir.mkdir(parents=True)
+        (repo_dir / ".git").mkdir()
+        result = doctor(tmp_root)
+        assert not any("deploy.yaml" in e for e in result.errors)

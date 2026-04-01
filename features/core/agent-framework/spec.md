@@ -100,23 +100,23 @@ one-context 目前是一个优秀的"上下文控制平面"：它管理多仓注
 - [x] 各适配器（Cursor / Claude Code / OpenClaw）支持生成 agent 配置文件
 - [x] `onecxt adapt` 自动生成所有 agent 配置（无需单独命令）
 
-## Phase 3 — Worktree 管理
-- [ ] `worktree.py` 模块
-- [ ] `onecxt worktree setup / status / teardown`
-- [ ] `features/.../worktrees.yaml` 自动生成与更新
+## Phase 3 — Worktree 管理（已完成）
+- [x] `worktree.py` 模块
+- [x] `onecxt worktree setup / status / teardown`
+- [x] `features/.../worktrees.yaml` 自动生成与更新
 
-## Phase 4 — SRE deploy.yaml 支持
-- [ ] `deploy.yaml` schema 定义与 doctor 校验
-- [ ] `docs/templates/deploy.yaml` 模板
-- [ ] SRE 智能体生成配置中注入 deploy.yaml 查找逻辑
+## Phase 4 — SRE deploy.yaml 支持（已完成）
+- [x] `deploy.yaml` schema 定义与 doctor 校验
+- [x] `docs/templates/deploy.yaml` 模板
+- [x] SRE 智能体生成配置中注入 deploy.yaml 查找逻辑
 
 ---
 
-# 开放问题
+# 开放问题（已关闭）
 
-1. `tech_design.md` 的 owns 归 `architect` 还是 `dev`？建议：架构师负责设计，开发可以追加实现细节，但 architect 是首要 owner。需在规范里明确"追加而非覆盖"的协作模式。
-2. `onecxt adapt-agent` 是独立命令还是 `onecxt adapt` 的选项（`--include-agents`）？
-3. `deploy.yaml` 是否需要支持多环境继承（staging extends base）？
+1. ~~`tech_design.md` 的 owns 归 `architect` 还是 `dev`？~~ **决策：architect 独占**。dev 可追加实现备注段落，但不可覆盖设计决策。在 dev agent instructions 中明确"追加而非覆盖"规则。
+2. ~~`onecxt adapt-agent` 是独立命令还是 `onecxt adapt` 的选项？~~ **决策：集成在 `onecxt adapt` 中**。adapt 一次性生成 workspace + agent 配置，无需独立命令。
+3. ~~`deploy.yaml` 是否需要支持多环境继承（staging extends base）？~~ **决策：暂不支持**。当前 stages 列表已足够表达多环境，继承机制留待实际需求出现再引入。
 
 ---
 

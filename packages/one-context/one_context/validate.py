@@ -170,6 +170,61 @@ def doctor(root: Path) -> DoctorResult:
                     f"agent {aid!r}: knowledge path not found: {kp}"
                 )
 
+        # Validate worktree config (dev agent)
+        wt = agent.get("worktree")
+        if wt:
+            if role and role != "dev":
+                warnings.append(
+                    f"agent {aid!r}: 'worktree' config is intended for "
+                    f"role=dev, but agent has role={role!r}"
+                )
+            if isinstance(wt, dict):
+                for req_key in ("branch_pattern", "path_pattern"):
+                    if not wt.get(req_key):
+                        errors.append(
+                            f"agent {aid!r}: worktree.{req_key} is required"
+                        )
+                bp = wt.get("branch_pattern", "")
+                pp = wt.get("path_pattern", "")
+                if bp and "{feature_id}" not in bp:
+                    warnings.append(
+                        f"agent {aid!r}: worktree.branch_pattern should "
+                        "contain {{feature_id}} placeholder"
+                    )
+                if pp and ("{repo_id}" not in pp or "{feature_id}" not in pp):
+                    warnings.append(
+                        f"agent {aid!r}: worktree.path_pattern should "
+                        "contain {{repo_id}} and {{feature_id}} placeholders"
+                    )
+            else:
+                errors.append(
+                    f"agent {aid!r}: 'worktree' must be a mapping"
+                )
+
+    # --- deploy.yaml validation (per-repo) ---
+    sre_agent = next(
+        (a for a in agents if a.get("role") == "sre"), None
+    )
+    deploy_filename = (
+        sre_agent.get("deploy_manifest", "deploy.yaml") if sre_agent else None
+    )
+    if deploy_filename:
+        for entry in repo_entries:
+            repo_path = (root / entry["path"]).resolve()
+            deploy_path = repo_path / deploy_filename
+            if deploy_path.is_file():
+                from one_context.deploy import validate_deploy_yaml
+
+                d_errors, d_warnings = validate_deploy_yaml(deploy_path)
+                for e in d_errors:
+                    errors.append(
+                        f"repo {entry['id']!r} {deploy_filename}: {e}"
+                    )
+                for w in d_warnings:
+                    warnings.append(
+                        f"repo {entry['id']!r} {deploy_filename}: {w}"
+                    )
+
     for entry in repo_entries:
         target = (root / entry["path"]).resolve()
         label = entry["id"]

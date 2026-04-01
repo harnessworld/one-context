@@ -1,0 +1,25 @@
+# deploy.yaml — SRE deployment manifest
+# Place this file at the root of any repo that needs automated deployment.
+# See: knowledge/standards/agent-framework.md Section 5
+
+version: "1"
+name: ""                 # service or component name
+strategy: manual         # docker-compose | helm | raw-script | manual | none
+
+stages:
+  - id: staging
+    cmd: ""              # deployment command for this stage
+    health_check: ""     # optional health check command
+    approval_required: false
+
+  - id: production
+    cmd: ""
+    health_check: ""
+    approval_required: true
+
+rollback:
+  cmd: ""                # rollback command
+
+notes: |
+  Deployment notes for the SRE agent. Fill in pre-deployment checklist,
+  environment variables, or special instructions.

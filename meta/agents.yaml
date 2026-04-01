@@ -80,6 +80,7 @@ agents:
           repos/<repo_id>/.worktrees/<feature_id>  (branch: feature/<feature_id>)
       - Record all worktrees in features/<category>/<feature-id>/worktrees.yaml.
       - Implement per the design; raise blockers in a comment inside worktrees.yaml or tech_design.md.
+      - You may append implementation notes to tech_design.md (e.g. under an "Implementation Notes" section), but NEVER overwrite or modify the Architect's design decisions.
       - Do not merge worktrees or push to main — leave that to the SRE agent.
       - Follow coding standards in knowledge/standards/.
 
