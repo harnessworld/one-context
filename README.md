@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/banner.jpg" alt="one-context 横幅" width="560" />
+  <img src="docs/images/banner.jpg" alt="one-context 横幅" width="300" />
 </p>
 
 <p align="center">
@@ -52,7 +52,7 @@
   <img
     src="docs/images/一次配置%20多端共享.png"
     alt="一次配置多端共享：one-context 中心 hub 辐射 Cursor、Claude、OpenClaw 等不同 AI 开发入口"
-    width="560"
+    width="300"
   />
 </p>
 
@@ -62,7 +62,7 @@
   <img
     src="docs/images/知识工具%20开箱即用.png"
     alt="知识工具开箱即用：one-context 中心连接知识库、skill、CLI 与 Cursor、Claude Code、OpenClaw 等"
-    width="560"
+    width="300"
   />
 </p>
 
@@ -72,7 +72,7 @@
   <img
     src="docs/images/项目进度%20自动同步.png"
     alt="项目进度自动同步：DEV 与 QA 等智能体协同，需求到测试流程与进度可视"
-    width="560"
+    width="300"
   />
 </p>
 
@@ -177,7 +177,7 @@ onecxt adapt --all                  # 所有 workspace
 系统概览（声明式清单 → 核心引擎 → 适配器 → 生成的工具配置）：
 
 <p align="center">
-  <img src="docs/images/architecture.png" alt="one-context 架构：YAML 与知识经适配器到达 Cursor、Claude Code、OpenClaw" width="560" />
+  <img src="docs/images/architecture.png" alt="one-context 架构：YAML 与知识经适配器到达 Cursor、Claude Code、OpenClaw" width="300" />
 </p>
 
 磁盘布局：
