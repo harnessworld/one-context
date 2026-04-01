@@ -50,7 +50,7 @@
 
 <p align="center">
   <img
-    src="docs/images/一次配置%20多端共享.png"
+    src="docs/images/一次配置%20多端共享.jpg"
     alt="一次配置多端共享：one-context 中心 hub 辐射 Cursor、Claude、OpenClaw 等不同 AI 开发入口"
     width="300"
   />
@@ -60,7 +60,7 @@
 
 <p align="center">
   <img
-    src="docs/images/知识工具%20开箱即用.png"
+    src="docs/images/知识工具%20开箱即用.jpg"
     alt="知识工具开箱即用：one-context 中心连接知识库、skill、CLI 与 Cursor、Claude Code、OpenClaw 等"
     width="300"
   />
@@ -70,7 +70,7 @@
 
 <p align="center">
   <img
-    src="docs/images/项目进度%20自动同步.png"
+    src="docs/images/项目进度%20自动同步.jpg"
     alt="项目进度自动同步：DEV 与 QA 等智能体协同，需求到测试流程与进度可视"
     width="300"
   />
