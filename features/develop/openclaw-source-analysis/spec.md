@@ -1,7 +1,7 @@
 ---
 id: "openclaw-source-analysis"
 title: "OpenClaw 源码解析知识整理"
-status: draft
+status: done
 category: "develop"
 primary_repo_id: "one-context"
 owner: ""
