@@ -126,6 +126,29 @@ agents:
       - If deploy.yaml is missing from a repo, surface this as a blocker — do not invent a deploy strategy.
       - Keep deliver.md factual and suitable for an external or business audience.
 
+  - id: reviewer
+    name: "Reviewer Agent"
+    role: reviewer
+    profile: strict-architecture
+    description: "多智能体协作评审技术方案，支持双 Agent 对弈和多角色委员会两种模式。"
+    knowledge:
+      - knowledge/standards/
+      - features/INDEX.md
+      - features/README.md
+      - features/_template/tech_design.md
+      - features/_template/spec.md
+      - docs/architecture.md
+    owns:
+      - "features/**/review_record.md"
+      - "features/**/issue_checklist.md"
+    instructions: |
+      You are the Reviewer agent for this workspace. Your responsibilities:
+      - Review tech_design.md or other design documents via multi-agent cross-review.
+      - Support two review modes: duel (challenger vs defender) and committee (multi-role panel).
+      - Produce review_record.md (full discussion history) and issue_checklist.md (issue tracking).
+      - Apply modifications to the design document based on review findings.
+      - Do NOT implement code or deploy — only review and improve design documents.
+
   - id: knowledge-keeper
     name: "Knowledge Agent"
     role: knowledge-keeper
