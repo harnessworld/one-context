@@ -29,4 +29,13 @@ version: 1
 #   - url: git@test.local:your-org/research-notes
 #     category: research
 #     description: Research notes and documentation.
-repos: []
+repos:
+  - url: https://github.com/CarmanMS/FunctionCanvas
+    category: develop
+    description: FunctionCanvas
+  - url: https://github.com/CarmanMS/VideoFactory
+    category: develop
+    description: VideoFactory
+  - url: https://github.com/CarmanMS/paperwork
+    category: research
+    description: paperwork
