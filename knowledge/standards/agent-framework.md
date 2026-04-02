@@ -61,6 +61,7 @@ agents:
 | `dev` | 设计并实现功能，以 git worktree 方式在 feature 分支工作 |
 | `qa` | Review 实现，生成测试，产出 `test_report.md` / `mr_report.md` |
 | `sre` | 读取各 repo 的 `deploy.yaml` 执行发布，产出 `deliver.md` |
+| `reviewer` | 多智能体协作评审技术方案，产出 `review_record.md` / `issue_checklist.md` |
 | `knowledge-keeper` | 维护知识层，检测知识漂移，提炼新约定 |
 
 ---

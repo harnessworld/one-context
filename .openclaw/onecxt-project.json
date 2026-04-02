@@ -30,6 +30,10 @@
         "path": ".openclaw/agents/qa.json"
       },
       {
+        "id": "reviewer",
+        "path": ".openclaw/agents/reviewer.json"
+      },
+      {
         "id": "sre",
         "path": ".openclaw/agents/sre.json"
       }

@@ -1,7 +1,7 @@
 ---
 id: agent-framework
 title: "Agent Framework — 智能体框架"
-status: in_progress
+status: done
 category: core
 primary_repo_id: one-context
 owner: architect
@@ -52,15 +52,15 @@ one-context 目前是一个优秀的"上下文控制平面"：它管理多仓注
 
 # 验收标准
 
-- [ ] `meta/agents.yaml` 可通过 `onecxt doctor` 校验（无错误）
-- [ ] `onecxt agent list` 输出 6 个标准智能体
-- [ ] `onecxt agent show pm` 输出完整字段（profile、knowledge、owns、instructions）
-- [ ] `onecxt adapt dev` 在 Cursor / Claude Code / OpenClaw 各自目录生成 `agent-pm.mdc` / `pm.md` / `agent-pm.json`
-- [ ] 生成文件内容包含：角色说明、profile 行为规格、knowledge 内容（inline 或引用）、owns 产物清单
-- [ ] `onecxt worktree setup <feature-id>` 在涉及的 repo 下创建 worktree，并写入 `worktrees.yaml`
-- [ ] `onecxt worktree teardown <feature-id>` 清理 worktree，更新 `worktrees.yaml` status 为 `merged` 或 `abandoned`
-- [ ] `deploy.yaml` 模板文件存在于 `docs/templates/deploy.yaml`，字段通过 `onecxt doctor` 校验
-- [ ] 知识规范文档 `knowledge/standards/agent-framework.md` 存在且与实现一致
+- [x] `meta/agents.yaml` 可通过 `onecxt doctor` 校验（无错误）
+- [x] `onecxt agent list` 输出 6 个标准智能体
+- [x] `onecxt agent show pm` 输出完整字段（profile、knowledge、owns、instructions）
+- [x] `onecxt adapt dev` 在 Cursor / Claude Code / OpenClaw 各自目录生成 `agent-pm.mdc` / `pm.md` / `agent-pm.json`
+- [x] 生成文件内容包含：角色说明、profile 行为规格、knowledge 内容（inline 或引用）、owns 产物清单
+- [x] `onecxt worktree setup <feature-id>` 在涉及的 repo 下创建 worktree，并写入 `worktrees.yaml`
+- [x] `onecxt worktree teardown <feature-id>` 清理 worktree，更新 `worktrees.yaml` status 为 `merged` 或 `abandoned`
+- [x] `deploy.yaml` 模板文件存在于 `docs/templates/deploy.yaml`，字段通过 `onecxt doctor` 校验
+- [x] 知识规范文档 `knowledge/standards/agent-framework.md` 存在且与实现一致
 
 ---
 

@@ -10,7 +10,7 @@ from one_context.profiles import load_mixins, load_profiles
 from one_context.repos import load_repos
 from one_context.workspaces import load_workspaces
 
-VALID_ROLES = {"pm", "architect", "dev", "qa", "sre", "knowledge-keeper"}
+VALID_ROLES = {"pm", "architect", "dev", "qa", "sre", "reviewer", "knowledge-keeper"}
 
 
 @dataclass
