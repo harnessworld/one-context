@@ -16,6 +16,7 @@ Its purpose is to store guidance once, then let different AI tools consume or ad
 - `standards/`: engineering conventions, repository policies, naming rules
 - `playbooks/`: step-by-step operating procedures for common tasks
 - `prompts/`: reusable prompt/context fragments
+- `references/`: curated external resource indexes (articles, docs, repos)
 
 Umbrella-level feature specs (not sub-repo issues) live at repo root **`features/`** — see `features/README.md` and playbook `playbooks/add-umbrella-feature.md`.
 
