@@ -13,6 +13,13 @@ __pycache__/
 dist/
 build/
 
+# Skills (local npm install under skills/)
+skills/**/node_modules/
+
+# Node (skills: html-video-from-slides CLI)
+skills/html-video-from-slides/node_modules/
+skills/html-video-from-slides/.cache/
+
 # Testing
 .coverage
 .pytest_cache/
@@ -29,6 +36,7 @@ build/
 *.m4v
 *.wmv
 *.flv
+*.wav
 
 # OS
 .DS_Store

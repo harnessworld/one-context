@@ -9,6 +9,7 @@ This file provides guidance for AI coding tools (Cursor, Claude Code, Codex, etc
 - **`meta/workspaces.yaml`**: task- or theme-oriented workspace definitions
 - **`meta/profiles.yaml`**: shared AI/runtime profiles
 - **`knowledge/`**: canonical standards, playbooks, prompts; layout in `knowledge/README.md`
+- **`skills/`**: cross-tool executable helpers (e.g. HTML slides → MP4); see `skills/README.md`
 - **`features/`**: umbrella-level feature specs; see `features/README.md` and `features/INDEX.md`
 - **`docs/`**: architecture docs and contributor templates
 

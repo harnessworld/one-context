@@ -37,6 +37,7 @@ onecxt workspace list
 onecxt workspace show WORKSPACE_ID
 onecxt context export WORKSPACE_ID
 onecxt context export WORKSPACE_ID --format markdown
+onecxt context export WORKSPACE_ID --format markdown --compress --target-tokens 8000
 onecxt profile list
 onecxt sync
 onecxt sync your-repo-id

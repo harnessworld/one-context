@@ -1,0 +1,6 @@
+{
+  "_comment": "复制为 wav-durations.json。与 skills/html-video-from-slides/wav-durations.example.json 字段一致。",
+  "wavFile": "AI+时代：将所有人拉进同一仓库.wav",
+  "outputFile": "final_from_wav.mp4",
+  "slideDurationsSec": [30, 35, 40, 35, 40, 35, 25]
+}

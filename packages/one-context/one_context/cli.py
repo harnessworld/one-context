@@ -103,6 +103,14 @@ def _cmd_context_export(root: Path, args: argparse.Namespace) -> int:
         return 2
 
     rendered = render_workspace_context(data, args.format)
+    if getattr(args, "compress", False) or getattr(args, "target_tokens", None) is not None:
+        from one_context.context import apply_context_compression
+
+        rendered = apply_context_compression(
+            rendered,
+            compress=bool(getattr(args, "compress", False)),
+            target_tokens=getattr(args, "target_tokens", None),
+        )
     if args.output is None:
         print(rendered, end="")
         return 0
@@ -417,6 +425,19 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=None,
         help="Write export to a file instead of stdout",
+    )
+    p_ctx_export.add_argument(
+        "--compress",
+        action="store_true",
+        default=False,
+        help="Apply automatic token-budget compression to the export (approximate)",
+    )
+    p_ctx_export.add_argument(
+        "--target-tokens",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Approximate max tokens when compressing (implies compression if set)",
     )
     p_ctx_export.set_defaults(func=_cmd_context_export)
 

@@ -1,4 +1,4 @@
-﻿"""Tests for one_context.context — build_workspace_context + render."""
+"""Tests for one_context.context — build_workspace_context + render."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from one_context.context import (
+    apply_context_compression,
     build_workspace_context,
     render_workspace_context,
     render_workspace_context_markdown,
@@ -139,3 +140,24 @@ class TestRenderMarkdown:
         md = render_workspace_context_markdown(ctx)
         assert "## Unresolved References" in md
         assert "`ghost`" in md
+
+
+class TestApplyContextCompression:
+    def test_noop_without_flags(self):
+        s = "hello" * 100
+        assert apply_context_compression(s) == s
+
+    def test_noop_when_under_budget(self):
+        s = "x" * 1000
+        assert apply_context_compression(s, compress=True, target_tokens=500) == s
+
+    def test_truncates_when_over_budget(self):
+        s = "a" * 10_000
+        out = apply_context_compression(s, compress=True, target_tokens=100)
+        assert len(out) < len(s)
+        assert "truncated" in out.lower() or "token budget" in out.lower()
+
+    def test_target_tokens_alone_implies_compression(self):
+        s = "b" * 5000
+        out = apply_context_compression(s, compress=False, target_tokens=10)
+        assert len(out) < len(s)

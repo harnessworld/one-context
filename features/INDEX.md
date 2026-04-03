@@ -10,6 +10,7 @@
 | profile-inheritance | Profile 继承与 Mixin 机制 | core | draft | `features/core/profile-inheritance/` | one-context |
 | claudecode-source-analysis | Claude Code 源码解析知识整理 | develop | done | `features/develop/claudecode-source-analysis/` | one-context |
 | openclaw-source-analysis | OpenClaw 源码解析知识整理 | develop | done | `features/develop/openclaw-source-analysis/` | one-context |
+| one-context-intro-short-video | one-context 中视频介绍（爆款口播框架） | develop | draft | `features/develop/one-context-intro-short-video/` | one-context |
 
 **Columns**
 

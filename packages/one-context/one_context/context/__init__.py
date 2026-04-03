@@ -1,4 +1,4 @@
-﻿"""
+"""
 Assemble tool-neutral context exports from canonical one-context manifests.
 """
 
@@ -217,3 +217,40 @@ def render_workspace_context(data: dict[str, Any], fmt: str) -> str:
     if fmt == "markdown":
         return render_workspace_context_markdown(data)
     raise ValueError(f"Unsupported context export format: {fmt}")
+
+
+def apply_context_compression(
+    text: str,
+    *,
+    compress: bool = False,
+    target_tokens: int | None = None,
+    default_budget_tokens: int = 24_000,
+) -> str:
+    """
+    Enforce an approximate token budget on exported context (lossy).
+
+    Uses a rough heuristic (~4 characters per token). When only *compress* is
+    True, *default_budget_tokens* applies. Smarter structured compression can
+    replace this without changing the CLI contract.
+    """
+    if not compress and target_tokens is None:
+        return text
+
+    budget = target_tokens if target_tokens is not None else default_budget_tokens
+    # Honor small explicit --target-tokens; default path keeps a floor so tiny
+    # exports are not over-truncated by accident.
+    if target_tokens is not None:
+        max_chars = max(64, budget * 4)
+    else:
+        max_chars = max(512, budget * 4)
+    if len(text) <= max_chars:
+        return text
+
+    note = (
+        "\n\n---\n\n"
+        "*[one-context: context truncated to approximate token budget; "
+        "adjust with --target-tokens.]*\n"
+    )
+    # Ensure slice length is non-negative (small budgets vs. long footer).
+    take = max(0, min(len(text), max_chars - len(note)))
+    return text[:take] + note

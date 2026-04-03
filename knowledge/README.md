@@ -1,4 +1,4 @@
-﻿# Knowledge
+# Knowledge
 
 This directory is the canonical, tool-neutral knowledge layer for `one-context`.
 
@@ -19,6 +19,8 @@ Its purpose is to store guidance once, then let different AI tools consume or ad
 - `references/`: curated external resource indexes (articles, docs, repos)
 
 Umbrella-level feature specs (not sub-repo issues) live at repo root **`features/`** — see `features/README.md` and playbook `playbooks/add-umbrella-feature.md`.
+
+Executable, tool-agnostic pipelines (Node scripts, single CLI entry) live at repo root **`skills/`** — see `skills/README.md` (e.g. HTML presentation + narration → video).
 
 ## Adapter Model
 
