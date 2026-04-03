@@ -11,6 +11,7 @@
 | claudecode-source-analysis | Claude Code 源码解析知识整理 | develop | done | `features/develop/claudecode-source-analysis/` | one-context |
 | openclaw-source-analysis | OpenClaw 源码解析知识整理 | develop | done | `features/develop/openclaw-source-analysis/` | one-context |
 | one-context-intro-short-video | one-context 中视频介绍（爆款口播框架） | develop | draft | `features/develop/one-context-intro-short-video/` | one-context |
+| skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill | core | done | `features/core/skill-windows-c-drive-cleanup/` | one-context |
 
 **Columns**
 
