@@ -20,10 +20,6 @@ skills/**/node_modules/
 skills/html-video-from-slides/node_modules/
 skills/html-video-from-slides/.cache/
 
-# Feature production (cover toolchain)
-features/develop/one-context-intro-short-video/production/node_modules/
-features/develop/one-context-intro-short-video/production/temp_video_wav/
-
 # Testing
 .coverage
 .pytest_cache/

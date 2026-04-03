@@ -11,6 +11,7 @@
 | skill-merge-to-main | 选择性合并到主干 — 路径分类、咨询与确认后合入 main | core | done | `features/core/skill-merge-to-main/` | one-context |
 | claudecode-source-analysis | Claude Code 源码解析知识整理 | develop | done | `features/develop/claudecode-source-analysis/` | one-context |
 | openclaw-source-analysis | OpenClaw 源码解析知识整理 | develop | done | `features/develop/openclaw-source-analysis/` | one-context |
+| one-context-intro-short-video | one-context 中视频介绍（爆款口播框架） | develop | draft | `features/develop/one-context-intro-short-video/` | one-context |
 
 **Columns**
 
