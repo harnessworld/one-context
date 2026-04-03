@@ -1,0 +1,6 @@
+{
+  "_comment": "复制到视频素材目录为 wav-durations.json。wav 子命令读取。slideDurationsSec 每项为该页口播秒数，长度须等于 presentation.html 中 .slide 个数。",
+  "wavFile": "your-voiceover.wav",
+  "outputFile": "final_from_wav.mp4",
+  "slideDurationsSec": [30, 35, 40, 35, 40, 35, 25]
+}

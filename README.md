@@ -1,6 +1,6 @@
 <p align="center">
   <strong>one-context</strong><br>
-  <em>面向多仓库 AI 开发的智能体无关控制平面</em>
+  <em>跨仓库 AI 协作与共享上下文层 · 智能体无关 · 本地优先</em>
 </p>
 
 <p align="center">
@@ -12,6 +12,7 @@
 </p>
 
 <p align="center">
+  <a href="#vision">愿景与定位</a> &middot;
   <a href="#the-problem">痛点与挑战</a> &middot;
   <a href="#how-it-works">工作原理</a> &middot;
   <a href="#quick-start">快速开始</a> &middot;
@@ -22,17 +23,31 @@
 
 ---
 
-**one-context** 是一套开源、本地优先、与具体 AI 工具解耦的控制平面，用于跨仓库的 AI 辅助研发工作流。
+<h2 id="vision">愿景与定位</h2>
+
+AI 把个人写代码的速度拉满之后，瓶颈往往不在「某个人有多快」，而在 **上下文是否被切开**：人与人之间的交接（zip、即时通讯甩文件）、工具与工具之间的重复配置、以及微服务 / 多仓库下 **spec 与实现无法同屏**——SDD、伞形需求、跨服务改动，都容易卡在「仓库边界」上。
+
+业界有一种回应是 **物理 monorepo**：把设计、原型、前后端、多服务、脚本、测试、spec 放进 **同一个 Git 树**，让 Git 成为协作协议。方向对，但 **迁移与组织成本** 让很多团队望而却步。
+
+**one-context 走的是同一条问题意识，换一种代价结构：** 在 **umbrella 仓库** 里用 `meta/`、`knowledge/`、`features/` 与智能体模型，把 **共享上下文、规范、需求链与角色分工** 逻辑上收拢到一处；业务代码仍在各 **独立 Git 仓库**（`repos.yaml` 登记、`onecxt sync` 对齐本地工作副本）。你得到的是 **「多角色、多仓、多工具共用一个叙事」**，而不必把历史仓库物理合并。
+
+**它不只是「控制平面」这一句话能概括的：** 适配器与 `onecxt adapt` 是 **落地手段**；更核心的是 **跨仓统一语义**（注册表 + 知识 + 伞形特性 + Agent 产物链）和 **可导出、可自动压缩的上下文**——在模型窗口有限的前提下，仍能把「与当前任务最相关」的事实送进 AI，而不是把整棵目录树原样塞进提示里。治理与校验（如 `onecxt doctor`）也可以集中在 umbrella 侧演进，而不必在每个业务仓重复铺一套流水线逻辑。
+
+> **与物理 monorepo 的关系：** 同向（共享上下文、减少衔接摩擦），不同路（**逻辑聚合** 业务仓，**不**替代各仓自己的 Git 历史与发布节奏）。子仓库在磁盘上仍是普通 Git 仓库；本项目是叠在上面的 **智能层与知识层**。
+
+---
+
+**one-context** 是一套开源、本地优先、与具体 AI 工具解耦的 **跨仓库 AI 协作层**：控制平面、知识层与特性链共同构成上述「共享上下文」，并通过 CLI 在本地运行。
 
 ### ✨ 核心能力
 
 通过统一的 **知识层与语义模型**，one-context 打通 Cursor、Claude Code、Windsurf、OpenClaw 等不同 AI 工具之间的壁垒。工程规范、AI 技能与上下文记忆 **只需维护一份**；轻量适配器会把这些内容自动同步为各工具的原生配置，从而在多仓库、多工具之间实现真正的 **知识共享与规则一致**。
 
+**上下文自动压缩** — 导出或装配工作区上下文时，可按 **token 预算** 与 **结构化优先级**（注册表与 workspace 绑定关系、当前特性链、`knowledge/` 命中、冗余段落折叠等）自动收紧体积：先保证「事实不断裂」，再裁掉重复说明与低优先级片段，让长链路、多仓库场景下仍能把一屏可用的上下文交给模型与 IDE。
+
 ### 🌍 为何开源
 
-在 AI 编程工具爆发但彼此割裂的当下，我们开源这套「AI 工作流控制平面」，希望为 AI 辅助开发沉淀一套可协作的约定。让团队少受厂商绑定和「单仓视野」的限制，一起走向更高效、更 AI 原生的协作开发。
-
-> *它 **不是** monorepo：子仓库在磁盘上仍是普通 Git 仓库；本项目是叠在上面的 **控制平面与知识层**。*
+在 AI 编程工具爆发但彼此割裂的当下，我们开源这套 **跨仓库 AI 协作与上下文模型**，希望为 AI 辅助开发沉淀一套可协作的约定。让团队少受厂商绑定和「单仓视野」的限制，一起走向更高效、更 AI 原生的协作开发。
 
 1. **单仓盲区。** Cursor、Claude Code、Copilot 等主要工具，大多以「一个仓库」为边界；真实工程往往横跨许多仓库。one-context 为 AI 工具提供跨仓库的统一视图。
 
@@ -40,13 +55,13 @@
 
 **共享语义写一次，多工具自动适配。**
 
-这 **不是** monorepo：你的仓库仍在原处，仍是普通 Git 仓库。one-context 是叠在上面的智能层：集中式元数据注册表、声明式知识库，以及轻量适配框架，把工程规范、上下文与约定投影到你使用的任意 AI 平台。
+你的业务仓库仍在原处、仍是普通 Git 仓库；one-context 在 umbrella 里提供 **集中式元数据注册表**、**声明式知识库**、**伞形特性与文档链**，以及 **轻量适配框架**，把工程规范、上下文与约定投影到你使用的任意 AI 平台。
 
 <h2 id="the-problem">痛点与挑战</h2>
 
 典型的多仓库 AI 协作里，常见三类问题：**工具配置分散**、**跨仓工作上下文不一致**，以及 **缺少可沉淀的标准与编排层**（规范散落在各厂商配置文件和聊天记录里，而不是一处可治理的来源）。下面三张图分别对应这三类痛点的应对方向。
 
-**一次配置，多端共享** — 在 **one-context 仓库根目录**（`meta/`、`knowledge/`、`features/` 等控制平面内容都在这里，与各子业务仓库分离）声明一次事实：`repos.yaml` 登记跨仓克隆与路径，`workspaces.yaml` 定义任务视角，`profiles.yaml` 与 `agents.yaml` 描述行为规格与智能体。`onecxt adapt` 经声明式规则引擎，把同一套语义编译为 Cursor（`.mdc` 规则）、Claude Code（适配器 Markdown + `@file` 知识引用）、OpenClaw（JSON）等**原生格式**，一条命令生成 workspace 与全部 agent 配置，**多终端、多工具共用同一套事实来源**；配合 `onecxt sync` 对齐本地仓库、`onecxt context export` 导出 Markdown/JSON 上下文包。新工具侧接入以约 60 行适配器扩展，无需复制粘贴多份约定。
+**一次配置，多端共享** — 在 **one-context 仓库根目录**（`meta/`、`knowledge/`、`features/` 等控制平面内容都在这里，与各子业务仓库分离）声明一次事实：`repos.yaml` 登记跨仓克隆与路径，`workspaces.yaml` 定义任务视角，`profiles.yaml` 与 `agents.yaml` 描述行为规格与智能体。`onecxt adapt` 经声明式规则引擎，把同一套语义编译为 Cursor（`.mdc` 规则）、Claude Code（适配器 Markdown + `@file` 知识引用）、OpenClaw（JSON）等**原生格式**，一条命令生成 workspace 与全部 agent 配置，**多终端、多工具共用同一套事实来源**；配合 `onecxt sync` 对齐本地仓库、`onecxt context export` 导出 Markdown/JSON 上下文包，并可选 **自动压缩**（见上方「上下文自动压缩」）。新工具侧接入以约 60 行适配器扩展，无需复制粘贴多份约定。
 
 <p align="center">
   <img
@@ -66,7 +81,7 @@
   />
 </p>
 
-**项目进度，自动同步** — **当前能力**：以 `features/<category>/<feature-id>/` 下的 `spec.md` → `tech_design.md` → `test_report.md` / `mr_report.md` → `deliver.md` 沉淀阶段产物，`features/INDEX.md` 维护需求状态一览；各智能体对产物有明确所有权，需求—设计—开发—测试—交付在**同一套文档链**上推进，避免「信息割裂、进度失真」；`onecxt context export` 可拉整包上下文，作为站会、评审或周报素材。**规划**：与产品线中的 **one-team** 衔接（OKR、日报/周报自动化等），在控制平面之上再补「自动汇总与对外上报」；今日重点是**结构化事实链与可追溯文档**，而非内置定时推送。
+**项目进度，自动同步** — **当前能力**：以 `features/<category>/<feature-id>/` 下的 `spec.md` → `tech_design.md` → `test_report.md` / `mr_report.md` → `deliver.md` 沉淀阶段产物，`features/INDEX.md` 维护需求状态一览；各智能体对产物有明确所有权，需求—设计—开发—测试—交付在**同一套文档链**上推进，避免「信息割裂、进度失真」；`onecxt context export` 可拉整包上下文（**长文档链可经自动压缩**再交给模型或同事），作为站会、评审或周报素材。**规划**：与产品线中的 **one-team** 衔接（OKR、日报/周报自动化等），在控制平面之上再补「自动汇总与对外上报」；今日重点是**结构化事实链与可追溯文档**，而非内置定时推送。
 
 <p align="center">
   <img
@@ -199,7 +214,7 @@ one-context/
 ├── packages/one-context/    # 核心 — Python 包 + CLI（`onecxt`）；详见 packages/one-context/README.md
 │   └── one_context/
 │       ├── adapters/        #   工具适配器（Cursor、Claude Code、OpenClaw）
-│       ├── context/         #   上下文组装引擎
+│       ├── context/         #   上下文组装与导出（含自动压缩策略）
 │       └── ...              #   CLI、同步、校验、profile、repos、agents 等
 ├── repos/                   # 工作副本（通常 gitignore）
 └── docs/                    # 文档
@@ -271,7 +286,7 @@ onecxt [--root PATH] [--verbose]
 │                                           # 生成工具配置 + agent 配置
 ├── repo list                               # 列出已登记仓库
 ├── workspace list | show ID                # 查看 workspace
-├── context export ID [--format json|md]    # 导出上下文包
+├── context export ID [--format json|md] [--compress] [--target-tokens N]  # 导出上下文包；可选自动压缩
 ├── profile list | show ID [--resolved]     # 列出/查看 profile
 └── agent list | show ID                    # 列出/查看智能体
 ```
@@ -290,6 +305,7 @@ onecxt agent show pm                        # 查看 PM 智能体详情
 | 仓库注册表 + 同步 | 稳定 |
 | Workspace + profile 清单 | 稳定 |
 | 上下文导出（JSON / Markdown） | 稳定 |
+| 上下文自动压缩（预算 / 优先级裁剪） | 稳定 |
 | 清单校验（`doctor`） | 稳定 |
 | **适配框架** | **可用于生产** — Cursor、Claude Code、OpenClaw |
 | 声明式规则匹配引擎 | 可用于生产 |
@@ -298,7 +314,8 @@ onecxt agent show pm                        # 查看 PM 智能体详情
 
 ## one-context 不是什么
 
-- **不是 monorepo 工具。** 各仓库仍相互独立；本项目是叠在上面的控制平面。
+- **不是 monorepo 工具。** 各仓库仍相互独立；umbrella 提供逻辑上的「全景」与治理，不替代把多仓物理合并成一棵目录树。
+- **不只是「生成几份 AI 配置文件」。** 那是适配层；完整价值还包括跨仓注册表、`knowledge/` 与 `features/` 下的权威语义、智能体产物链与上下文导出。
 - **不绑定某一厂商。** 今天是 Cursor、Claude Code、OpenClaw；明天可以是你的自研工具。
 - **不是云服务。** 一切在本地运行，代码与知识不离开你的机器。
 - **不是 Git submodule 管理器。** 不搞嵌套仓库、subtree 或 submodule 泥潭。

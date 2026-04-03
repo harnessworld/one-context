@@ -63,6 +63,23 @@ class TestBuildParser:
         assert args.context_command == "export"
         assert args.format == "markdown"
 
+    def test_context_export_compress_flags(self):
+        parser = build_parser()
+        args = parser.parse_args(
+            [
+                "context",
+                "export",
+                "dev",
+                "--format",
+                "markdown",
+                "--compress",
+                "--target-tokens",
+                "8000",
+            ],
+        )
+        assert args.compress is True
+        assert args.target_tokens == 8000
+
 
 class TestMainIntegration:
     def test_doctor_on_valid_root(self, tmp_root_with_workspaces: Path, monkeypatch: pytest.MonkeyPatch):
@@ -134,6 +151,30 @@ class TestMainIntegration:
         assert exc.value.code == 0
         out = capsys.readouterr().out
         assert "# one-context Context Export" in out
+
+    def test_context_export_markdown_compress_tiny_budget(
+        self, tmp_root_with_workspaces: Path, monkeypatch: pytest.MonkeyPatch, capsys,
+    ):
+        monkeypatch.setattr(
+            sys, "argv",
+            [
+                "onecxt",
+                "--root",
+                str(tmp_root_with_workspaces),
+                "context",
+                "export",
+                "dev",
+                "--format",
+                "markdown",
+                "--target-tokens",
+                "20",
+            ],
+        )
+        with pytest.raises(SystemExit) as exc:
+            main()
+        assert exc.value.code == 0
+        out = capsys.readouterr().out
+        assert "token budget" in out.lower()
 
     def test_invalid_root(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
         monkeypatch.setattr(sys, "argv", ["onecxt", "--root", str(tmp_path), "doctor"])

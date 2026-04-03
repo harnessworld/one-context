@@ -7,6 +7,7 @@
 | agent-framework | 智能体框架 — meta/agents.yaml + 适配器扩展 + worktree/deploy 约定 | core | done | `features/core/agent-framework/` | one-context |
 | agent-collaboration | 智能体协作增强 — 状态流转、决策手册、条件知识、生成保护 | core | draft | `features/core/agent-collaboration/` | one-context |
 | profile-inheritance | Profile 继承与 Mixin 机制 | core | draft | `features/core/profile-inheritance/` | one-context |
+| skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill | core | done | `features/core/skill-windows-c-drive-cleanup/` | one-context |
 | claudecode-source-analysis | Claude Code 源码解析知识整理 | develop | done | `features/develop/claudecode-source-analysis/` | one-context |
 | openclaw-source-analysis | OpenClaw 源码解析知识整理 | develop | done | `features/develop/openclaw-source-analysis/` | one-context |
 

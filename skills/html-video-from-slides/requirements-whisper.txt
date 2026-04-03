@@ -1,0 +1,2 @@
+# wav-auto 子命令：口播与幻灯文案对齐（本地 Whisper）
+faster-whisper>=1.0.0
