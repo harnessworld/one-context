@@ -1,0 +1,14 @@
+{
+  "_comment": "可选。仅当目录内有多个 wav 或需改模型/输出名时使用。wav-auto 默认：单个 .wav + presentation.html 即可。",
+  "wavFile": "voiceover.wav",
+  "whisperModel": "medium",
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "subtitle": {
+    "fontSize": 24,
+    "marginV": 18,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 28
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@one-context/html-video-from-slides",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTML 幻灯 + 讲稿/TTS 或整段 WAV → MP4；单入口 CLI，供 Cursor / Claude Code / OpenClaw 等共用",
+  "bin": {
+    "html-video": "./cli.js"
+  },
+  "scripts": {},
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "playwright": "^1.41.0"
+  }
+}

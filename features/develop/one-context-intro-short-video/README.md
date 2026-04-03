@@ -13,6 +13,7 @@
 | [`production/02-shots-checklist.md`](production/02-shots-checklist.md) | 镜头 / 录屏 / B-roll 清单 |
 | [`production/03-assets-and-links.md`](production/03-assets-and-links.md) | 引用文档、仓库链接、封面与评论区文案 |
 | [`production/04-style-reference.md`](production/04-style-reference.md) | 对标长文叙事手法与 one-context 边界（勿与物理 monorepo 混谈） |
+| [`production/05-publish-kit.md`](production/05-publish-kit.md) | **发布素材**：各平台标题、简介、话题、置顶评论、章节轴、检查清单 |
 | [`skills/html-video-from-slides/`](../../../skills/html-video-from-slides/) | **HTML 幻灯 → MP4** 单入口（Cursor / Claude Code / OpenClaw 共用） |
 | [`production/VIDEO-BUILD.md`](production/VIDEO-BUILD.md) | **HTML → MP4**（调用 [`skills/html-video-from-slides/`](../../../skills/html-video-from-slides/)） |
 

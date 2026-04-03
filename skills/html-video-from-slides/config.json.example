@@ -1,0 +1,37 @@
+{
+  "_comment": "复制到视频素材目录为 config.json（与 presentation.html 同目录）。tts 子命令读取。",
+
+  "input": {
+    "htmlFile": "presentation.html",
+    "scriptFile": "讲稿.md"
+  },
+
+  "output": {
+    "file": "final.mp4"
+  },
+
+  "voice": {
+    "name": "zh-CN-YunxiNeural",
+    "mode": "single",
+    "male": "zh-CN-YunxiNeural",
+    "female": "zh-CN-XiaoxiaoNeural",
+    "startWith": "male",
+    "rate": "+0%"
+  },
+
+  "video": {
+    "fps": 60,
+    "bitrate": "8M",
+    "maxrate": "10M",
+    "preset": "slow"
+  },
+
+  "subtitle": {
+    "enable": true,
+    "fontSize": 24,
+    "marginV": 18,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 28
+  }
+}

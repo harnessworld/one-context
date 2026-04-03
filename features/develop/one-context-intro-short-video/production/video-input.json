@@ -1,0 +1,15 @@
+{
+  "whisperModel": "small",
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "srtFile": "sub_new.srt",
+  "subtitle": {
+    "fontSize": 24,
+    "marginV": 18,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 28,
+    "primaryColour": "#FFFF00"
+  },
+  "_comment": "若下载仍失败，多半是终端未设 HTTPS_PROXY/HTTP_PROXY；见 SKILL.md。medium 更大，网络好时可改回 medium/large-v3。"
+}

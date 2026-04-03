@@ -2,6 +2,10 @@
 
 权威实现：**`skills/html-video-from-slides/cli.js`**（勿在项目里再复制 Node 脚本）。
 
+## 代理（Whisper / Playwright / pip 下载失败时）
+
+在**同一终端**设置 **`HTTPS_PROXY`、`HTTP_PROXY`**（与仓库根 `README.md` 一致），再执行安装与 `wav-auto`。详见 [`skills/html-video-from-slides/SKILL.md`](../../../../skills/html-video-from-slides/SKILL.md) 中的「代理与网络」。
+
 ## 一次性安装（全仓库一次）
 
 ```bash
@@ -23,7 +27,7 @@ pip install -r requirements-whisper.txt
 node ../../../../skills/html-video-from-slides/cli.js wav-auto --project .
 ```
 
-3. 默认得到 **`final_auto.mp4`**。可选：复制 `skills/html-video-from-slides/video-input.example.json` 为 **`video-input.json`**，改 `whisperModel`（如 `large-v3`）、`outputFile`、`wavFile`（多 wav 时）。
+3. 默认得到 **`final_auto.mp4`**。可选：复制 `skills/html-video-from-slides/video-input.example.json` 为 **`video-input.json`**，改 `whisperModel`（如 `large-v3`）、`outputFile`、`wavFile`（多 wav 时）、`burnSubtitles: true`（烧录同源 Whisper 字幕）`subtitle: { ... }`（字幕样式）。
 
 详见 [`skills/html-video-from-slides/SKILL.md`](../../../../skills/html-video-from-slides/SKILL.md)。
 
