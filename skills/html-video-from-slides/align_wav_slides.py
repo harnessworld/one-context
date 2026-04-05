@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 从整段 WAV + 每页幻灯文案（与口播大致一致）自动推算 slideDurationsSec。
-依赖: pip install faster-whisper
+依赖: pip install faster-whisper huggingface_hub
+  可选（推荐）: pip install opencc-python-reimplemented
+  安装 OpenCC 后，写出 SRT 与对齐用词级时间轴前会做繁体→简体，并与幻灯 innerText 更好匹配。
 
 用法:
   python align_wav_slides.py --wav path/to/audio.wav --slides-json path/to/slides.json --out-json path/to/out.json
@@ -19,6 +21,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -32,6 +35,30 @@ _NORM_DELETE = (
     "`'\"「」『』【】[]()（）,，.。·…:：;；!！?？"
     "\\/_—-+=|<>"
 )
+
+
+_t2s_converter = None  # False = 已探测失败；OpenCC 对象 = 可用
+
+
+def _get_t2s():
+    """繁体→简体（可选依赖 opencc-python-reimplemented）。"""
+    global _t2s_converter
+    if _t2s_converter is not None:
+        return _t2s_converter if _t2s_converter is not False else None
+    try:
+        from opencc import OpenCC  # type: ignore
+
+        _t2s_converter = OpenCC("t2s")
+    except Exception:
+        _t2s_converter = False
+    return _t2s_converter if _t2s_converter is not False else None
+
+
+def to_simp_zh(s: str, *, enabled: bool) -> str:
+    if not enabled or not s:
+        return s
+    cc = _get_t2s()
+    return cc.convert(s) if cc else s
 
 
 def norm_chars(s: str) -> str:
@@ -50,12 +77,13 @@ def _srt_time(seconds: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
-def write_srt(segments, output_path: str) -> None:
+def write_srt(segments, output_path: str, *, t2s: bool) -> None:
     """Write Whisper segments to SRT file (with BOM for Windows)."""
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\ufeff")
         for i, seg in enumerate(segments, 1):
             text = (getattr(seg, "text", "") or "").strip()
+            text = to_simp_zh(text, enabled=t2s)
             if not text:
                 continue
             start = _srt_time(float(seg.start))
@@ -63,12 +91,15 @@ def write_srt(segments, output_path: str) -> None:
             f.write(f"{i}\n{start} --> {end}\n{text}\n\n")
 
 
-def build_char_timeline(words: list) -> tuple[str, list[tuple[float, float]]]:
+def build_char_timeline(
+    words: list, *, t2s: bool
+) -> tuple[str, list[tuple[float, float]]]:
     """words: faster_whisper Word with .word .start .end"""
     big = ""
     times: list[tuple[float, float]] = []
     for w in words:
         raw = getattr(w, "word", "") or ""
+        raw = to_simp_zh(raw, enabled=t2s)
         ntxt = norm_chars(raw)
         if not ntxt:
             continue
@@ -222,7 +253,18 @@ def main() -> int:
         default=None,
         help="输出 SRT 字幕文件路径（与转写同源）",
     )
+    ap.add_argument(
+        "--no-t2s",
+        action="store_true",
+        help="禁用繁体→简体（默认启用；需 pip install opencc-python-reimplemented）",
+    )
     args = ap.parse_args()
+    use_t2s = not args.no_t2s
+    if use_t2s and _get_t2s() is None:
+        print(
+            "⚠️  未安装 OpenCC，SRT 可能混用繁体。建议: pip install opencc-python-reimplemented",
+            flush=True,
+        )
 
     with open(args.slides_json, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -233,20 +275,49 @@ def main() -> int:
 
     try:
         from faster_whisper import WhisperModel
-    except ImportError:
+        import huggingface_hub
+    except ImportError as e:
         print(
-            "未安装 faster-whisper。请执行: pip install faster-whisper",
+            f"缺少依赖: {e}。请执行: pip install faster-whisper huggingface_hub",
             file=sys.stderr,
         )
         return 3
 
-    model = WhisperModel(args.model, device="cpu", compute_type="int8")
+    # 确保缓存完整，防止 bin 文件损坏导致崩溃
+    os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+    os.environ["HF_HUB_DISABLE_XET"] = "1"
+    model_id = f"Systran/faster-whisper-{args.model}"
+
+    def load_model():
+        return WhisperModel(args.model, device="cpu", compute_type="int8")
+
+    try:
+        model = load_model()
+    except Exception as e:
+        err_msg = str(e)
+        # 检测模型加载失败（常见于 bin 文件损坏或缺失）
+        if "model.bin" in err_msg or "Unable to open file" in err_msg or "not found" in err_msg.lower():
+            print(f"⚠️  模型缓存损坏或缺失 ({e})，正在从 hf-mirror.com 重新下载...", flush=True)
+            try:
+                # 清理损坏的缓存
+                cached = huggingface_hub.snapshot_download(model_id, local_files_only=False)
+                print(f"✅ 模型已缓存至: {cached}", flush=True)
+            except Exception as dl_err:
+                print(f"⚠️  重新下载失败: {dl_err}，尝试强制清理后重试...", flush=True)
+                cache_base = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "hub", f"models--{model_id.replace('/','--')}")
+                if os.path.exists(cache_base):
+                    shutil.rmtree(cache_base)
+                huggingface_hub.snapshot_download(model_id, local_files_only=False)
+            model = load_model()
+        else:
+            raise
     segments_gen, info = model.transcribe(
         args.wav,
         language="zh",
         word_timestamps=True,
         vad_filter=True,
         vad_parameters=dict(min_silence_duration_ms=300),
+        initial_prompt="请使用简体中文转写中文内容，专有名词保持常用英文拼写。",
     )
 
     seg_list = list(segments_gen)
@@ -258,7 +329,7 @@ def main() -> int:
 
     # 输出 SRT 字幕（如果请求）
     if args.srt_out and seg_list:
-        write_srt(seg_list, args.srt_out)
+        write_srt(seg_list, args.srt_out, t2s=use_t2s)
 
     audio_end = float(info.duration) if info.duration else 0.0
     if not words or audio_end <= 0:
@@ -272,7 +343,7 @@ def main() -> int:
             json.dump(out, f, ensure_ascii=False, indent=2)
         return 0
 
-    big, times = build_char_timeline(words)
+    big, times = build_char_timeline(words, t2s=use_t2s)
     if len(big) < 10:
         durs, w = silence_split_durations(args.wav, len(slides), audio_end)
         out = {

@@ -63,7 +63,8 @@ function findWavPath(projectRoot, explicit) {
   return path.join(projectRoot, files[0]);
 }
 
-async function run(projectRoot, skillDir) {
+async function run(projectRoot, skillDir, options = {}) {
+  const forceWhisperSrt = options.forceWhisperSrt === true;
   const inputPath = path.join(projectRoot, 'video-input.json');
   let wavExplicit = null;
   let whisperModel = 'medium';
@@ -79,12 +80,16 @@ async function run(projectRoot, skillDir) {
     outputFile = j.outputFile || outputFile;
     burnSubtitles = j.burnSubtitles === true;
     subtitleCfg = j.subtitle || {};
-    if (j.srtFile) {
-      // 用户提供的已审校 SRT，优先使用
+    if (j.srtFile && !forceWhisperSrt) {
+      // 用户提供的已审校 SRT，优先使用（时间轴可能与当前 WAV 不一致）
       externalSrt = path.isAbsolute(j.srtFile) ? j.srtFile : path.join(projectRoot, j.srtFile);
       if (!fs.existsSync(externalSrt)) {
         throw new Error(`指定的 srtFile 不存在：${externalSrt}`);
       }
+    } else if (j.srtFile && forceWhisperSrt) {
+      console.log(
+        'ℹ️  已加 --whisper-srt：忽略 video-input.json 的 srtFile，将用 Whisper 重新生成与口播对齐的 sub.srt\n'
+      );
     }
   }
 
@@ -119,6 +124,9 @@ async function run(projectRoot, skillDir) {
   if (ffmpegStatic) {
     env.FFMPEG_PATH = ffmpegStatic;
   }
+  // 禁用 Xet Storage 写入（写入不稳定易导致 bin 文件损坏），优先走 hf-mirror.com
+  env.HF_ENDPOINT = 'https://hf-mirror.com';
+  env.HF_HUB_DISABLE_XET = '1';
 
   const pythonExe = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
   const r = spawnSync(
@@ -142,7 +150,7 @@ async function run(projectRoot, skillDir) {
   if (r.status !== 0) {
     console.error(r.stderr || r.stdout);
     throw new Error(
-      'align_wav_slides.py 失败。请确认已执行: pip install faster-whisper'
+      'align_wav_slides.py 失败。请确认已执行: pip install faster-whisper huggingface_hub（可选 opencc-python-reimplemented 用于简体字幕）'
     );
   }
 
@@ -168,6 +176,17 @@ async function run(projectRoot, skillDir) {
   };
 
   await runWav(projectRoot, skillDir, { cfg });
+
+  // 无外部 srtFile 时，把 Whisper 生成的 SRT 拷到项目根，便于只改文案、保留时间轴
+  if (burnSubtitles && !externalSrt && fs.existsSync(srtOut)) {
+    const dest = path.join(projectRoot, 'sub.srt');
+    try {
+      fs.copyFileSync(srtOut, dest);
+      console.log(`\n📄 已写入对齐用字幕（与口播同源时间轴）：${dest}\n`);
+    } catch (e) {
+      console.warn('⚠️  未能复制 Whisper SRT 到项目目录：', e.message);
+    }
+  }
 
   try {
     fs.unlinkSync(slidesJson);

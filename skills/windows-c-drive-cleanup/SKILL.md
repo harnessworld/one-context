@@ -9,9 +9,26 @@ description: Windows C 盘空间紧张时的安全清理流程。代理须先只
 
 任何 **删除文件或目录**、**清空回收站**、以及卸载以外的「清缓存」等 **实质移除数据** 的操作（含 `Remove-Item`、`Clear-RecycleBin`、各工具的 prune / 批量清理等），**必须**在对话中取得 **用户明确授权**（逐条确认、明确同意某路径/某步骤，或用户本人亲自执行命令）后，代理方可代为执行。
 
-**未获授权前**，代理 **仅** 允许：枚举与体积估算、展示建议命令、引导 **设置 → 系统 → 存储 → 临时文件 / 存储感知**、运行本目录下 **只读** 脚本 `survey-disk-hints.ps1`。
+**未获授权前**，代理 **仅** 允许：枚举与体积估算、展示建议命令、引导 **设置 → 系统 → 存储 → 临时文件 / 存储感知**、运行本目录下 **只读** 脚本（见下「只读统计」；**默认用产品化报告** `survey-c-drive-report.ps1`）。
 
 **不得**默认、推测或静默删除或清空回收站。说明风险后 **仍须** 用户明确同意，严于「先说明再执行」。
+
+**不得**在用户不知情下运行 **去掉 `-DryRun`** 的 `invoke-c-drive-cleanup.ps1`。用户明确要求「只看会执行哪些步骤」时，可运行 **`-DryRun`**（不修改磁盘）；真正清理须用户同意具体开关后再去掉 `-DryRun`。
+
+---
+
+## 交付模型（用户应得到什么）
+
+本 skill 向用户交付两件事，缺一不可：
+
+1. **许可后可自动清理**  
+   由代理在用户 **逐条明确同意** 后，在 **one-context 仓库根** 运行 `invoke-c-drive-cleanup.ps1`，传入 **`-ChatAuthorizationNote`**（用户在对话中的同意**原文**，≥8 字符，作审计）以及对应 **清理开关**（见下表）。  
+   建议先 **`-DryRun`** 预览，再去掉 `-DryRun` 真正执行。执行前后各记一次 `Get-PSDrive C` 的可用空间。
+
+2. **无法或不应脚本代劳的清理**  
+   用 **分步说明** 告诉用户在本机哪里点、打开哪个客户端（**设置 → 应用**、**存储 → 临时文件**、Android Studio、Steam、WSL 附录、DISM/cleanmgr 等）。代理 **只指导**，不代替用户点 UI。
+
+`survey-c-drive-report.ps1` 末尾 **「五-A / 五-B」** 已按本机扫描结果拆分上述两类；代理应据此组织对话，而不是只贴原始日志。
 
 ---
 
@@ -25,10 +42,11 @@ description: Windows C 盘空间紧张时的安全清理流程。代理须先只
 
 | 阶段 | 内容 | 默认是否需要授权 |
 |------|------|------------------|
-| **0** | 建议用户优先使用 **设置 → 系统 → 存储 → 临时文件**，勾选后由系统清理 | 用户在本机 UI 操作 |
-| **1** | 记录 C 盘可用空间；运行或等价执行「只读统计」命令（见下） | 否 |
-| **2** | 按「开发者 / 包管理 / Docker / 系统」分类展示可清理项与 **建议命令** | 否 |
-| **3** | 仅在用户 **对每一条** 明确同意后，执行删除类命令 | **是** |
+| **0** | 建议用户优先使用 **设置 → 系统 → 存储 → 临时文件**（**手动**） | 用户在本机 UI |
+| **1** | 记录 C 盘可用空间；运行 **`survey-c-drive-report.ps1`**（只读）：目录 + 应用 + 修改时间 + **五-A 自动 / 五-B 手动** | 否 |
+| **2** | 向用户复述：**A** 里每项对应哪个 `invoke` 开关、风险一句；**B** 里逐步写清「去哪点、删什么」 | 否 |
+| **3** | 用户 **逐条** 回复同意哪些 **A 类**开关（可拒绝部分）；代理将用户原话写入 `-ChatAuthorizationNote`，先 **`invoke-c-drive-cleanup.ps1 ... -DryRun`**，再执行无 `-DryRun` | **是** |
+| **4** | **B 类**由用户按说明自操作；代理可答疑，**不代点 UI、不代卸载**（除非用户另行授权且工具支持 CLI） | 视项而定 |
 
 清理 **前后** 各记录一次 C 盘空闲（不要求字节级精确）：
 
@@ -42,18 +60,45 @@ fsutil volume diskfree c:
 
 ## 1. 只读统计（无需授权）
 
-本仓库脚本（**无删除逻辑**）。在 **one-context 仓库根** 下执行：
+本目录脚本均为 **只读、无删除**。
+
+### 1a. 产品化总览（**默认优先**）
+
+`survey-c-drive-report.ps1`：按 **目录** 与 **已安装应用** 两个维度输出，指标包含 **体积（大者优先）**、**文件夹最近修改时间**、**下一步建议**（例如：走「设置 → 应用」卸载，还是走 npm/pip/Docker/存储感知等；与下文安全边界一致）。
+
+在 **one-context 仓库根** 执行：
+
+```powershell
+.\skills\windows-c-drive-cleanup\survey-c-drive-report.ps1
+# 详细进度（每个子目录统计时输出）：
+.\skills\windows-c-drive-cleanup\survey-c-drive-report.ps1 -Verbose
+# 额外统计 Program Files / (x86) 下一级子目录 Top（较慢，便于对准「哪个应用文件夹大」）：
+.\skills\windows-c-drive-cleanup\survey-c-drive-report.ps1 -IncludeProgramFilesBreakdown
+# 递归整棵 %SystemRoot%（极慢，一般不默认）：
+.\skills\windows-c-drive-cleanup\survey-c-drive-report.ps1 -IncludeWindowsFull
+```
+
+**说明（务必告知用户）**：
+
+- 报告末尾 **「五-A / 五-B」**：**A** = 许可后可用 `invoke-c-drive-cleanup.ps1` 自动执行；**B** = 须用户在本机手动完成。代理按两类分别推进。
+- 默认 **不** 递归整棵 `C:\Windows`，仅汇总若干热点子路径体积，并在报告中注明；完整 Windows 体积请以 **设置 → 系统 → 存储** 为准。
+- 「应用维度」体积来自卸载注册表的 **EstimatedSize（KB）**，与磁盘真实占用 **可能不一致**，仅作排序与线索；**卸载仍以系统「已安装的应用」或官方卸载程序为准**。
+- `C:\` 根下各目录、当前用户 `AppData\Local` / `Roaming` 下一级子目录会 **递归测体积**，**Users、Program Files 等可能耗时数分钟**，属正常。
+
+绝对路径示例（将根目录换成你的克隆位置）：
+
+```powershell
+& "D:\harnessworld\one-context\skills\windows-c-drive-cleanup\survey-c-drive-report.ps1"
+```
+
+### 1b. 常见开发者缓存路径（轻量补充）
+
+`survey-disk-hints.ps1`：快速对照 npm/pip/VS Installer 等 **固定候选路径**（不做「全机」视角）。可与 1a 并用：
 
 ```powershell
 .\skills\windows-c-drive-cleanup\survey-disk-hints.ps1
 # 仅检查路径是否存在、不做递归体积（秒级）：
 .\skills\windows-c-drive-cleanup\survey-disk-hints.ps1 -Quick
-```
-
-或使用本机的绝对路径（将根目录换成你的克隆位置）：
-
-```powershell
-& "D:\harnessworld\one-context\skills\windows-c-drive-cleanup\survey-disk-hints.ps1"
 ```
 
 手动抽查单目录体积（大目录可能较慢，可提醒用户）：
@@ -66,9 +111,41 @@ $p = $env:TEMP
 
 ---
 
+## 1c. 可自动清理（`invoke-c-drive-cleanup.ps1`）
+
+**前提**：用户已在对话中 **明确同意** 本次要执行的 **具体开关**；`-ChatAuthorizationNote` 必须为其同意原文（或含关键句的复制）。
+
+在 **仓库根** 执行示例：
+
+```powershell
+.\skills\windows-c-drive-cleanup\invoke-c-drive-cleanup.ps1 `
+  -ChatAuthorizationNote '用户原话：同意清理 npm 与 pip 缓存' `
+  -NpmCache -PipCache -DryRun
+# 确认无误后去掉 -DryRun
+```
+
+| 开关 | 行为摘要 | 风险/注意 |
+|------|-----------|-----------|
+| `-NpmCache` | `npm cache clean --force` | 需 npm；之后 install 可能多下载 |
+| `-PipCache` | `pip cache purge` | 需 pip |
+| `-YarnCache` | `yarn cache clean` | 需 yarn |
+| `-PnpmStorePrune` | `pnpm store prune` | 删未被引用的包 |
+| `-UserTemp` | 清空 `%TEMP%` 下内容 | 先关可能占用临时文件的程序 |
+| `-LocalAppDataTemp` | 清空 `%LOCALAPPDATA%\Temp` 下内容 | 常与 %TEMP% 重叠；按需二选一或都开 |
+| `-RecycleBin` | `Clear-RecycleBin` | **不可撤销**；须用户单独同意 |
+| `-DockerSystemPrune` | `docker system prune -f` | 需 Docker；不删未使用镜像 |
+| `-DockerSystemPruneAll` | `docker system prune -a -f` | **更激进**；与上一项二选一（脚本优先 All） |
+| `-CondaCleanAll` | `conda clean -a -y` | 需 conda；确认无进行中的 env 操作 |
+| `-DotnetNugetLocalsAllClear` | `dotnet nuget locals all --clear` | 需 dotnet CLI |
+| `-VisualStudioPackagesCache` | 删除 `C:\ProgramData\Microsoft\VisualStudio\Packages` 下内容 | **以后修 VS/加组件可能要重下**；须单独说清风险并取得同意 |
+
+**禁止**在 `invoke-c-drive-cleanup.ps1` 中实现未列入上表的「万能删」；**禁止**卸载 MSI/商店应用（用 **设置 → 应用**）。
+
+---
+
 ## 2. 无需管理员（常见 / 用户态）
 
-下列 **仅** 在用户明确授权后执行；执行前再次口头确认路径。
+下列 **仅** 在用户明确授权后执行；**优先通过 `invoke-c-drive-cleanup.ps1` 中已有开关**；表内命令仅在脚本未覆盖时由代理逐条手敲。
 
 | 类别 | 说明 | 示例（执行前须授权） |
 |------|------|----------------------|
@@ -83,7 +160,7 @@ $p = $env:TEMP
 **Visual Studio / Build Tools**（易占数 GB，优先走官方入口）：
 
 - **推荐（低风险）**：打开 **Visual Studio Installer** → 对应版本 → **修改 / 更多** → 移除不工作负载或按微软文档使用 **清理安装缓存** 类选项（以当前 Installer 界面为准）。
-- **只读探查**：若已装 VS，可用 `vswhere`（通常位于 `%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe`）列出安装路径；`survey-disk-hints.ps1` 会尝试统计常见 **Installer 包缓存**目录（可能需管理员才能测准）。
+- **只读探查**：若已装 VS，可用 `vswhere`（通常位于 `%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe`）列出安装路径；`survey-disk-hints.ps1` 会尝试统计常见 **Installer 包缓存**目录（可能需管理员才能测准）。`survey-c-drive-report.ps1 -IncludeProgramFilesBreakdown` 可按 **安装目录** 看大户。
 - **目录级删除（须用户明确授权 + 单独说明风险）**：`C:\ProgramData\Microsoft\VisualStudio\Packages` 等处存放安装包缓存，删掉可腾空间但 **以后修复/增装组件可能要重新下载**；禁止在未说明风险并取得授权前代为删除。
 
 **`node_modules` / `dist` / `build`**：仅当用户 **给出具体项目路径并授权** 时可删；禁止全盘搜索后批量删除。
@@ -152,4 +229,5 @@ $p = $env:TEMP
 
 - **Spec**：`features/core/skill-windows-c-drive-cleanup/spec.md`
 - **本 Skill**：`skills/windows-c-drive-cleanup/SKILL.md`
-- **只读脚本**：`skills/windows-c-drive-cleanup/survey-disk-hints.ps1`（**不得**加入无确认批量删除）
+- **只读脚本**：`survey-c-drive-report.ps1`、`survey-disk-hints.ps1`
+- **授权后自动清理**：`invoke-c-drive-cleanup.ps1`（**仅**白名单开关 + `-ChatAuthorizationNote`；**不得**加入无确认批量删除）

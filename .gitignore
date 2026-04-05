@@ -23,6 +23,7 @@ skills/html-video-from-slides/.cache/
 # Feature production (cover toolchain)
 features/develop/one-context-intro-short-video/production/node_modules/
 features/develop/one-context-intro-short-video/production/temp_video_wav/
+features/develop/claude-caveman-mode/production/node_modules/
 
 # Testing
 .coverage

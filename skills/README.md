@@ -5,6 +5,7 @@
 | 路径 | 说明 |
 |------|------|
 | [`html-video-from-slides/`](html-video-from-slides/) | HTML 幻灯 + 口播 → MP4；**wav-auto** 仅需单个 WAV + HTML（Whisper 自动对齐）；见 `SKILL.md` |
-| [`windows-c-drive-cleanup/`](windows-c-drive-cleanup/) | Windows C 盘清理流程与安全边界；**删除须用户明确授权**；只读调查 `survey-disk-hints.ps1`；见 `SKILL.md` |
+| [`windows-c-drive-cleanup/`](windows-c-drive-cleanup/) | Windows C 盘清理；**授权后** `invoke-c-drive-cleanup.ps1` 白名单自动清理；只读 `survey-c-drive-report.ps1`（五-A 自动 / 五-B 手动）；见 `SKILL.md` |
+| [`merge-to-main/`](merge-to-main/) | 功能分支 → `main`：**文档/框架/工具/skills** 可合，**业务资产与个人根配置** 默认不合；先咨询、**明确确认后**再检出路径并提交/推送；见 `SKILL.md` |
 
 各视频选题目录**不应**再复制一套 Node 脚本；应通过 `--project` 指向仅含素材的文件夹。

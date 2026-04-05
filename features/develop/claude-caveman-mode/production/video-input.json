@@ -1,7 +1,5 @@
 {
-  "_comment": "可选。仅当目录内有多个 wav 或需改模型/输出名时使用。wav-auto 默认：单个 .wav + presentation.html 即可。",
-  "wavFile": "voiceover.wav",
-  "whisperModel": "medium",
+  "whisperModel": "small",
   "outputFile": "final_auto.mp4",
   "burnSubtitles": true,
   "subtitle": {
@@ -12,5 +10,6 @@
     "charsPerLine": 28,
     "primaryColour": "#FFFF00",
     "primaryAlpha": 108
-  }
+  },
+  "_comment": "small：CPU 友好；字幕为 Whisper 初稿，请对照口播校对 sub.srt 后再按需重烧。"
 }

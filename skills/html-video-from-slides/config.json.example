@@ -28,10 +28,12 @@
 
   "subtitle": {
     "enable": true,
-    "fontSize": 24,
+    "fontSize": 18,
     "marginV": 18,
     "fontName": "Microsoft YaHei",
     "bold": true,
-    "charsPerLine": 28
+    "charsPerLine": 28,
+    "primaryColour": "#FFFF00",
+    "primaryAlpha": 108
   }
 }
