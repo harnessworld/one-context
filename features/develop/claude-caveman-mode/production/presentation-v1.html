@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1334">
+<title>文言文省 Token - Claude 极简回复</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'STKaiti','KaiTi','Noto Serif SC','SimSun',serif;color:#e8d5b0;}
+body::before{content:'';position:fixed;inset:0;z-index:-2;background:#1a1208;}
+body::after{content:'';position:fixed;inset:0;z-index:-1;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),radial-gradient(ellipse 100% 80% at 30% 20%,rgba(180,120,40,0.08) 0%,transparent 60%),radial-gradient(ellipse 80% 60% at 70% 80%,rgba(140,80,20,0.06) 0%,transparent 60%);pointer-events:none;}
+#presentation{position:absolute;width:1334px;height:750px;transform-origin:0 0;overflow:hidden;}
+.paper-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 90% 70% at 20% 0%,rgba(200,150,60,0.08) 0%,transparent 55%),radial-gradient(ellipse 70% 60% at 80% 100%,rgba(160,100,30,0.06) 0%,transparent 55%),#1a1208;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:1;padding:20px 48px;}
+.slide.active{opacity:1;pointer-events:auto;}
+.rock-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,150,60,0.3),rgba(180,130,50,0.2),transparent);z-index:0;}
+.ink-red{color:#c0392b;}
+.ink-gold{color:#d4a843;}
+.ink-cream{color:#e8d5b0;}
+.ink-muted{color:#a89070;}
+.ink-sage{color:#7d9c6c;}
+.bamboo-card{background:linear-gradient(145deg,rgba(200,160,80,0.07),rgba(160,120,40,0.04));border:1px solid rgba(200,150,60,0.18);backdrop-filter:blur(8px);position:relative;overflow:hidden;}
+.bamboo-card::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(145deg,rgba(220,180,80,0.04),transparent 50%);pointer-events:none;}
+.stone-title{font-size:68px;font-weight:900;line-height:1.15;letter-spacing:5px;color:#e8d5b0;text-shadow:0 0 40px rgba(212,168,67,0.3),0 4px 12px rgba(0,0,0,0.8);text-align:center;margin-bottom:16px;z-index:2;}
+.stone-title-sm{font-size:58px;letter-spacing:4px;}
+.stone-title-lg{font-size:120px;letter-spacing:6px;}
+.sub-text{font-size:34px;color:#a89070;line-height:1.6;text-align:center;max-width:1000px;margin-bottom:12px;z-index:2;}
+.sub-text strong{color:#d4a843;font-weight:700;}
+.section-tag{display:inline-flex;align-items:center;gap:8px;padding:9px 24px;border-radius:4px;font-size:20px;font-weight:700;letter-spacing:4px;text-transform:uppercase;margin-bottom:16px;z-index:2;border:1px solid;}
+.tag-red{background:rgba(192,57,43,0.12);border-color:rgba(192,57,43,0.4);color:#c0392b;}
+.tag-gold{background:rgba(212,168,67,0.12);border-color:rgba(212,168,67,0.4);color:#d4a843;}
+.tag-sage{background:rgba(125,156,108,0.12);border-color:rgba(125,156,108,0.4);color:#7d9c6c;}
+.compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;z-index:2;}
+.compare-stone{padding:20px 24px;border-radius:12px;position:relative;overflow:hidden;}
+.compare-stone::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.old-style{background:rgba(192,57,43,0.05);border:1px solid rgba(192,57,43,0.15);}
+.old-style::before{background:linear-gradient(90deg,transparent,rgba(192,57,43,0.5),transparent);}
+.new-style{background:rgba(125,156,108,0.05);border:1px solid rgba(125,156,108,0.15);}
+.new-style::before{background:linear-gradient(90deg,transparent,rgba(125,156,108,0.5),transparent);}
+.compare-label{font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;}
+.old-style .compare-label{color:#c0392b;}
+.new-style .compare-label{color:#7d9c6c;}
+.compare-quote{font-size:22px;color:#a89070;line-height:1.7;padding-left:14px;border-left:2px solid rgba(200,150,60,0.2);}
+.new-style .compare-quote{border-left-color:rgba(125,156,108,0.3);}
+.big-stat{font-size:80px;font-weight:900;line-height:1;margin-bottom:6px;}
+.big-stat.red{color:#c0392b;text-shadow:0 0 30px rgba(192,57,43,0.4);}
+.big-stat.gold{color:#d4a843;text-shadow:0 0 30px rgba(212,168,67,0.4);}
+.big-stat.green{color:#7d9c6c;text-shadow:0 0 30px rgba(125,156,108,0.4);}
+.stat-desc{font-size:17px;color:#a89070;line-height:1.4;}
+.stat-card{padding:18px 16px;border-radius:12px;text-align:center;background:rgba(200,160,80,0.05);border:1px solid rgba(200,150,60,0.12);}
+.quote-scroll{width:100%;padding:14px 36px;border-radius:10px;z-index:2;background:rgba(200,160,80,0.06);border:1px solid rgba(200,150,60,0.15);border-left:3px solid rgba(212,168,67,0.5);text-align:center;}
+.quote-text{font-size:26px;font-weight:600;color:#d4a843;letter-spacing:1px;}
+.token-compare{display:flex;align-items:center;gap:0;width:100%;z-index:2;margin-bottom:16px;}
+.token-box{flex:1;padding:20px 16px;border-radius:10px;text-align:center;background:rgba(200,160,80,0.04);border:1px solid rgba(200,150,60,0.1);}
+.token-num{font-size:72px;font-weight:900;line-height:1;}
+.token-box.red .token-num{color:#c0392b;}
+.token-box.green .token-num{color:#7d9c6c;}
+.token-label{font-size:18px;color:#a89070;margin-top:4px;}
+.token-arrow{width:60px;flex-shrink:0;text-align:center;font-size:30px;color:rgba(212,168,67,0.5);}
+.seal-badge{display:inline-flex;align-items:center;gap:6px;padding:9px 24px;border-radius:4px;font-size:18px;font-weight:700;background:rgba(125,156,108,0.1);color:#7d9c6c;border:1px solid rgba(125,156,108,0.3);box-shadow:0 0 12px rgba(125,156,108,0.1);}
+.bottom-seal{width:100%;padding:12px 36px;border-radius:10px;z-index:2;background:rgba(200,160,80,0.04);border:1px solid rgba(200,150,60,0.12);text-align:center;}
+.seal-text{font-size:17px;color:#a89070;letter-spacing:2px;}
+.cave-dots{position:absolute;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(200,150,60,0.04) 1px,transparent 1px);background-size:40px 40px;}
+#progress{position:fixed;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#c0392b,#d4a843,#7d9c6c,#c0392b);z-index:999;}
+#pageNum{position:absolute;bottom:12px;right:32px;font-size:12px;color:rgba(200,150,60,0.25);z-index:10;letter-spacing:2px;}
+.deco-line{width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,168,67,0.5),transparent);margin:0 auto 14px;}
+.rune-band{display:flex;align-items:stretch;gap:0;width:100%;z-index:2;border:1px solid rgba(200,150,60,0.12);border-radius:14px;overflow:hidden;}
+.rune-pill{flex:1;padding:18px 14px;text-align:center;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(200,160,80,0.03);}
+.rune-pill+.rune-pill{border-left:1px solid rgba(200,150,60,0.1);}
+.rune-pill:nth-child(1)::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(192,57,43,0.6),transparent);}
+.rune-pill:nth-child(2)::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(212,168,67,0.6),transparent);}
+.rune-pill:nth-child(3)::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(125,156,108,0.6),transparent);}
+.rune-ico{font-size:32px;margin-bottom:8px;}
+.rune-title{font-size:19px;font-weight:700;color:#e8d5b0;margin-bottom:4px;}
+.rune-desc{font-size:15px;color:#a89070;line-height:1.4;}
+.hero-wrap{text-align:center;z-index:2;margin-bottom:20px;position:relative;}
+.hero-title{font-size:80px;font-weight:900;letter-spacing:6px;line-height:1.2;color:#e8d5b0;text-shadow:0 0 60px rgba(212,168,67,0.3),0 4px 20px rgba(0,0,0,0.8);margin-bottom:12px;}
+.hero-sub{font-size:22px;color:#a89070;letter-spacing:3px;}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;z-index:2;}
+.demo-card{padding:20px 24px;border-radius:12px;text-align:center;}
+.demo-card.old-demo{background:rgba(192,57,43,0.05);border:1px solid rgba(192,57,43,0.15);}
+.demo-card.new-demo{background:rgba(125,156,108,0.05);border:1px solid rgba(125,156,108,0.15);}
+.demo-mode{font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;}
+.demo-card.old-demo .demo-mode{color:#c0392b;}
+.demo-card.new-demo .demo-mode{color:#7d9c6c;}
+.demo-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.metric{text-align:center;}
+.metric-val{font-size:48px;font-weight:900;line-height:1;}
+.demo-card.old-demo .metric-val{color:#c0392b;}
+.demo-card.new-demo .metric-val{color:#7d9c6c;}
+.metric-key{font-size:15px;color:#a89070;margin-top:4px;}
+.demo-tag{font-size:15px;font-weight:600;padding:7px 16px;border-radius:6px;display:inline-block;}
+.demo-card.old-demo .demo-tag{background:rgba(192,57,43,0.1);color:#c0392b;}
+.demo-card.new-demo .demo-tag{background:rgba(125,156,108,0.1);color:#7d9c6c;}
+.wall-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;z-index:2;}
+.wall-card{padding:22px 16px;border-radius:12px;text-align:center;background:rgba(200,160,80,0.04);border:1px solid rgba(200,150,60,0.12);}
+.wall-num{font-size:96px;font-weight:900;line-height:0.9;margin-bottom:8px;}
+.red-card .wall-num{color:transparent;-webkit-text-stroke:2px rgba(192,57,43,0.7);text-shadow:0 0 40px rgba(192,57,43,0.4);}
+.green-card .wall-num{color:transparent;-webkit-text-stroke:2px rgba(125,156,108,0.7);text-shadow:0 0 40px rgba(125,156,108,0.4);}
+.gold-card .wall-num{color:transparent;-webkit-text-stroke:2px rgba(212,168,67,0.7);text-shadow:0 0 40px rgba(212,168,67,0.4);}
+.wall-card-title{font-size:20px;font-weight:700;color:#e8d5b0;margin-bottom:4px;}
+.wall-card-body{font-size:15px;color:#a89070;line-height:1.5;}
+.wenyan{font-family:'STKaiti','KaiTi','SimSun',serif;}
+.classic-quote{width:100%;padding:12px 36px;border-radius:10px;z-index:2;background:linear-gradient(135deg,rgba(192,57,43,0.04),rgba(212,168,67,0.04));border:1px solid rgba(200,150,60,0.12);text-align:center;}
+.classic-quote-text{font-size:20px;font-weight:600;color:#d4a843;letter-spacing:1px;}
+</style>
+</head>
+<body>
+<div id="progress" style="width:0%"></div>
+<div id="presentation">
+
+<div class="slide active" id="slide-0">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  
+          <div style="position:relative;z-index:2;text-align:center;padding:0 60px;">
+    <div class="deco-line"></div>
+    <div class="section-tag tag-gold"><span>&#x1F30F;</span> Cursor 省 Token 全攻略</div>
+    <div class="stone-title-lg wenyan">文言文</div>
+    <div class="sub-text">让 Claude 少废话，<strong>省 Token 又省钱</strong></div>
+    <div class="deco-line"></div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px;">
+      <div class="bamboo-card" style="padding:10px 22px;border-radius:6px;font-size:22px;color:#d4a843;">节省 50-75% Output Token</div>
+      <div class="bamboo-card" style="padding:10px 22px;border-radius:6px;font-size:22px;color:#7d9c6c;">速度提升 2x+</div>
+      <div class="bamboo-card" style="padding:10px 22px;border-radius:6px;font-size:22px;color:#a89070;">代码质量不变</div>
+    </div>
+  </div>
+</div>
+
+<div class="slide" id="slide-1">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="section-tag tag-red" style="position:relative;z-index:2;"><span>&#x26A0;&#xFE0F;</span> TOKEN CRISIS</div>
+  <div class="stone-title">Claude Code <span class="ink-red">额度告急</span></div>
+  <div class="sub-text">Anthropic 承认 Claude Code 额度消耗<strong>远超预期</strong>，已成为最高优先级</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;z-index:2;margin-bottom:16px;">
+    <div class="stat-card">
+      <div class="big-stat red">7%</div>
+      <div class="stat-desc">Pro 用户受影响<br>每月仅 12 天可用</div>
+    </div>
+    <div class="stat-card">
+      <div class="big-stat red">8h&#x2192;1h</div>
+      <div class="stat-desc">Max 5 用户<br>一小时耗尽额度</div>
+    </div>
+    <div class="stat-card">
+      <div class="big-stat gold">4/4</div>
+      <div class="stat-desc">Anthropic 已禁止<br>第三方工具接入</div>
+    </div>
+  </div>
+  <div class="quote-scroll">
+    <div class="quote-text wenyan">省 Token = 万民之刚需</div>
+  </div>
+</div>
+
+<div class="slide" id="slide-2">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="section-tag tag-gold" style="position:relative;z-index:2;"><span>&#x1FAA8;</span> THE METHOD</div>
+  <div class="stone-title wenyan">穴居人模式 <span class="ink-gold">=</span> <span class="ink-sage">言简意赅</span></div>
+  <div class="sub-text">一位16岁小哥 提出，全网疯传，<strong>超百万人围观</strong></div>
+  <div class="compare-wrap">
+    <div class="compare-stone old-style">
+      <div class="compare-label wenyan">&#x274C; 寻常模式</div>
+      <div class="compare-quote">"我已为您执行了网页搜索"</div>
+      <div class="compare-quote" style="margin-top:8px;">"以下是搜索结果&#x2026;"</div>
+      <div class="compare-quote" style="margin-top:8px;">"请问还有什么需要帮忙的？"</div>
+    </div>
+    <div class="compare-stone new-style">
+      <div class="compare-label wenyan">&#x2705; 穴居人模式</div>
+      <div class="compare-quote" style="color:#7d9c6c;">"工具完成"</div>
+      <div class="compare-quote" style="margin-top:8px;color:#7d9c6c;">"已接通"</div>
+      <div class="compare-quote" style="margin-top:8px;color:#7d9c6c;">"三测接通"</div>
+    </div>
+  </div>
+  <div class="quote-scroll" style="margin-top:14px;">
+    <div class="quote-text wenyan">少言寡语 = 少耗算力 = 少费 Token = 省钱</div>
+  </div>
+</div>
+
+<div class="slide" id="slide-3">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="section-tag tag-sage" style="position:relative;z-index:2;"><span>&#x1F4DC;</span> TOKEN MATH</div>
+  <div class="stone-title">一役，<span class="ink-sage">Token 省 75%</span></div>
+  <div class="token-compare">
+    <div class="token-box red">
+      <div class="token-num">180</div>
+      <div class="token-label">Token（寻常模式）</div>
+    </div>
+    <div class="token-arrow">&#x2192;</div>
+    <div class="token-box green">
+      <div class="token-num">45</div>
+      <div class="token-label">Token（穴居人模式）</div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-bottom:14px;z-index:2;">
+    <div class="seal-badge wenyan">节省 50-75% Output Token</div>
+  </div>
+  <div class="quote-scroll">
+    <div class="quote-text wenyan">Output Token 比 Input Token 贵 5 倍<br>Claude Sonnet：Input $3 / Output $15（每百万）</div>
+  </div>
+</div>
+
+<div class="slide" id="slide-4">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="section-tag tag-gold" style="position:relative;z-index:2;"><span>&#x1F52E;</span> WHY IT WORKS</div>
+  <div class="stone-title">原理甚简：<span class="ink-gold">少言 = 少算</span></div>
+  <div class="sub-text" style="margin-bottom:14px;">Transformer 乃<strong>自回归之模型</strong>，每生一 Token 皆需跑一遍完整 Forward Pass</div>
+  <div class="wall-pillars">
+    <div class="wall-card red-card">
+      <div class="wall-num">180</div>
+      <div class="wall-card-title wenyan">寻常模式</div>
+      <div class="wall-card-body">需跑 180 次<br>Forward Pass</div>
+    </div>
+    <div class="wall-card green-card">
+      <div class="wall-num">45</div>
+      <div class="wall-card-title wenyan">穴居人模式</div>
+      <div class="wall-card-body">仅需跑 45 次<br>Forward Pass</div>
+    </div>
+    <div class="wall-card gold-card">
+      <div class="wall-num wenyan">&#x221E;</div>
+      <div class="wall-card-title wenyan">积少成多</div>
+      <div class="wall-card-body">多轮对话<br>省下 Token 持续叠加</div>
+    </div>
+  </div>
+  <div class="classic-quote" style="margin-top:14px;">
+    <div class="classic-quote-text wenyan">Thinking 过程不受影响，Claude 内心思考深度不变</div>
+  </div>
+</div>
+
+<div class="slide" id="slide-5">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="section-tag tag-sage" style="position:relative;z-index:2;"><span>&#x26A1;</span> REAL DEMO</div>
+  <div class="stone-title-sm">实测对比：<span class="ink-sage">30 秒 vs 73 秒</span></div>
+  <div class="sub-text" style="margin-bottom:14px;">Python 词频统计函数 + 单元测试 + 调试的真实任务</div>
+  <div class="demo-grid">
+    <div class="demo-card old-demo">
+      <div class="demo-mode wenyan">寻常模式</div>
+      <div class="demo-metrics">
+        <div class="metric"><div class="metric-val">73s</div><div class="metric-key">耗时</div></div>
+        <div class="metric"><div class="metric-val">6次</div><div class="metric-key">工具调用</div></div>
+      </div>
+      <div class="demo-tag">耗时长 · 调用多</div>
+    </div>
+    <div class="demo-card new-demo">
+      <div class="demo-mode wenyan">穴居人模式</div>
+      <div class="demo-metrics">
+        <div class="metric"><div class="metric-val">30s</div><div class="metric-key">耗时</div></div>
+        <div class="metric"><div class="metric-val">4次</div><div class="metric-key">工具调用</div></div>
+      </div>
+      <div class="demo-tag">快 2.4 倍！</div>
+    </div>
+  </div>
+  <div class="classic-quote" style="margin-top:14px;">
+    <div class="classic-quote-text wenyan">代码质量完全相同，穴居人模式仅改变了输出格式</div>
+  </div>
+</div>
+
+<div class="slide" id="slide-6">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  
+  <div class="rock-line" style="top:80px;"></div>
+    <div style="position:absolute;top:30px;left:50px;font-size:28px;opacity:0.2;">&#x1F4DC;</div>
+  <div style="position:absolute;bottom:30px;right:50px;font-size:28px;opacity:0.2;">&#x1F9B4;</div>
+  <div class="hero-wrap">
+    <div class="deco-line"></div>
+    <div class="hero-title wenyan">言简意赅<br>一次做到位</div>
+    <div class="hero-sub">省 Token · 提速度 · 降成本</div>
+  </div>
+  <div class="rune-band">
+    <div class="rune-pill">
+      <div class="rune-ico">&#x1F30F;</div>
+      <div class="rune-title wenyan">穴居人模式</div>
+      <div class="rune-desc">英文场景<br>言简意赅</div>
+    </div>
+    <div class="rune-pill">
+      <div class="rune-ico">&#x1F4DC;</div>
+      <div class="rune-title wenyan">文言文模式</div>
+      <div class="rune-desc">中文场景<br>一字当五字</div>
+    </div>
+    <div class="rune-pill">
+      <div class="rune-ico">&#x1F3AF;</div>
+      <div class="rune-title wenyan">精准干活</div>
+      <div class="rune-desc">不多做<br>不少做</div>
+    </div>
+  </div>
+  <div class="bottom-seal" style="margin-top:14px;">
+    <div class="seal-text wenyan">Claude Code · Anthropic · 省 Token 就是省钱</div>
+  </div>
+</div>
+
+</div>
+<div id="pageNum"></div>
+
+<script>
+function resize(){
+  var p=document.getElementById('presentation');
+  var s=Math.min(window.innerWidth/1334,window.innerHeight/750);
+  var ox=(window.innerWidth-1334*s)/2;
+  var oy=(window.innerHeight-750*s)/2;
+  p.style.transform='scale('+s+')';
+  p.style.left=ox+'px';
+  p.style.top=oy+'px';
+}
+window.addEventListener('resize',resize);
+resize();
+var slides=document.querySelectorAll('.slide');
+var total=slides.length;
+var cur=0;
+function updateUI(){
+  document.getElementById('pageNum').textContent=(cur+1)+' / '+total;
+  document.getElementById('progress').style.width=(cur/(total-1)*100)+'%';
+}
+function goTo(i){
+  if(i<0||i>=total)return;
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  updateUI();
+}
+/** html-video-from-slides 截图用（与 goTo 等价） */
+function go(n){ goTo(n); }
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();goTo(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();goTo(cur-1);}
+});
+document.addEventListener('click',function(e){
+  if(e.clientX>window.innerWidth*0.3)goTo(cur+1);
+  else goTo(cur-1);
+});
+updateUI();
+</script>
+</body>
+</html>

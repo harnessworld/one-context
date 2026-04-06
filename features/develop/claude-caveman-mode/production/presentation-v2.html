@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1334">
+<title>穴居人模式 - 让Claude省Token</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'STKaiti','KaiTi','Noto Serif SC','SimSun',serif;color:#e8d5b0;}
+body::before{content:'';position:fixed;inset:0;z-index:-2;background:#1a1208;}
+body::after{content:'';position:fixed;inset:0;z-index:-1;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"),radial-gradient(ellipse 100% 80% at 30% 20%,rgba(180,120,40,0.08) 0%,transparent 60%),radial-gradient(ellipse 80% 60% at 70% 80%,rgba(140,80,20,0.06) 0%,transparent 60%);pointer-events:none;}
+#presentation{position:absolute;width:1334px;height:750px;transform-origin:0 0;overflow:hidden;}
+.paper-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 90% 70% at 20% 0%,rgba(200,150,60,0.08) 0%,transparent 55%),radial-gradient(ellipse 70% 60% at 80% 100%,rgba(160,100,30,0.06) 0%,transparent 55%),#1a1208;}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:1;padding:24px 48px;}
+.slide.active{opacity:1;pointer-events:auto;}
+.rock-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(200,150,60,0.3),rgba(180,130,50,0.2),transparent);z-index:0;}
+.ink-red{color:#c0392b;}.ink-gold{color:#d4a843;}.ink-cream{color:#e8d5b0;}.ink-muted{color:#a89070;}.ink-sage{color:#7d9c6c;}
+.deco-line{width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,168,67,0.5),transparent);margin:0 auto 14px;}
+.tag{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:4px;font-size:18px;font-weight:700;letter-spacing:3px;margin-bottom:14px;z-index:2;border:1px solid;}
+.tag-red{background:rgba(192,57,43,0.12);border-color:rgba(192,57,43,0.4);color:#c0392b;}
+.tag-gold{background:rgba(212,168,67,0.12);border-color:rgba(212,168,67,0.4);color:#d4a843;}
+.tag-sage{background:rgba(125,156,108,0.12);border-color:rgba(125,156,108,0.4);color:#7d9c6c;}
+.title{font-size:64px;font-weight:900;line-height:1.2;letter-spacing:4px;color:#e8d5b0;text-shadow:0 0 40px rgba(212,168,67,0.3),0 4px 12px rgba(0,0,0,0.8);text-align:center;margin-bottom:16px;z-index:2;}
+.title-sm{font-size:52px;letter-spacing:3px;}
+.title-lg{font-size:100px;letter-spacing:6px;}
+.sub{font-size:32px;color:#a89070;line-height:1.6;text-align:center;max-width:1000px;margin-bottom:12px;z-index:2;}
+.sub strong{color:#d4a843;font-weight:700;}
+.stat-row{display:flex;gap:20px;width:100%;z-index:2;margin-bottom:14px;justify-content:center;}
+.stat{flex:1;max-width:300px;padding:18px 16px;border-radius:12px;text-align:center;background:rgba(200,160,80,0.05);border:1px solid rgba(200,150,60,0.12);}
+.stat-num{font-size:72px;font-weight:900;line-height:1;}
+.stat-num.red{color:#c0392b;text-shadow:0 0 30px rgba(192,57,43,0.4);}
+.stat-num.gold{color:#d4a843;text-shadow:0 0 30px rgba(212,168,67,0.4);}
+.stat-num.green{color:#7d9c6c;text-shadow:0 0 30px rgba(125,156,108,0.4);}
+.stat-desc{font-size:18px;color:#a89070;margin-top:6px;line-height:1.4;}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;z-index:2;}
+.compare-box{padding:18px 22px;border-radius:12px;text-align:center;}
+.compare-box.old{background:rgba(192,57,43,0.05);border:1px solid rgba(192,57,43,0.15);}
+.compare-box.new{background:rgba(125,156,108,0.05);border:1px solid rgba(125,156,108,0.15);}
+.compare-label{font-size:16px;font-weight:700;letter-spacing:2px;margin-bottom:10px;}
+.compare-box.old .compare-label{color:#c0392b;}
+.compare-box.new .compare-label{color:#7d9c6c;}
+.compare-text{font-size:22px;color:#a89070;line-height:1.7;}
+.quote-box{width:100%;padding:14px 36px;border-radius:10px;z-index:2;background:rgba(200,160,80,0.06);border:1px solid rgba(200,150,60,0.15);border-left:3px solid rgba(212,168,67,0.5);text-align:center;}
+.quote{font-size:28px;font-weight:600;color:#d4a843;letter-spacing:1px;}
+.seal{display:inline-flex;align-items:center;gap:6px;padding:8px 22px;border-radius:4px;font-size:18px;font-weight:700;background:rgba(125,156,108,0.1);color:#7d9c6c;border:1px solid rgba(125,156,108,0.3);}
+.cave-dots{position:absolute;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(200,150,60,0.04) 1px,transparent 1px);background-size:40px 40px;}
+#progress{position:fixed;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#c0392b,#d4a843,#7d9c6c,#c0392b);z-index:999;}
+#pageNum{position:absolute;bottom:12px;right:32px;font-size:12px;color:rgba(200,150,60,0.25);z-index:10;letter-spacing:2px;}
+.pills{display:flex;gap:0;width:100%;z-index:2;border:1px solid rgba(200,150,60,0.12);border-radius:14px;overflow:hidden;}
+.pill{flex:1;padding:16px 14px;text-align:center;background:rgba(200,160,80,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.pill+.pill{border-left:1px solid rgba(200,150,60,0.1);}
+.pill-title{font-size:20px;font-weight:700;color:#e8d5b0;margin-bottom:4px;}
+.pill-desc{font-size:16px;color:#a89070;line-height:1.4;}
+.arrow-box{display:flex;align-items:center;gap:0;width:100%;z-index:2;margin-bottom:14px;}
+.arrow-item{flex:1;padding:16px;border-radius:10px;text-align:center;background:rgba(200,160,80,0.04);border:1px solid rgba(200,150,60,0.1);}
+.arrow-num{font-size:68px;font-weight:900;line-height:1;}
+.arrow-item.red .arrow-num{color:#c0392b;}
+.arrow-item.green .arrow-num{color:#7d9c6c;}
+.arrow-label{font-size:18px;color:#a89070;margin-top:4px;}
+.arrow-mid{width:50px;flex-shrink:0;text-align:center;font-size:28px;color:rgba(212,168,67,0.5);}
+.bottom-bar{width:100%;padding:12px 36px;border-radius:10px;z-index:2;background:rgba(200,160,80,0.04);border:1px solid rgba(200,150,60,0.12);text-align:center;}
+.bottom-text{font-size:18px;color:#a89070;letter-spacing:2px;}
+.wenyan{font-family:'STKaiti','KaiTi','SimSun',serif;}
+.hero-title{font-size:72px;font-weight:900;letter-spacing:5px;line-height:1.2;color:#e8d5b0;text-shadow:0 0 60px rgba(212,168,67,0.3),0 4px 20px rgba(0,0,0,0.8);margin-bottom:12px;}
+</style>
+</head>
+<body>
+<div id="progress" style="width:0%"></div>
+<div id="presentation">
+
+<!-- Slide 1: 开场 (0:00-0:31) 欢迎收听+Claude太啰嗦 -->
+<div class="slide active" id="slide-0">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div style="position:relative;z-index:2;text-align:center;padding:0 60px;">
+    <div class="deco-line"></div>
+    <div class="tag tag-gold"><span>&#x1F30F;</span> Claude Code 省 Token</div>
+    <div class="title-lg wenyan">穴居人模式</div>
+    <div class="sub">让 Claude <strong>少废话</strong>，省 Token 又省钱</div>
+    <div class="deco-line"></div>
+  </div>
+</div>
+
+<!-- Slide 2: 问题 (0:31-0:62) Claude回复太啰嗦 -->
+<div class="slide" id="slide-1">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-red" style="position:relative;z-index:2;"><span>&#x26A0;&#xFE0F;</span> 问题</div>
+  <div class="title">Claude <span class="ink-red">太啰嗦</span></div>
+  <div class="quote-box">
+    <div class="quote">"今晚到此为止，你快去睡吧"</div>
+  </div>
+  <div class="sub" style="margin-top:18px;">这些<strong>完全没有必要</strong>的话<br>导致 Token 消耗<strong>特别快</strong></div>
+</div>
+
+<!-- Slide 3: Anthropic回应 (0:62-0:93) 远超预期+最高优先级 -->
+<div class="slide" id="slide-2">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-red" style="position:relative;z-index:2;"><span>&#x1F6A8;</span> Anthropic</div>
+  <div class="title">Claude Code <span class="ink-red">额度告急</span></div>
+  <div class="sub">Anthropic 公开承认：<strong>额度消耗远超预期</strong></div>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num red">Top 1</div>
+      <div class="stat-desc">最高优先级<br>要解决的问题</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num red">3月底</div>
+      <div class="stat-desc">公开表示<br>问题严重</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: 限制措施 (0:93-1:24) 用户受影响 -->
+<div class="slide" id="slide-3">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-red" style="position:relative;z-index:2;"><span>&#x1F6D1;</span> 限制</div>
+  <div class="title-sm">高峰时段 <span class="ink-red">收紧额度</span></div>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num red">7%</div>
+      <div class="stat-desc">用户遇到<br>前所未有限制</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num red">12天</div>
+      <div class="stat-desc">Pro 用户<br>每月仅能正常使用</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num red">8h&#x2192;1h</div>
+      <div class="stat-desc">Max 5 用户<br>一小时耗尽</div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: 封禁第三方 (1:24-1:55) -->
+<div class="slide" id="slide-4">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-red" style="position:relative;z-index:2;"><span>&#x1F512;</span> 4月4日</div>
+  <div class="title">禁止第三方工具 <span class="ink-red">接入 Claude</span></div>
+  <div class="sub" style="margin-bottom:14px;">Open Claude 等工具对<strong>算力压力实在太大</strong></div>
+  <div class="quote-box">
+    <div class="quote wenyan">省 Token = 万民之刚需</div>
+  </div>
+</div>
+
+<!-- Slide 6: 穴居人登场 (1:55-2:26) -->
+<div class="slide" id="slide-5">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-gold" style="position:relative;z-index:2;"><span>&#x1FAA8;</span> 解法</div>
+  <div class="title wenyan">穴居人模式 <span class="ink-gold">登场</span></div>
+  <div class="sub">一位 <strong>16 岁小哥</strong> 提出，全网疯传，<strong>超百万人围观</strong></div>
+  <div class="sub" style="margin-top:8px;">让 Claude 像原始人一样说话<br>每一句都极为简略，<strong>完全去掉客套和废话</strong></div>
+</div>
+
+<!-- Slide 7: Token对比 (2:26-2:57) -->
+<div class="slide" id="slide-6">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-sage" style="position:relative;z-index:2;"><span>&#x1F4CA;</span> 对比</div>
+  <div class="title-sm">网页搜索任务 <span class="ink-sage">Token 对比</span></div>
+  <div class="arrow-box">
+    <div class="arrow-item red">
+      <div class="arrow-num">180</div>
+      <div class="arrow-label">寻常模式 Token</div>
+    </div>
+    <div class="arrow-mid">&#x2192;</div>
+    <div class="arrow-item green">
+      <div class="arrow-num">45</div>
+      <div class="arrow-label">穴居人模式 Token</div>
+    </div>
+  </div>
+  <div class="compare">
+    <div class="compare-box old">
+      <div class="compare-label">寻常模式</div>
+      <div class="compare-text">"我已经为您执行了<br>网页搜索工具" <span class="ink-red">8个Token</span></div>
+    </div>
+    <div class="compare-box new">
+      <div class="compare-label">穴居人模式</div>
+      <div class="compare-text">"工具完成" <span class="ink-sage">2个Token</span></div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:12px;z-index:2;">
+    <div class="seal wenyan">节省 50%-75% Output Token</div>
+  </div>
+</div>
+
+<!-- Slide 8: 原理-自回归 (2:57-3:28) -->
+<div class="slide" id="slide-7">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-gold" style="position:relative;z-index:2;"><span>&#x1F52E;</span> 原理</div>
+  <div class="title">少废话 = <span class="ink-gold">少计算</span></div>
+  <div class="sub" style="margin-bottom:14px;">Claude 是 <strong>自回归模型</strong>，每生成一个 Token<br>都要跑一遍完整的 <strong>Forward Pass</strong></div>
+  <div class="arrow-box">
+    <div class="arrow-item red">
+      <div class="arrow-num">180次</div>
+      <div class="arrow-label">180 Token = 跑 180 次</div>
+    </div>
+    <div class="arrow-mid">&#x2192;</div>
+    <div class="arrow-item green">
+      <div class="arrow-num">45次</div>
+      <div class="arrow-label">45 Token = 跑 45 次</div>
+    </div>
+  </div>
+  <div class="quote-box">
+    <div class="quote wenyan">输出 Token 越少，计算量越小，速度越快</div>
+  </div>
+</div>
+
+<!-- Slide 9: 连锁效应 (3:28-3:59) -->
+<div class="slide" id="slide-8">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-gold" style="position:relative;z-index:2;"><span>&#x1F517;</span> 连锁</div>
+  <div class="title-sm">多轮对话 <span class="ink-red">连锁效应</span></div>
+  <div class="sub" style="margin-bottom:14px;">每一轮的 <strong>Output</strong> 都会变成下一轮的 <strong>Input</strong></div>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num red">+100</div>
+      <div class="stat-desc">第一轮多 100 个<br>没用的 Token</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num red">1000</div>
+      <div class="stat-desc">10 轮下来<br>累积 1000 个多余 Token</div>
+    </div>
+  </div>
+  <div class="quote-box">
+    <div class="quote wenyan">省 Output 的效果会越来越明显</div>
+  </div>
+</div>
+
+<!-- Slide 10: 网友热议 (3:59-4:30) -->
+<div class="slide" id="slide-9">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-gold" style="position:relative;z-index:2;"><span>&#x1F4AC;</span> 热议</div>
+  <div class="title-sm">全网讨论 <span class="ink-gold">穴居人模式</span></div>
+  <div class="quote-box" style="margin-bottom:14px;">
+    <div class="quote wenyan">"现代问题需要旧石器时代的解决方案"</div>
+  </div>
+  <div class="sub">还有网友开玩笑说：<br>"希望 Claude 不要也写穴居人代码"</div>
+  <div class="sub" style="margin-top:8px;">开发者实际使用后表示：<br><strong>减少了很多不必要的叙述，成本变低了</strong></div>
+</div>
+
+<!-- Slide 11: 文言文模式 (4:30-5:01) -->
+<div class="slide" id="slide-10">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-sage" style="position:relative;z-index:2;"><span>&#x1F4DC;</span> 中文方案</div>
+  <div class="title wenyan">文言文模式</div>
+  <div class="sub" style="margin-bottom:14px;">文言文本身是一种<strong>压缩率极高</strong>的语言</div>
+  <div class="compare">
+    <div class="compare-box old">
+      <div class="compare-label">寻常模式</div>
+      <div class="compare-text">"好的，我马上去办"</div>
+    </div>
+    <div class="compare-box new">
+      <div class="compare-label">文言文模式</div>
+      <div class="compare-text" style="color:#7d9c6c;">"诺" <span class="ink-gold">→ 一个字搞定</span></div>
+    </div>
+  </div>
+  <div class="quote-box" style="margin-top:14px;">
+    <div class="quote wenyan">省的主要是语气词、过渡句和客套话</div>
+  </div>
+</div>
+
+<!-- Slide 12: 实测-任务设定 (5:01-5:32) -->
+<div class="slide" id="slide-11">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-sage" style="position:relative;z-index:2;"><span>&#x26A1;</span> 实测</div>
+  <div class="title-sm">Python 词频统计 <span class="ink-sage">实测对比</span></div>
+  <div class="sub" style="margin-bottom:14px;">任务：词频统计函数 + 单元测试 + 调试</div>
+  <div class="compare">
+    <div class="compare-box old">
+      <div class="compare-label">寻常模式</div>
+      <div class="compare-text" style="font-size:28px;font-weight:900;color:#c0392b;">73 秒<br><span style="font-size:18px;font-weight:400;color:#a89070;">工具调用 6 次</span></div>
+    </div>
+    <div class="compare-box new">
+      <div class="compare-label">文言文模式</div>
+      <div class="compare-text" style="font-size:28px;font-weight:900;color:#7d9c6c;">30 秒<br><span style="font-size:18px;font-weight:400;color:#a89070;">工具调用 4 次</span></div>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:14px;z-index:2;">
+    <div class="seal wenyan">直接快了一倍多！</div>
+  </div>
+</div>
+
+<!-- Slide 13: 回复风格对比 (5:32-6:03) -->
+<div class="slide" id="slide-12">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-gold" style="position:relative;z-index:2;"><span>&#x1F4DD;</span> 回复风格</div>
+  <div class="title-sm">完成后的 <span class="ink-gold">汇报对比</span></div>
+  <div class="compare">
+    <div class="compare-box old">
+      <div class="compare-label">寻常模式</div>
+      <div class="compare-text" style="font-size:18px;text-align:left;">"完成了以下工作：<br>用正则提取英文单词<br>去标点、忽略大小写<br>通过 Counter 统计<br>首次运行测试通过<br>失败原因是测试数据<br>被正则过滤<br>修复后全部通过"</div>
+    </div>
+    <div class="compare-box new">
+      <div class="compare-label">文言文模式</div>
+      <div class="compare-text" style="font-size:36px;font-weight:900;color:#7d9c6c;">三测<br>接通</div>
+    </div>
+  </div>
+  <div class="quote-box" style="margin-top:14px;">
+    <div class="quote wenyan">代码质量和功能完全一样</div>
+  </div>
+</div>
+
+<!-- Slide 14: 为什么调用变少 (6:03-6:34) -->
+<div class="slide" id="slide-13">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-gold" style="position:relative;z-index:2;"><span>&#x1F9E0;</span> 深度分析</div>
+  <div class="title-sm">为什么工具调用 <span class="ink-sage">变少了？</span></div>
+  <div class="compare">
+    <div class="compare-box old">
+      <div class="compare-label">寻常模式</div>
+      <div class="compare-text">本来只需 3 个测试<br>却写了 5 个<br>意外触发 bug<br>需要修复重跑<br><span class="ink-red">共 6 次工具调用</span></div>
+    </div>
+    <div class="compare-box new">
+      <div class="compare-label">文言文模式</div>
+      <div class="compare-text" style="color:#7d9c6c;">精准写了 3 个测试<br>一次就跑通<br><span class="ink-sage">仅 4 次工具调用</span></div>
+    </div>
+  </div>
+  <div class="quote-box" style="margin-top:14px;">
+    <div class="quote wenyan">不多做不少做，一次做到位</div>
+  </div>
+</div>
+
+<!-- Slide 15: 会变笨吗 (6:34-7:05) -->
+<div class="slide" id="slide-14">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-gold" style="position:relative;z-index:2;"><span>&#x2753;</span> 疑问</div>
+  <div class="title">会不会让 Claude <span class="ink-red">变笨？</span></div>
+  <div class="sub" style="margin-bottom:14px;">Anthropic 工程师 <strong>Dixon Sy</strong> 专门做过测试</div>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num red">&#x2193;</div>
+      <div class="stat-desc">省的主要是<br><strong>Output Token</strong></div>
+    </div>
+    <div class="stat">
+      <div class="stat-num gold">=</div>
+      <div class="stat-desc">工具返回结果<br>和上下文 Input <strong>不变</strong></div>
+    </div>
+  </div>
+  <div class="quote-box">
+    <div class="quote wenyan">只是输出格式变了，不影响内部思考深度</div>
+  </div>
+</div>
+
+<!-- Slide 16: Thinking Token (7:05-7:36) -->
+<div class="slide" id="slide-15">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-sage" style="position:relative;z-index:2;"><span>&#x1F9E0;</span> Thinking</div>
+  <div class="title-sm">Thinking Token <span class="ink-sage">不受影响</span></div>
+  <div class="sub" style="margin-bottom:14px;">Claude 回答前会先用 <strong>Thinking Tokens</strong><br>做一次内部的深度思考</div>
+  <div class="quote-box" style="margin-bottom:14px;">
+    <div class="quote wenyan">让教授写一页纸的报告，还是写一句话的摘要<br>他对此问题的理解深度是不变的</div>
+  </div>
+  <div class="bottom-bar">
+    <div class="bottom-text wenyan">文言文、穴居人语的输出格式，不影响思考过程</div>
+  </div>
+</div>
+
+<!-- Slide 17: 费用分析 (7:36-8:07) -->
+<div class="slide" id="slide-16">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-red" style="position:relative;z-index:2;"><span>&#x1F4B0;</span> 费用</div>
+  <div class="title-sm">Claude Sonnet <span class="ink-red">价格对比</span></div>
+  <div class="sub" style="margin-bottom:14px;">Output Token 比 Input Token <strong>贵 5 倍</strong></div>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num gold">$3</div>
+      <div class="stat-desc">Input Token<br>每百万</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num red">$15</div>
+      <div class="stat-desc">Output Token<br>每百万</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num green">$0.3</div>
+      <div class="stat-desc">Prompt Cache<br>每百万</div>
+    </div>
+  </div>
+  <div class="quote-box">
+    <div class="quote wenyan">Cached Input vs Output = <span class="ink-red">1 : 50</span></div>
+  </div>
+</div>
+
+<!-- Slide 18: 账单占比 (8:07-8:38) -->
+<div class="slide" id="slide-17">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-red" style="position:relative;z-index:2;"><span>&#x1F4B3;</span> 账单</div>
+  <div class="title-sm">Output Token <span class="ink-red">账单占比惊人</span></div>
+  <div class="arrow-box">
+    <div class="arrow-item red">
+      <div class="arrow-num">4%</div>
+      <div class="arrow-label">Output 占 Token<br>总量的比例</div>
+    </div>
+    <div class="arrow-mid">&#x2192;</div>
+    <div class="arrow-item" style="border-color:rgba(192,57,43,0.3);">
+      <div class="arrow-num red">30%+</div>
+      <div class="arrow-label">Output 占<br>账单的比例</div>
+    </div>
+  </div>
+  <div class="quote-box" style="margin-top:14px;">
+    <div class="quote wenyan">多轮对话中 Output 不断变 Input，经济价值非常高</div>
+  </div>
+</div>
+
+<!-- Slide 19: 代码质量 (8:38-9:09) -->
+<div class="slide" id="slide-18">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-sage" style="position:relative;z-index:2;"><span>&#x1F4BB;</span> 质量</div>
+  <div class="title-sm">代码质量 <span class="ink-sage">完全不变</span></div>
+  <div class="sub" style="margin-bottom:14px;">不仅没有下降，反而因为<strong>更聚焦</strong>，出错概率更小</div>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num green">&#x2713;</div>
+      <div class="stat-desc">代码附用性<br>变高了</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num gold">&#x2713;</div>
+      <div class="stat-desc">Transformer 最擅长<br>提取核心信息</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num sage">&#x2713;</div>
+      <div class="stat-desc">所有模型<br>都可以用</div>
+    </div>
+  </div>
+  <div class="quote-box">
+    <div class="quote wenyan">惜字如今，完全在它的能力范围之内</div>
+  </div>
+</div>
+
+<!-- Slide 20: 官方措施 (9:09-9:40) -->
+<div class="slide" id="slide-19">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div class="tag tag-gold" style="position:relative;z-index:2;"><span>&#x1F3ED;</span> Anthropic</div>
+  <div class="title-sm">官方应对 <span class="ink-gold">额度收紧</span></div>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num gold">5h</div>
+      <div class="stat-desc">高峰时段<br>进一步收紧</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num green">&#x2191;</div>
+      <div class="stat-desc">非高峰时段<br>相应放宽</div>
+    </div>
+  </div>
+  <div class="sub" style="margin-top:8px;">约 <strong>7% 高频用户</strong>受影响<br>团队持续投入扩容中</div>
+  <div class="quote-box" style="margin-top:14px;">
+    <div class="quote wenyan">Anthropic 自己也说：这个调整确实让人沮丧</div>
+  </div>
+</div>
+
+<!-- Slide 21: 总结 (9:40-10:08) -->
+<div class="slide" id="slide-20">
+  <div class="paper-bg"></div>
+  <div class="cave-dots"></div>
+  <div class="rock-line" style="top:80px;"></div>
+  <div style="position:relative;z-index:2;text-align:center;padding:0 40px;">
+    <div class="deco-line"></div>
+    <div class="tag tag-sage"><span>&#x1F3AF;</span> 总结</div>
+    <div class="title wenyan">言简意赅<br>一次做到位</div>
+    <div class="sub" style="margin-top:12px;">省 Token · 提速度 · 降成本</div>
+    <div class="deco-line" style="margin-top:14px;margin-bottom:14px;"></div>
+    <div class="pills">
+      <div class="pill">
+        <div class="pill-title wenyan">穴居人模式</div>
+        <div class="pill-desc">英文场景<br>言简意赅</div>
+      </div>
+      <div class="pill">
+        <div class="pill-title wenyan">文言文模式</div>
+        <div class="pill-desc">中文场景<br>一字当五字</div>
+      </div>
+      <div class="pill">
+        <div class="pill-title wenyan">精准干活</div>
+        <div class="pill-desc">不多做<br>不少做</div>
+      </div>
+    </div>
+    <div class="bottom-bar" style="margin-top:16px;">
+      <div class="bottom-text wenyan">感谢收听 · 咱们下期再见</div>
+    </div>
+  </div>
+</div>
+
+</div>
+<div id="pageNum"></div>
+
+<script>
+function resize(){
+  var p=document.getElementById('presentation');
+  var s=Math.min(window.innerWidth/1334,window.innerHeight/750);
+  var ox=(window.innerWidth-1334*s)/2;
+  var oy=(window.innerHeight-750*s)/2;
+  p.style.transform='scale('+s+')';
+  p.style.left=ox+'px';
+  p.style.top=oy+'px';
+}
+window.addEventListener('resize',resize);
+resize();
+var slides=document.querySelectorAll('.slide');
+var total=slides.length;
+var cur=0;
+function updateUI(){
+  document.getElementById('pageNum').textContent=(cur+1)+' / '+total;
+  document.getElementById('progress').style.width=(cur/(total-1)*100)+'%';
+}
+function goTo(i){
+  if(i<0||i>=total)return;
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  updateUI();
+}
+function go(n){ goTo(n); }
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();goTo(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();goTo(cur-1);}
+});
+document.addEventListener('click',function(e){
+  if(e.clientX>window.innerWidth*0.3)goTo(cur+1);
+  else goTo(cur-1);
+});
+updateUI();
+</script>
+</body>
+</html>
