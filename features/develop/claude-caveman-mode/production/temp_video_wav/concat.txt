@@ -1,7 +1,0 @@
-file 'd:/harnessworld/one-context/features/develop/claude-caveman-mode/production/temp_video_wav/part_00.mp4'
-file 'd:/harnessworld/one-context/features/develop/claude-caveman-mode/production/temp_video_wav/part_01.mp4'
-file 'd:/harnessworld/one-context/features/develop/claude-caveman-mode/production/temp_video_wav/part_02.mp4'
-file 'd:/harnessworld/one-context/features/develop/claude-caveman-mode/production/temp_video_wav/part_03.mp4'
-file 'd:/harnessworld/one-context/features/develop/claude-caveman-mode/production/temp_video_wav/part_04.mp4'
-file 'd:/harnessworld/one-context/features/develop/claude-caveman-mode/production/temp_video_wav/part_05.mp4'
-file 'd:/harnessworld/one-context/features/develop/claude-caveman-mode/production/temp_video_wav/part_06.mp4'

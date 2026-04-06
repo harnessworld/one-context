@@ -12,6 +12,7 @@ const { chromium } = require('playwright');
 const { pathToFileURL } = require('url');
 const ffmpegStatic = require('ffmpeg-static');
 const { run: runWav } = require('./wav_pipeline');
+const { prepareSrtForBurn } = require('./srt_postprocess');
 
 async function extractSlideTexts(projectRoot) {
   const html = path.join(projectRoot, 'presentation.html');
@@ -72,6 +73,16 @@ async function run(projectRoot, skillDir, options = {}) {
   let burnSubtitles = false;
   let subtitleCfg = {};
   let externalSrt = null; // 用户提供的已审校 SRT（跳过 Whisper SRT 输出）
+  let vadFilter = false; // 默认关闭：与 align_wav_slides.py 一致，减少片头/轻声被裁导致的字幕大段空白
+  let strictSubtitles = false;
+  let maxSubtitleGapSec = 2.5;
+  /** @type {string | null} null = 不传参，Python 用 skill 默认 0.85 */
+  let noSpeechThresholdArg = null;
+  let fillSrtGaps = true;
+  let whisperHotwords = '';
+  /** @type {unknown[]} */
+  let srtReplacements = [];
+  let wrapSubtitles = true;
 
   if (fs.existsSync(inputPath)) {
     const j = JSON.parse(fs.readFileSync(inputPath, 'utf-8'));
@@ -80,6 +91,28 @@ async function run(projectRoot, skillDir, options = {}) {
     outputFile = j.outputFile || outputFile;
     burnSubtitles = j.burnSubtitles === true;
     subtitleCfg = j.subtitle || {};
+    if (j.vadFilter === true) vadFilter = true;
+    if (j.strictSubtitles === true) strictSubtitles = true;
+    if (typeof j.maxSubtitleGapSec === 'number' && j.maxSubtitleGapSec > 0) {
+      maxSubtitleGapSec = j.maxSubtitleGapSec;
+    }
+    if (j.noSpeechThreshold === null) {
+      noSpeechThresholdArg = 'none';
+    } else if (typeof j.noSpeechThreshold === 'number') {
+      noSpeechThresholdArg = String(j.noSpeechThreshold);
+    }
+    if (j.fillSrtGaps === false) {
+      fillSrtGaps = false;
+    }
+    if (typeof j.whisperHotwords === 'string') {
+      whisperHotwords = j.whisperHotwords;
+    }
+    if (Array.isArray(j.srtReplacements)) {
+      srtReplacements = j.srtReplacements;
+    }
+    if (j.wrapSubtitles === false) {
+      wrapSubtitles = false;
+    }
     if (j.srtFile && !forceWhisperSrt) {
       // 用户提供的已审校 SRT，优先使用（时间轴可能与当前 WAV 不一致）
       externalSrt = path.isAbsolute(j.srtFile) ? j.srtFile : path.join(projectRoot, j.srtFile);
@@ -102,7 +135,30 @@ async function run(projectRoot, skillDir, options = {}) {
   console.log(`   项目: ${projectRoot}`);
   console.log(`   WAV:  ${wavRel}`);
   console.log(`   Whisper 模型: ${whisperModel}`);
-  console.log(`   烧录字幕: ${burnSubtitles ? '✅' : '❌'}\n`);
+  console.log(`   烧录字幕: ${burnSubtitles ? '✅' : '❌'}`);
+  console.log(`   VAD 裁切: ${vadFilter ? '开启（可能丢轻声/片头）' : '关闭（默认，字幕更完整）'}`);
+  console.log(
+    `   字幕缺口: 超过 ${maxSubtitleGapSec}s 会告警${strictSubtitles ? '；strict 模式将中止成片' : ''}`
+  );
+  if (noSpeechThresholdArg !== null) {
+    console.log(
+      `   no_speech 阈值: ${noSpeechThresholdArg === 'none' ? '关闭（不传 no_speech_threshold）' : noSpeechThresholdArg}（仅当 no_speech_prob 大于该值时跳过整段）\n`
+    );
+  } else {
+    console.log(
+      `   no_speech 阈值: 0.85（skill 默认；faster-whisper 库默认 0.6 易误跳过清晰人声，见 SKILL.md）\n`
+    );
+  }
+  if (whisperHotwords) {
+    console.log(`   Whisper hotwords: ${whisperHotwords.slice(0, 80)}${whisperHotwords.length > 80 ? '…' : ''}`);
+  }
+  if (srtReplacements.length) {
+    console.log(`   烧录前字幕替换: ${srtReplacements.length} 组`);
+  }
+  const cpl = subtitleCfg.charsPerLine ?? 28;
+  console.log(
+    `   烧录折行: ${wrapSubtitles ? `每行≤${cpl} 字` : '关闭（整段一行）'}\n`
+  );
 
   const slides = await extractSlideTexts(projectRoot);
   console.log(`✅ 从 HTML 提取 ${slides.length} 页文案（用于与口播对齐）\n`);
@@ -127,6 +183,8 @@ async function run(projectRoot, skillDir, options = {}) {
   // 禁用 Xet Storage 写入（写入不稳定易导致 bin 文件损坏），优先走 hf-mirror.com
   env.HF_ENDPOINT = 'https://hf-mirror.com';
   env.HF_HUB_DISABLE_XET = '1';
+  // Windows 控制台默认 GBK，align_wav_slides.py 含中文/emoji 的 print 会 UnicodeEncodeError
+  env.PYTHONUTF8 = '1';
 
   const pythonExe = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
   const r = spawnSync(
@@ -141,14 +199,30 @@ async function run(projectRoot, skillDir, options = {}) {
       alignOut,
       '--model',
       whisperModel,
-      // 只有需要烧字幕且用户没提供外部 SRT 时，才让 Whisper 输出 SRT
-      ...(burnSubtitles && !externalSrt ? ['--srt-out', srtOut] : []),
+      '--max-subtitle-gap-sec',
+      String(maxSubtitleGapSec),
+      ...(strictSubtitles ? ['--strict-subtitles'] : []),
+      ...(vadFilter ? ['--vad-filter'] : []),
+      ...(noSpeechThresholdArg !== null
+        ? ['--no-speech-threshold', noSpeechThresholdArg]
+        : []),
+      ...(!fillSrtGaps ? ['--no-fill-srt-gaps'] : []),
+      ...(whisperHotwords.trim()
+        ? ['--hotwords', whisperHotwords.trim()]
+        : []),
+      // 与口播对齐的 SRT 始终生成（除非用户指定外部 srtFile），便于缺口检测；仅 burnSubtitles 时拷贝到项目根
+      ...(!externalSrt ? ['--srt-out', srtOut] : []),
     ],
     { encoding: 'utf-8', env, maxBuffer: 50 * 1024 * 1024 }
   );
 
   if (r.status !== 0) {
     console.error(r.stderr || r.stdout);
+    if (r.status === 4) {
+      throw new Error(
+        'align_wav_slides.py：strict-subtitles 检测到超长无字幕区间，已中止。请编辑 sub.srt 补全缺口后重跑，或在 video-input.json 关闭 strictSubtitles / 调整 maxSubtitleGapSec。'
+      );
+    }
     throw new Error(
       'align_wav_slides.py 失败。请确认已执行: pip install faster-whisper huggingface_hub（可选 opencc-python-reimplemented 用于简体字幕）'
     );
@@ -157,6 +231,12 @@ async function run(projectRoot, skillDir, options = {}) {
   const aligned = JSON.parse(fs.readFileSync(alignOut, 'utf-8'));
   if (aligned.warnings && aligned.warnings.length) {
     aligned.warnings.forEach((w) => console.warn('⚠️ ', w));
+  }
+  if (aligned.method === 'whisper_align_partial') {
+    console.warn(
+      '\n⚠️  幻灯与口播仅部分匹配（whisper_align_partial）。若成片翻页与讲解不同步：\n' +
+        '   让每页 .slide 可见文字更贴近真实口播，或改用更大的 whisperModel，或改用 wav 模式手写 slideDurationsSec。\n'
+    );
   }
   console.log(`\n✅ 对齐方式: ${aligned.method || 'unknown'}`);
   console.log(
@@ -170,19 +250,35 @@ async function run(projectRoot, skillDir, options = {}) {
     slideDurationsSec: aligned.slideDurationsSec,
     outputFile,
     burnSubtitles,
-    // 优先用用户提供的已审校 SRT，否则用 Whisper 生成的
+    // 优先用用户提供的已审校 SRT，否则仅在 burn 时用 Whisper 生成的临时 SRT 烧录
     srtFile: externalSrt || (burnSubtitles ? srtOut : undefined),
     subtitle: subtitleCfg,
+    srtReplacements,
+    wrapSubtitles,
   };
 
   await runWav(projectRoot, skillDir, { cfg });
 
-  // 无外部 srtFile 时，把 Whisper 生成的 SRT 拷到项目根，便于只改文案、保留时间轴
-  if (burnSubtitles && !externalSrt && fs.existsSync(srtOut)) {
+  // 无外部 srtFile 时，把 Whisper 生成的 SRT 拷到项目根，便于校对文案、保留时间轴（未 burn 也会复制供审阅）
+  if (!externalSrt && fs.existsSync(srtOut)) {
     const dest = path.join(projectRoot, 'sub.srt');
     try {
       fs.copyFileSync(srtOut, dest);
-      console.log(`\n📄 已写入对齐用字幕（与口播同源时间轴）：${dest}\n`);
+      if (srtReplacements.length > 0 || wrapSubtitles) {
+        prepareSrtForBurn(dest, dest, {
+          charsPerLine:
+            subtitleCfg.charsPerLine > 0 ? subtitleCfg.charsPerLine : undefined,
+          fontSize: subtitleCfg.fontSize ?? 18,
+          replacements: srtReplacements,
+          wrap: wrapSubtitles,
+        });
+        console.log(
+          '\n📄 已对项目 sub.srt 做与烧录相同的折行/替换，便于与成片对照改字。'
+        );
+      }
+      console.log(
+        `\n📄 已写入 ${burnSubtitles ? '对齐用字幕' : 'Whisper 初稿字幕'}：${dest}\n`
+      );
     } catch (e) {
       console.warn('⚠️  未能复制 Whisper SRT 到项目目录：', e.message);
     }

@@ -41,6 +41,7 @@ html-video-from-slides（one-context 内置技能）
   tts      presentation.html、讲稿.md、可选 config.json
   wav      presentation.html、wav-durations.json、.wav
   wav-auto presentation.html、目录内单个 .wav（可选 video-input.json）
+           video-input 可选：whisperModel、vadFilter（默认 false）、strictSubtitles、maxSubtitleGapSec
            --whisper-srt  忽略 video-input.json 里的 srtFile，强制用 Whisper
                           转写生成与口播同源时间轴的 sub.srt（解决字幕与语音不对齐）
 

@@ -2,6 +2,23 @@
   "_comment": "可选。仅当目录内有多个 wav 或需改模型/输出名时使用。wav-auto 默认：单个 .wav + presentation.html 即可。",
   "wavFile": "voiceover.wav",
   "whisperModel": "medium",
+  "noSpeechThreshold": 0.85,
+  "_noSpeechThreshold_help": "faster-whisper：仅当 no_speech_prob 大于该值时才跳过整段音频（库默认 0.6 偏严，易漏清晰人声）。提高可减少漏检；null 表示关闭此项过滤。",
+  "vadFilter": false,
+  "_vadFilter_help": "默认 false。仅当环境噪声极大且口播极清晰时可试 true；true 可能裁掉轻声/片头导致 SRT 大段空白。",
+  "strictSubtitles": false,
+  "maxSubtitleGapSec": 2.5,
+  "_strict_help": "strictSubtitles true 时：若存在超过 maxSubtitleGapSec 的无字幕区间则中止成片，避免未审校的残缺字幕烧进视频。",
+  "fillSrtGaps": true,
+  "whisperHotwords": "Claude Anthropic GitHub",
+  "_whisperHotwords_help": "传给 faster-whisper 的 hotwords（空格分隔），减轻专有名词听写错。",
+  "srtReplacements": [
+    { "from": "Cloud Code", "to": "Claude Code", "ignoreCase": true },
+    { "from": "Cloud", "to": "Claude", "ignoreCase": true }
+  ],
+  "_srtReplacements_help": "烧录前对 sub.srt 做字面替换；长词组放前面。也可用 [\"from\",\"to\"] 二元数组。",
+  "wrapSubtitles": true,
+  "_wrapSubtitles_help": "true（默认）时按 subtitle.charsPerLine 折行再烧录，避免单行超出画面。",
   "outputFile": "final_auto.mp4",
   "burnSubtitles": true,
   "subtitle": {
@@ -9,7 +26,7 @@
     "marginV": 18,
     "fontName": "Microsoft YaHei",
     "bold": true,
-    "charsPerLine": 28,
+    "charsPerLine": 24,
     "primaryColour": "#FFFF00",
     "primaryAlpha": 108
   }
