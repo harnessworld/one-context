@@ -36,6 +36,7 @@ Read these files for context:
 @knowledge/standards/README.md
 @knowledge/standards/agent-framework.md
 @knowledge/standards/claudecode-architecture-patterns.md
+@knowledge/standards/diagram-conventions.md
 @knowledge/standards/one-context-conventions.md
 @knowledge/standards/openclaw-architecture.md
 @features/INDEX.md
