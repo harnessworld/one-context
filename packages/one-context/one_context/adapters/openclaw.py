@@ -22,6 +22,13 @@ PROFILE_RULES: list[FieldRule] = [
     FieldRule("behavior.test_expectation", "targeted", "Write targeted tests for changes.", section="behavior"),
     FieldRule("behavior.test_expectation", "advisory", "Suggest testing strategies when appropriate.", section="behavior"),
     # -- output_style --
+    FieldRule(
+        "output_style.tone",
+        "minimal",
+        "Minimal output (文言极简): short, no filler, answer first; override only if "
+        "the user asks for a different style or detail level.",
+        section="output_style",
+    ),
     FieldRule("output_style.tone", "concise", "Be concise.", section="output_style"),
     FieldRule("output_style.tone", "structured", "Use structured output.", section="output_style"),
     FieldRule("output_style.include_verification", True, "Include verification steps.", section="output_style"),

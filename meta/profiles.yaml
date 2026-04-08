@@ -12,6 +12,7 @@
 #   behavior        — Expectations for planning, editing, testing, and safety
 #   context_policy  — How much context to load and from where
 #   output_style    — Preferred answer and change-reporting style
+#                     tone: minimal | concise | structured (see mixin output-concise)
 #
 # Merge order: extends parent → mixins (declared order, later wins) → self fields.
 # Dict values are deep-merged; all other types (lists, scalars) are replaced.
@@ -51,6 +52,14 @@ mixins:
       tone: structured
       include_verification: true
 
+  - id: output-concise
+    name: Concise Output (lighter)
+    description: >-
+      Shorter replies without full minimal-mode rules. Use on profiles that extend
+      default-coding when you want tone concise instead of minimal.
+    output_style:
+      tone: concise
+
 # ---------------------------------------------------------------------------
 # Profiles
 # ---------------------------------------------------------------------------
@@ -60,7 +69,10 @@ profiles:
 
   - id: default-coding
     name: Default Coding
-    description: Balanced editing profile for normal implementation work across repositories.
+    description: >-
+      Balanced editing profile for normal implementation work across repositories.
+      Default output is minimal (文言极简 / caveman-style): few tokens unless the user
+      asks for a different style or detail level.
     mode: edit
     behavior:
       plan_first: false
@@ -76,8 +88,16 @@ profiles:
         - canonical-rules
         - existing-project-conventions
     output_style:
-      tone: concise
+      tone: minimal
       include_verification: true
+
+  - id: default-coding-lighter
+    name: Default Coding (lighter tone)
+    extends: default-coding
+    description: >-
+      Same as default-coding but output_style tone concise (less aggressive than minimal).
+    mixins:
+      - output-concise
 
   - id: repo-architecture
     name: Repository Architecture
