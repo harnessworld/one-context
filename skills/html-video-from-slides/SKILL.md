@@ -18,6 +18,8 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 | **wav-auto**（推荐「只给 WAV+HTML」） | `node cli.js wav-auto --project <dir>`（可加 `--whisper-srt` 忽略 `srtFile`、强制 Whisper 字幕时间轴） | `presentation.html`、目录内**恰好一个** `.wav`；可选 `video-input.json` | 口播内容与**各页幻灯可见文字**大致一致时，对齐最准；否则可能降级静音切分/均分；**默认关闭 VAD** 以减少片头/轻声被裁导致的无字幕大段空白；支持 `burnSubtitles: true` 烧录；可选 `strictSubtitles` 在超长字幕缺口时中止成片 |
 | **wav** | `node cli.js wav --project <dir>` | `presentation.html`、`wav-durations.json`、`.wav` | 时长由你精确指定 |
 | **tts** | `node cli.js tts --project <dir>` | `presentation.html`、`讲稿.md`、可选 `config.json` | 机器念稿 + 自动字幕 |
+| **srt-map** | `node cli.js srt-map --project <dir>`（可选 `--boundaries "0:0-0,1:1-2,..."`） | `sub.srt`、`presentation.html` | Whisper 对齐失败时，手动映射 SRT 条目→幻灯片，生成 `wav-durations.json` |
+| **cover** | `node cli.js cover --project <dir>`（可选 `--horizontal`） | `cover.html` / `cover_h.html` | Playwright 截图 → `videos/cover.png` 或 `videos/cover_h.png` |
 
 幻灯按 **1920×1080** 视口截图。
 
@@ -218,6 +220,41 @@ const THEMES = {
 ```
 
 示例：`features/develop/claude-caveman-mode/production/05-publish-kit.md`。下文可接标题备选、封面定稿说明、置顶评论、章节轴、素材路径、发布前检查等备忘。
+
+### SRT→Slide 手动映射（Whisper 对齐失败时）
+
+当 `wav-auto` 日志出现 **`whisper_align_partial`** 或所有幻灯片时长几乎相等时，说明 Whisper 无法将口播与 HTML 幻灯文字对齐（通常因为 PPT 文案是提炼要点而非逐字对应口播）。此时：
+
+**Step 1** — 分析 SRT 与幻灯片：
+
+```bash
+node cli.js srt-map --project <素材目录>
+```
+
+输出：全部 SRT 条目（序号、时间、内容预览）+ 全部幻灯片文本。AI 阅读后判断每页幻灯片对应的 SRT 条目范围。
+
+**Step 2** — 提供边界，生成时长配置：
+
+```bash
+node cli.js srt-map --project <素材目录> --boundaries "0:0-0,1:1-2,2:3-5,..."
+```
+
+格式：`slide_idx:first_entry-last_entry`，逗号分隔。脚本自动计算每页时长、找 .wav 文件，写入 `wav-durations.json`。
+
+**Step 3** — 用精确时长渲染：
+
+```bash
+node cli.js wav --project <素材目录>
+```
+
+### 封面一键截图
+
+```bash
+node cli.js cover --project <素材目录>              # → videos/cover.png (1080×1920)
+node cli.js cover --project <素材目录> --horizontal # → videos/cover_h.png (1440×1080)
+```
+
+在素材目录放 `cover.html`（竖版）和/或 `cover_h.html`（横版），内含 `CONFIG` 对象控制文案与配色（见上文 CONFIG 要点）。命令使用 Playwright 截图输出到 `videos/` 子目录。
 
 ### 优化要点
 

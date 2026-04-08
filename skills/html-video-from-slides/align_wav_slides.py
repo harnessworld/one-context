@@ -576,7 +576,8 @@ def main() -> int:
     transcribe_kw: dict = {
         "language": "zh",
         "word_timestamps": True,
-        "initial_prompt": "请使用简体中文转写中文内容，专有名词保持常用英文拼写。",
+        # 勿写「请使用简体中文转写…」长句，易被 Whisper 当幻听输出到字幕开头
+        "initial_prompt": "中文播客，讨论企业与人工智能；专名保留常见英文拼写。",
         # 库默认 0.6：no_speech_prob > 阈值 则整段跳过，片头/垫乐旁白易被误杀成大段无字幕；skill 默认提高到 0.85
         "no_speech_threshold": no_speech_threshold,
     }
