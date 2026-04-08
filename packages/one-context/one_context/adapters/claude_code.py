@@ -55,6 +55,14 @@ PROFILE_RULES: list[FieldRule] = [
     ),
     # -- output_style --
     FieldRule(
+        "output_style.tone", "minimal",
+        "Default to minimal output (文言极简 / caveman-style): modern language, "
+        "shortest useful phrasing, no filler or pleasantries, do not restate the "
+        "user's question—lead with the answer. Unless the user explicitly requests "
+        "a different style, length, format, or language, keep replies short.",
+        section="Output Style",
+    ),
+    FieldRule(
         "output_style.tone", "concise",
         "Keep responses concise and to the point.",
         section="Output Style",

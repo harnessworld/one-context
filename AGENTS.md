@@ -31,6 +31,16 @@ Cross-repository or product-level requirement documents live in **`features/`**.
 
 Playbook: `knowledge/playbooks/add-umbrella-feature.md`.
 
+## Default output style (minimal / 文言极简)
+
+Unless the user **explicitly** asks for a different style, length, format, or language, agents should default to **minimal output**: modern wording, shortest useful phrasing, no pleasantries, do not restate the question—**answer first**. This reduces output tokens and matches `meta/profiles.yaml` profile **`default-coding`** (`output_style.tone: minimal`).
+
+**Overrides:** Phrases such as “详细说明”, “展开讲”, “tutorial 口吻”, “step by step”, “in English”, “用表格”, etc. take precedence for that request.
+
+**Lighter default:** Profile **`default-coding-lighter`** uses `tone: concise` (via mixin `output-concise`) when minimal is too aggressive for a workspace.
+
+Canonical machine-readable policy: `meta/profiles.yaml`; tool-specific text is emitted by adapters (`one_context.adapters`).
+
 ## Conventions
 
 - When answering questions or editing code in this umbrella repo, use the manifests above; do not guess remotes or paths.
