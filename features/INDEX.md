@@ -14,6 +14,7 @@
 | claude-caveman-mode           | 用穴居人模式让 Claude 省 Token                                | develop  | done   | `features/develop/claude-caveman-mode/`           | one-context     |
 | math-teacher-ai-platform      | 数学教师 AI 工作台 — Phase 1 可视化资产化与 AI 出题 MVP          | develop  | draft  | `features/develop/math-teacher-ai-platform/`      | FunctionCanvas  |
 | one-context-intro-short-video | one-context 中视频介绍（爆款口播框架）                             | develop  | draft  | `features/develop/one-context-intro-short-video/` | one-context     |
+| hermes-agent-short-video      | Hermes Agent 短视频口播成片（wav-auto）                          | develop  | draft  | `features/develop/hermes-agent-short-video/`      | one-context     |
 | skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill                     | core     | done   | `features/core/skill-windows-c-drive-cleanup/`    | one-context     |
 
 

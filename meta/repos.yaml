@@ -39,3 +39,6 @@ repos:
   - url: https://github.com/CarmanMS/paperwork
     category: research
     description: paperwork
+  - url: https://github.com/VoltAgent/awesome-design-md
+    category: research
+    description: Curated DESIGN.md design-system snippets for agent-driven UI (reference only).
