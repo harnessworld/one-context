@@ -12,7 +12,7 @@
 | claudecode-source-analysis    | Claude Code 源码解析知识整理                                  | develop  | done   | `features/develop/claudecode-source-analysis/`    | one-context     |
 | openclaw-source-analysis      | OpenClaw 源码解析知识整理                                     | develop  | done   | `features/develop/openclaw-source-analysis/`      | one-context     |
 | claude-caveman-mode           | 用穴居人模式让 Claude 省 Token                                | develop  | done   | `features/develop/claude-caveman-mode/`           | one-context     |
-| math-teacher-ai-platform      | 数学教师 AI 平台 — Phase 1 平台骨架与 FunctionCanvas 接入      | develop  | draft  | `features/develop/math-teacher-ai-platform/`      | FunctionCanvas  |
+| math-teacher-ai-platform      | 数学教师 AI 工作台 — Phase 1 可视化资产化与 AI 出题 MVP          | develop  | draft  | `features/develop/math-teacher-ai-platform/`      | FunctionCanvas  |
 | one-context-intro-short-video | one-context 中视频介绍（爆款口播框架）                             | develop  | draft  | `features/develop/one-context-intro-short-video/` | one-context     |
 | skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill                     | core     | done   | `features/core/skill-windows-c-drive-cleanup/`    | one-context     |
 
