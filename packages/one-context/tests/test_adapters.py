@@ -111,6 +111,84 @@ def dev_context(adapter_root: Path) -> dict:
     return build_workspace_context(adapter_root, "dev")
 
 
+@pytest.fixture()
+def minimal_root(tmp_path: Path) -> Path:
+    """Create a one-context tree with output_style.tone: minimal (triggers top-placement)."""
+    meta = tmp_path / "meta"
+    meta.mkdir()
+
+    (meta / "repos.yaml").write_text(
+        textwrap.dedent("""\
+            repos:
+              - url: git@test.local:acme/alpha.git
+                category: develop
+        """),
+        encoding="utf-8",
+    )
+    (meta / "profiles.yaml").write_text(
+        textwrap.dedent("""\
+            profiles:
+              - id: default-coding
+                name: Default Coding
+                description: Minimal output profile.
+                mode: edit
+                behavior:
+                  plan_first: false
+                  test_expectation: targeted
+                  safety_level: standard
+                  change_scope: focused
+                context_policy:
+                  load:
+                    - repo-readme
+                output_style:
+                  tone: minimal
+                  include_verification: true
+        """),
+        encoding="utf-8",
+    )
+    (meta / "workspaces.yaml").write_text(
+        textwrap.dedent("""\
+            workspaces:
+              - id: dev
+                name: Development
+                repos:
+                  - alpha
+                profiles:
+                  - default-coding
+                context:
+                  summary: Dev workspace with minimal tone.
+                  knowledge: []
+        """),
+        encoding="utf-8",
+    )
+    (meta / "agents.yaml").write_text(
+        textwrap.dedent("""\
+            version: "1"
+            agents:
+              - id: dev
+                name: Dev Agent
+                role: dev
+                profile: default-coding
+                description: Dev agent with minimal tone.
+                knowledge: []
+                owns:
+                  - "features/**/worktrees.yaml"
+                instructions: |
+                  You are the dev agent.
+        """),
+        encoding="utf-8",
+    )
+
+    return tmp_path
+
+
+@pytest.fixture()
+def minimal_context(minimal_root: Path) -> dict:
+    """Build context for the minimal-tone workspace."""
+    from one_context.context import build_workspace_context
+    return build_workspace_context(minimal_root, "dev")
+
+
 # ---------------------------------------------------------------------------
 # Registry
 # ---------------------------------------------------------------------------
@@ -200,6 +278,74 @@ class TestClaudeCodeAdapter:
         assert "@.claude/agents/pm.md" in files[0].content
 
 
+class TestClaudeCodeTopPlacement:
+    """Tests for top-placement (hard rules) when tone=minimal."""
+
+    def test_hard_rules_prepended_to_claude_md(self, minimal_root, minimal_context):
+        from one_context.agents import load_agents
+
+        adapter = get_adapter("claude_code")
+        ws = minimal_context["workspace"]
+
+        # generate() collects top rules into adapter._top_rules
+        adapter.generate(minimal_root, ws, minimal_context)
+
+        agents, _ = load_agents(minimal_root)
+        adapter.generate_agents(minimal_root, agents, {})
+
+        files = adapter.generate_project_artifacts(minimal_root, ["dev"], agents)
+
+        claude_md = next(f for f in files if f.rel_path == "CLAUDE.md")
+        # Hard rule text is prepended before the title
+        assert "ALWAYS respond" in claude_md.content
+        # The title should come after the hard rule
+        title_pos = claude_md.content.index("# one-context")
+        hard_pos = claude_md.content.index("ALWAYS respond")
+        assert hard_pos < title_pos
+
+    def test_hard_rules_file_generated(self, minimal_root, minimal_context):
+        from one_context.agents import load_agents
+
+        adapter = get_adapter("claude_code")
+        ws = minimal_context["workspace"]
+        adapter.generate(minimal_root, ws, minimal_context)
+
+        agents, _ = load_agents(minimal_root)
+        adapter.generate_agents(minimal_root, agents, {})
+        files = adapter.generate_project_artifacts(minimal_root, ["dev"], agents)
+
+        hard_rules = next(
+            (f for f in files if f.rel_path == ".claude/adapters/onecxt-hard-rules.md"),
+            None,
+        )
+        assert hard_rules is not None
+        assert "ALWAYS respond" in hard_rules.content
+
+    def test_claude_md_references_hard_rules(self, minimal_root, minimal_context):
+        from one_context.agents import load_agents
+
+        adapter = get_adapter("claude_code")
+        ws = minimal_context["workspace"]
+        adapter.generate(minimal_root, ws, minimal_context)
+
+        agents, _ = load_agents(minimal_root)
+        adapter.generate_agents(minimal_root, agents, {})
+        files = adapter.generate_project_artifacts(minimal_root, ["dev"], agents)
+
+        claude_md = next(f for f in files if f.rel_path == "CLAUDE.md")
+        assert "@.claude/adapters/onecxt-hard-rules.md" in claude_md.content
+
+    def test_inline_rules_exclude_top_placement(self, minimal_root, minimal_context):
+        adapter = get_adapter("claude_code")
+        ws = minimal_context["workspace"]
+        files = adapter.generate(minimal_root, ws, minimal_context)
+
+        content = files[0].content
+        # The soft "Default to minimal output" should NOT appear in the inline
+        # workspace file (it was promoted to top-placement)
+        assert "Default to minimal output" not in content
+
+
 # ---------------------------------------------------------------------------
 # Cursor Adapter
 # ---------------------------------------------------------------------------
@@ -244,6 +390,39 @@ class TestCursorAdapter:
     def test_does_not_support_file_ref(self):
         adapter = get_adapter("cursor")
         assert adapter.supports_file_ref is False
+
+
+class TestCursorTopPlacement:
+    """Tests for top-placement (hard rules) when tone=minimal."""
+
+    def test_hard_rules_mdc_generated(self, minimal_root, minimal_context):
+        from one_context.agents import load_agents
+
+        adapter = get_adapter("cursor")
+        ws = minimal_context["workspace"]
+        adapter.generate(minimal_root, ws, minimal_context)
+
+        agents, _ = load_agents(minimal_root)
+        files = adapter.generate_agents(minimal_root, agents, {})
+
+        hard_rules = next(
+            (f for f in files if f.rel_path == ".cursor/rules/onecxt-hard-rules.mdc"),
+            None,
+        )
+        assert hard_rules is not None
+        assert "alwaysApply: true" in hard_rules.content
+        assert "Respond in ≤2 lines" in hard_rules.content
+
+    def test_inline_rules_exclude_top_placement(self, minimal_root, minimal_context):
+        adapter = get_adapter("cursor")
+        ws = minimal_context["workspace"]
+        files = adapter.generate(minimal_root, ws, minimal_context)
+
+        workspace_mdc = next(
+            f for f in files if f.rel_path == ".cursor/rules/onecxt-dev.mdc"
+        )
+        # The soft "Default to minimal output" should NOT appear inline
+        assert "Default to minimal output" not in workspace_mdc.content
 
 
 # ---------------------------------------------------------------------------

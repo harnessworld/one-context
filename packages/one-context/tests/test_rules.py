@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from one_context.adapters._rules import (
+    AdapterOverride,
     FieldRule,
     _MISSING,
     _resolve,
+    collect_top_rules,
     match_rules,
     render_rules_by_section,
+    resolve_rule_output,
+    resolve_rule_placement,
 )
 
 
@@ -123,3 +127,141 @@ class TestRenderRulesBySection:
         # No heading for default section
         assert "Do A." in text
         assert "##" not in text
+
+    def test_adapter_name_uses_overrides(self):
+        matched = [
+            FieldRule(
+                "output_style.tone", "minimal",
+                "Default to minimal output.",
+                section="Output Style",
+                adapter_overrides={
+                    "claude_code": AdapterOverride(
+                        output="ALWAYS be brief.",
+                        placement="top",
+                    ),
+                },
+            ),
+        ]
+        # With adapter_name, override output is used
+        text = render_rules_by_section(matched, adapter_name="claude_code")
+        assert "ALWAYS be brief." in text
+        assert "Default to minimal" not in text
+
+    def test_adapter_name_without_override(self):
+        matched = [
+            FieldRule(
+                "output_style.tone", "minimal",
+                "Default to minimal output.",
+                section="Output Style",
+            ),
+        ]
+        # Without adapter_overrides, default output is used
+        text = render_rules_by_section(matched, adapter_name="claude_code")
+        assert "Default to minimal output." in text
+
+
+# ---------------------------------------------------------------------------
+# AdapterOverride, resolve_rule_output, resolve_rule_placement
+# ---------------------------------------------------------------------------
+
+class TestAdapterOverride:
+    def test_resolve_output_no_override(self):
+        rule = FieldRule("x", True, "Default text.")
+        assert resolve_rule_output(rule, "claude_code") == "Default text."
+
+    def test_resolve_output_with_override(self):
+        rule = FieldRule(
+            "x", True, "Default text.",
+            adapter_overrides={
+                "claude_code": AdapterOverride(output="Hard text."),
+            },
+        )
+        assert resolve_rule_output(rule, "claude_code") == "Hard text."
+
+    def test_resolve_output_override_for_other_adapter(self):
+        rule = FieldRule(
+            "x", True, "Default text.",
+            adapter_overrides={
+                "cursor": AdapterOverride(output="Cursor text."),
+            },
+        )
+        assert resolve_rule_output(rule, "claude_code") == "Default text."
+
+    def test_resolve_output_none_adapter_name(self):
+        rule = FieldRule(
+            "x", True, "Default text.",
+            adapter_overrides={
+                "claude_code": AdapterOverride(output="Hard text."),
+            },
+        )
+        assert resolve_rule_output(rule, None) == "Default text."
+
+    def test_resolve_output_override_output_is_none(self):
+        rule = FieldRule(
+            "x", True, "Default text.",
+            adapter_overrides={
+                "claude_code": AdapterOverride(output=None, placement="top"),
+            },
+        )
+        # output=None means use default
+        assert resolve_rule_output(rule, "claude_code") == "Default text."
+
+    def test_resolve_placement_no_override(self):
+        rule = FieldRule("x", True, "Text.")
+        assert resolve_rule_placement(rule, "claude_code") == "inline"
+
+    def test_resolve_placement_with_override(self):
+        rule = FieldRule(
+            "x", True, "Text.",
+            adapter_overrides={
+                "claude_code": AdapterOverride(placement="top"),
+            },
+        )
+        assert resolve_rule_placement(rule, "claude_code") == "top"
+
+    def test_resolve_placement_override_for_other_adapter(self):
+        rule = FieldRule(
+            "x", True, "Text.",
+            adapter_overrides={
+                "cursor": AdapterOverride(placement="top"),
+            },
+        )
+        assert resolve_rule_placement(rule, "claude_code") == "inline"
+
+
+# ---------------------------------------------------------------------------
+# collect_top_rules
+# ---------------------------------------------------------------------------
+
+class TestCollectTopRules:
+    def test_collects_top_rules(self):
+        matched = [
+            FieldRule(
+                "output_style.tone", "minimal", "Soft text.",
+                adapter_overrides={
+                    "claude_code": AdapterOverride(output="Hard text.", placement="top"),
+                },
+            ),
+            FieldRule("behavior.plan_first", True, "Plan first."),
+        ]
+        top = collect_top_rules(matched, "claude_code")
+        assert top == ["Hard text."]
+
+    def test_no_top_rules(self):
+        matched = [
+            FieldRule("behavior.plan_first", True, "Plan first."),
+        ]
+        top = collect_top_rules(matched, "claude_code")
+        assert top == []
+
+    def test_uses_adapter_override_output(self):
+        matched = [
+            FieldRule(
+                "output_style.tone", "minimal", "Soft text.",
+                adapter_overrides={
+                    "claude_code": AdapterOverride(output="ALWAYS be brief.", placement="top"),
+                },
+            ),
+        ]
+        top = collect_top_rules(matched, "claude_code")
+        assert top == ["ALWAYS be brief."]
