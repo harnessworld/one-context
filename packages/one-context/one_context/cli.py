@@ -323,6 +323,7 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
     # Trigger adapter registration via side-effect imports
     import one_context.adapters.claude_code  # noqa: F401
     import one_context.adapters.cursor  # noqa: F401
+    import one_context.adapters.hermes  # noqa: F401
     import one_context.adapters.openclaw  # noqa: F401
 
     workspace_ids: list[str]
@@ -397,6 +398,115 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
     for gf in all_generated:
         _emit_file(root, gf, dry_run)
 
+    return 0
+
+
+def _cmd_adapt_install(root: Path, args: argparse.Namespace) -> int:
+    """Install git hooks that auto-run ``onecxt adapt`` after checkout/merge."""
+    import subprocess
+
+    # Find the git directory (works for worktrees too)
+    try:
+        git_dir = subprocess.check_output(
+            ["git", "rev-parse", "--git-dir"],
+            cwd=str(root),
+            stderr=subprocess.PIPE,
+            text=True,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("error: not inside a git repository", file=sys.stderr)
+        return 2
+
+    hooks_dir = root / git_dir / "hooks"
+    hooks_dir.mkdir(parents=True, exist_ok=True)
+
+    # Determine onecxt binary path (cross-platform via shutil.which)
+    import shutil
+    onecxt_path = shutil.which("onecxt") or "onecxt"
+
+    root_arg = str(root.resolve())
+
+    hook_names = ["post-checkout", "post-merge"]
+    installed: list[str] = []
+    skipped: list[str] = []
+
+    for hook_name in hook_names:
+        hook_path = hooks_dir / hook_name
+        target_line = f"{onecxt_path} adapt --all --root {root_arg}"
+
+        # Read existing hook content
+        existing = ""
+        if hook_path.is_file():
+            existing = hook_path.read_text(encoding="utf-8")
+
+        if target_line in existing:
+            skipped.append(hook_name)
+            continue
+
+        # If hook already exists but doesn't have our line, append
+        if existing:
+            # Ensure it's executable and has a shebang
+            new_content = existing.rstrip() + "\n\n# one-context: auto-adapt on pull/checkout\n" + target_line + "\n"
+        else:
+            new_content = f"#!/bin/sh\n\n# one-context: auto-adapt on pull/checkout\n{target_line}\n"
+
+        hook_path.write_text(new_content, encoding="utf-8")
+        hook_path.chmod(hook_path.stat().st_mode | 0o755)
+        installed.append(hook_name)
+
+    if installed:
+        print(f"installed: git hooks {', '.join(installed)} → auto-adapt --all")
+    if skipped:
+        print(f"skipped:   {', '.join(skipped)} (already contains onecxt adapt)")
+    if not installed and not skipped:
+        print("nothing to do")
+    return 0
+
+
+def _cmd_adapt_uninstall(root: Path, args: argparse.Namespace) -> int:
+    """Remove onecxt adapt lines from git hooks."""
+    import subprocess
+
+    try:
+        git_dir = subprocess.check_output(
+            ["git", "rev-parse", "--git-dir"],
+            cwd=str(root),
+            stderr=subprocess.PIPE,
+            text=True,
+        ).strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("error: not inside a git repository", file=sys.stderr)
+        return 2
+
+    hooks_dir = root / git_dir / "hooks"
+    hook_names = ["post-checkout", "post-merge"]
+    removed: list[str] = []
+
+    for hook_name in hook_names:
+        hook_path = hooks_dir / hook_name
+        if not hook_path.is_file():
+            continue
+        content = hook_path.read_text(encoding="utf-8")
+        lines = content.split("\n")
+        filtered = [
+            ln for ln in lines
+            if "onecxt adapt" not in ln and "one-context: auto-adapt" not in ln
+        ]
+        # Remove trailing blank lines left by removal
+        while filtered and not filtered[-1].strip():
+            filtered.pop()
+        new_content = "\n".join(filtered)
+        if new_content != content:
+            if new_content.strip() == "#!/bin/sh" or not new_content.strip():
+                hook_path.unlink()
+            else:
+                hook_path.write_text(new_content + "\n", encoding="utf-8")
+            removed.append(hook_name)
+
+    if removed:
+        print(f"removed: onecxt adapt from {', '.join(removed)}")
+    else:
+        print("no onecxt adapt hooks found")
     return 0
 
 
@@ -542,7 +652,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--only",
         metavar="ADAPTER",
         default=None,
-        help="Only run a specific adapter (e.g. cursor, claude_code, openclaw)",
+        help="Only run a specific adapter (e.g. cursor, claude_code, hermes, openclaw)",
     )
     p_adapt.add_argument(
         "--dry-run",
@@ -557,6 +667,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Check that generated files are up-to-date (exit 1 if not). Does not write.",
     )
     p_adapt.set_defaults(func=_cmd_adapt)
+
+    p_adapt_install = sub.add_parser(
+        "adapt-install",
+        help="Install git hooks to auto-run onecxt adapt after checkout/merge",
+    )
+    p_adapt_install.set_defaults(func=_cmd_adapt_install)
+
+    p_adapt_uninstall = sub.add_parser(
+        "adapt-uninstall",
+        help="Remove onecxt adapt git hooks installed by adapt-install",
+    )
+    p_adapt_uninstall.set_defaults(func=_cmd_adapt_uninstall)
 
     p_agent = sub.add_parser("agent", help="Agent commands")
     agent_sub = p_agent.add_subparsers(dest="agent_command", required=True)

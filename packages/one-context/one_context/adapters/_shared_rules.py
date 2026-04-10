@@ -99,6 +99,12 @@ PROFILE_RULES: list[FieldRule] = [
                 "No restating user input. Lead with the answer.",
                 placement="top",
             ),
+            "hermes": AdapterOverride(
+                output="ALWAYS respond in ≤2 sentences. No filler. "
+                "No pleasantries. No restating the question. "
+                "Lead with the answer.",
+                placement="top",
+            ),
         },
     ),
     FieldRule(

@@ -11,6 +11,7 @@ import pytest
 # Trigger registration side effects
 import one_context.adapters.claude_code  # noqa: F401
 import one_context.adapters.cursor  # noqa: F401
+import one_context.adapters.hermes  # noqa: F401
 import one_context.adapters.openclaw  # noqa: F401
 
 from one_context.adapters import ADAPTERS, GeneratedFile, get_adapter, list_adapters
@@ -198,6 +199,7 @@ class TestRegistry:
         names = list_adapters()
         assert "claude_code" in names
         assert "cursor" in names
+        assert "hermes" in names
         assert "openclaw" in names
 
     def test_get_adapter(self):
@@ -344,6 +346,159 @@ class TestClaudeCodeTopPlacement:
         # The soft "Default to minimal output" should NOT appear in the inline
         # workspace file (it was promoted to top-placement)
         assert "Default to minimal output" not in content
+
+
+# ---------------------------------------------------------------------------
+# Hermes Adapter
+# ---------------------------------------------------------------------------
+
+class TestHermesAdapter:
+    def test_generates_file(self, adapter_root, dev_context):
+        adapter = get_adapter("hermes")
+        ws = dev_context["workspace"]
+        files = adapter.generate(adapter_root, ws, dev_context)
+
+        assert len(files) == 1
+        gf = files[0]
+        assert isinstance(gf, GeneratedFile)
+        assert gf.rel_path == ".hermes/onecxt-dev.md"
+
+    def test_content_has_workspace_header(self, adapter_root, dev_context):
+        adapter = get_adapter("hermes")
+        ws = dev_context["workspace"]
+        files = adapter.generate(adapter_root, ws, dev_context)
+        content = files[0].content
+
+        assert "# one-context" in content
+        assert "`dev`" in content
+
+    def test_content_has_profile_rules(self, adapter_root, dev_context):
+        adapter = get_adapter("hermes")
+        ws = dev_context["workspace"]
+        files = adapter.generate(adapter_root, ws, dev_context)
+        content = files[0].content
+
+        assert "Profile: Default Coding" in content
+        assert "without" in content.lower() or "directly" in content.lower()
+
+    def test_content_inlines_knowledge(self, adapter_root, dev_context):
+        adapter = get_adapter("hermes")
+        ws = dev_context["workspace"]
+        files = adapter.generate(adapter_root, ws, dev_context)
+        content = files[0].content
+
+        # Hermes inlines knowledge content
+        assert "Conventions" in content
+        assert "<!-- source:" in content
+
+    def test_does_not_support_file_ref(self):
+        adapter = get_adapter("hermes")
+        assert adapter.supports_file_ref is False
+
+    def test_content_has_focus_areas(self, adapter_root, dev_context):
+        adapter = get_adapter("hermes")
+        ws = dev_context["workspace"]
+        files = adapter.generate(adapter_root, ws, dev_context)
+        content = files[0].content
+
+        assert "Focus Areas" in content
+        assert "feature development" in content
+
+    def test_generate_project_artifacts_writes_hermes_md(self, adapter_root):
+        from one_context.agents import load_agents
+
+        adapter = get_adapter("hermes")
+        ws = self._get_dev_workspace(adapter_root)
+        ctx = self._get_dev_context(adapter_root)
+        adapter.generate(adapter_root, ws, ctx)
+
+        agents, _ = load_agents(adapter_root)
+        adapter.generate_agents(adapter_root, agents, {})
+        files = adapter.generate_project_artifacts(adapter_root, ["dev"], agents)
+
+        hermes_md = next(f for f in files if f.rel_path == ".hermes.md")
+        assert hermes_md is not None
+        # Should contain workspace content
+        assert "Development workspace" in hermes_md.content
+        # Should contain agent content
+        assert "PM Agent" in hermes_md.content
+
+    @staticmethod
+    def _get_dev_workspace(root: Path) -> dict:
+        from one_context.context import build_workspace_context
+        ctx = build_workspace_context(root, "dev")
+        return ctx["workspace"]
+
+    @staticmethod
+    def _get_dev_context(root: Path) -> dict:
+        from one_context.context import build_workspace_context
+        return build_workspace_context(root, "dev")
+
+
+class TestHermesTopPlacement:
+    """Tests for top-placement (hard rules) when tone=minimal."""
+
+    def test_hard_rules_prepended_to_hermes_md(self, minimal_root, minimal_context):
+        from one_context.agents import load_agents
+
+        adapter = get_adapter("hermes")
+        ws = minimal_context["workspace"]
+        adapter.generate(minimal_root, ws, minimal_context)
+
+        agents, _ = load_agents(minimal_root)
+        adapter.generate_agents(minimal_root, agents, {})
+        files = adapter.generate_project_artifacts(minimal_root, ["dev"], agents)
+
+        hermes_md = next(f for f in files if f.rel_path == ".hermes.md")
+        assert "ALWAYS respond" in hermes_md.content
+        # Hard rule should come before the title
+        title_pos = hermes_md.content.index("# one-context")
+        hard_pos = hermes_md.content.index("ALWAYS respond")
+        assert hard_pos < title_pos
+
+    def test_inline_rules_exclude_top_placement(self, minimal_root, minimal_context):
+        adapter = get_adapter("hermes")
+        ws = minimal_context["workspace"]
+        files = adapter.generate(minimal_root, ws, minimal_context)
+        content = files[0].content
+        assert "Default to minimal output" not in content
+
+
+class TestHermesGenerateAgents:
+    def test_generates_agent_file(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("hermes")
+        files = adapter.generate_agents(root, agents, profiles)
+        assert len(files) >= 1
+        assert any("pm.md" in gf.rel_path for gf in files)
+
+    def test_content_has_instructions(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("hermes")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "PM agent" in content or "PM Agent" in content
+
+    def test_content_has_artifact_ownership(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("hermes")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "Artifact Ownership" in content
+
+    def test_content_has_profile_section(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("hermes")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "Profile" in content
+
+    def test_inlines_knowledge(self, agents_and_profiles):
+        root, agents, profiles = agents_and_profiles
+        adapter = get_adapter("hermes")
+        files = adapter.generate_agents(root, agents, profiles)
+        content = files[0].content
+        assert "Conventions" in content
 
 
 # ---------------------------------------------------------------------------
@@ -697,15 +852,17 @@ class TestOpenClawGenerateAgents:
 # ---------------------------------------------------------------------------
 
 class TestSharedRulesIdentity:
-    """Verify all three adapters reference the same PROFILE_RULES object."""
+    """Verify all adapters reference the same PROFILE_RULES object."""
 
     def test_all_adapters_share_same_rules(self):
         from one_context.adapters._shared_rules import PROFILE_RULES as shared
         from one_context.adapters.claude_code import PROFILE_RULES as cc
         from one_context.adapters.cursor import PROFILE_RULES as cu
+        from one_context.adapters.hermes import PROFILE_RULES as hm
         from one_context.adapters.openclaw import PROFILE_RULES as oc
         assert cc is shared
         assert cu is shared
+        assert hm is shared
         assert oc is shared
 
     def test_shared_rules_count(self):
@@ -778,6 +935,21 @@ class TestGoldenOutput:
         files = adapter.generate_project_artifacts(root, ["dev"], agents)
         data = json.loads(files[0].content)
         assert "_generated" in data
+
+    def test_hermes_workspace_has_marker(self, adapter_root, dev_context):
+        adapter = get_adapter("hermes")
+        ws = dev_context["workspace"]
+        files = adapter.generate(adapter_root, ws, dev_context)
+        content = files[0].content
+        assert "GENERATED by onecxt adapt" in content
+
+    def test_hermes_workspace_has_unified_rules(self, adapter_root, dev_context):
+        adapter = get_adapter("hermes")
+        ws = dev_context["workspace"]
+        files = adapter.generate(adapter_root, ws, dev_context)
+        content = files[0].content
+        assert "You may edit code directly without creating a formal plan first." in content
+        assert "Write targeted tests for the specific changes you make." in content
 
 
 # ---------------------------------------------------------------------------
