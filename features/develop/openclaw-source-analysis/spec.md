@@ -43,7 +43,7 @@ updated: "2026-04-02"
 
 - **仓库 id**（`meta/repos.yaml`）: one-context
 - **分支 / PR**: —
-- **主要路径或模块**: `knowledge/standards/openclaw-architecture.md`
+- **主要路径或模块**: `knowledge/references/openclaw-architecture.md`
 
 # 关联
 

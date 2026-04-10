@@ -1,13 +1,15 @@
 # Tools
 
-工具相关的参考文档，存放各类开发工具的 CLI 用法、配置说明等。
+Tool-related reference documents — CLI usage, configuration, and integration notes.
 
-## 目录结构
+## Principles
 
-- `cursor-cli.md` — Cursor 命令行工具参考
+- Keep documentation tool-agnostic for reuse across AI tools.
+- Record commonly used commands and config, not full vendor docs.
+- Adapters under `one_context.adapters` translate canonical guidance into tool-native formats.
 
-## 设计原则
+## Status
 
-- 工具文档保持工具无关（tool-agnostic），便于多种 AI 工具复用
-- 记录常用的 CLI 命令和配置，而非完整文档
-- 未来可扩展支持其他工具（Claude Code、Codex 等）
+This directory is currently **empty** — awaiting tool reference pages (e.g. CLI quick-reference, editor configuration, CI integration).
+
+> Previously listed `cursor-cli.md` which did not exist. Removed pending actual content.

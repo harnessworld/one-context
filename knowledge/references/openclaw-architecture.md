@@ -1,4 +1,4 @@
-# OpenClaw 源码架构解析
+# OpenClaw Source Architecture — 源码架构解析
 
 > 基于对 [OpenClaw](https://github.com/openclaw/openclaw) 项目源码及权威技术文章的系统性梳理，提炼出对 agent 建设有指导意义的架构模式和设计理念。
 
