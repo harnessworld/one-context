@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, initial-scale=1">
+<title>Hermes Agent · 豆包AI播客</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Noto+Sans+SC:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg0:#050408;--bg1:#0c0a12;--ink:#f8f6ff;--ink2:#e4e0f0;--muted:#8a8598;
+  --hermes:#e35205;--hermes-bright:#ff6a1a;--hermes-soft:rgba(227,82,5,0.22);
+  --blue:#5eb3d4;--cyan:#22d3ee;--indigo:#8b7fb8;--gold:#c9a227;--rose:#e07a7a;--emerald:#5cb88a;
+  --magenta:#e879f9;
+  --cream:#f5efe6;--champagne:#d4c4a8;
+  --glass:rgba(12,10,20,0.82);--stroke:rgba(200,210,255,0.14);--stroke2:rgba(160,170,220,0.08);
+  --viz-scale:1.12;
+  --noise:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;
+  font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei','Helvetica Neue',system-ui,sans-serif;
+  color:var(--ink);background:var(--bg0);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+#presentation{position:absolute;width:1920px;height:1080px;transform-origin:0 0;overflow:hidden;}
+.biz-bg{position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 55% 45% at 15% 25%, rgba(34,211,238,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 88% 75%, rgba(232,121,249,0.08) 0%, transparent 48%),
+    radial-gradient(ellipse 90% 70% at 8% 15%, rgba(227,82,5,0.2) 0%, transparent 42%),
+    radial-gradient(ellipse 70% 55% at 92% 8%, rgba(201,162,39,0.12) 0%, transparent 48%),
+    radial-gradient(ellipse 100% 85% at 50% -20%, rgba(94,179,212,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 50% at 50% 110%, rgba(227,82,5,0.06) 0%, transparent 45%),
+    linear-gradient(168deg, var(--bg0) 0%, var(--bg1) 42%, #030206 100%);}
+.biz-vignette{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse 72% 68% at 50% 42%, transparent 28%, rgba(0,0,0,0.55) 100%);}
+.biz-grid{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:0.22;
+  background-image:
+    linear-gradient(rgba(34,211,238,0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,211,238,0.07) 1px, transparent 1px),
+    linear-gradient(rgba(227,82,5,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(227,82,5,0.04) 1px, transparent 1px);
+  background-size:64px 64px,64px 64px,16px 16px,16px 16px;
+  mask-image:radial-gradient(ellipse 88% 78% at 50% 48%, #000 22%, transparent 70%);
+  -webkit-mask-image:radial-gradient(ellipse 88% 78% at 50% 48%, #000 22%, transparent 70%);}
+.biz-top{position:absolute;top:0;left:0;right:0;height:10px;z-index:4;
+  background:linear-gradient(90deg, #0a0810 0%, var(--cyan) 12%, var(--hermes) 35%, var(--gold) 50%, var(--hermes) 65%, var(--magenta) 88%, #0a0810 100%);
+  box-shadow:0 0 40px rgba(227,82,5,0.5),0 0 80px rgba(34,211,238,0.15),0 4px 0 rgba(0,0,0,0.4);}
+.deco-scarf{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.22;
+  background:
+    repeating-linear-gradient(-32deg, transparent, transparent 38px, rgba(227,82,5,0.04) 38px, rgba(227,82,5,0.04) 40px),
+    repeating-linear-gradient(32deg, transparent, transparent 52px, rgba(201,162,39,0.03) 52px, rgba(201,162,39,0.03) 54px);}
+.deco-corner{position:absolute;width:min(420px,38vw);height:min(420px,38vw);pointer-events:none;z-index:2;opacity:0.35;}
+.deco-corner.tr{top:-40px;right:-40px;}
+.deco-corner.bl{bottom:60px;left:-50px;transform:rotate(180deg);}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;z-index:2;padding:40px 44px 118px;
+  perspective:1850px;perspective-origin:50% 42%;isolation:isolate;}
+.slide.active{opacity:1;pointer-events:auto;}
+/* 静态微粒 + 扫描线（截图友好，无动画） */
+.slide::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;opacity:1;
+  background-image:var(--noise),
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.045) 3px, rgba(0,0,0,0.045) 6px);
+  background-size:280px 280px,100% 100%;
+  mix-blend-mode:overlay;}
+/* 四角的科技框线 */
+.slide::after{content:'';position:absolute;inset:36px;z-index:12;pointer-events:none;
+  background:
+    linear-gradient(var(--cyan),var(--cyan)) left top / 140px 3px no-repeat,
+    linear-gradient(var(--cyan),var(--cyan)) left top / 3px 140px no-repeat,
+    linear-gradient(var(--hermes-bright),var(--hermes-bright)) right top / 140px 3px no-repeat,
+    linear-gradient(var(--hermes-bright),var(--hermes-bright)) right top / 3px 140px no-repeat,
+    linear-gradient(var(--gold),var(--gold)) right bottom / 140px 3px no-repeat,
+    linear-gradient(var(--gold),var(--gold)) right bottom / 3px 140px no-repeat,
+    linear-gradient(var(--magenta),var(--magenta)) left bottom / 140px 3px no-repeat,
+    linear-gradient(var(--magenta),var(--magenta)) left bottom / 3px 140px no-repeat;
+  opacity:0.85;
+  filter:drop-shadow(0 0 12px rgba(34,211,238,0.35));}
+.wrap{position:relative;z-index:15;width:100%;max-width:1860px;display:flex;flex-direction:column;align-items:center;text-align:center;
+  transform-style:preserve-3d;transform:rotateX(1.8deg);}
+/* 左右分栏：左/右图示 + 文案（咨询风） */
+.wrap-split{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;text-align:left;max-width:1860px;width:100%;
+  transform:rotateX(1.1deg);}
+.wrap-split .txt{display:flex;flex-direction:column;justify-content:center;gap:20px;}
+.wrap-split .txt.center{text-align:center;align-items:center;}
+.viz-box{
+  border-radius:28px;padding:32px 28px;
+  background:linear-gradient(155deg, rgba(255,255,255,0.1) 0%, rgba(20,16,40,0.5) 45%, rgba(8,6,18,0.85) 100%);
+  border:1px solid rgba(34,211,238,0.28);
+  box-shadow:
+    0 0 0 1px rgba(227,82,5,0.12) inset,
+    0 32px 80px rgba(0,0,0,0.65),
+    0 0 60px rgba(34,211,238,0.08),
+    0 0 100px rgba(227,82,5,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.14);
+  min-height:460px;display:flex;align-items:center;justify-content:center;
+  transform-style:preserve-3d;
+  transform:rotateY(-5.5deg) rotateX(3.5deg) translateZ(28px);}
+.viz-box.viz-short{
+  transform:rotateY(-2.8deg) rotateX(2deg) translateZ(18px);}
+.wrap-split .txt{transform:translateZ(12px);transform-style:preserve-3d;}
+.viz-box svg{width:100%;height:auto;max-height:560px;transform:scale(var(--viz-scale));transform-origin:center center;
+  filter:drop-shadow(0 8px 24px rgba(0,0,0,0.4));}
+.pill{display:inline-flex;align-items:center;padding:14px 32px;border-radius:999px;font-size:24px;font-weight:800;
+  letter-spacing:0.12em;margin-bottom:12px;align-self:flex-start;text-transform:uppercase;
+  background:linear-gradient(135deg, rgba(227,82,5,0.22), rgba(34,211,238,0.08));
+  color:#ffe8dc;border:1px solid rgba(34,211,238,0.35);
+  box-shadow:0 0 28px rgba(227,82,5,0.25),0 0 40px rgba(34,211,238,0.08), inset 0 1px 0 rgba(255,255,255,0.12);}
+.pill-warn{background:rgba(245,158,11,0.12);color:#fde68a;border-color:rgba(251,191,36,0.45);}
+.pill-ok{background:rgba(52,211,153,0.1);color:#a7f3d0;border-color:rgba(52,211,153,0.4);}
+.pill-muted{background:rgba(148,163,184,0.08);color:#cbd5e1;border-color:rgba(148,163,184,0.25);}
+.title{font-size:96px;font-weight:700;line-height:1.1;letter-spacing:-0.02em;color:var(--ink);
+  font-family:'Cormorant Garamond','Noto Sans SC',serif;
+  text-shadow:
+    0 0 1px rgba(255,255,255,0.9),
+    0 0 42px rgba(34,211,238,0.35),
+    0 0 80px rgba(139,127,184,0.2),
+    0 10px 48px rgba(0,0,0,0.75);}
+.title-sm{font-size:76px;line-height:1.15;}
+.title-lg{font-size:128px;line-height:1.02;}
+.title .hl{background:linear-gradient(118deg,#fff4e6,var(--hermes-bright),var(--gold),#fde68a);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:none;
+  filter:drop-shadow(0 0 20px rgba(227,82,5,0.55)) drop-shadow(0 0 48px rgba(201,162,39,0.35)) drop-shadow(0 4px 24px rgba(0,0,0,0.8));}
+.accent{color:#7dd3fc;font-weight:900;text-shadow:0 0 24px rgba(34,211,238,0.45);}
+.accent-w{color:#fde68a;font-weight:900;text-shadow:0 0 22px rgba(201,162,39,0.4);}
+.accent-r{color:#fca5a5;font-weight:900;text-shadow:0 0 20px rgba(248,113,113,0.35);}
+.sub{font-size:56px;font-weight:600;line-height:1.42;color:var(--ink2);max-width:820px;}
+.sub-wide{max-width:980px;}
+.sub strong{color:#fff;font-weight:800;}
+.lede{font-size:60px;font-weight:700;color:#f0ecff;line-height:1.38;max-width:900px;
+  text-shadow:0 0 32px rgba(139,127,184,0.25),0 4px 24px rgba(0,0,0,0.45);}
+.part-row{display:flex;align-items:baseline;gap:24px;margin-bottom:10px;}
+.part-num{font-size:min(220px, 12.5vw);font-weight:900;line-height:1;
+  background:linear-gradient(185deg,#ecfeff 0%,var(--cyan) 35%,var(--gold) 70%,rgba(148,163,184,0.5) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 40px rgba(34,211,238,0.25)) drop-shadow(0 12px 32px rgba(0,0,0,0.55));}
+.part-tag{font-size:32px;font-weight:800;letter-spacing:0.25em;color:var(--muted);}
+.part-title{font-size:38px;font-weight:700;color:#e2e8f0;letter-spacing:0.1em;margin-bottom:10px;}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:28px;width:100%;max-width:1780px;margin-top:22px;}
+.card{
+  border-radius:24px;padding:34px 38px;
+  background:linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(14,12,28,0.88) 100%);
+  backdrop-filter:blur(20px);border:1px solid rgba(34,211,238,0.18);
+  box-shadow:0 28px 64px rgba(0,0,0,0.55),0 0 40px rgba(34,211,238,0.06), inset 0 1px 0 rgba(255,255,255,0.12);}
+.card-a{border-left:8px solid var(--rose);}
+.card-b{border-left:8px solid var(--emerald);}
+.card-h{font-size:36px;font-weight:900;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px;}
+.card-a .card-h{color:#fecaca;}
+.card-b .card-h{color:#a7f3d0;}
+.card-p{font-size:44px;line-height:1.48;color:var(--ink2);font-weight:600;}
+.stat-row{display:flex;gap:24px;width:100%;max-width:1800px;margin-top:28px;justify-content:center;flex-wrap:wrap;}
+.stat{flex:1;min-width:280px;max-width:520px;padding:34px 26px;border-radius:24px;text-align:center;
+  background:linear-gradient(168deg, rgba(30,28,48,0.95) 0%, rgba(8,6,20,0.98) 100%);
+  border:1px solid rgba(34,211,238,0.15);
+  box-shadow:0 32px 64px rgba(0,0,0,0.6),0 0 50px rgba(227,82,5,0.05), inset 0 1px 0 rgba(255,255,255,0.1);}
+.stat-num{font-size:120px;font-weight:900;line-height:1;letter-spacing:-0.04em;}
+.stat-num.c1{color:#7dd3fc;text-shadow:0 0 50px rgba(34,211,238,0.65),0 0 100px rgba(94,179,212,0.25);}
+.stat-num.c2{color:#fde68a;text-shadow:0 0 48px rgba(201,162,39,0.55),0 0 90px rgba(227,82,5,0.2);}
+.stat-num.c3{color:#86efac;text-shadow:0 0 40px rgba(92,184,138,0.45);}
+.stat-desc{font-size:32px;color:#e2e8f0;margin-top:14px;font-weight:600;line-height:1.35;}
+.strip{width:100%;max-width:1620px;margin-top:22px;padding:32px 42px;border-radius:22px;
+  background:linear-gradient(90deg, rgba(227,82,5,0.18), rgba(201,162,39,0.1));
+  border:1px solid rgba(227,82,5,0.45);border-left:8px solid var(--hermes);}
+.strip-t{font-size:52px;font-weight:800;color:#ecfeff;line-height:1.42;
+  text-shadow:0 0 24px rgba(34,211,238,0.25);}
+.foot-hint{width:100%;max-width:1480px;margin-top:18px;padding:22px 32px;border-radius:16px;font-size:34px;font-weight:600;color:#e2e8f0;
+  background:rgba(15,23,42,0.72);border:1px dashed rgba(148,163,184,0.4);}
+ul.bul{list-style:none;margin-top:14px;max-width:880px;}
+ul.bul li{font-size:44px;color:var(--ink2);line-height:1.48;padding-left:1.25em;margin-bottom:14px;position:relative;font-weight:600;}
+ul.bul li::before{content:'';position:absolute;left:0;top:0.42em;width:18px;height:18px;border-radius:5px;
+  background:linear-gradient(135deg,var(--hermes),var(--gold));
+  box-shadow:0 0 12px rgba(227,82,5,0.45);}
+.badge-line{display:inline-flex;margin-top:18px;padding:20px 42px;border-radius:999px;font-size:40px;font-weight:800;color:#e0e7ff;
+  background:linear-gradient(135deg, rgba(139,127,184,0.28), rgba(34,211,238,0.1));
+  border:1px solid rgba(167,139,250,0.5);
+  box-shadow:0 0 40px rgba(139,127,184,0.22),0 0 60px rgba(34,211,238,0.06), inset 0 1px 0 rgba(255,255,255,0.12);}
+.ref{font-size:42px;color:#cbd5e1;margin-top:18px;line-height:1.5;max-width:960px;font-weight:550;}
+/* 横向条形图 */
+.bchart{width:100%;max-width:720px;}
+.bchart-row{display:flex;align-items:center;gap:18px;margin-bottom:20px;}
+.bchart-row span{flex:0 0 132px;font-size:26px;font-weight:700;color:#cbd5e1;text-align:right;}
+.bchart-bar{flex:1;height:44px;border-radius:12px;background:rgba(30,41,59,0.95);overflow:hidden;border:1px solid var(--stroke2);}
+.bchart-bar i{display:block;height:100%;border-radius:12px;background:linear-gradient(90deg,var(--blue),var(--indigo));}
+.bchart-row:nth-child(2) .bchart-bar i{background:linear-gradient(90deg,#fbbf24,#f59e0b);width:85%!important;}
+.bchart-row:nth-child(3) .bchart-bar i{background:linear-gradient(90deg,var(--emerald),#10b981);width:70%!important;}
+#progress{position:fixed;bottom:0;left:0;height:9px;background:linear-gradient(90deg,#050308,var(--cyan),var(--hermes),var(--gold),var(--magenta));z-index:999;
+  box-shadow:0 0 24px rgba(227,82,5,0.4);}
+#pageNum{position:absolute;bottom:36px;right:48px;font-size:26px;font-weight:800;letter-spacing:0.12em;
+  color:#a5f3fc;padding:10px 22px;border-radius:12px;z-index:20;
+  background:rgba(8,6,18,0.75);border:1px solid rgba(34,211,238,0.35);
+  box-shadow:0 0 24px rgba(34,211,238,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+  font-variant-numeric:tabular-nums;}
+.caption{font-size:36px;color:var(--muted);margin-top:10px;text-align:center;}
+
+.pill-purple{background:rgba(129,140,246,0.14);color:#ddd6fe;border-color:rgba(167,139,250,0.45);}
+.sub-compact{font-size:40px;font-weight:600;line-height:1.48;color:var(--ink2);max-width:1520px;text-align:left;
+  text-shadow:0 2px 20px rgba(0,0,0,0.5);}
+.sub-compact strong{color:#fff;font-weight:800;
+  text-shadow:0 0 18px rgba(255,255,255,0.15);}
+.viz-tall{min-height:520px;}
+.viz-short{min-height:280px;max-width:900px;margin:0 auto;}
+/* 成片截图：禁止过渡/动画，避免半帧 */
+#presentation .slide,#presentation .slide *,#presentation .wrap,#presentation .viz-box{
+  animation:none!important;transition:none!important;}
+
+</style>
+</head>
+<body>
+<div id="progress" style="width:0%"></div>
+<div id="presentation">
+<div class="slide active" id="slide-0">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill pill-muted">豆包 AI 播客 · 讲稿可视化</div>
+      <div class="title title-lg">Hermes<br><span class="hl">Agent</span></div>
+          <p class="sub sub-compact">欢迎收听豆包AI播客节目。</p>
+          <p class="sub sub-compact">请不吝点赞 订阅 转发 打赏支持明镜与点点栏目</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 420 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hOr" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7a3a"/><stop offset="55%" stop-color="#e35205"/><stop offset="100%" stop-color="#9a3200"/></linearGradient>
+          <linearGradient id="hGd" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8a7030"/><stop offset="100%" stop-color="#e8d5a8"/></linearGradient>
+          <filter id="hSh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#e35205" flood-opacity="0.35"/></filter>
+        </defs>
+        <rect x="16" y="16" width="388" height="348" rx="28" fill="rgba(26,24,22,0.65)" stroke="url(#hOr)" stroke-width="2"/>
+        <path d="M16 52h388M16 328h388" stroke="url(#hGd)" stroke-width="1" opacity="0.5"/>
+        <g filter="url(#hSh)">
+          <path d="M210 78v224M140 78c-38 0-62 38-62 86s24 86 62 86h70M280 78c38 0 62 38 62 86s-24 86-62 86h-70" fill="none" stroke="url(#hOr)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <ellipse cx="320" cy="92" rx="56" ry="28" fill="none" stroke="rgba(201,162,39,0.45)" stroke-width="2" transform="rotate(-18 320 92)"/>
+        <ellipse cx="98" cy="268" rx="48" ry="22" fill="none" stroke="rgba(227,82,5,0.25)" stroke-width="2" transform="rotate(22 98 268)"/>
+        <circle cx="210" cy="190" r="6" fill="#c9a227"/>
+        <text x="210" y="352" text-anchor="middle" fill="#9c958a" font-size="13" font-family="Cormorant Garamond,serif" letter-spacing="0.35em">CRAFT · AGENT</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-1">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+    <div class="pill pill-ok">开场</div>
+    <div class="title title-sm">本期聊聊 <span class="hl">Hermes Agent</span></div>
+        <p class="sub sub-compact">Hello 大家好,欢迎收听。</p>
+        <p class="sub sub-compact">我们的播客啊,今天咱们要聊一聊</p>
+        <p class="sub sub-compact">最近技术圈特别火的一个东西啊,叫Hermes Agent。</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="micG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e35205"/><stop offset="100%" stop-color="#c9a227"/></linearGradient></defs>
+        <rect x="24" y="24" width="352" height="292" rx="22" fill="rgba(20,18,16,0.5)" stroke="rgba(227,82,5,0.35)"/>
+        <path d="M200 68c-32 0-58 26-58 58v52c0 32 26 58 58 58s58-26 58-58v-52c0-32-26-58-58-58z" fill="none" stroke="url(#micG)" stroke-width="5"/>
+        <path d="M200 236v36M168 272h64" stroke="#e8e4dc" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="200" cy="126" r="10" fill="#c9a227" opacity="0.9"/>
+        <path d="M88 118 Q200 48 312 118" fill="none" stroke="rgba(201,162,39,0.4)" stroke-width="2" stroke-dasharray="8 6"/>
+        <text x="200" y="312" text-anchor="middle" fill="#9c958a" font-size="14" font-weight="700">AI 播客 · 技术热话</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-2">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill pill-warn">悬念</div>
+      <div class="title title-sm">开源 · <span class="accent-w">自动生成技能</span></div>
+          <p class="sub sub-compact">这个东西到底是个什么来头,为什么?</p>
+          <p class="sub sub-compact">他一开源就能够引来这么多开发者的关注,说他能够自动生成技能。</p>
+          <p class="sub sub-compact">这东西到底有多神奇?</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="qGlow" cx="50%" cy="40%"><stop offset="0%" stop-color="#e35205" stop-opacity="0.45"/><stop offset="100%" stop-color="#e35205" stop-opacity="0"/></radialGradient></defs>
+        <rect x="32" y="40" width="336" height="240" rx="22" fill="rgba(227,82,5,0.06)" stroke="rgba(201,162,39,0.5)"/>
+        <circle cx="200" cy="140" r="72" fill="url(#qGlow)"/>
+        <text x="200" y="158" text-anchor="middle" fill="#ffd4bf" font-size="72" font-family="Cormorant Garamond,serif" font-weight="700">?</text>
+        <path d="M96 248h208" stroke="rgba(227,82,5,0.4)" stroke-width="2" stroke-dasharray="6 8"/>
+        <text x="200" y="278" text-anchor="middle" fill="#c9a227" font-size="17" font-weight="800" letter-spacing="0.2em">开源 · 自动生成技能</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-3">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill pill-warn">痛点</div>
+      <div class="title title-sm">用 <span class="accent-r">OpenClaw</span> 时</div>
+          <p class="sub sub-compact">说到这个我真的是深有体会,</p>
+          <p class="sub sub-compact">因为之前我用那个<strong>OpenClaw</strong>的时候,</p>
+          <p class="sub sub-compact">就是这个插件啊什么的,虽然说很多,</p>
+          <p class="sub sub-compact">但是真的用起来特别麻烦,</p>
+          <p class="sub sub-compact">就是你每一次都要去手动的配置这个技能啊,</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="44" y="56" width="312" height="188" rx="18" fill="rgba(224,122,122,0.08)" stroke="#c45c5c"/>
+        <g stroke="#e8e4dc" stroke-width="3" fill="none" stroke-linecap="round">
+          <rect x="88" y="96" width="52" height="52" rx="6"/><rect x="174" y="96" width="52" height="52" rx="6"/><rect x="260" y="96" width="52" height="52" rx="6"/>
+          <path d="M114 148v28M200 148v28M286 148v28"/>
+        </g>
+        <text x="200" y="228" text-anchor="middle" fill="#f0c4c4" font-size="20" font-weight="800">手动拧每一颗螺丝</text>
+        <text x="200" y="258" text-anchor="middle" fill="#9c958a" font-size="16">插件多 · 配置繁</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-4">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+    <div class="pill pill-warn">重复劳动</div>
+    <div class="title title-sm">周报也要<span class="accent-r">重来一遍</span></div>
+        <p class="sub sub-compact">然后你每周,比如说你要写周报,</p>
+        <p class="sub sub-compact">你都要重新来一遍,</p>
+        <p class="sub sub-compact">这个事情真的是让我特别头大。</p>
+    <div class="strip" style="margin-top:24px;"><div class="strip-t">配置技能 · 每次从零开始</div></div>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 380 320" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#e35205"/></marker></defs>
+        <circle cx="190" cy="100" r="36" fill="rgba(227,82,5,0.2)" stroke="#e35205" stroke-width="3"/>
+        <text x="190" y="108" text-anchor="middle" fill="#ffd4bf" font-size="14" font-weight="800">配置</text>
+        <path d="M190 136v40" stroke="#c9a227" stroke-width="3" marker-end="url(#arr)"/>
+        <circle cx="190" cy="210" r="36" fill="rgba(201,162,39,0.15)" stroke="#c9a227" stroke-width="3"/>
+        <text x="190" y="218" text-anchor="middle" fill="#f0d78c" font-size="13" font-weight="800">周报</text>
+        <path d="M250 210 A80 80 0 1 1 130 210" fill="none" stroke="rgba(224,122,122,0.7)" stroke-width="3" stroke-dasharray="10 8"/>
+        <text x="190" y="288" text-anchor="middle" fill="#9c958a" font-size="15" font-weight="600">循环 · 无沉淀</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-5">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+    <div class="part-row" style="justify-content:flex-start;"><span class="part-tag">PART</span><span class="part-num">01</span></div>
+    <div class="part-title" style="text-align:left;width:100%;">设计理念</div>
+    <div class="title title-sm"><span class="hl">Hermes Agent</span> 和 OpenClaw</div>
+        <p class="sub sub-compact">咱们先来讲第一个,</p>
+        <p class="sub sub-compact">就是这个<strong>Hermes Agent</strong>和<strong>OpenClaw</strong>,</p>
+        <p class="sub sub-compact">他们在核心的设计理念上面的差别。</p>
+        <p class="sub sub-compact">你觉得这两个东西最大的不一样是啥?</p>
+        <p class="sub sub-compact">这两个我觉得就完全是两个路数,</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
+        <rect x="28" y="32" width="344" height="296" rx="24" fill="rgba(20,18,16,0.55)" stroke="rgba(227,82,5,0.3)"/>
+        <text x="200" y="78" text-anchor="middle" fill="#c9a227" font-size="16" font-weight="800" letter-spacing="0.35em">PART 01</text>
+        <rect x="56" y="108" width="130" height="100" rx="14" fill="rgba(94,179,212,0.12)" stroke="#5eb3d4" stroke-width="2"/>
+        <text x="121" y="168" text-anchor="middle" fill="#b8dfea" font-size="15" font-weight="800">OpenClaw</text>
+        <text x="200" y="162" text-anchor="middle" fill="#9c958a" font-size="28" font-weight="300">VS</text>
+        <rect x="214" y="108" width="130" height="100" rx="14" fill="rgba(227,82,5,0.14)" stroke="#e35205" stroke-width="2"/>
+        <text x="279" y="168" text-anchor="middle" fill="#ffd4bf" font-size="15" font-weight="800">Hermes</text>
+        <path d="M200 228v32" stroke="#c9a227" stroke-width="3"/>
+        <path d="M120 268h160" stroke="rgba(201,162,39,0.5)" stroke-width="2"/>
+        <text x="200" y="302" text-anchor="middle" fill="#9c958a" font-size="14" font-weight="600">理念 · 两条路线</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-6">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill">OpenClaw</div>
+      <div class="title title-sm"><span class="accent">交通枢纽</span> · 调度员</div>
+          <p class="sub sub-compact">你可以想象一下<strong>OpenClaw</strong>,</p>
+          <p class="sub sub-compact">它其实更像是一个<strong>交通枢纽</strong>,</p>
+          <p class="sub sub-compact">就是它把各个聊天平台啊什么的都接进来,</p>
+          <p class="sub sub-compact">然后它就专注于这个消息的转发啊,</p>
+          <p class="sub sub-compact">和这个任务的分发啊,</p>
+          <p class="sub sub-compact">它就像是一个<strong>幕后的调度员</strong>。</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 420 340" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="hubg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#5eb3d4"/><stop offset="100%" stop-color="#3d7a9e"/></linearGradient></defs>
+        <circle cx="210" cy="170" r="48" fill="url(#hubg)" opacity="0.95"/>
+        <text x="210" y="178" text-anchor="middle" fill="#0a0908" font-size="15" font-weight="900">枢纽</text>
+        <circle cx="210" cy="50" r="24" fill="#2a2826" stroke="#5eb3d4"/>
+        <circle cx="360" cy="140" r="24" fill="#2a2826" stroke="#5eb3d4"/>
+        <circle cx="60" cy="140" r="24" fill="#2a2826" stroke="#5eb3d4"/>
+        <circle cx="210" cy="290" r="24" fill="#2a2826" stroke="#c9a227"/>
+        <line x1="210" y1="122" x2="210" y2="74" stroke="#e35205" stroke-width="4"/>
+        <line x1="250" y1="158" x2="336" y2="148" stroke="#e35205" stroke-width="4"/>
+        <line x1="170" y1="158" x2="84" y2="148" stroke="#e35205" stroke-width="4"/>
+        <line x1="210" y1="218" x2="210" y2="266" stroke="#c9a227" stroke-width="4"/>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-7">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="evoA" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e35205"/><stop offset="100%" stop-color="#5cb88a"/></linearGradient></defs>
+        <path d="M200,64 A106,106 0 1,1 199,64" fill="none" stroke="url(#evoA)" stroke-width="6"/>
+        <polygon points="312,170 292,158 292,182" fill="#e35205"/>
+        <circle cx="200" cy="170" r="52" fill="rgba(92,184,138,0.12)" stroke="#5cb88a" stroke-width="3"/>
+        <path d="M200 130v80M160 170h80" stroke="rgba(227,82,5,0.35)" stroke-width="2"/>
+        <text x="200" y="178" text-anchor="middle" fill="#c8ead9" font-size="17" font-weight="800">进化</text>
+        <text x="200" y="288" text-anchor="middle" fill="#c9a227" font-size="13" font-weight="700" letter-spacing="0.2em">闭环学习</text>
+      </svg>
+    </div>
+    <div class="txt">
+      <div class="pill pill-ok">Hermes Agent</div>
+      <div class="title title-sm">另一个<span class="hl">画风</span></div>
+          <p class="sub sub-compact">那<strong>Hermes Agent</strong>是不是就完全是另一个画风了?</p>
+          <p class="sub sub-compact">没错没错。</p>
+          <p class="sub sub-compact"><strong>Hermes Agent</strong>,他就像是一个可以<strong>自我进化</strong>的一个助手。</p>
+          <p class="sub sub-compact">他就是每做一件事情,他都能总结经验,</p>
+          <p class="sub sub-compact">然后他会把这个经验变成自己的一个技能,</p>
+          <p class="sub sub-compact">他也特别强调这种持续的学习和这个<strong>闭环的反馈</strong>。</p>
+          <p class="sub sub-compact">他的核心是让自己变得越来越聪明,</p>
+          <p class="sub sub-compact">而不是说我要去连接很多很多的外部的平台。</p>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-8">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap">
+    <div class="pill pill-muted">对比 · OpenClaw</div>
+    <div class="title title-sm">插件市场 · <span class="accent">markdown</span> 记忆</div>
+    <div class="compare">
+      <div class="card card-a"><div class="card-h">技能侧</div><p class="card-p">下载多 · 手动配置</p></div>
+      <div class="card card-b"><div class="card-h">记忆侧</div><p class="card-p">markdown 记关键信息</p></div>
+    </div>
+    <div class="viz-box viz-short" style="margin-top:12px;max-width:1100px;" aria-hidden="true">
+      <svg viewBox="0 0 900 140" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="mkA" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#e35205"/></marker></defs>
+        <rect x="24" y="28" width="200" height="84" rx="12" fill="rgba(224,122,122,0.1)" stroke="#c45c5c"/>
+        <path d="M64 52h120M64 72h90M64 92h100" stroke="rgba(240,196,196,0.5)" stroke-width="4" stroke-linecap="round"/>
+        <text x="124" y="118" text-anchor="middle" fill="#9c958a" font-size="12" font-weight="700">插件商店</text>
+        <path d="M250 70h120" stroke="#c9a227" stroke-width="3" marker-end="url(#mkA)"/>
+        <rect x="400" y="22" width="100" height="96" rx="12" fill="rgba(227,82,5,0.12)" stroke="#e35205"/>
+        <text x="450" y="76" text-anchor="middle" fill="#ffd4bf" font-size="22" font-weight="800">.md</text>
+        <path d="M520 70h120" stroke="#c9a227" stroke-width="3" marker-end="url(#mkA)"/>
+        <rect x="668" y="28" width="208" height="84" rx="12" fill="rgba(94,179,212,0.1)" stroke="#5eb3d4"/>
+        <circle cx="720" cy="70" r="14" fill="none" stroke="#b8dfea" stroke-width="2"/><circle cx="772" cy="70" r="14" fill="none" stroke="#b8dfea" stroke-width="2"/><circle cx="824" cy="70" r="14" fill="none" stroke="#b8dfea" stroke-width="2"/>
+        <text x="772" y="118" text-anchor="middle" fill="#9c958a" font-size="12" font-weight="700">关键信息落盘</text>
+      </svg>
+    </div>
+        <p class="sub sub-compact">那如果我们再把镜头拉近一点,</p>
+        <p class="sub sub-compact">就是具体到比如说技能的管理和这个<strong>记忆的存储</strong>,</p>
+        <p class="sub sub-compact">这两个东西还有哪些比较鲜明的差别呢?</p>
+        <p class="sub sub-compact">这个技能的话就是<strong>OpenClaw</strong>,它是类似于一个<strong>插件市场</strong>。</p>
+        <p class="sub sub-compact">你可以去下载很多很多的技能,但是它这个技能的话都是需要你去手动配置的。</p>
+        <p class="sub sub-compact">然后它的这个记忆的话,就是主要是靠一些markdown的文件去帮你记录一些关键的信息。</p>
+        <p class="sub sub-compact">就感觉上手会比较友好。</p>
+  </div>
+</div>
+<div class="slide" id="slide-9">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill pill-purple">Hermes Agent</div>
+      <div class="title title-sm"><span class="hl">自动归纳</span> 技能</div>
+          <p class="sub sub-compact">对,然后<strong>Hermes Agent</strong>,他就厉害了,</p>
+          <p class="sub sub-compact">他是可以在使用的过程当中<strong>自动去归纳出技能</strong>。</p>
+          <p class="sub sub-compact">他的这个记忆是分了很多层的,有热有冷。</p>
+          <p class="sub sub-compact">就是他的这个无论是技能还是记忆,</p>
+          <p class="sub sub-compact">他都更强调一种<strong>智能化的管理</strong>和这种<strong>长期的成长</strong>。</p>
+          <p class="sub sub-compact">而不是说像OpenClaw,他就只是一个配置和存储的一个便捷性。</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="memHot" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e35205"/><stop offset="100%" stop-color="#ff8c42"/></linearGradient></defs>
+        <rect x="88" y="52" width="224" height="52" rx="10" fill="rgba(227,82,5,0.2)" stroke="url(#memHot)" stroke-width="2"/>
+        <rect x="88" y="118" width="224" height="52" rx="10" fill="rgba(201,162,39,0.12)" stroke="#c9a227" stroke-width="2"/>
+        <rect x="88" y="184" width="224" height="52" rx="10" fill="rgba(94,179,212,0.1)" stroke="#5eb3d4" stroke-width="2"/>
+        <text x="200" y="86" text-anchor="middle" fill="#ffd4bf" font-size="16" font-weight="800">热记忆</text>
+        <text x="200" y="152" text-anchor="middle" fill="#f0d78c" font-size="16" font-weight="800">温</text>
+        <text x="200" y="218" text-anchor="middle" fill="#b8dfea" font-size="16" font-weight="800">冷</text>
+        <text x="200" y="272" text-anchor="middle" fill="#9c958a" font-size="13" font-weight="600">分层 · 智能加载</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-10">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+    <div class="pill pill-purple">怎么选</div>
+    <div class="title title-sm"><span class="hl">AI框架</span> 权衡</div>
+        <p class="sub sub-compact">如果说咱们现在有不同的使用场景,</p>
+        <p class="sub sub-compact">那我们在选择这两个<strong>AI框架</strong>的时候要怎么去<strong>权衡</strong>呢?</p>
+        <p class="sub sub-compact">如果说你是一个企业,或者说你是一个团队,</p>
+        <p class="sub sub-compact">你需要有一个东西帮你在多个平台上面去处理大量的消息,</p>
+        <p class="sub sub-compact">或者说做一些比较复杂的自动化的任务,</p>
+        <p class="sub sub-compact">那<strong>OpenClaw</strong>可能是一个更好的选择,</p>
+        <p class="sub sub-compact">因为他的这个<strong>多渠道的连接</strong>和这个管理是非常非常强的。</p>
+        <p class="sub sub-compact">那如果说我只是一个个人用户,或者说我是一个小的团队呢?</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
+        <path d="M200 48v40" stroke="#9c958a" stroke-width="2"/>
+        <rect x="88" y="88" width="224" height="72" rx="14" fill="rgba(94,179,212,0.12)" stroke="#5eb3d4" stroke-width="2"/>
+        <text x="200" y="124" text-anchor="middle" fill="#b8dfea" font-size="15" font-weight="800">企业 / 团队</text>
+        <text x="200" y="148" text-anchor="middle" fill="#9c958a" font-size="12" font-weight="600">多平台 · 消息洪峰</text>
+        <text x="200" y="188" text-anchor="middle" fill="#c9a227" font-size="22">▼</text>
+        <rect x="108" y="204" width="184" height="56" rx="12" fill="rgba(227,82,5,0.16)" stroke="#e35205"/>
+        <text x="200" y="240" text-anchor="middle" fill="#ffd4bf" font-size="16" font-weight="800">OpenClaw 更合拍</text>
+        <path d="M200 268v32" stroke="rgba(201,162,39,0.5)" stroke-width="2"/>
+        <rect x="72" y="300" width="256" height="44" rx="10" fill="rgba(20,18,16,0.6)" stroke="rgba(156,149,138,0.35)"/>
+        <text x="200" y="328" text-anchor="middle" fill="#9c958a" font-size="12" font-weight="600">个人 / 小团队 → 见下一页</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-11">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill pill-ok">个人 / 小团队</div>
+      <div class="title title-sm">隐私 · 本地 · <span class="hl">互补</span></div>
+          <p class="sub sub-compact">如果你更看重的是个性化的体验,</p>
+          <p class="sub sub-compact">然后本地的执行的效率,包括你的隐私的安全,</p>
+          <p class="sub sub-compact">那<strong>Hermes Agent</strong>就会比较适合你,因为他能自学习,</p>
+          <p class="sub sub-compact">也可以很方便的在你的本地,或者是说边缘设备上面去部署。</p>
+          <p class="sub sub-compact">而且他其实跟<strong>OpenClaw</strong>是可以互补的,</p>
+          <p class="sub sub-compact">就是你可以把他们两个结合起来,</p>
+          <p class="sub sub-compact">去做一个非常非常灵活的AI的应用。</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 280" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60" y="100" width="120" height="80" rx="12" fill="rgba(94,179,212,0.14)" stroke="#5eb3d4"/>
+        <text x="120" y="148" text-anchor="middle" fill="#b8dfea" font-size="14" font-weight="800">OpenClaw</text>
+        <circle cx="200" cy="140" r="22" fill="rgba(227,82,5,0.25)" stroke="#e35205"/>
+        <text x="200" y="148" text-anchor="middle" fill="#ffd4bf" font-size="20" font-weight="800">+</text>
+        <rect x="220" y="100" width="120" height="80" rx="12" fill="rgba(227,82,5,0.14)" stroke="#e35205"/>
+        <text x="280" y="148" text-anchor="middle" fill="#ffd4bf" font-size="14" font-weight="800">Hermes</text>
+        <path d="M200 196v28" stroke="#c9a227" stroke-width="2"/><text x="200" y="252" text-anchor="middle" fill="#9c958a" font-size="13" font-weight="600">互补 · 灵活组合</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-12">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap">
+    <div class="part-row" style="justify-content:center;"><span class="part-tag">PART</span><span class="part-num">02</span></div>
+    <div class="part-title" style="text-align:center;width:100%;">自动生成技能</div>
+    <div class="title title-sm">门槛 · 复盘 · <span class="accent-w">模板</span></div>
+        <p class="sub sub-compact">咱们现在来聊一聊这个<strong>Hermes Agent</strong>,</p>
+        <p class="sub sub-compact">他的这个最让人觉得神奇的地方,就是他的这个<strong>自动生成技能</strong>,</p>
+        <p class="sub sub-compact">这个到底是怎么实现的?他背后的这个触发的机制是什么?</p>
+        <p class="sub sub-compact">其实他是有一个门槛的,就是只有当你这个任务,</p>
+        <p class="sub sub-compact"><strong>连续调用了五次工具以上</strong>,他才会认为说OK我要去自动生成一个技能,</p>
+        <p class="sub sub-compact">就简单的一两个步骤的这种操作他是不会理的。</p>
+        <p class="sub sub-compact">所以说他是专门针对这种比较复杂的重复性的流程。</p>
+        <p class="sub sub-compact">没错,然后他还有一个就是<strong>每15次的工具调用</strong>,他会做一次自我的复盘,</p>
+        <p class="sub sub-compact">就是他会把之前的这些任务的执行的轨迹都回放一遍,去优化他的这个技能库。</p>
+        <p class="sub sub-compact">对,所以说就是复杂的任务,才值得他去自动的归纳出一个可以反复用的一个技能模板。</p>
+    <div class="viz-box viz-short" style="margin-top:14px;max-width:1500px;" aria-hidden="true">
+      <svg viewBox="0 0 920 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="flA" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#c9a227"/></marker></defs>
+        <rect x="20" y="22" width="140" height="56" rx="10" fill="rgba(227,82,5,0.15)" stroke="#e35205"/>
+        <text x="90" y="58" text-anchor="middle" fill="#ffd4bf" font-size="14" font-weight="800">5+ 工具</text>
+        <path d="M168 50h56" stroke="#c9a227" stroke-width="2" marker-end="url(#flA)"/>
+        <rect x="232" y="22" width="160" height="56" rx="10" fill="rgba(201,162,39,0.12)" stroke="#c9a227"/>
+        <text x="312" y="58" text-anchor="middle" fill="#f0d78c" font-size="14" font-weight="800">归纳技能</text>
+        <path d="M400 50h56" stroke="#c9a227" stroke-width="2" marker-end="url(#flA)"/>
+        <rect x="464" y="22" width="200" height="56" rx="10" fill="rgba(94,179,212,0.1)" stroke="#5eb3d4"/>
+        <text x="564" y="58" text-anchor="middle" fill="#b8dfea" font-size="14" font-weight="800">每 15 次复盘</text>
+        <path d="M672 50h48" stroke="#c9a227" stroke-width="2" marker-end="url(#flA)"/>
+        <rect x="728" y="22" width="172" height="56" rx="10" fill="rgba(245,239,230,0.06)" stroke="rgba(201,162,39,0.45)"/>
+        <text x="814" y="58" text-anchor="middle" fill="#e8e4dc" font-size="14" font-weight="800">模板沉淀</text>
+      </svg>
+    </div>
+    <div class="stat-row" style="margin-top:20px;">
+      <div class="stat"><div class="stat-num c1">5+</div><div class="stat-desc">工具调用门槛</div></div>
+      <div class="stat"><div class="stat-num c2">15</div><div class="stat-desc">次调用复盘</div></div>
+      <div class="stat"><div class="stat-num c3" style="font-size:88px;">规约</div><div class="stat-desc">行为与边界</div></div>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-13">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill">LLM</div>
+      <div class="title title-sm">值不值得变成<span class="hl">新技能</span></div>
+          <p class="sub sub-compact">那他是怎么去判断说,</p>
+          <p class="sub sub-compact">哪些任务流程是值得被保存下来作为一个新的技能的呢?</p>
+          <p class="sub sub-compact">他是这样就是每完成一个任务,</p>
+          <p class="sub sub-compact">他会去用这个<strong>LLM</strong>去分析这整个的执行的轨迹,</p>
+          <p class="sub sub-compact">然后把那些关键的步骤以及这个判断的点都给抽出来。</p>
+          <p class="sub sub-compact">最后他会去根据这个结果,是不是稳定是不是可以被复用来决定要不要存成一个新的技能。</p>
+          <p class="sub sub-compact">所以说其实他不只是在记录步骤,他其实还在判断这个东西到底有没有用?</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60" y="40" width="280" height="100" rx="14" fill="rgba(139,127,184,0.14)" stroke="#8b7fb8"/>
+        <text x="200" y="100" text-anchor="middle" fill="#ddd6f5" font-size="18" font-weight="800">LLM 分析轨迹</text>
+        <path d="M200,150 L200,200" stroke="#9c958a" stroke-width="3"/>
+        <rect x="80" y="210" width="240" height="60" rx="10" fill="rgba(92,184,138,0.14)" stroke="#5cb88a"/>
+        <text x="200" y="248" text-anchor="middle" fill="#c8ead9" font-size="16" font-weight="700">稳定 · 可复用 → 存技能</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-14">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap">
+    <div class="pill pill-ok">规范</div>
+    <div class="title title-sm"><span class="hl">agentskills.io</span></div>
+        <p class="sub sub-compact">对,没错没错,而且他生成的这个技能文件,</p>
+        <p class="sub sub-compact">他是有一个非常规范的一个结构的,</p>
+        <p class="sub sub-compact">就是他是一个markdown的文件,</p>
+        <p class="sub sub-compact">然后他里面有这个技能的名字,有这个触发的场景,有每一步的操作,</p>
+        <p class="sub sub-compact">还有这个已知的一些注意事项。</p>
+        <p class="sub sub-compact">就是他是一个完全符合这个<strong>agentskills.io</strong>的这个标准的一个东西,</p>
+        <p class="sub sub-compact">所以他可以很方便的在不同的平台之间进行共享和迁移。</p>
+    <div class="viz-box viz-short" style="margin-top:16px;" aria-hidden="true">
+      <svg viewBox="0 0 560 120" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="120" height="80" rx="10" fill="rgba(227,82,5,0.16)" stroke="#e35205"/>
+        <text x="80" y="68" text-anchor="middle" fill="#ffd4bf" font-size="14" font-weight="700">技能名</text>
+        <text x="160" y="70" fill="#c9a227" font-size="28">→</text>
+        <rect x="200" y="20" width="120" height="80" rx="10" fill="rgba(201,162,39,0.14)" stroke="#c9a227"/>
+        <text x="260" y="68" text-anchor="middle" fill="#f0d78c" font-size="14" font-weight="700">场景</text>
+        <text x="340" y="70" fill="#c9a227" font-size="28">→</text>
+        <rect x="380" y="20" width="160" height="80" rx="10" fill="rgba(92,184,138,0.12)" stroke="#5cb88a"/>
+        <text x="460" y="68" text-anchor="middle" fill="#c8ead9" font-size="14" font-weight="700">步骤 · 注意</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-15">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap">
+    <div class="pill pill-warn">收益</div>
+    <div class="title title-sm">重复工作 <span class="accent-w">快至少 40%</span></div>
+    <div class="viz-box viz-short" style="margin-top:10px;max-width:920px;" aria-hidden="true">
+      <svg viewBox="0 0 640 128" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="s15barOld" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#5c5652"/><stop offset="100%" stop-color="#8a8278"/></linearGradient>
+          <linearGradient id="s15barNew" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e35205"/><stop offset="100%" stop-color="#c9a227"/></linearGradient>
+        </defs>
+        <text x="0" y="20" fill="#9c958a" font-size="14" font-weight="700">重复任务耗时（示意）</text>
+        <rect x="0" y="30" width="600" height="32" rx="8" fill="rgba(20,18,16,0.85)" stroke="rgba(156,149,138,0.25)"/>
+        <rect x="4" y="34" width="348" height="24" rx="6" fill="url(#s15barOld)"/>
+        <text x="365" y="52" fill="#cbd5e1" font-size="13" font-weight="600">Before</text>
+        <text x="0" y="86" fill="#9c958a" font-size="14" font-weight="700">沉淀技能后</text>
+        <rect x="0" y="92" width="600" height="32" rx="8" fill="rgba(20,18,16,0.85)" stroke="rgba(227,82,5,0.28)"/>
+        <rect x="4" y="96" width="210" height="24" rx="6" fill="url(#s15barNew)"/>
+        <text x="230" y="114" fill="#ffd4bf" font-size="13" font-weight="700">≈60% 用时 · 口播「快至少 40%」</text>
+      </svg>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-num c2">40%</div><div class="stat-desc">提速（口播数据）</div></div>
+      <div class="stat"><div class="stat-num c1">分层</div><div class="stat-desc">技能库智能加载</div></div>
+      <div class="stat"><div class="stat-num c3">省</div><div class="stat-desc">内存与 token</div></div>
+    </div>
+        <p class="sub sub-compact">就是说这个<strong>Hermes Agent</strong>他这个自动生成技能这个东西,到底在实际用起来的时候有什么明显的好处?</p>
+        <p class="sub sub-compact">你想象一下,就是这个东西用了一段时间之后,</p>
+        <p class="sub sub-compact">你就发现他处理那些重复性的工作的速度会<strong>快至少40%</strong>,</p>
+        <p class="sub sub-compact">他直接就可以用他之前总结的那个经验,就不需要再重新摸索一遍。</p>
+        <p class="sub sub-compact">对,这个确实很省力呀,然后他的那个技能库是<strong>分层的</strong>,</p>
+        <p class="sub sub-compact">他会智能地去加载你需要的那一部分技能,所以他会很省你的内存和token,</p>
+        <p class="sub sub-compact">而且他会随着你不断的使用他,遇到新的情况他会自动地去优化他的技能。</p>
+        <p class="sub sub-compact">所以他这个就是完全不需要你人工地去插手,</p>
+        <p class="sub sub-compact">他就是一个真正的可以<strong>自我进化</strong>的一个AI。</p>
+  </div>
+</div>
+<div class="slide" id="slide-16">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+    <div class="part-row" style="justify-content:flex-start;"><span class="part-tag">PART</span><span class="part-num">03</span></div>
+    <div class="part-title" style="text-align:left;width:100%;">前景与场景</div>
+    <div class="title title-sm">谁适合用 <span class="hl">Hermes Agent</span></div>
+        <p class="sub sub-compact">然后咱们来到第三个部分,</p>
+        <p class="sub sub-compact">咱们来聊一聊这个<strong>Hermes Agent</strong>他的这个广阔的前景。</p>
+        <p class="sub sub-compact">OK,第一个问题,就是说哪些人或者说哪些群体最适合用<strong>Hermes Agent</strong>?</p>
+        <p class="sub sub-compact">其实我觉得就是技术爱好者或者说独立开发者是特别适合的,</p>
+        <p class="sub sub-compact">因为你可以用他来自动地去处理你的一些<strong>运维的任务</strong>,</p>
+        <p class="sub sub-compact">然后或者是说帮你管理你的项目啊,甚至帮你生成一些文档啊,</p>
+        <p class="sub sub-compact">就是你可以把它当成你的一个非常高效的<strong>数字助理</strong>。</p>
+        <p class="sub sub-compact">听起来对个人用户非常友好。没错没错,</p>
+        <p class="sub sub-compact">而且他其实也很适合那种跨境的团队或者说那种远程办公的人,</p>
+        <p class="sub sub-compact">因为他可以多平台的消息聚合嘛,</p>
+        <p class="sub sub-compact">然后你可以在不同的设备之间无缝地同步你的这个对话。</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="s16c" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e35205"/><stop offset="100%" stop-color="#c9a227"/></linearGradient></defs>
+        <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(227,82,5,0.2)" stroke-width="2"/>
+        <circle cx="200" cy="200" r="118" fill="none" stroke="rgba(201,162,39,0.15)" stroke-width="1" stroke-dasharray="6 10"/>
+        <circle cx="200" cy="72" r="36" fill="rgba(227,82,5,0.2)" stroke="#e35205"/>
+        <text x="200" y="80" text-anchor="middle" fill="#ffd4bf" font-size="12" font-weight="800">开发者</text>
+        <circle cx="318" cy="168" r="36" fill="rgba(94,179,212,0.12)" stroke="#5eb3d4"/>
+        <text x="318" y="176" text-anchor="middle" fill="#b8dfea" font-size="12" font-weight="800">远程</text>
+        <circle cx="270" cy="292" r="36" fill="rgba(201,162,39,0.14)" stroke="#c9a227"/>
+        <text x="270" y="300" text-anchor="middle" fill="#f0d78c" font-size="12" font-weight="800">跨境</text>
+        <circle cx="130" cy="292" r="36" fill="rgba(92,184,138,0.12)" stroke="#5cb88a"/>
+        <text x="130" y="300" text-anchor="middle" fill="#c8ead9" font-size="12" font-weight="800">个人</text>
+        <circle cx="82" cy="168" r="36" fill="rgba(245,239,230,0.06)" stroke="rgba(201,162,39,0.4)"/>
+        <text x="82" y="176" text-anchor="middle" fill="#e8e4dc" font-size="11" font-weight="800">多设备</text>
+        <line x1="200" y1="108" x2="200" y2="152" stroke="url(#s16c)" stroke-width="2" opacity="0.6"/>
+        <text x="200" y="200" text-anchor="middle" fill="#faf7f2" font-size="15" font-weight="800">Hermes</text>
+        <text x="200" y="222" text-anchor="middle" fill="#9c958a" font-size="11" font-weight="600">核心受众圈</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-17">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill pill-muted">场景</div>
+      <div class="title title-sm">从创业到<span class="accent">学生</span></div>
+          <p class="sub sub-compact">所以就是说无论是你是一个小的创业公司,</p>
+          <p class="sub sub-compact">还是说你是一个有这种私有化需求的企业,</p>
+          <p class="sub sub-compact">甚至说你是一个科研人员或者说学生,</p>
+          <p class="sub sub-compact">你想要做一些知识管理啊,或者是说文献的追踪啊,</p>
+          <p class="sub sub-compact">都可以用他来提高你的效率。</p>
+          <p class="sub sub-compact">就是说<strong>Hermes Agent</strong>到底可以在哪些实际的场景当中去发挥他的作用?</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg">
+        <rect x="28" y="28" width="344" height="284" rx="22" fill="rgba(20,18,16,0.5)" stroke="rgba(227,82,5,0.25)"/>
+        <rect x="52" y="52" width="100" height="88" rx="12" fill="rgba(227,82,5,0.12)" stroke="#e35205"/>
+        <text x="102" y="104" text-anchor="middle" fill="#ffd4bf" font-size="13" font-weight="800">创业</text>
+        <rect x="172" y="52" width="76" height="88" rx="12" fill="rgba(201,162,39,0.1)" stroke="#c9a227"/>
+        <text x="210" y="104" text-anchor="middle" fill="#f0d78c" font-size="13" font-weight="800">企业</text>
+        <rect x="264" y="52" width="84" height="88" rx="12" fill="rgba(94,179,212,0.1)" stroke="#5eb3d4"/>
+        <text x="306" y="98" text-anchor="middle" fill="#b8dfea" font-size="12" font-weight="800">科研</text>
+        <text x="306" y="118" text-anchor="middle" fill="#b8dfea" font-size="12" font-weight="800">学生</text>
+        <path d="M200 156v28" stroke="#c9a227" stroke-width="2"/>
+        <circle cx="200" cy="210" r="56" fill="rgba(227,82,5,0.1)" stroke="#e35205" stroke-width="2"/>
+        <text x="200" y="206" text-anchor="middle" fill="#faf7f2" font-size="14" font-weight="800">知识管理</text>
+        <text x="200" y="228" text-anchor="middle" fill="#9c958a" font-size="12" font-weight="600">文献 · 笔记 · 追踪</text>
+        <rect x="72" y="278" width="256" height="40" rx="10" fill="rgba(245,239,230,0.05)" stroke="rgba(156,149,138,0.3)"/>
+        <text x="200" y="304" text-anchor="middle" fill="#9c958a" font-size="12" font-weight="600">全场景提效</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-18">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+    <div class="pill">管家</div>
+    <div class="title title-sm">全职全能<span class="hl">管家</span></div>
+        <p class="sub sub-compact">比如说你可以把它变成你的一个专属的<strong>数字助理</strong>。</p>
+        <p class="sub sub-compact">他可以帮你自动地去整理你的日程啊,</p>
+        <p class="sub sub-compact">然后帮你去聚合你各个平台的消息啊,</p>
+        <p class="sub sub-compact">包括你可以让他去定时的帮你执行一些任务啊。</p>
+        <p class="sub sub-compact">你可以把它变成一个你的全职全能的这种管家。</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 360" xmlns="http://www.w3.org/2000/svg">
+        <rect x="24" y="24" width="352" height="312" rx="24" fill="rgba(20,18,16,0.55)" stroke="rgba(201,162,39,0.3)"/>
+        <rect x="56" y="56" width="288" height="72" rx="14" fill="rgba(227,82,5,0.12)" stroke="#e35205"/>
+        <circle cx="88" cy="92" r="18" fill="none" stroke="#ffd4bf" stroke-width="2"/>
+        <path d="M88 74v10M88 100v10M74 92h10M92 92h10" stroke="#ffd4bf" stroke-width="2"/>
+        <text x="200" y="100" text-anchor="middle" fill="#ffd4bf" font-size="15" font-weight="800">日程整理</text>
+        <rect x="56" y="148" width="288" height="72" rx="14" fill="rgba(94,179,212,0.1)" stroke="#5eb3d4"/>
+        <circle cx="88" cy="184" r="6" fill="#5eb3d4"/><circle cx="108" cy="184" r="6" fill="#5eb3d4"/><circle cx="128" cy="184" r="6" fill="#5eb3d4"/>
+        <text x="200" y="192" text-anchor="middle" fill="#b8dfea" font-size="15" font-weight="800">多平台消息聚合</text>
+        <rect x="56" y="240" width="288" height="72" rx="14" fill="rgba(201,162,39,0.1)" stroke="#c9a227"/>
+        <circle cx="200" cy="276" r="22" fill="none" stroke="#f0d78c" stroke-width="3" stroke-dasharray="8 6"/>
+        <text x="200" y="282" text-anchor="middle" fill="#f0d78c" font-size="14" font-weight="800">定时任务</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-19">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+    <div class="pill pill-ok">团队</div>
+    <div class="title title-sm">客服 · 运维 · <span class="hl">原型</span></div>
+        <p class="sub sub-compact">听起来他好像不只是可以管个人的事务。</p>
+        <p class="sub sub-compact">没错没错没错,</p>
+        <p class="sub sub-compact">而且他还可以做很多就是团队协作的事情,</p>
+        <p class="sub sub-compact">比如说自动的帮你同步一些跨平台的信息啊,</p>
+        <p class="sub sub-compact">然后帮你做一些<strong>客服的自动化</strong>啊,</p>
+        <p class="sub sub-compact">或者说帮你监控一些数据啊,帮你运维一些东西啊,</p>
+        <p class="sub sub-compact">甚至说帮你这个开发团队去快速的搭建一些<strong>原型</strong>啊,</p>
+        <p class="sub sub-compact">或者说帮你这个研究团队去高效的梳理一些文献啊。</p>
+        <p class="sub sub-compact">就是他其实是一个非常非常好的一个助力,在很多很多领域里面。</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 380" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="360" height="340" rx="22" fill="rgba(20,18,16,0.5)" stroke="rgba(227,82,5,0.2)"/>
+        <rect x="48" y="48" width="148" height="76" rx="12" fill="rgba(224,122,122,0.1)" stroke="#c45c5c"/>
+        <path d="M88 88h68M88 100h52M88 112h60" stroke="#f0c4c4" stroke-width="3" stroke-linecap="round"/>
+        <text x="122" y="112" text-anchor="middle" fill="#fecaca" font-size="11" font-weight="800">客服</text>
+        <rect x="204" y="48" width="148" height="76" rx="12" fill="rgba(94,179,212,0.1)" stroke="#5eb3d4"/>
+        <polyline points="230,92 250,72 270,88 290,64 310,80" fill="none" stroke="#b8dfea" stroke-width="2"/>
+        <text x="278" y="112" text-anchor="middle" fill="#b8dfea" font-size="11" font-weight="800">监控</text>
+        <rect x="48" y="140" width="148" height="76" rx="12" fill="rgba(201,162,39,0.12)" stroke="#c9a227"/>
+        <rect x="72" y="164" width="100" height="36" rx="6" fill="none" stroke="#f0d78c" stroke-width="2" stroke-dasharray="4 3"/>
+        <text x="122" y="188" text-anchor="middle" fill="#f0d78c" font-size="11" font-weight="800">原型</text>
+        <rect x="204" y="140" width="148" height="76" rx="12" fill="rgba(92,184,138,0.1)" stroke="#5cb88a"/>
+        <path d="M240 188l16-28 16 28 16-36 16 32" fill="none" stroke="#c8ead9" stroke-width="2"/>
+        <text x="278" y="188" text-anchor="middle" fill="#c8ead9" font-size="11" font-weight="800">文献</text>
+        <rect x="48" y="232" width="304" height="112" rx="14" fill="rgba(227,82,5,0.08)" stroke="rgba(227,82,5,0.35)"/>
+        <path d="M200 252v72M120 288h160" stroke="rgba(201,162,39,0.45)" stroke-width="2"/>
+        <circle cx="200" cy="288" r="28" fill="rgba(227,82,5,0.2)" stroke="#e35205"/>
+        <text x="200" y="294" text-anchor="middle" fill="#ffd4bf" font-size="12" font-weight="800">跨平台同步</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-20">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+      <div class="pill pill-purple">优势</div>
+      <div class="title title-sm">自动生成 · <span class="hl">本地闭环</span></div>
+          <p class="sub sub-compact">你觉得<strong>Hermes Agent</strong>跟其他的一些同类的AI框架相比,</p>
+          <p class="sub sub-compact">他最突出的优势在哪里?</p>
+          <p class="sub sub-compact">就是他的那个技能是可以<strong>自动生成</strong>并且不断的<strong>自我进化</strong>的。</p>
+          <p class="sub sub-compact">就他的那个整个的学习的<strong>闭环</strong>都是在本地完成的,</p>
+          <p class="sub sub-compact">所以他可以越用越聪明,</p>
+          <p class="sub sub-compact">而且他的那个<strong>多层的记忆系统</strong>也非常的厉害,</p>
+          <p class="sub sub-compact">就是他可以非常准确地去记住你这个<strong>跨会话</strong>的一些细节。</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="s20loop" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e35205"/><stop offset="50%" stop-color="#c9a227"/><stop offset="100%" stop-color="#5cb88a"/></linearGradient></defs>
+        <ellipse cx="200" cy="170" rx="140" ry="120" fill="none" stroke="url(#s20loop)" stroke-width="4" opacity="0.85"/>
+        <polygon points="330,170 318,162 318,178" fill="#5cb88a"/>
+        <circle cx="200" cy="170" r="64" fill="rgba(20,18,16,0.75)" stroke="rgba(227,82,5,0.45)" stroke-width="2"/>
+        <text x="200" y="158" text-anchor="middle" fill="#c8ead9" font-size="14" font-weight="800">本地闭环</text>
+        <text x="200" y="182" text-anchor="middle" fill="#9c958a" font-size="11" font-weight="600">执行 · 记忆 · 技能</text>
+        <text x="200" y="62" text-anchor="middle" fill="#ffd4bf" font-size="12" font-weight="700">自动生成技能</text>
+        <text x="72" y="200" text-anchor="middle" fill="#b8dfea" font-size="11" font-weight="600" transform="rotate(-58 72 200)">跨会话</text>
+        <text x="328" y="200" text-anchor="middle" fill="#f0d78c" font-size="11" font-weight="600" transform="rotate(58 328 200)">进化</text>
+        <text x="200" y="310" text-anchor="middle" fill="#9c958a" font-size="13" font-weight="600">越用越聪明</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-21">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt">
+    <div class="pill">工程力</div>
+    <div class="title title-sm">工具 · 平台 · <span class="accent-w">沙盒</span> · MIT</div>
+        <p class="sub sub-compact">然后他的部署啊和他的这个兼容啊,是不是也特别灵活啊?</p>
+        <p class="sub sub-compact">没错没错没错,</p>
+        <p class="sub sub-compact">就是他支持<strong>几十种工具</strong>,</p>
+        <p class="sub sub-compact">然后<strong>六大平台</strong>的消息接入主流的大模型,</p>
+        <p class="sub sub-compact">他都是原生的兼容,</p>
+        <p class="sub sub-compact">再加上他的那个<strong>一键迁移</strong>和他的那个<strong>安全沙盒</strong>,</p>
+        <p class="sub sub-compact">就是你无论是个人还是团队还是企业,</p>
+        <p class="sub sub-compact">你都可以非常快速地去上手并且保证你的数据的安全。</p>
+        <p class="sub sub-compact">他的这个<strong>MIT的协议</strong>也非常的宽松,</p>
+        <p class="sub sub-compact">就是你几乎可以为所欲为地使用他。</p>
+    <div class="badge-line" style="margin-top:20px;">一键迁移 · 安全沙盒 · MIT</div>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(200,200)">
+          <polygon points="0,-120 104,-60 104,60 0,120 -104,60 -104,-60" fill="none" stroke="rgba(227,82,5,0.35)" stroke-width="2"/>
+          <circle r="28" cy="-92" fill="rgba(227,82,5,0.2)" stroke="#e35205"/><text y="-86" text-anchor="middle" fill="#ffd4bf" font-size="10" font-weight="800">工具×N</text>
+          <circle r="28" cx="80" cy="-46" fill="rgba(201,162,39,0.15)" stroke="#c9a227"/><text x="80" y="-40" text-anchor="middle" fill="#f0d78c" font-size="10" font-weight="800">6 平台</text>
+          <circle r="28" cx="80" cy="46" fill="rgba(94,179,212,0.12)" stroke="#5eb3d4"/><text x="80" y="52" text-anchor="middle" fill="#b8dfea" font-size="10" font-weight="800">大模型</text>
+          <circle r="28" cy="92" fill="rgba(92,184,138,0.12)" stroke="#5cb88a"/><text y="98" text-anchor="middle" fill="#c8ead9" font-size="10" font-weight="800">沙盒</text>
+          <circle r="28" cx="-80" cy="46" fill="rgba(245,239,230,0.06)" stroke="rgba(201,162,39,0.45)"/><text x="-80" y="52" text-anchor="middle" fill="#e8e4dc" font-size="10" font-weight="800">迁移</text>
+          <circle r="28" cx="-80" cy="-46" fill="rgba(139,127,184,0.12)" stroke="#8b7fb8"/><text x="-80" y="-40" text-anchor="middle" fill="#ddd6f5" font-size="10" font-weight="800">MIT</text>
+        </g>
+        <text x="200" y="368" text-anchor="middle" fill="#9c958a" font-size="12" font-weight="600">工程能力六边形（示意）</text>
+      </svg>
+    </div>
+  </div>
+</div>
+<div class="slide" id="slide-22">
+<div class="biz-bg"></div><div class="biz-vignette"></div><div class="biz-grid"></div><div class="deco-scarf"></div><div class="biz-top"></div>
+  <div class="wrap wrap-split">
+    <div class="txt center" style="align-items:center;text-align:center;">
+    <div class="title title-lg">感谢收听</div>
+    <p class="lede">百闻不如一见 · 去试试 Hermes Agent</p>
+        <p class="sub sub-compact">对,今天我们把<strong>Hermes Agent</strong>这个自动生成技能啊,然后自我进化的这个能力给大家聊了一遍。</p>
+        <p class="sub sub-compact">对,其实还是那句话,<strong>百闻不如一见</strong>,我觉得大家不如自己去试一试,</p>
+        <p class="sub sub-compact">感受一下这个AI助手不一样的成长方式。</p>
+        <p class="sub sub-compact">感谢大家的收听,然后咱们下期节目再见,</p>
+        <p class="sub sub-compact">记得去体验一下<strong>Hermes Agent</strong>,</p>
+        <p class="sub sub-compact">咱们下次聊点更酷的东西,拜拜,拜拜</p>
+    </div>
+    <div class="viz-box viz-tall" aria-hidden="true">
+      <svg viewBox="0 0 420 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="s22rib" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ff7a3a"/><stop offset="40%" stop-color="#e35205"/><stop offset="100%" stop-color="#c9a227"/></linearGradient>
+        </defs>
+        <path d="M40 120 Q210 40 380 120 Q210 200 40 120" fill="rgba(227,82,5,0.12)" stroke="url(#s22rib)" stroke-width="2"/>
+        <path d="M60 200 Q210 120 360 200 Q210 280 60 200" fill="none" stroke="rgba(201,162,39,0.45)" stroke-width="3"/>
+        <circle cx="210" cy="200" r="88" fill="rgba(20,18,16,0.65)" stroke="url(#s22rib)" stroke-width="3"/>
+        <path d="M210 130v140M150 200h120" stroke="rgba(227,82,5,0.5)" stroke-width="3" stroke-linecap="round"/>
+        <text x="210" y="208" text-anchor="middle" fill="#faf7f2" font-size="13" font-weight="800" font-family="Cormorant Garamond,serif" letter-spacing="0.2em">FIN</text>
+        <text x="210" y="318" text-anchor="middle" fill="#c9a227" font-size="14" font-weight="700" letter-spacing="0.35em">下期再会</text>
+      </svg>
+    </div>
+  </div>
+</div>
+</div>
+<div id="pageNum"></div>
+<script>
+function resize(){
+  var p=document.getElementById('presentation');
+  var s=Math.min(window.innerWidth/1920,window.innerHeight/1080);
+  var ox=(window.innerWidth-1920*s)/2;
+  var oy=(window.innerHeight-1080*s)/2;
+  p.style.transform='scale('+s+')';
+  p.style.left=ox+'px';
+  p.style.top=oy+'px';
+}
+window.addEventListener('resize',resize);
+resize();
+var slides=document.querySelectorAll('.slide');
+var total=slides.length;
+var cur=0;
+function updateUI(){
+  document.getElementById('pageNum').textContent=(cur+1)+' / '+total;
+  document.getElementById('progress').style.width=(total<=1?100:(cur/(total-1)*100))+'%';
+}
+function goTo(i){
+  if(i<0||i>=total)return;
+  slides[cur].classList.remove('active');
+  cur=i;
+  slides[cur].classList.add('active');
+  updateUI();
+}
+function go(n){ goTo(n); }
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();goTo(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();goTo(cur-1);}
+});
+document.addEventListener('click',function(e){
+  if(e.clientX>window.innerWidth*0.3)goTo(cur+1);
+  else goTo(cur-1);
+});
+updateUI();
+</script>
+</body>
+</html>

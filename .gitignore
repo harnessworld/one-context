@@ -13,18 +13,15 @@ __pycache__/
 dist/
 build/
 
-# Skills (local npm install under skills/)
-skills/**/node_modules/
+# Node / JS tooling
+node_modules/
+**/.cache/
 
-# Node (skills: html-video-from-slides CLI)
-skills/html-video-from-slides/node_modules/
-skills/html-video-from-slides/.cache/
+# Local tooling lockfiles
+**/.skills_store_lock.json
 
-# Feature production (cover toolchain)
-features/develop/one-context-intro-short-video/production/node_modules/
-features/develop/one-context-intro-short-video/production/temp_video_wav/
-features/develop/claude-caveman-mode/production/node_modules/
-features/develop/claude-caveman-mode/production/temp_video_wav/
+# Video pipeline intermediates (slides, concat, ffmpeg scratch)
+temp_video_wav/
 
 # Testing
 .coverage

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes Agent - 自我进化的AI助手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow-x:hidden;}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth;}
+body{background:#0f0c07;font-family:'Noto Serif SC','STKaiti','SimSun',serif;color:#e8d5b0;}
+
+:root{
+  --title-size:clamp(1.8rem,5vw,4.5rem);
+  --h2-size:clamp(1.4rem,3.5vw,2.8rem);
+  --body-size:clamp(0.8rem,1.8vw,1.25rem);
+  --small-size:clamp(0.65rem,1.2vw,0.95rem);
+  --slide-padding:clamp(1.5rem,5vw,5rem);
+  --content-gap:clamp(0.6rem,2vw,2rem);
+}
+
+.slide{width:100vw;height:100vh;height:100dvh;overflow:hidden;scroll-snap-align:start;display:flex;flex-direction:column;position:relative;}
+.slide-content{flex:1;display:flex;flex-direction:column;justify-content:center;max-height:100%;overflow:hidden;padding:var(--slide-padding);}
+.slide-content.centered{text-align:center;align-items:center;}
+
+h1{font-size:var(--title-size);font-weight:900;letter-spacing:0.06em;line-height:1.2;}
+h2{font-size:var(--h2-size);font-weight:700;letter-spacing:0.04em;line-height:1.3;}
+
+/* === HERMÈS BRAND COLORS === */
+.orange{color:#D4770E;}
+.gold{color:#d4a843;}
+.sage{color:#7d9c6c;}
+.muted{color:#a89070;}
+.red{color:#c0392b;}
+
+/* === PAPER BACKGROUND === */
+.paper-bg{position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 5%,rgba(212,119,14,0.07) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 50% at 85% 95%,rgba(180,100,30,0.05) 0%,transparent 55%),
+    linear-gradient(180deg,#0f0c07 0%,#1a1208 50%,#0f0c07 100%);
+}
+.grain{position:absolute;inset:0;opacity:0.035;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* === HERMÈS BUCKLE CORNERS === */
+.corner-tl{position:absolute;top:18px;left:18px;width:44px;height:44px;opacity:0.2;}
+.corner-br{position:absolute;bottom:18px;right:18px;width:44px;height:44px;opacity:0.2;}
+
+/* === EDGE LINES === */
+.edge-line{position:absolute;left:40px;right:40px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,119,14,0.15),rgba(212,119,14,0.08),transparent);}
+.edge-line.top{top:65px;}
+
+/* === HERMÈS LOGO MARK === */
+.hermes-logo{
+  display:inline-block;position:relative;
+  font-size:var(--small-size);font-weight:900;
+  letter-spacing:0.35em;text-transform:uppercase;
+  color:#D4770E;padding:0 2.5em;
+  margin-bottom:var(--content-gap);
+}
+.hermes-logo::before,.hermes-logo::after{
+  content:'';position:absolute;top:50%;width:2.2em;height:1px;
+  background:#D4770E;opacity:0.5;
+}
+.hermes-logo::before{right:100%;}
+.hermes-logo::after{left:100%;}
+
+/* === LEATHER STRAP DIVIDER === */
+.strap-divider{
+  display:flex;align-items:center;gap:0;
+  width:100%;max-width:680px;margin:0 auto;
+  opacity:0;transform:scaleX(0.5);
+  transition:all 0.6s ease;
+}
+.strap-divider.visible{opacity:1;transform:scaleX(1);}
+.strap-line{height:2px;flex:1;
+  background:linear-gradient(90deg,transparent,rgba(212,119,14,0.5) 15%,rgba(212,119,14,0.5) 85%,transparent);
+}
+.strap-center{
+  width:34px;height:22px;
+  border:1px solid rgba(212,119,14,0.55);
+  border-radius:2px;
+  display:flex;align-items:center;justify-content:center;
+  background:#0f0c07;position:relative;flex-shrink:0;
+}
+.strap-center::after{
+  content:'';width:7px;height:7px;
+  background:#D4770E;border-radius:50%;opacity:0.85;
+}
+
+/* === TAGS === */
+.tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 20px;border-radius:2px;
+  font-size:var(--small-size);font-weight:700;letter-spacing:4px;
+  margin-bottom:var(--content-gap);border:1px solid;
+  opacity:0;transform:translateY(10px);transition:all 0.5s ease;
+}
+.tag.visible{opacity:1;transform:translateY(0);}
+.tag-orange{background:rgba(212,119,14,0.1);border-color:rgba(212,119,14,0.4);color:#D4770E;}
+.tag-gold{background:rgba(212,168,67,0.07);border-color:rgba(212,168,67,0.3);color:#d4a843;}
+.tag-sage{background:rgba(125,156,108,0.07);border-color:rgba(125,156,108,0.3);color:#7d9c6c;}
+
+/* === QUOTE BOX === */
+.quote-box{
+  width:100%;padding:12px 32px;
+  background:rgba(212,119,14,0.04);
+  border:1px solid rgba(212,119,14,0.12);
+  border-left:3px solid #D4770E;
+  margin-top:var(--content-gap);
+  opacity:0;transform:translateX(-8px);transition:all 0.5s ease;
+}
+.quote-box.visible{opacity:1;transform:translateX(0);}
+.quote{font-size:var(--body-size);color:#D4770E;font-weight:600;letter-spacing:0.02em;}
+
+/* === STAT ROW === */
+.stat-row{
+  display:flex;gap:clamp(14px,2.5vw,28px);width:100%;justify-content:center;
+  opacity:0;transform:translateY(14px);transition:all 0.5s ease;
+}
+.stat-row.visible{opacity:1;transform:translateY(0);}
+.stat{
+  flex:1;max-width:280px;
+  padding:clamp(14px,2vw,22px) clamp(12px,1.5vw,24px);
+  border-radius:2px;text-align:center;
+  background:rgba(212,119,14,0.03);
+  border:1px solid rgba(212,119,14,0.1);
+  position:relative;
+}
+.stat::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#D4770E,transparent);opacity:0;
+  transition:opacity 0.3s;
+}
+.stat.visible::before{opacity:1;}
+.stat-num{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;line-height:1;}
+.stat-desc{font-size:var(--small-size);color:#a89070;margin-top:8px;line-height:1.5;}
+
+/* === COMPARE === */
+.compare{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(14px,2vw,28px);width:100%;
+  opacity:0;transform:translateY(14px);transition:all 0.5s ease;
+}
+.compare.visible{opacity:1;transform:translateY(0);}
+.compare-box{
+  padding:clamp(14px,2vw,22px) clamp(16px,2vw,28px);
+  border-radius:2px;text-align:center;
+}
+.compare-box.old{background:rgba(192,57,43,0.03);border:1px solid rgba(192,57,43,0.1);}
+.compare-box.new{background:rgba(212,119,14,0.03);border:1px solid rgba(212,119,14,0.1);}
+.compare-label{font-size:var(--small-size);font-weight:700;letter-spacing:3px;margin-bottom:12px;}
+.compare-box.old .compare-label{color:#c0392b;}
+.compare-box.new .compare-label{color:#D4770E;}
+.compare-text{font-size:var(--body-size);color:#a89070;line-height:1.8;}
+
+/* === ARROW BOX === */
+.arrow-box{
+  display:flex;align-items:center;gap:0;width:100%;
+  opacity:0;transform:translateY(14px);transition:all 0.5s ease;
+}
+.arrow-box.visible{opacity:1;transform:translateY(0);}
+.arrow-item{
+  flex:1;padding:clamp(14px,2vw,22px);
+  border-radius:2px;text-align:center;
+  background:rgba(212,119,14,0.03);border:1px solid rgba(212,119,14,0.1);
+}
+.arrow-num{font-size:clamp(2.5rem,6vw,5rem);font-weight:900;line-height:1;}
+.arrow-label{font-size:var(--small-size);color:#a89070;margin-top:8px;}
+.arrow-mid{width:36px;flex-shrink:0;text-align:center;font-size:clamp(1.2rem,2.5vw,2rem);color:rgba(212,119,14,0.35);}
+
+/* === SEAL === */
+.seal{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 22px;border-radius:2px;
+  font-size:var(--small-size);font-weight:700;
+  background:rgba(212,119,14,0.07);color:#D4770E;
+  border:1px solid rgba(212,119,14,0.25);
+  margin-top:var(--content-gap);
+  opacity:0;transform:translateY(8px);transition:all 0.5s 0.5s ease;
+}
+.seal.visible{opacity:1;transform:translateY(0);}
+
+/* === REVEAL === */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-delay-1{transition-delay:0.12s;}
+.reveal-delay-2{transition-delay:0.22s;}
+.reveal-delay-3{transition-delay:0.32s;}
+.reveal-delay-4{transition-delay:0.42s;}
+.reveal-delay-5{transition-delay:0.52s;}
+
+/* === TITLE SLIDE === */
+.title-slide .slide-content{text-align:center;align-items:center;}
+
+/* === NAVIGATION === */
+.progress-bar{
+  position:fixed;top:0;left:0;height:2px;
+  background:linear-gradient(90deg,#D4770E,#d4a843,#7d9c6c);
+  z-index:999;transition:width 0.3s ease;
+}
+.nav-dots{
+  position:fixed;right:18px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:8px;z-index:998;
+}
+.nav-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:rgba(212,119,14,0.2);border:none;cursor:pointer;
+  transition:all 0.3s;padding:0;
+}
+.nav-dot.active{
+  background:#D4770E;transform:scale(1.7);
+  box-shadow:0 0 6px rgba(212,119,14,0.4);
+}
+.keyboard-hint{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  font-size:10px;color:rgba(212,119,14,0.12);letter-spacing:4px;z-index:998;font-family:monospace;
+}
+
+/* === RESPONSIVE === */
+@media(max-height:700px){:root{--slide-padding:clamp(1rem,3vw,2.5rem);--title-size:clamp(1.5rem,4.5vw,3rem);}}
+@media(max-height:600px){:root{--title-size:clamp(1.2rem,4vw,2.2rem);--body-size:clamp(0.7rem,1.2vw,0.95rem);}.nav-dots,.keyboard-hint{display:none;}}
+@media(max-width:600px){.compare,.stat-row{grid-template-columns:1fr;}.nav-dots{display:none;}}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.tag,.seal,.quote-box,.stat-row,.compare,.arrow-box,.strap-divider{transition-duration:0.2s!important;}
+  html{scroll-behavior:auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="nav-dots" id="navDots"></div>
+<div class="keyboard-hint">← → SPACE</div>
+
+<!-- ═══ SLIDE 1: 封面 ═══ -->
+<section class="slide title-slide" id="slide-0">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <svg class="corner-tl" viewBox="0 0 44 44" fill="none"><path d="M3 41V13C3 7.477 7.477 3 13 3H41" stroke="#D4770E" stroke-width="2"/><path d="M3 23H11M3 16H7" stroke="#D4770E" stroke-width="1.5"/></svg>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/><path d="M41 23H33M41 30H37" stroke="#D4770E" stroke-width="1.5"/></svg>
+  <div class="slide-content centered">
+    <div class="hermes-logo">HERMÈS</div>
+    <h1 class="reveal orange" style="font-size:clamp(2.5rem,7vw,6rem);">Hermes Agent</h1>
+    <p class="reveal reveal-delay-1" style="font-size:var(--h2-size);color:#d4a843;margin-top:0.5em;">一个会<strong>自我进化</strong>的 AI 助手</p>
+    <p class="reveal reveal-delay-2" style="font-size:var(--body-size);color:#a89070;margin-top:1em;">开源即爆火，开发者热议的<strong style="color:#D4770E;">自动生成技能</strong>能力</p>
+    <div class="strap-divider visible" style="margin-top:2.5em;"><div class="strap-line"></div><div class="strap-center"></div><div class="strap-line"></div></div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 2: 悬念 ═══ -->
+<section class="slide" id="slide-1">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content centered">
+    <div class="hermes-logo">INTRODUCE</div>
+    <h2 class="reveal">为什么能 <span class="orange">自动生成技能</span>？</h2>
+    <p class="reveal reveal-delay-1" style="font-size:var(--h2-size);color:#a89070;margin-top:0.8em;">它到底有多神奇？</p>
+    <div class="quote-box">
+      <p class="quote">一开源就引来众多开发者关注</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 3: 痛点 ═══ -->
+<section class="slide" id="slide-2">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-orange">痛点</div>
+    <h2 class="reveal">OpenClaw <span style="color:#c0392b;">太麻烦</span></h2>
+    <p class="reveal reveal-delay-1" style="color:#a89070;margin-top:0.6em;margin-bottom:var(--content-gap);">插件很多，但每次都要<strong style="color:#D4770E;">手动配置技能</strong></p>
+    <div class="compare">
+      <div class="compare-box old">
+        <div class="compare-label">周报场景</div>
+        <div class="compare-text">每周写周报<br>都要重新来一遍<br><span style="color:#c0392b;">让人头大</span></div>
+      </div>
+      <div class="compare-box new">
+        <div class="compare-label">期望</div>
+        <div class="compare-text">能不能自动记住<br>下次直接用？</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">重复劳动 → 浪费时间</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 4: 两个路数 ═══ -->
+<section class="slide" id="slide-3">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-sage">对比</div>
+    <h2 class="reveal">两个 <span class="sage">完全不同</span> 的路数</h2>
+    <div class="strap-divider"><div class="strap-line"></div><div class="strap-center"></div><div class="strap-line"></div></div>
+    <div class="compare">
+      <div class="compare-box old">
+        <div class="compare-label">OpenClaw</div>
+        <div class="compare-text">交通枢纽<br>消息转发 · 任务分发<br>幕后调度员<br><span style="color:#c0392b;">连接外部平台</span></div>
+      </div>
+      <div class="compare-box new">
+        <div class="compare-label">Hermes Agent</div>
+        <div class="compare-text">自我进化<br>总结经验 · 闭环反馈<br><span class="orange">越用越聪明</span></div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">一个连接外部，一个强化自身</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 5: 技能管理对比 ═══ -->
+<section class="slide" id="slide-4">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-sage">技能管理</div>
+    <h2 class="reveal">手动配置 vs <span class="sage">自动归纳</span></h2>
+    <p class="reveal reveal-delay-1" style="color:#a89070;margin-top:0.5em;margin-bottom:var(--content-gap);">具体到技能和记忆，差别更明显</p>
+    <div class="compare">
+      <div class="compare-box old">
+        <div class="compare-label">OpenClaw</div>
+        <div class="compare-text">插件市场<br>下载多 · 手动配置<br>Markdown 记关键信息</div>
+      </div>
+      <div class="compare-box new">
+        <div class="compare-label">Hermes Agent</div>
+        <div class="compare-text">自动归纳技能<br><span class="orange">边用边学</span><br>多层记忆：热·温·冷</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">智能管理 vs 配置便捷</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 6: 怎么选 ═══ -->
+<section class="slide" id="slide-5">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-orange">怎么选</div>
+    <h2 class="reveal">不同场景 <span class="orange">不同选择</span></h2>
+    <div class="strap-divider"><div class="strap-line"></div><div class="strap-center"></div><div class="strap-line"></div></div>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num gold">企业</div>
+        <div class="stat-desc">多平台消息处理<br>复杂自动化任务<br>→ <strong style="color:#d4a843;">OpenClaw</strong></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num orange">Hermes</div>
+        <div class="stat-desc">本地执行 · 隐私安全<br>个性化体验<br>→ <strong style="color:#D4770E;">Hermes Agent</strong></div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">两者还可以结合使用</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 7: PART 2 ═══ -->
+<section class="slide title-slide" id="slide-6">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <svg class="corner-tl" viewBox="0 0 44 44" fill="none"><path d="M3 41V13C3 7.477 7.477 3 13 3H41" stroke="#D4770E" stroke-width="2"/></svg>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content centered">
+    <div class="hermes-logo">PART II</div>
+    <h1 class="reveal orange" style="font-size:clamp(2rem,6vw,5rem);">自动生成技能</h1>
+    <p class="reveal reveal-delay-1" style="font-size:var(--h2-size);color:#a89070;margin-top:0.8em;">到底怎么 <strong class="orange;">触发</strong>？背后的机制是什么？</p>
+    <div class="strap-divider" style="margin-top:2.5em;"><div class="strap-line"></div><div class="strap-center"></div><div class="strap-line"></div></div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 8: 触发门槛 ═══ -->
+<section class="slide" id="slide-7">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-orange">触发门槛</div>
+    <h2 class="reveal">不是什么任务都会 <span class="orange">生成技能</span></h2>
+    <div class="arrow-box" style="margin-top:var(--content-gap);">
+      <div class="arrow-item">
+        <div class="stat-num orange">5+</div>
+        <div class="arrow-label">连续工具调用<br>才会触发</div>
+      </div>
+      <div class="arrow-mid">→</div>
+      <div class="arrow-item">
+        <div class="stat-num" style="font-size:clamp(1.8rem,4vw,3.5rem);color:#d4a843;">复杂流程</div>
+        <div class="arrow-label">重复性任务<br>才值得变技能</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">简单的一两个步骤，它不会理</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 9: 复盘机制 ═══ -->
+<section class="slide" id="slide-8">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-sage">复盘机制</div>
+    <h2 class="reveal">每 <span class="orange">15</span> 次调用自动复盘</h2>
+    <p class="reveal reveal-delay-1" style="color:#a89070;margin-top:0.5em;margin-bottom:var(--content-gap);">回放执行轨迹 → <strong style="color:#D4770E;">优化技能库</strong></p>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num orange">回放</div>
+        <div class="stat-desc">任务执行轨迹<br>逐帧回顾</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num gold">优化</div>
+        <div class="stat-desc">技能库自动<br>更新迭代</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">复杂的任务 → 可复用的技能模板</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 10: LLM 分析 ═══ -->
+<section class="slide" id="slide-9">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-orange">LLM 分析</div>
+    <h2 class="reveal">判断 <span class="orange">值不值得</span></h2>
+    <p class="reveal reveal-delay-1" style="color:#a89070;margin-top:0.5em;margin-bottom:var(--content-gap);">用 LLM 分析整个执行轨迹</p>
+    <div class="arrow-box">
+      <div class="arrow-item">
+        <div class="stat-num" style="font-size:clamp(1.6rem,3.5vw,3rem);color:#d4a843;">提取关键步骤</div>
+        <div class="arrow-label">判断点 · 操作</div>
+      </div>
+      <div class="arrow-mid">→</div>
+      <div class="arrow-item">
+        <div class="stat-num orange" style="font-size:clamp(1.6rem,3.5vw,3rem);">稳定可复用</div>
+        <div class="arrow-label">才保存成技能</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">不只是记录步骤，还在判断有用没用</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 11: agentskills.io ═══ -->
+<section class="slide" id="slide-10">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-tl" viewBox="0 0 44 44" fill="none"><path d="M3 41V13C3 7.477 7.477 3 13 3H41" stroke="#D4770E" stroke-width="2"/></svg>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content centered">
+    <div class="hermes-logo">STANDARD</div>
+    <h2 class="reveal orange" style="font-size:clamp(2rem,5.5vw,4.5rem);letter-spacing:0.06em;">agentskills.io</h2>
+    <p class="reveal reveal-delay-1" style="font-size:var(--h2-size);color:#a89070;margin-top:0.8em;margin-bottom:var(--content-gap);">生成的技能文件有<strong class="orange;">规范结构</strong></p>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num orange">技能名</div>
+        <div class="stat-desc">触发场景</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num sage">步骤</div>
+        <div class="stat-desc">注意事项</div>
+      </div>
+    </div>
+    <div class="strap-divider" style="margin-top:var(--content-gap);"><div class="strap-line"></div><div class="strap-center"></div><div class="strap-line"></div></div>
+    <div class="quote-box">
+      <p class="quote">跨平台共享 · 方便迁移</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 12: 实际收益 ═══ -->
+<section class="slide" id="slide-11">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-sage">实际收益</div>
+    <h2 class="reveal">用了一段时间后 <span class="sage">效果惊人</span></h2>
+    <div class="arrow-box" style="margin-top:var(--content-gap);">
+      <div class="arrow-item">
+        <div class="stat-num sage">40%</div>
+        <div class="arrow-label">重复工作<br>提速</div>
+      </div>
+      <div class="arrow-mid">→</div>
+      <div class="arrow-item">
+        <div class="stat-num orange" style="font-size:clamp(1.8rem,4vw,3.5rem);">分层加载</div>
+        <div class="arrow-label">省内存 · 省 token</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">越用越聪明 · 真正的自我进化</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 13: PART 3 ═══ -->
+<section class="slide title-slide" id="slide-12">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <svg class="corner-tl" viewBox="0 0 44 44" fill="none"><path d="M3 41V13C3 7.477 7.477 3 13 3H41" stroke="#D4770E" stroke-width="2"/></svg>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content centered">
+    <div class="hermes-logo">PART III</div>
+    <h1 class="reveal orange" style="font-size:clamp(2rem,6vw,5rem);">前景与场景</h1>
+    <p class="reveal reveal-delay-1" style="font-size:var(--h2-size);color:#a89070;margin-top:0.8em;">谁适合用 <strong class="orange;">Hermes Agent</strong>？</p>
+    <div class="strap-divider" style="margin-top:2.5em;"><div class="strap-line"></div><div class="strap-center"></div><div class="strap-line"></div></div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 14: 个人用户 ═══ -->
+<section class="slide" id="slide-13">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-sage">技术爱好者</div>
+    <h2 class="reveal">运维 · 项目管理 · <span class="sage">文档生成</span></h2>
+    <p class="reveal reveal-delay-1" style="color:#a89070;margin-top:0.5em;margin-bottom:var(--content-gap);">把它当成一个<strong style="color:#D4770E;">全职全能的数字助理</strong></p>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num orange">日程</div>
+        <div class="stat-desc">自动整理<br>跨平台聚合</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num gold">定时</div>
+        <div class="stat-desc">自动执行任务<br>省心省力</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">跨境团队 · 远程办公 · 多设备同步</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 15: 团队协作 ═══ -->
+<section class="slide" id="slide-14">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-orange">团队协作</div>
+    <h2 class="reveal">客服 · 监控 · <span class="orange">快速原型</span></h2>
+    <div class="compare" style="margin-top:var(--content-gap);">
+      <div class="compare-box old">
+        <div class="compare-label">客服自动化</div>
+        <div class="compare-text">数据监控<br>运维管理<br>跨平台同步</div>
+      </div>
+      <div class="compare-box new">
+        <div class="compare-label">研发助力</div>
+        <div class="compare-text">快速原型<br>文献梳理<br>知识管理</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">创业公司 · 私有化企业 · 科研学生</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 16: 核心优势 ═══ -->
+<section class="slide" id="slide-15">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-sage">核心优势</div>
+    <h2 class="reveal">自动生成 · <span class="sage">本地闭环</span></h2>
+    <p class="reveal reveal-delay-1" style="color:#a89070;margin-top:0.5em;margin-bottom:var(--content-gap);">跟其他 AI 框架相比，最突出的特点</p>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num orange">自学习</div>
+        <div class="stat-desc">技能自动生成<br>不断自我进化</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num gold">多层记忆</div>
+        <div class="stat-desc">热·温·冷分层<br>跨会话细节</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">本地闭环 → 越用越聪明</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 17: 工程力 ═══ -->
+<section class="slide" id="slide-16">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <div class="edge-line top"></div>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content">
+    <div class="tag tag-orange">工程力</div>
+    <h2 class="reveal">几十种工具 · <span class="orange">六大平台</span></h2>
+    <p class="reveal reveal-delay-1" style="color:#a89070;margin-top:0.5em;margin-bottom:var(--content-gap);">部署灵活，兼容性强</p>
+    <div class="stat-row">
+      <div class="stat">
+        <div class="stat-num orange">一键迁移</div>
+        <div class="stat-desc">安全沙盒<br>数据安全</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num gold">MIT</div>
+        <div class="stat-desc">宽松协议<br>几乎为所欲为</div>
+      </div>
+    </div>
+    <div class="quote-box">
+      <p class="quote">个人 · 团队 · 企业 快速上手</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SLIDE 18: 结尾 ═══ -->
+<section class="slide title-slide" id="slide-17">
+  <div class="paper-bg"></div>
+  <div class="grain"></div>
+  <svg class="corner-tl" viewBox="0 0 44 44" fill="none"><path d="M3 41V13C3 7.477 7.477 3 13 3H41" stroke="#D4770E" stroke-width="2"/></svg>
+  <svg class="corner-br" viewBox="0 0 44 44" fill="none"><path d="M41 3V31C41 36.523 36.523 41 31 41H3" stroke="#D4770E" stroke-width="2"/></svg>
+  <div class="slide-content centered">
+    <div class="hermes-logo">FIN</div>
+    <h1 class="reveal orange" style="font-size:clamp(2.5rem,7vw,6rem);">百闻不如一见</h1>
+    <p class="reveal reveal-delay-1" style="font-size:var(--h2-size);color:#d4a843;margin-top:0.7em;">去试试 <strong>Hermes Agent</strong></p>
+    <div class="seal reveal reveal-delay-2">感受不一样的成长方式</div>
+    <p class="reveal reveal-delay-3" style="font-size:var(--body-size);color:#a89070;margin-top:1.5em;">感谢收听，下期再见</p>
+    <div class="strap-divider" style="margin-top:2em;"><div class="strap-line"></div><div class="strap-center"></div><div class="strap-line"></div></div>
+  </div>
+</section>
+
+<script>
+class SlidePresentation {
+  constructor() {
+    this.slides = document.querySelectorAll('.slide');
+    this.total = this.slides.length;
+    this.current = 0;
+    this.progressBar = document.getElementById('progressBar');
+    this.navDots = document.getElementById('navDots');
+    this.init();
+  }
+  init() {
+    this.buildNavDots();
+    this.setupObserver();
+    this.bindKeys();
+    this.updateProgress();
+    this.revealSlide(0);
+  }
+  buildNavDots() {
+    for (let i = 0; i < this.total; i++) {
+      const dot = document.createElement('button');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+      dot.addEventListener('click', () => this.goTo(i));
+      this.navDots.appendChild(dot);
+    }
+  }
+  setupObserver() {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = [...this.slides].indexOf(e.target);
+          this.current = idx;
+          this.updateProgress();
+          this.revealSlide(idx);
+          this.updateNavDots(idx);
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach(s => obs.observe(s));
+  }
+  revealSlide(idx) {
+    const s = this.slides[idx];
+    if (!s) return;
+    s.querySelectorAll('.reveal,.tag,.seal,.quote-box,.stat-row,.compare,.arrow-box,.strap-divider').forEach(el => el.classList.add('visible'));
+  }
+  updateNavDots(idx) {
+    this.navDots.querySelectorAll('.nav-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  }
+  updateProgress() {
+    this.progressBar.style.width = ((this.current + 1) / this.total * 100) + '%';
+  }
+  goTo(idx) { this.slides[idx]?.scrollIntoView({ behavior: 'smooth' }); }
+  bindKeys() {
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (this.current < this.total - 1) this.goTo(this.current + 1); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); if (this.current > 0) this.goTo(this.current - 1); }
+    });
+  }
+}
+new SlidePresentation();
+</script>
+</body>
+</html>
