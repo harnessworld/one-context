@@ -5,7 +5,7 @@
 # Fields:
 #   id               — 稳定的全局唯一 id（kebab-case）
 #   name             — 人类可读名称
-#   role             — pm | architect | dev | qa | sre | knowledge-keeper
+#   role             — pm | architect | dev | qa | sre | reviewer | knowledge-keeper
 #   profile          — 引用 meta/profiles.yaml 中的 id
 #   description      — 简短描述
 #   knowledge        — 加载到上下文的知识文件/目录（相对 one-context 根）
