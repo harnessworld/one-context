@@ -41,4 +41,9 @@ onecxt context export WORKSPACE_ID --format markdown --compress --target-tokens 
 onecxt profile list
 onecxt sync
 onecxt sync your-repo-id
+onecxt adapt dev                    # generate all adapters
+onecxt adapt dev --only hermes      # only Hermes
+onecxt adapt dev --only hermes --dry-run
+onecxt adapt-install                # install git hooks (auto-adapt on pull/checkout)
+onecxt adapt-uninstall              # remove git hooks
 ```

@@ -18,6 +18,7 @@
 | skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill                     | core     | done   | `features/core/skill-windows-c-drive-cleanup/`    | one-context     |
 | unified-adapter-rules         | 统一适配器规则源 — 声明式 manifest，消除 PROFILE_RULES 重复          | core     | done   | `features/core/unified-adapter-rules/`            | one-context     |
 | ai-mid-mgmt-video             | AI 中视频管理 — 素材与发布工具链                                       | develop  | draft  | `features/develop/ai-mid-mgmt-video/`             | one-context     |
+| hermes-adapter                | Hermes Adapter — one-context 支持 Hermes Agent CLI                     | core     | draft  | `features/core/hermes-adapter/`                   | one-context     |
 
 
 **Columns**
