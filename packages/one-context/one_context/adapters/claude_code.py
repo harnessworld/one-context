@@ -6,83 +6,28 @@ from pathlib import Path
 from typing import Any
 
 from one_context.adapters import AdapterBase, GeneratedFile, register
-from one_context.adapters._rules import FieldRule, match_rules, render_rules_by_section
+from one_context.adapters._rules import (
+    FieldRule,
+    collect_top_rules,
+    match_rules,
+    render_rules_by_section,
+    resolve_rule_placement,
+    resolve_rule_output,
+)
+from one_context.adapters._shared_rules import GENERATED_HEADER_MD, PROFILE_RULES
 from one_context.agents import resolve_agent_knowledge
 
+_ADAPTER_NAME = "claude_code"
 
-PROFILE_RULES: list[FieldRule] = [
-    # -- behavior --
-    FieldRule(
-        "behavior.plan_first", True,
-        "Always create a plan and get approval before making changes.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.plan_first", False,
-        "You may edit code directly without creating a formal plan first.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.safety_level", "conservative",
-        "Take a conservative approach: prefer minimal, reversible changes. "
-        "Review each change for unintended side effects.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.safety_level", "standard",
-        "Follow standard safety practices when making changes.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.change_scope", "broad",
-        "Consider cross-cutting concerns — changes may span multiple files and modules.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.change_scope", "focused",
-        "Keep changes focused and scoped to the immediate task.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.test_expectation", "targeted",
-        "Write targeted tests for the specific changes you make.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.test_expectation", "advisory",
-        "Suggest testing strategies but do not require tests for every change.",
-        section="Behavior",
-    ),
-    # -- output_style --
-    FieldRule(
-        "output_style.tone", "minimal",
-        "Default to minimal output (文言极简 / caveman-style): modern language, "
-        "shortest useful phrasing, no filler or pleasantries, do not restate the "
-        "user's question—lead with the answer. Unless the user explicitly requests "
-        "a different style, length, format, or language, keep replies short.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.tone", "concise",
-        "Keep responses concise and to the point.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.tone", "structured",
-        "Use structured output with clear headings and sections.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.include_verification", True,
-        "Include verification steps (e.g. test commands) after making changes.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.include_verification", False,
-        "Verification steps are optional — focus on the design and rationale.",
-        section="Output Style",
-    ),
-]
+
+def _inline_rules(
+    matched: list[FieldRule],
+    adapter_name: str,
+    heading_level: int = 2,
+) -> str:
+    """Render rules that are NOT top-placement (i.e. inline only)."""
+    inline = [r for r in matched if resolve_rule_placement(r, adapter_name) != "top"]
+    return render_rules_by_section(inline, heading_level=heading_level, adapter_name=adapter_name)
 
 
 @register("claude_code")
@@ -90,6 +35,9 @@ class ClaudeCodeAdapter(AdapterBase):
     """Generate per-workspace adapter files and project-root ``CLAUDE.md``."""
 
     supports_file_ref = True
+
+    def __init__(self) -> None:
+        self._top_rules: list[str] = []
 
     def generate(
         self,
@@ -99,6 +47,8 @@ class ClaudeCodeAdapter(AdapterBase):
     ) -> list[GeneratedFile]:
         ws_id = workspace.get("id", "unknown")
         parts: list[str] = [
+            GENERATED_HEADER_MD,
+            "",
             f"# one-context — workspace `{ws_id}`",
             "",
         ]
@@ -118,10 +68,14 @@ class ClaudeCodeAdapter(AdapterBase):
                 parts.append(f"- {item}")
             parts.append("")
 
-        # Profile rules
+        # Profile rules — inline only; top-placement rules are collected separately
         for profile in context.get("profiles") or []:
             matched = match_rules(profile, PROFILE_RULES)
-            if matched:
+            # Collect top-placement rules across all profiles
+            self._top_rules.extend(collect_top_rules(matched, _ADAPTER_NAME))
+            # Render only inline rules
+            inline_text = _inline_rules(matched, _ADAPTER_NAME, heading_level=3)
+            if inline_text.strip():
                 pname = profile.get("name", profile.get("id", ""))
                 parts.append(f"## Profile: {pname}")
                 parts.append("")
@@ -129,7 +83,7 @@ class ClaudeCodeAdapter(AdapterBase):
                 if desc:
                     parts.append(f"_{desc}_")
                     parts.append("")
-                parts.append(render_rules_by_section(matched, heading_level=3))
+                parts.append(inline_text)
 
         # Knowledge — use @file references (Claude Code supports this)
         knowledge = context.get("knowledge") or []
@@ -174,7 +128,7 @@ class ClaudeCodeAdapter(AdapterBase):
             owns: list[str] = agent.get("owns") or []
             profile_id: str | None = agent.get("profile")
 
-            parts: list[str] = [f"# {name}", ""]
+            parts: list[str] = [GENERATED_HEADER_MD, "", f"# {name}", ""]
             if description:
                 parts.append(f"_{description}_")
                 parts.append("")
@@ -211,11 +165,14 @@ class ClaudeCodeAdapter(AdapterBase):
                 profile = profiles_by_id.get(profile_id.casefold())
                 if profile:
                     matched = match_rules(profile, PROFILE_RULES)
-                    if matched:
+                    # Collect top-placement rules from agent profiles too
+                    self._top_rules.extend(collect_top_rules(matched, _ADAPTER_NAME))
+                    inline_text = _inline_rules(matched, _ADAPTER_NAME, heading_level=3)
+                    if inline_text.strip():
                         pname = profile.get("name", profile.get("id", ""))
                         parts.append(f"## Profile: {pname}")
                         parts.append("")
-                        parts.append(render_rules_by_section(matched, heading_level=3))
+                        parts.append(inline_text)
 
             knowledge = resolve_agent_knowledge(root, agent)
             existing = [k for k in knowledge if k.get("exists")]
@@ -252,7 +209,25 @@ class ClaudeCodeAdapter(AdapterBase):
     ) -> list[GeneratedFile]:
         """Generate root ``CLAUDE.md`` with ``@`` refs to adapters + agents."""
         del root  # paths are repo-relative for @-references
+
+        # Deduplicate top rules while preserving order
+        seen: set[str] = set()
+        unique_top: list[str] = []
+        for rule_text in self._top_rules:
+            if rule_text not in seen:
+                seen.add(rule_text)
+                unique_top.append(rule_text)
+
+        # Prepend top-placement rules as hard constraints at the very top
+        top_block = ""
+        hard_rules_ref = ""
+        if unique_top:
+            top_block = "\n".join(unique_top) + "\n\n"
+            hard_rules_ref = "@.claude/adapters/onecxt-hard-rules.md\n"
+
         lines = [
+            GENERATED_HEADER_MD,
+            "",
             "# one-context — Claude Code",
             "",
             "This file is **generated by** `onecxt adapt`. Do not edit by hand — "
@@ -267,6 +242,11 @@ class ClaudeCodeAdapter(AdapterBase):
             "Per-workspace context (profiles, knowledge `@` list):",
             "",
         ]
+
+        # Hard rules reference first
+        if hard_rules_ref:
+            lines.append(hard_rules_ref)
+
         for ws_id in workspace_ids:
             lines.append(f"@.claude/adapters/onecxt-{ws_id}.md")
             lines.append("")
@@ -286,11 +266,27 @@ class ClaudeCodeAdapter(AdapterBase):
                 lines.append(f"@.claude/agents/{aid}.md")
                 lines.append("")
 
-        content = "\n".join(lines).rstrip() + "\n"
-        return [
+        content = top_block + "\n".join(lines).rstrip() + "\n"
+
+        files: list[GeneratedFile] = [
             GeneratedFile(
                 rel_path="CLAUDE.md",
                 content=content,
                 description="Claude Code project root CLAUDE.md (generated)",
             ),
         ]
+
+        # Generate the hard-rules standalone file for @-reference
+        if unique_top:
+            files.append(
+                GeneratedFile(
+                    rel_path=".claude/adapters/onecxt-hard-rules.md",
+                    content=GENERATED_HEADER_MD + "\n\n" + "\n".join(unique_top) + "\n",
+                    description="Hard rules (top-placement) for this project",
+                )
+            )
+
+        # Reset cached top rules after generating artifacts
+        self._top_rules = []
+
+        return files

@@ -6,82 +6,17 @@ from pathlib import Path
 from typing import Any
 
 from one_context.adapters import AdapterBase, GeneratedFile, register
-from one_context.adapters._rules import FieldRule, match_rules, render_rules_by_section
+from one_context.adapters._rules import (
+    FieldRule,
+    collect_top_rules,
+    match_rules,
+    render_rules_by_section,
+    resolve_rule_placement,
+)
+from one_context.adapters._shared_rules import GENERATED_HEADER_MD, PROFILE_RULES
 from one_context.agents import resolve_agent_knowledge
 
-
-PROFILE_RULES: list[FieldRule] = [
-    # -- behavior --
-    FieldRule(
-        "behavior.plan_first", True,
-        "Always create a plan before making changes. Ask for approval first.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.plan_first", False,
-        "You may edit code directly without a formal plan.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.safety_level", "conservative",
-        "Be conservative: prefer minimal, reversible changes.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.safety_level", "standard",
-        "Follow standard safety practices.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.change_scope", "broad",
-        "Changes may span multiple files — consider cross-cutting concerns.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.change_scope", "focused",
-        "Keep changes focused on the immediate task.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.test_expectation", "targeted",
-        "Write targeted tests for changes.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.test_expectation", "advisory",
-        "Suggest testing strategies when appropriate.",
-        section="Behavior",
-    ),
-    # -- output_style --
-    FieldRule(
-        "output_style.tone", "minimal",
-        "Default to minimal output (文言极简 / caveman-style): modern language, "
-        "shortest useful phrasing, no filler or pleasantries, do not restate the "
-        "user's question—lead with the answer. Unless the user explicitly requests "
-        "a different style, length, format, or language, keep replies short.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.tone", "concise",
-        "Be concise.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.tone", "structured",
-        "Use structured output with clear headings.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.include_verification", True,
-        "Include verification steps after changes.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.include_verification", False,
-        "Focus on design and rationale over verification.",
-        section="Output Style",
-    ),
-]
+_ADAPTER_NAME = "cursor"
 
 
 def _build_mdc_frontmatter(workspace: dict[str, Any]) -> str:
@@ -124,6 +59,9 @@ class CursorAdapter(AdapterBase):
 
     supports_file_ref = False
 
+    def __init__(self) -> None:
+        self._top_rules: list[str] = []
+
     def generate(
         self,
         root: Path,
@@ -131,7 +69,7 @@ class CursorAdapter(AdapterBase):
         context: dict[str, Any],
     ) -> list[GeneratedFile]:
         ws_id = workspace.get("id", "unknown")
-        parts: list[str] = [_build_mdc_frontmatter(workspace), ""]
+        parts: list[str] = [_build_mdc_frontmatter(workspace), "", GENERATED_HEADER_MD, ""]
 
         # Workspace summary
         ws_ctx = workspace.get("context") or {}
@@ -150,14 +88,17 @@ class CursorAdapter(AdapterBase):
                 parts.append(f"- {item}")
             parts.append("")
 
-        # Profile rules
+        # Profile rules — inline only; top-placement rules are collected separately
         for profile in context.get("profiles") or []:
             matched = match_rules(profile, PROFILE_RULES)
-            if matched:
+            self._top_rules.extend(collect_top_rules(matched, _ADAPTER_NAME))
+            # Render only inline rules
+            inline = [r for r in matched if resolve_rule_placement(r, _ADAPTER_NAME) != "top"]
+            if inline:
                 pname = profile.get("name", profile.get("id", ""))
                 parts.append(f"## Profile: {pname}")
                 parts.append("")
-                parts.append(render_rules_by_section(matched, heading_level=3))
+                parts.append(render_rules_by_section(inline, heading_level=3, adapter_name=_ADAPTER_NAME))
 
         # Knowledge — inline content
         knowledge = context.get("knowledge") or []
@@ -168,14 +109,15 @@ class CursorAdapter(AdapterBase):
             parts.append(inlined)
             parts.append("")
 
-        content = "\n".join(parts)
-        return [
+        files: list[GeneratedFile] = [
             GeneratedFile(
                 rel_path=f".cursor/rules/onecxt-{ws_id}.mdc",
-                content=content,
+                content="\n".join(parts),
                 description=f"Cursor rules for workspace {ws_id}",
             ),
         ]
+
+        return files
 
     def generate_agents(
         self,
@@ -211,7 +153,7 @@ class CursorAdapter(AdapterBase):
             fm_lines.append("alwaysApply: false")
             fm_lines.append("---")
 
-            parts: list[str] = ["\n".join(fm_lines), "", f"# {name}", ""]
+            parts: list[str] = ["\n".join(fm_lines), "", GENERATED_HEADER_MD, "", f"# {name}", ""]
 
             if instructions:
                 parts.append(instructions)
@@ -245,11 +187,14 @@ class CursorAdapter(AdapterBase):
                 profile = profiles_by_id.get(profile_id.casefold())
                 if profile:
                     matched = match_rules(profile, PROFILE_RULES)
-                    if matched:
+                    # Collect top-placement rules from agent profiles too
+                    self._top_rules.extend(collect_top_rules(matched, _ADAPTER_NAME))
+                    inline = [r for r in matched if resolve_rule_placement(r, _ADAPTER_NAME) != "top"]
+                    if inline:
                         pname = profile.get("name", profile.get("id", ""))
                         parts.append(f"## Profile: {pname}")
                         parts.append("")
-                        parts.append(render_rules_by_section(matched, heading_level=3))
+                        parts.append(render_rules_by_section(inline, heading_level=3, adapter_name=_ADAPTER_NAME))
 
             knowledge = resolve_agent_knowledge(root, agent)
             inlined = _inline_knowledge(root, knowledge)
@@ -266,5 +211,34 @@ class CursorAdapter(AdapterBase):
                     description=f"Cursor rules for agent {agent_id}",
                 )
             )
+
+        # Emit hard-rules file after all agents are processed
+        # (top rules may also come from generate(), so always check)
+        seen: set[str] = set()
+        unique_top: list[str] = []
+        for rule_text in self._top_rules:
+            if rule_text not in seen:
+                seen.add(rule_text)
+                unique_top.append(rule_text)
+
+        if unique_top:
+            hard_content = (
+                "---\n"
+                "description: Hard rules (top-priority)\n"
+                "globs:\n"
+                "alwaysApply: true\n"
+                "---\n\n"
+                + GENERATED_HEADER_MD + "\n\n"
+                + "\n".join(unique_top)
+                + "\n"
+            )
+            files.append(
+                GeneratedFile(
+                    rel_path=".cursor/rules/onecxt-hard-rules.mdc",
+                    content=hard_content,
+                    description="Hard rules for Cursor (top-priority, alwaysApply)",
+                )
+            )
+            self._top_rules = []
 
         return files
