@@ -1,6 +1,6 @@
-# 语雀绘图引擎 Demo 集
+# Diagram Demos — 绘图引擎示例集
 
-每种引擎、每种图表类型各一个精美示例，可直接复制到语雀使用。
+每种引擎、每种图表类型各一个精美示例，可直接复制到支持 PlantUML / Mermaid / Graphviz 的平台使用。
 
 ---
 
@@ -78,7 +78,7 @@ App --> U : 展示支付结果页
 deactivate App
 
 note over MQ : 所有跨服务调用\n均通过消息队列解耦
-note right of Pay : 支持微信/支付宝/银联\n三通道自动路由
+note right of Pay : 支持微信/银联\n双通道自动路由
 
 @enduml
 ```

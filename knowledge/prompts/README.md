@@ -1,24 +1,16 @@
 # Prompts
 
-Put canonical prompt and context fragments here.
+Canonical prompt and context fragments for AI tooling.
 
-These should describe reusable intent, not vendor-specific syntax.
+These describe reusable intent, not vendor-specific syntax. Adapters translate them into tool-native formats.
 
-Examples:
+## Scope
 
-- repository summary templates
-- task kickoff context
-- architecture review framing
-- implementation checklist prompts
-# Prompts
+- Repository summary templates
+- Task kickoff context
+- Architecture review framing
+- Implementation checklist prompts
 
-Put canonical prompt and context fragments here.
+## Status
 
-These should describe reusable intent, not vendor-specific syntax.
-
-Examples:
-
-- repository summary templates
-- task kickoff context
-- architecture review framing
-- implementation checklist prompts
+This directory is currently **empty** — awaiting reusable text prompt fragments. Diagram-related image-generation prompts live under `references/diagram-examples/` alongside their source images.

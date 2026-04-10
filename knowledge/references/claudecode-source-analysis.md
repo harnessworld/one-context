@@ -1,4 +1,4 @@
-# Claude Code 源码解析 — 参考资料索引
+# Claude Code Source Analysis — 源码解析参考资料索引
 
 > 本文档整理了关于 Claude Code 源码解析、架构分析的权威文章和资源，供 agent 框架建设参考。
 > 更新日期：2026-04-02

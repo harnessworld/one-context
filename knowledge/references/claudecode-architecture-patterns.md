@@ -1,4 +1,4 @@
-# Claude Code 架构设计模式与最佳实践
+# Claude Code Architecture Patterns — 架构设计模式与最佳实践
 
 > 从 30+ 篇权威文章中提炼的 Claude Code 核心架构要素和可复用设计模式。
 > 目的：为后续 agent 框架建设提供设计参考。
