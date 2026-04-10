@@ -1,0 +1,35 @@
+#!/bin/sh
+# pre-commit hook for one-context
+#
+# Regenerates adapter output files from shared rules and stages them,
+# ensuring generated artifacts are always consistent with source.
+#
+# Install:
+#   ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+#
+# Or with pre-commit framework:
+#   Add to .pre-commit-config.yaml as a local hook.
+
+set -e
+
+# Only run if onecxt is available
+if ! command -v onecxt >/dev/null 2>&1; then
+  echo "warning: onecxt not found, skipping adapt sync" >&2
+  exit 0
+fi
+
+# Check if any source files are staged that could affect generated output
+SOURCE_PATTERNS="meta/ packages/one-context/one_context/adapters/ knowledge/"
+CHANGED=$(git diff --cached --name-only -- $SOURCE_PATTERNS 2>/dev/null || true)
+
+if [ -z "$CHANGED" ]; then
+  exit 0
+fi
+
+echo "[pre-commit] Source files changed, running onecxt adapt --all ..."
+onecxt adapt --all
+
+# Stage the generated files
+git add .claude/ .cursor/ .openclaw/ CLAUDE.md 2>/dev/null || true
+
+echo "[pre-commit] Generated files updated and staged."

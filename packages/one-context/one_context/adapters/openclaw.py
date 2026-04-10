@@ -8,32 +8,8 @@ from typing import Any
 
 from one_context.adapters import AdapterBase, GeneratedFile, register
 from one_context.adapters._rules import FieldRule, match_rules
+from one_context.adapters._shared_rules import GENERATED_NOTICE_JSON, PROFILE_RULES
 from one_context.agents import resolve_agent_knowledge
-
-
-PROFILE_RULES: list[FieldRule] = [
-    # -- behavior --
-    FieldRule("behavior.plan_first", True, "Always create a plan before making changes.", section="behavior"),
-    FieldRule("behavior.plan_first", False, "Edit code directly without a formal plan.", section="behavior"),
-    FieldRule("behavior.safety_level", "conservative", "Prefer minimal, reversible changes.", section="behavior"),
-    FieldRule("behavior.safety_level", "standard", "Follow standard safety practices.", section="behavior"),
-    FieldRule("behavior.change_scope", "broad", "Consider cross-cutting concerns across files.", section="behavior"),
-    FieldRule("behavior.change_scope", "focused", "Keep changes focused on the immediate task.", section="behavior"),
-    FieldRule("behavior.test_expectation", "targeted", "Write targeted tests for changes.", section="behavior"),
-    FieldRule("behavior.test_expectation", "advisory", "Suggest testing strategies when appropriate.", section="behavior"),
-    # -- output_style --
-    FieldRule(
-        "output_style.tone",
-        "minimal",
-        "Minimal output (文言极简): short, no filler, answer first; override only if "
-        "the user asks for a different style or detail level.",
-        section="output_style",
-    ),
-    FieldRule("output_style.tone", "concise", "Be concise.", section="output_style"),
-    FieldRule("output_style.tone", "structured", "Use structured output.", section="output_style"),
-    FieldRule("output_style.include_verification", True, "Include verification steps.", section="output_style"),
-    FieldRule("output_style.include_verification", False, "Focus on design over verification.", section="output_style"),
-]
 
 
 def _collect_instructions(profiles: list[dict[str, Any]]) -> list[str]:
@@ -80,6 +56,7 @@ class OpenClawAdapter(AdapterBase):
         ws_ctx = workspace.get("context") or {}
 
         config: dict[str, Any] = {
+            "_generated": GENERATED_NOTICE_JSON,
             "workspace_id": ws_id,
             "name": workspace.get("name", ""),
             "description": workspace.get("description", ""),
@@ -141,6 +118,7 @@ class OpenClawAdapter(AdapterBase):
             profile_id: str | None = agent.get("profile")
 
             config: dict[str, Any] = {
+                "_generated": GENERATED_NOTICE_JSON,
                 "agent_id": agent_id,
                 "name": name,
                 "role": agent.get("role", ""),
@@ -192,6 +170,7 @@ class OpenClawAdapter(AdapterBase):
         """Generate ``.openclaw/onecxt-project.json`` listing workspace + agent configs."""
         del root
         payload: dict[str, Any] = {
+            "_generated": GENERATED_NOTICE_JSON,
             "one_context": {
                 "version": 1,
                 "description": (

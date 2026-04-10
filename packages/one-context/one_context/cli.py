@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import logging
 import sys
 from pathlib import Path
@@ -268,6 +269,54 @@ def _emit_file(root: Path, gf, dry_run: bool) -> None:
         print(f"wrote: {gf.rel_path} ({gf.description})")
 
 
+def _check_generated(root: Path, files: list) -> int:
+    """Compare generated content to disk. Return 0 if all match, 1 if any differ."""
+    mismatched: list[str] = []
+    for gf in files:
+        target = root / gf.rel_path
+        if not target.is_file():
+            mismatched.append(f"  missing: {gf.rel_path}")
+            continue
+        existing = target.read_text(encoding="utf-8")
+        if existing != gf.content:
+            mismatched.append(f"  stale:   {gf.rel_path}")
+
+    if mismatched:
+        print("adapt --check: generated files are NOT up-to-date:", file=sys.stderr)
+        for line in mismatched:
+            print(line, file=sys.stderr)
+        print(f"\nRun `onecxt adapt --all` to regenerate.", file=sys.stderr)
+        return 1
+
+    print("adapt --check: all generated files are up-to-date.")
+    return 0
+
+
+def _report_dirty_files(root: Path, files: list) -> None:
+    """Detect and report files that were modified externally since last adapt."""
+    dirty_count = 0
+    for gf in files:
+        target = root / gf.rel_path
+        if not target.is_file():
+            continue
+        existing = target.read_text(encoding="utf-8")
+        if existing != gf.content:
+            dirty_count += 1
+            diff_lines = list(difflib.unified_diff(
+                existing.splitlines(keepends=True),
+                gf.content.splitlines(keepends=True),
+                fromfile=f"disk:{gf.rel_path}",
+                tofile=f"generated:{gf.rel_path}",
+                n=1,
+            ))
+            add_count = sum(1 for l in diff_lines if l.startswith("+") and not l.startswith("+++"))
+            del_count = sum(1 for l in diff_lines if l.startswith("-") and not l.startswith("---"))
+            print(f"  dirty: {gf.rel_path} (+{add_count}/-{del_count} lines)")
+
+    if dirty_count:
+        print(f"warning: {dirty_count} generated file(s) differ from expected output; overwriting.")
+
+
 def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
     # Lazy import to avoid circular deps and keep startup fast
     from one_context.adapters import ADAPTERS, get_adapter, list_adapters
@@ -297,6 +346,11 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
 
     adapter_names = [only] if only else list_adapters()
     dry_run = args.dry_run
+    check_mode = getattr(args, "check", False)
+
+    if dry_run and check_mode:
+        print("error: --dry-run and --check are mutually exclusive", file=sys.stderr)
+        return 2
 
     # Load agents and profiles once — used for per-agent config generation
     agents, _ = load_agents(root)
@@ -311,6 +365,10 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
         except Exception:
             resolved_profiles[pid] = profiles_by_id[pid]  # fallback to raw
 
+    # Collect all generated files first
+    from one_context.adapters import GeneratedFile
+    all_generated: list[GeneratedFile] = []
+
     for ws_id in workspace_ids:
         try:
             ctx = build_workspace_context(root, ws_id)
@@ -321,20 +379,23 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
         workspace = ctx["workspace"]
         for aname in adapter_names:
             adapter = get_adapter(aname)
-
-            # Workspace-level config (existing behaviour)
-            for gf in adapter.generate(root, workspace, ctx):
-                _emit_file(root, gf, dry_run)
+            all_generated.extend(adapter.generate(root, workspace, ctx))
 
     # Agent files and project-root hooks — once per adapt run (not per workspace)
     for aname in adapter_names:
         adapter = get_adapter(aname)
         if agents:
-            for gf in adapter.generate_agents(root, agents, resolved_profiles):
-                _emit_file(root, gf, dry_run)
+            all_generated.extend(adapter.generate_agents(root, agents, resolved_profiles))
+        all_generated.extend(adapter.generate_project_artifacts(root, workspace_ids, agents))
 
-        for gf in adapter.generate_project_artifacts(root, workspace_ids, agents):
-            _emit_file(root, gf, dry_run)
+    # --check mode: compare only, do not write
+    if check_mode:
+        return _check_generated(root, all_generated)
+
+    # Normal mode: report dirty files, then emit
+    _report_dirty_files(root, all_generated)
+    for gf in all_generated:
+        _emit_file(root, gf, dry_run)
 
     return 0
 
@@ -488,6 +549,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         default=False,
         help="Print generated content without writing files",
+    )
+    p_adapt.add_argument(
+        "--check",
+        action="store_true",
+        default=False,
+        help="Check that generated files are up-to-date (exit 1 if not). Does not write.",
     )
     p_adapt.set_defaults(func=_cmd_adapt)
 
