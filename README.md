@@ -108,13 +108,16 @@ agents.yaml ──────┘      └─ OpenClawAdapter ──→ .opencla
                                                      .openclaw/agents/pm.json
 ```
 
-| 工具 | Workspace 配置 | Agent 配置 | 知识策略 |
-|------|---------------|-----------|----------|
-| **Cursor** | `.cursor/rules/onecxt-{id}.mdc` | `.cursor/rules/agent-{id}.mdc` | 内容内联 |
-| **Claude Code** | `.claude/adapters/onecxt-{id}.md` | `.claude/agents/{id}.md` | `@file` 引用 |
-| **OpenClaw** | `.openclaw/onecxt-{id}.json` | `.openclaw/agents/{id}.json` | 内容内联 |
+|| 工具 | 项目入口 | Workspace 配置 | Agent 配置 | 知识策略 |
+|------|----------|---------------|-----------|----------|
+| **Cursor** | — | `.cursor/rules/onecxt-{id}.mdc` | `.cursor/rules/agent-{id}.mdc` | 内容内联 |
+| **Claude Code** | `CLAUDE.md` | `.claude/adapters/onecxt-{id}.md` | `.claude/agents/{id}.md` | `@file` 引用 |
+| **OpenClaw** | `.openclaw/onecxt-project.json` | `.openclaw/onecxt-{id}.json` | `.openclaw/agents/{id}.json` | 内容内联 |
 
-一条 `onecxt adapt` 即可生成上述全部（workspace + 所有 agent 配置）。要接新工具？写一个约 60 行的适配器即可。
+- **项目入口**：Claude Code 生成根目录 `CLAUDE.md`（含 `@` 引用各 workspace + agent 文件）；OpenClaw 生成 `.openclaw/onecxt-project.json`（列出所有 workspace 与 agent 配置路径）。
+- 另有 `.claude/adapters/onecxt-hard-rules.md` 存放 top-placement 硬约束规则（Claude Code 专有）。
+
+一条 `onecxt adapt` 即可生成上述全部（项目入口 + workspace + 所有 agent 配置）。要接新工具？写一个约 60 行的适配器即可。
 
 ## Agent Framework
 
@@ -126,6 +129,7 @@ agents.yaml ──────┘      └─ OpenClawAdapter ──→ .opencla
 | **architect** | 技术设计 | `features/**/tech_design.md`, `docs/architecture.md` |
 | **dev** | 功能实现 | `features/**/worktrees.yaml` |
 | **qa** | 测试验收 | `features/**/test_report.md`, `features/**/mr_report.md` |
+| **reviewer** | 代码评审 | `features/**/mr_report.md` |
 | **sre** | 发布部署 | `features/**/deliver.md` |
 | **knowledge-keeper** | 知识维护 | `knowledge/standards/`, `knowledge/playbooks/` |
 
@@ -282,13 +286,17 @@ FieldRule("behavior.safety_level", "conservative",
 onecxt [--root PATH] [--verbose]
 ├── doctor                                  # 校验清单（含 agents.yaml）
 ├── sync [ID...] [--jobs N]                 # 克隆 / 快进更新仓库
-├── adapt WORKSPACE [--only ADAPTER] [--dry-run] [--all]
-│                                           # 生成工具配置 + agent 配置
+├── adapt WORKSPACE [--only ADAPTER] [--dry-run] [--check] [--all]
+│                                           # 生成项目入口 + workspace + agent 配置
+│                                           # --check: 仅比对磁盘文件是否最新
 ├── repo list                               # 列出已登记仓库
 ├── workspace list | show ID                # 查看 workspace
-├── context export ID [--format json|md] [--compress] [--target-tokens N]  # 导出上下文包；可选自动压缩
+├── context export ID [--format json|md] [--compress] [--target-tokens N] [-o FILE]
+│                                           # 导出上下文包；可选自动压缩；-o 写入文件
 ├── profile list | show ID [--resolved]     # 列出/查看 profile
-└── agent list | show ID                    # 列出/查看智能体
+├── agent list | show ID                    # 列出/查看智能体
+├── worktree setup | status | teardown      # Git worktree 生命周期管理
+└── deploy validate                         # 校验 deploy.yaml
 ```
 
 ### Agent 子命令
@@ -309,7 +317,7 @@ onecxt agent show pm                        # 查看 PM 智能体详情
 | 清单校验（`doctor`） | 稳定 |
 | **适配框架** | **可用于生产** — Cursor、Claude Code、OpenClaw |
 | 声明式规则匹配引擎 | 可用于生产 |
-| **Agent Framework** | **可用于生产** — 6 个标准智能体 + 适配器生成 |
+| **Agent Framework** | **可用于生产** — 7 个标准智能体 + 适配器生成 |
 | 测试套件 | 见 CI — `packages/one-context/tests/` 下 pytest |
 
 ## one-context 不是什么

@@ -13,6 +13,7 @@
 | 4 | `exemplar-persona-md-blueprint.png` | [prompt-4](prompt-4-persona-md-blueprint.md) | steel blue | 蓝图放射 |
 | 5 | `exemplar-work-md-blueprint.png` | [prompt-5](prompt-5-work-md-blueprint.md) | blue-gray ink | 手绘蓝图 |
 | 6 | `exemplar-work-persona-incident-flow.png` | [prompt-6](prompt-6-work-persona-incident-flow.md) | teal/gray | 协同流程 |
+| 7 | *(AI-generated, no exemplar PNG)* | [prompt-7](prompt-7-knowledge-base-intro.md) | teal/cyan monochrome | 专业蓝图 |
 
 ## 使用说明
 

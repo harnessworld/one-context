@@ -11,4 +11,10 @@ Local copies of reference infographics (process flow, layered blueprints, before
 | `exemplar-codex-agent-loop-part3-sse-tool-flow.png` | *Unrolling the Codex Agent Loop* 3/4：SSE 实时流、`reasoning_summary` / `encrypted_content` 与工具调用闭环 |
 | `exemplar-codex-agent-loop-part4-cache-compression.png` | 同系列 4/4：Prompt 缓存（静态/动态区、前缀追加）、Context compaction、`encrypted_content` 与 ZDR |
 
+### AI-generated diagram prompts (no exemplar PNG)
+
+| File | Topic |
+|------|-------|
+| `prompt-7-knowledge-base-intro.md` | `knowledge/` 知识库结构介绍：五目录放射布局 + 适配器流水线 + knowledge-keeper 维护循环 |
+
 Added from user `Downloads` on 2026-04-08; Codex loop 两张来自 Cursor workspace `assets/`（2026-04-08）。
