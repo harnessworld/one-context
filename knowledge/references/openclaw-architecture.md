@@ -1,5 +1,8 @@
 # OpenClaw Source Architecture — 源码架构解析
 
+> 来源：基于 [OpenClaw](https://github.com/openclaw/openclaw) 项目源码分析
+> 链接：https://github.com/openclaw/openclaw
+
 > 基于对 [OpenClaw](https://github.com/openclaw/openclaw) 项目源码及权威技术文章的系统性梳理，提炼出对 agent 建设有指导意义的架构模式和设计理念。
 
 ## 1. 项目概述
@@ -10,7 +13,7 @@
 | **原名** | Clawdbot → Moltbot → OpenClaw |
 | **技术栈** | TypeScript（90%+）、Node.js 24、pnpm、WebSocket |
 | **许可证** | MIT |
-| **活跃度** | 344K+ Star、68K+ Fork，每日发版（vYYYY.M.D 日历版本） |
+| **活跃度** | 高活跃度（Star/Fork 数据请以 [GitHub 仓库](https://github.com/openclaw/openclaw) 实时数据为准），每日发版（vYYYY.M.D 日历版本） |
 | **口号** | "Your own personal AI assistant. Any OS. Any Platform." |
 
 ## 2. 核心架构

@@ -1,5 +1,7 @@
 # one-context conventions
 
+> 来源：one-context 内部原创
+
 These conventions keep `one-context` agent-agnostic and easy to extend.
 
 ## Canonical sources
