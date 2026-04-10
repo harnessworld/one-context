@@ -16,6 +16,7 @@
 | one-context-intro-short-video | one-context 中视频介绍（爆款口播框架）                             | develop  | draft  | `features/develop/one-context-intro-short-video/` | one-context     |
 | hermes-agent-short-video      | Hermes Agent 短视频口播成片（wav-auto）                          | develop  | draft  | `features/develop/hermes-agent-short-video/`      | one-context     |
 | skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill                     | core     | done   | `features/core/skill-windows-c-drive-cleanup/`    | one-context     |
+| unified-adapter-rules         | 统一适配器规则源 — 声明式 manifest，消除 PROFILE_RULES 重复          | core     | draft  | `features/core/unified-adapter-rules/`            | one-context     |
 
 
 **Columns**
