@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anthropic Agent Harness · 豆包AI播客</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'Microsoft YaHei UI', 'PingFang SC', 'Microsoft YaHei',
+                 'Source Han Sans CN', sans-serif;
+    background: #0b0914;
+    color: #e8e0f5;
+    overflow-x: hidden;
+}
+
+.slides {
+    width: 100vw;
+    height: 100vh;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+.slide {
+    width: 100vw;
+    height: 100vh;
+    min-height: 100vh;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 72px 60px 60px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 紫色光晕 */
+.slide::before {
+    content: '';
+    position: absolute;
+    top: -300px; left: 50%;
+    transform: translateX(-50%);
+    width: 1000px; height: 1000px;
+    background: radial-gradient(ellipse at center,
+        rgba(168,85,247,0.12) 0%,
+        rgba(34,211,238,0.04) 50%,
+        transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+.slide > * { position: relative; z-index: 1; }
+
+/* 进度条 */
+#progress {
+    position: fixed; top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #a855f7, #22d3ee);
+    z-index: 999;
+    transition: width 0.3s ease;
+}
+
+/* 右侧导航点 */
+#dots {
+    position: fixed; right: 20px; top: 50%;
+    transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 8px;
+    z-index: 999;
+}
+.dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(168,85,247,0.3);
+    cursor: pointer; transition: all 0.3s;
+}
+.dot.active {
+    background: #a855f7;
+    box-shadow: 0 0 8px rgba(168,85,247,0.8);
+    transform: scale(1.6);
+}
+
+/* ─── 共用组件 ─── */
+.tag {
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 6px;
+    color: #22d3ee;
+    text-transform: uppercase; opacity: 0.9;
+}
+.title {
+    font-size: clamp(44px, 6vw, 72px); font-weight: 900;
+    line-height: 1.15; color: #e8e0f5;
+    text-align: center; letter-spacing: 1px;
+    text-shadow: 0 0 40px rgba(168,85,247,0.2);
+    margin-top: 16px;
+}
+.body-text {
+    font-size: clamp(24px, 3vw, 36px); line-height: 1.7;
+    color: rgba(232,224,245,0.65);
+    text-align: center; margin-top: 24px; white-space: pre-line;
+}
+.divider {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, #a855f7, #22d3ee);
+    border-radius: 2px; margin: 20px auto;
+}
+.top-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #a855f7 30%, #22d3ee 70%, transparent);
+}
+.timestamp {
+    position: absolute; bottom: 24px; right: 36px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px; color: rgba(153,136,184,0.4); letter-spacing: 1px;
+}
+.page-num {
+    position: absolute; bottom: 24px; left: 36px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px; color: rgba(153,136,184,0.4); letter-spacing: 1px;
+}
+
+/* ─── 封面 ─── */
+.cover-bg {
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 30%,
+            rgba(168,85,247,0.18) 0%,
+            rgba(34,211,238,0.07) 40%,
+            transparent 70%),
+        radial-gradient(ellipse 60% 50% at 80% 80%,
+            rgba(168,85,247,0.10) 0%,
+            transparent 60%),
+        #0b0914;
+}
+.cover-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -60%);
+    background: radial-gradient(ellipse, rgba(168,85,247,0.20) 0%, transparent 70%);
+    pointer-events: none;
+}
+.cover-eyebrow {
+    font-size: 14px; letter-spacing: 8px;
+    color: rgba(34,211,238,0.7); font-weight: 500;
+    text-transform: uppercase; margin-bottom: 32px;
+}
+.cover-headline {
+    font-size: clamp(72px, 10vw, 120px); font-weight: 900;
+    line-height: 1.0; text-align: center;
+    color: #e8e0f5; letter-spacing: 4px;
+    text-shadow: 0 0 60px rgba(168,85,247,0.35);
+    white-space: pre-line;
+}
+.cover-sub {
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: rgba(232,224,245,0.55);
+    text-align: center; margin-top: 28px; line-height: 1.8; white-space: pre-line;
+}
+.cover-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #a855f7, #c084fc, #22d3ee);
+}
+
+/* ─── 章节分隔页 ─── */
+.section-icon { width: 80px; height: 80px; margin-bottom: 24px; }
+.section-icon svg { width: 80px; height: 80px; }
+.section-title {
+    font-size: clamp(52px, 7vw, 88px); font-weight: 900;
+    color: #e8e0f5; text-align: center; letter-spacing: 2px;
+    text-shadow: 0 0 40px rgba(168,85,247,0.25);
+    margin-top: 16px;
+}
+
+/* ─── 图标网格（四宫格）─── */
+.grid-2x2 {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; width: 100%; margin-top: 28px;
+}
+.grid-card {
+    padding: 28px 20px; border-radius: 20px;
+    background: rgba(244,114,182,0.06);
+    border: 1px solid rgba(244,114,182,0.18);
+    text-align: center;
+}
+.grid-card-icon { width: 52px; height: 52px; margin: 0 auto 14px; }
+.grid-card-icon svg { width: 52px; height: 52px; }
+.grid-card h3 {
+    font-size: clamp(22px, 2.5vw, 30px); font-weight: 700; margin-bottom: 8px;
+}
+.grid-card p {
+    font-size: clamp(15px, 1.5vw, 18px);
+    color: rgba(232,224,245,0.55); line-height: 1.5; white-space: pre-line;
+}
+
+/* ─── 大居中 ─── */
+.big-center { text-align: center; margin-top: 24px; }
+.big-icon { width: 96px; height: 96px; margin: 0 auto 20px; }
+.big-icon svg { width: 96px; height: 96px; }
+.big-sub {
+    font-size: clamp(18px, 2vw, 24px);
+    color: rgba(192,132,252,0.7); letter-spacing: 4px; margin-top: 16px;
+}
+
+/* ─── 三层架构 ─── */
+.layers { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+.layer-row {
+    display: grid; grid-template-columns: 160px 1fr;
+    align-items: center; gap: 20px; padding: 22px 28px; border-radius: 18px; border-left: 5px solid;
+}
+.layer-name { font-size: clamp(20px, 2.2vw, 26px); font-weight: 800; letter-spacing: 2px; }
+.layer-role { font-size: 13px; opacity: 0.65; letter-spacing: 2px; margin-top: 2px; }
+.layer-desc { font-size: clamp(16px, 1.6vw, 20px); color: rgba(232,224,245,0.82); line-height: 1.6; white-space: pre-line; }
+
+/* ─── 对比中心 ─── */
+.contrast-center { text-align: center; margin-top: 24px; width: 100%; }
+.contrast-row { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; }
+.contrast-box { padding: 28px 48px; border-radius: 20px; font-size: clamp(32px, 4vw, 52px); font-weight: 900; border: 2px solid; }
+.contrast-arrow-icon { width: 48px; height: 48px; }
+.contrast-arrow-icon svg { width: 48px; height: 48px; }
+
+/* ─── 数字卡片 ─── */
+.numbers-row { display: flex; gap: 24px; justify-content: center; margin-top: 32px; width: 100%; }
+.num-card { flex: 1; max-width: 280px; padding: 32px 24px; border-radius: 24px; text-align: center; border: 2px solid; }
+.num-value { font-family: 'Consolas', 'Courier New', monospace; font-size: clamp(52px, 6vw, 80px); font-weight: 900; line-height: 1; }
+.num-label { font-size: clamp(14px, 1.5vw, 18px); opacity: 0.65; margin-top: 10px; letter-spacing: 1px; }
+
+/* ─── 流程 ─── */
+.flow { display: flex; flex-direction: column; gap: 14px; width: 100%; margin-top: 28px; }
+.flow-step { display: flex; align-items: center; gap: 20px; padding: 22px 28px; border-radius: 16px; background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.15); }
+.flow-emoji { font-size: 36px; flex-shrink: 0; width: 56px; text-align: center; }
+.flow-step-title { font-size: clamp(20px, 2.2vw, 26px); font-weight: 700; color: #a855f7; margin-bottom: 4px; }
+.flow-step-desc { font-size: clamp(15px, 1.5vw, 18px); color: rgba(232,224,245,0.65); }
+
+/* ─── 左右对比 ─── */
+.contrast-layout { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: start; margin-top: 28px; width: 100%; }
+.contrast-col { padding: 24px 20px; border-radius: 20px; border: 1px solid; }
+.contrast-col-title { font-size: clamp(16px, 1.8vw, 22px); font-weight: 700; margin-bottom: 14px; }
+.contrast-item { font-size: clamp(15px, 1.5vw, 18px); padding: 6px 0; opacity: 0.82; }
+.contrast-arrow-col { display: flex; align-items: center; padding-top: 40px; }
+
+/* ─── 图标列表 ─── */
+.icon-list { width: 100%; margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
+.icon-list-item { display: flex; align-items: center; gap: 20px; padding: 20px 24px; border-radius: 16px; background: rgba(232,224,245,0.03); border: 1px solid rgba(232,224,245,0.08); }
+.icon-list-icon { width: 44px; height: 44px; flex-shrink: 0; }
+.icon-list-icon svg { width: 44px; height: 44px; }
+.icon-list-text h4 { font-size: clamp(18px, 2vw, 24px); font-weight: 700; color: #e8e0f5; margin-bottom: 4px; }
+.icon-list-text p { font-size: clamp(14px, 1.4vw, 17px); color: rgba(232,224,245,0.55); white-space: pre-line; }
+
+/* ─── 痛点 ─── */
+.pain-items { width: 100%; margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
+.pain-item { display: flex; align-items: center; gap: 20px; padding: 22px 28px; border-radius: 16px; background: rgba(244,114,182,0.07); border: 1px solid rgba(244,114,182,0.20); }
+.pain-item-icon { font-size: 32px; flex-shrink: 0; width: 44px; text-align: center; }
+.pain-item-text { font-size: clamp(22px, 2.8vw, 34px); font-weight: 700; color: #f472b6; }
+
+/* ─── 水平时间线 ─── */
+.timeline-horiz { width: 100%; margin-top: 32px; display: flex; flex-direction: column; gap: 20px; }
+.timeline-step { display: flex; align-items: center; gap: 24px; }
+.timeline-num { min-width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #22d3ee); display: flex; align-items: center; justify-content: center; font-family: 'Consolas', 'Courier New', monospace; font-size: 22px; font-weight: 700; flex-shrink: 0; color: #0b0914; }
+.timeline-content { flex: 1; padding: 20px 24px; border-radius: 16px; background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.15); }
+.timeline-title { font-size: clamp(18px, 2vw, 24px); font-weight: 700; color: #a855f7; margin-bottom: 6px; }
+.timeline-desc { font-size: clamp(15px, 1.5vw, 18px); color: rgba(232,224,245,0.65); }
+
+/* ─── 资源 ─── */
+.resources-grid { display: flex; flex-direction: column; gap: 16px; width: 100%; margin-top: 28px; }
+.resource-row { display: grid; grid-template-columns: 180px 1fr; align-items: center; gap: 20px; padding: 24px 28px; border-radius: 18px; border-left: 5px solid; }
+.resource-name { font-size: clamp(22px, 2.5vw, 32px); font-weight: 800; letter-spacing: 2px; }
+.resource-desc { font-size: clamp(16px, 1.6vw, 20px); color: rgba(232,224,245,0.82); line-height: 1.6; white-space: pre-line; }
+
+/* ─── 比喻 ─── */
+.metaphor-badges { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+.metaphor-badge { padding: 12px 28px; border-radius: 100px; font-size: clamp(16px, 1.8vw, 22px); font-weight: 700; border: 2px solid rgba(34,211,238,0.4); color: #22d3ee; background: rgba(34,211,238,0.06); }
+
+/* ─── 结尾 ─── */
+.ending-emphasis { font-size: clamp(28px, 3.5vw, 48px); font-weight: 700; color: #e8e0f5; text-align: center; margin-top: 20px; }
+.ending-sub { font-size: clamp(22px, 2.5vw, 30px); font-weight: 700; color: #a855f7; text-align: center; margin-top: 20px; padding: 20px 40px; border: 2px solid rgba(168,85,247,0.4); border-radius: 16px; background: rgba(168,85,247,0.08); }
+
+/* ─── 最终页 ─── */
+.end-title {
+    font-size: clamp(64px, 9vw, 120px); font-weight: 900;
+    text-align: center; line-height: 1.1;
+    background: linear-gradient(135deg, #a855f7, #22d3ee);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; letter-spacing: 4px; white-space: pre-line;
+    filter: drop-shadow(0 0 40px rgba(168,85,247,0.4));
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="dots"><div class="dot" onclick="document.getElementById('s0').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s1').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s2').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s3').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s4').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s5').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s6').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s7').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s8').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s9').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s10').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s11').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s12').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s13').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s14').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s15').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s16').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s17').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s18').scrollIntoView()"></div>
+<div class="dot" onclick="document.getElementById('s19').scrollIntoView()"></div></div>
+<div class="slides">
+<div class="slide" id="s0">
+  <div class="top-bar"></div>
+  <div class="cover-bg"></div>
+  <div class="cover-glow"></div>
+  <div class="cover-eyebrow">豆包AI播客</div>
+  <div class="cover-headline">Agent
+是宠物
+还是牲口？</div>
+  <div class="cover-sub">Anthropic 把 AI 从精心呵护的宠物
+变成了随时可替换的打工仔</div>
+  <div class="cover-bottom"></div>
+  <div class="page-num">1/20</div><div class="timestamp">0s–7s</div>
+</div>
+<div class="slide" id="s1">
+  <div class="top-bar"></div>
+  <div class="tag">PART I</div>
+  <div class="section-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L8 20v24l24 12 24-12V20L32 8z" fill="#a855f7" opacity=".8"/><path d="M32 20L14 30v18l18 9 18-9V30L32 20z" fill="#a855f7" opacity=".5"/></svg></div>
+  <div class="section-title">架构的转变</div>
+  <div class="divider"></div>
+  <div class="page-num">2/20</div><div class="timestamp">7s–15s</div>
+</div>
+<div class="slide" id="s2">
+  <div class="top-bar"></div>
+  <div class="tag">PART I · 旧架构</div><div class="title">单体的困境</div>
+  <div class="grid-2x2"><div class="grid-card">
+  <div class="grid-card-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L4 56h56L32 8z" fill="#f472b6" opacity=".85"/><rect x="29" y="22" width="6" height="18" rx="3" fill="#0b0914" opacity=".85"/><circle cx="32" cy="46" r="3" fill="#0b0914" opacity=".85"/></svg></div>
+  <h3 style="color:#f472b6">容器挂了</h3>
+  <p>所有状态全失
+任务重来</p>
+</div><div class="grid-card">
+  <div class="grid-card-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L4 56h56L32 8z" fill="#f472b6" opacity=".85"/><rect x="29" y="22" width="6" height="18" rx="3" fill="#0b0914" opacity=".85"/><circle cx="32" cy="46" r="3" fill="#0b0914" opacity=".85"/></svg></div>
+  <h3 style="color:#f472b6">调试困难</h3>
+  <p>排查问题
+牵一发而动全身</p>
+</div><div class="grid-card">
+  <div class="grid-card-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L4 56h56L32 8z" fill="#f472b6" opacity=".85"/><rect x="29" y="22" width="6" height="18" rx="3" fill="#0b0914" opacity=".85"/><circle cx="32" cy="46" r="3" fill="#0b0914" opacity=".85"/></svg></div>
+  <h3 style="color:#f472b6">扩展受限</h3>
+  <p>模型升级
+牵动 Harness 全局</p>
+</div><div class="grid-card">
+  <div class="grid-card-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L4 56h56L32 8z" fill="#f472b6" opacity=".85"/><rect x="29" y="22" width="6" height="18" rx="3" fill="#0b0914" opacity=".85"/><circle cx="32" cy="46" r="3" fill="#0b0914" opacity=".85"/></svg></div>
+  <h3 style="color:#f472b6">安全集中</h3>
+  <p>风险都集中在
+一个容器内</p>
+</div></div>
+  <div class="page-num">3/20</div><div class="timestamp">15s–36s</div>
+</div>
+<div class="slide" id="s3">
+  <div class="top-bar"></div>
+  <div class="tag">PART I · 核心问题</div><div class="title">这个架构
+就像养了一只宠物</div>
+  <div class="big-center">
+    <div class="big-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><ellipse cx="32" cy="44" rx="12" ry="9" fill="#c084fc" opacity=".8"/><circle cx="18" cy="30" r="6" fill="#c084fc" opacity=".7"/><circle cx="46" cy="30" r="6" fill="#c084fc" opacity=".7"/><circle cx="24" cy="20" r="5" fill="#c084fc" opacity=".65"/><circle cx="40" cy="20" r="5" fill="#c084fc" opacity=".65"/></svg></div>
+    <div class="big-sub">精心呵护 · 不可替换 · 全局耦合</div>
+  </div>
+  <div class="page-num">4/20</div><div class="timestamp">36s–51s</div>
+</div>
+<div class="slide" id="s4">
+  <div class="top-bar"></div>
+  <div class="tag">PART I · 新架构</div><div class="title">三层分离</div><div class="body-text" style="margin-top:8px;font-size:clamp(16px,1.8vw,22px);opacity:0.45;color:#9988b8">Session · Harness · Sandbox</div>
+  <div class="layers"><div class="layer-row" style="background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.5)">
+  <div>
+    <div class="layer-name" style="color:#a855f7">Session</div>
+    <div class="layer-role" style="color:#a855f7">日志层</div>
+  </div>
+  <div class="layer-desc">只追加事件记录
+不关业务逻辑
+支持 replay</div>
+</div><div class="layer-row" style="background:rgba(34,211,238,0.1);border-color:rgba(34,211,238,0.5)">
+  <div>
+    <div class="layer-name" style="color:#22d3ee">Harness</div>
+    <div class="layer-role" style="color:#22d3ee">大脑层</div>
+  </div>
+  <div class="layer-desc">无状态
+负责任务调度
+和工具选择</div>
+</div><div class="layer-row" style="background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.5)">
+  <div>
+    <div class="layer-name" style="color:#34d399">Sandbox</div>
+    <div class="layer-role" style="color:#34d399">执行层</div>
+  </div>
+  <div class="layer-desc">安全隔离
+执行命令
+返回结果</div>
+</div></div>
+  <div class="page-num">5/20</div><div class="timestamp">51s–67s</div>
+</div>
+<div class="slide" id="s5">
+  <div class="top-bar"></div>
+  <div class="tag">PART I · 优势</div><div class="title">各层职责清晰</div>
+  <div class="icon-list"><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><circle cx="32" cy="32" r="26" fill="#a855f7" opacity=".15" stroke="#a855f7" stroke-width="3"/><path d="M20 32l9 9 15-18" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="icon-list-text"><h4>Session</h4><p>可随时 replay
+任意步骤</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><circle cx="32" cy="32" r="26" fill="#a855f7" opacity=".15" stroke="#a855f7" stroke-width="3"/><path d="M20 32l9 9 15-18" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="icon-list-text"><h4>Harness</h4><p>多模型适配
+无状态扩容</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><circle cx="32" cy="32" r="26" fill="#a855f7" opacity=".15" stroke="#a855f7" stroke-width="3"/><path d="M20 32l9 9 15-18" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="icon-list-text"><h4>Sandbox</h4><p>沙箱隔离
+错误不外溢</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><circle cx="32" cy="32" r="26" fill="#a855f7" opacity=".15" stroke="#a855f7" stroke-width="3"/><path d="M20 32l9 9 15-18" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="icon-list-text"><h4>接口通信</h4><p>层间稳定接口
+系统灵活可靠</p></div>
+</div></div>
+  <div class="page-num">6/20</div><div class="timestamp">67s–82s</div>
+</div>
+<div class="slide" id="s6">
+  <div class="top-bar"></div>
+  <div class="tag">PART I · 小结</div><div class="title">从宠物变打工仔</div>
+  <div class="contrast-center">
+    <div class="contrast-row">
+      <div class="contrast-box" style="color:#f472b6;border-color:rgba(244,114,182,0.6);background:rgba(244,114,182,0.1)">🐾 宠物</div>
+      <div class="contrast-arrow-icon"><svg viewBox="0 0 64 64" width="32" height="32" fill="none"><path d="M12 32h40M40 20l12 12-12 12" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="contrast-box" style="color:#22d3ee;border-color:rgba(34,211,238,0.6);background:rgba(34,211,238,0.1)">⚙️ 打工仔</div>
+    </div>
+  </div>
+  <div class="page-num">7/20</div><div class="timestamp">82s–96s</div>
+</div>
+<div class="slide" id="s7">
+  <div class="top-bar"></div>
+  <div class="tag">PART II</div>
+  <div class="section-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24v24c0 8.84-5.37 16-12 16s-12-7.16-12-16V8z" fill="#a855f7" opacity=".9"/><path d="M20 16H8v8c0 6 4 10 12 10M44 16h12v8c0 6-4 10-12 10" stroke="#a855f7" stroke-width="3" fill="none" opacity=".8"/><rect x="28" y="48" width="8" height="8" fill="#a855f7" opacity=".9"/><rect x="20" y="54" width="24" height="4" rx="2" fill="#a855f7" opacity=".8"/></svg></div>
+  <div class="section-title">变革带来的成效</div>
+  <div class="divider"></div>
+  <div class="page-num">8/20</div><div class="timestamp">96s–113s</div>
+</div>
+<div class="slide" id="s8">
+  <div class="top-bar"></div>
+  <div class="tag">PART II · 延迟</div><div class="title">推理提前启动</div>
+  <div class="body-text">脑手分离之后
+Agent 不需要等沙箱完全起来
+才开始干活</div>
+  <div class="numbers-row"><div class="num-card" style="border-color:rgba(34,211,238,0.5);background:rgba(34,211,238,0.06)">
+  <div class="num-value" style="background:linear-gradient(135deg,#a855f7,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">↓60%</div>
+  <div class="num-label">P50 · 首 Token 延迟</div>
+</div><div class="num-card" style="border-color:rgba(34,211,238,0.5);background:rgba(34,211,238,0.06)">
+  <div class="num-value" style="background:linear-gradient(135deg,#a855f7,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">↓90%+</div>
+  <div class="num-label">P95 · 尾部延迟</div>
+</div></div>
+  <div class="page-num">9/20</div><div class="timestamp">113s–148s</div>
+</div>
+<div class="slide" id="s9">
+  <div class="top-bar"></div>
+  <div class="tag">PART II · 弹性</div><div class="title">故障自动恢复</div>
+  <div class="flow"><div class="flow-step">
+  <div class="flow-emoji">📦</div>
+  <div>
+    <div class="flow-step-title">会话状态</div>
+    <div class="flow-step-desc">持久化存储</div>
+  </div>
+</div><div class="flow-step">
+  <div class="flow-emoji">🔄</div>
+  <div>
+    <div class="flow-step-title">沙箱挂了</div>
+    <div class="flow-step-desc">自动重启</div>
+  </div>
+</div><div class="flow-step">
+  <div class="flow-emoji">⚡</div>
+  <div>
+    <div class="flow-step-title">新实例启动</div>
+    <div class="flow-step-desc">无缝恢复</div>
+  </div>
+</div><div class="flow-step">
+  <div class="flow-emoji">✅</div>
+  <div>
+    <div class="flow-step-title">业务层面</div>
+    <div class="flow-step-desc">零感知</div>
+  </div>
+</div></div>
+  <div class="page-num">10/20</div><div class="timestamp">148s–183s</div>
+</div>
+<div class="slide" id="s10">
+  <div class="top-bar"></div>
+  <div class="tag">PART II · 安全</div><div class="title">安全边界重塑</div>
+  <div class="contrast-layout">
+    <div class="contrast-col" style="background:rgba(244,114,182,0.06);border-color:rgba(244,114,182,0.20)">
+      <div class="contrast-col-title" style="color:#f472b6">旧：凭证藏沙箱</div>
+      <div class="contrast-item">• 风险集中</div><div class="contrast-item">• 被攻破即泄露</div>
+    </div>
+    <div class="contrast-arrow-col">
+      <div style="width:48px;height:48px;"><svg viewBox="0 0 64 64" width="32" height="32" fill="none"><path d="M12 32h40M40 20l12 12-12 12" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    </div>
+    <div class="contrast-col" style="background:rgba(168,85,247,0.06);border-color:rgba(168,85,247,0.20)">
+      <div class="contrast-col-title" style="color:#a855f7">新：凭证移出沙箱</div>
+      <div class="contrast-item">✓ 加密挂载</div><div class="contrast-item">✓ 代理访问</div><div class="contrast-item">✓ 隔离保护</div>
+    </div>
+  </div>
+  <div class="page-num">11/20</div><div class="timestamp">183s–222s</div>
+</div>
+<div class="slide" id="s11">
+  <div class="top-bar"></div>
+  <div class="tag">PART II · 可观测</div><div class="title">中间件 + 多Agent</div>
+  <div class="icon-list"><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><rect x="8" y="12" width="48" height="14" rx="4" fill="#a855f7" opacity=".7"/><rect x="8" y="32" width="48" height="14" rx="4" fill="#a855f7" opacity=".85"/><rect x="8" y="52" width="48" height="14" rx="4" fill="#a855f7" opacity=".6"/><circle cx="18" cy="19" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="39" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="59" r="3" fill="#0b0914" opacity=".7"/></svg></div>
+  <div class="icon-list-text"><h4>中间件</h4><p>做观测和流控</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><rect x="8" y="12" width="48" height="14" rx="4" fill="#a855f7" opacity=".7"/><rect x="8" y="32" width="48" height="14" rx="4" fill="#a855f7" opacity=".85"/><rect x="8" y="52" width="48" height="14" rx="4" fill="#a855f7" opacity=".6"/><circle cx="18" cy="19" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="39" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="59" r="3" fill="#0b0914" opacity=".7"/></svg></div>
+  <div class="icon-list-text"><h4>多 Agent 协作</h4><p>标准接口支撑</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><rect x="8" y="12" width="48" height="14" rx="4" fill="#a855f7" opacity=".7"/><rect x="8" y="32" width="48" height="14" rx="4" fill="#a855f7" opacity=".85"/><rect x="8" y="52" width="48" height="14" rx="4" fill="#a855f7" opacity=".6"/><circle cx="18" cy="19" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="39" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="59" r="3" fill="#0b0914" opacity=".7"/></svg></div>
+  <div class="icon-list-text"><h4>管理平台</h4><p>权限控制和操作审计</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><rect x="8" y="12" width="48" height="14" rx="4" fill="#a855f7" opacity=".7"/><rect x="8" y="32" width="48" height="14" rx="4" fill="#a855f7" opacity=".85"/><rect x="8" y="52" width="48" height="14" rx="4" fill="#a855f7" opacity=".6"/><circle cx="18" cy="19" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="39" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="59" r="3" fill="#0b0914" opacity=".7"/></svg></div>
+  <div class="icon-list-text"><h4>可维护</h4><p>组件可替换</p></div>
+</div></div>
+  <div class="page-num">12/20</div><div class="timestamp">222s–261s</div>
+</div>
+<div class="slide" id="s12">
+  <div class="top-bar"></div>
+  <div class="tag">PART III</div>
+  <div class="section-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M8 24V8h16M56 24V8H40M8 40v16h16M56 40v16H40" stroke="#a855f7" stroke-width="4" stroke-linecap="round" opacity=".8"/></svg></div>
+  <div class="section-title">发展方向</div>
+  <div class="divider"></div>
+  <div class="page-num">13/20</div><div class="timestamp">261s–333s</div>
+</div>
+<div class="slide" id="s13">
+  <div class="top-bar"></div>
+  <div class="tag">PART III · 过去</div><div class="title">各自造轮子</div>
+  <div class="pain-items"><div class="pain-item">
+  <div class="pain-item-icon">✗</div>
+  <div class="pain-item-text">自己搞编排</div>
+</div><div class="pain-item">
+  <div class="pain-item-icon">✗</div>
+  <div class="pain-item-text">自己搞沙箱</div>
+</div><div class="pain-item">
+  <div class="pain-item-icon">✗</div>
+  <div class="pain-item-text">自己搞会话管理</div>
+</div></div>
+  <div class="body-text" style="margin-top:20px;font-size:clamp(18px,2vw,24px);color:rgba(244,114,182,0.7)">什么都要自己来，非常费劲</div>
+  <div class="page-num">14/20</div><div class="timestamp">333s–370s</div>
+</div>
+<div class="slide" id="s14">
+  <div class="top-bar"></div>
+  <div class="tag">PART III · 现在</div><div class="title">标准化与平台化</div>
+  <div class="timeline-horiz"><div class="timeline-step">
+  <div class="timeline-num">1</div>
+  <div class="timeline-content">
+    <div class="timeline-title">初创公司</div>
+    <div class="timeline-desc">标准 Agent 框架</div>
+  </div>
+</div><div class="timeline-step">
+  <div class="timeline-num">2</div>
+  <div class="timeline-content">
+    <div class="timeline-title">云厂商</div>
+    <div class="timeline-desc">Managed Agent 服务</div>
+  </div>
+</div><div class="timeline-step">
+  <div class="timeline-num">3</div>
+  <div class="timeline-content">
+    <div class="timeline-title">主流趋势</div>
+    <div class="timeline-desc">运行时 + 平台托管出去</div>
+  </div>
+</div></div>
+  <div class="page-num">15/20</div><div class="timestamp">370s–410s</div>
+</div>
+<div class="slide" id="s15">
+  <div class="top-bar"></div>
+  <div class="tag">PART III · 平台化</div><div class="title">一切皆为资源</div><div class="body-text" style="margin-top:8px;font-size:clamp(14px,1.5vw,18px);opacity:0.45;color:#9988b8">Cloud Managed Agents</div>
+  <div class="resources-grid"><div class="resource-row" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.4)">
+  <div class="resource-name" style="color:#a855f7">Agent</div>
+  <div class="resource-desc">可组合的
+能力单元</div>
+</div><div class="resource-row" style="background:rgba(34,211,238,0.08);border-color:rgba(34,211,238,0.4)">
+  <div class="resource-name" style="color:#22d3ee">Environment</div>
+  <div class="resource-desc">可替换的
+执行环境</div>
+</div><div class="resource-row" style="background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.4)">
+  <div class="resource-name" style="color:#34d399">Session</div>
+  <div class="resource-desc">可管理的
+会话状态</div>
+</div></div>
+  <div class="page-num">16/20</div><div class="timestamp">410s–450s</div>
+</div>
+<div class="slide" id="s16">
+  <div class="top-bar"></div>
+  <div class="tag">PART III · 未来</div><div class="title">模块化分层架构</div>
+  <div class="body-text">模型只是大脑
+通过稳定接口连接各种
+可替换的执行环境和工具</div>
+  <div class="metaphor-badges"><div class="metaphor-badge">模型 = CPU</div><div class="metaphor-badge">工具 = 外设</div><div class="metaphor-badge">平台 = 操作系统</div></div>
+  <div style="margin-top:28px;font-size:clamp(28px,3vw,40px);color:#22d3ee;font-weight:900">🤖 AI Native OS</div>
+  <div class="page-num">17/20</div><div class="timestamp">450s–485s</div>
+</div>
+<div class="slide" id="s17">
+  <div class="top-bar"></div>
+  <div class="tag">PART III · 趋势</div><div class="title">多Agent协作</div>
+  <div class="icon-list"><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24a8 8 0 0 1 0 16H20V8z" fill="#a855f7" opacity=".85"/><path d="M8 24h16v24H8V24z" fill="#a855f7" opacity=".7"/><path d="M24 48h16a8 8 0 0 1 0 16H24V48z" fill="#a855f7" opacity=".7"/></svg></div>
+  <div class="icon-list-text"><h4>行业标准</h4><p>接口统一 · 生态繁荣</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24a8 8 0 0 1 0 16H20V8z" fill="#a855f7" opacity=".85"/><path d="M8 24h16v24H8V24z" fill="#a855f7" opacity=".7"/><path d="M24 48h16a8 8 0 0 1 0 16H24V48z" fill="#a855f7" opacity=".7"/></svg></div>
+  <div class="icon-list-text"><h4>工具生态</h4><p>专业分工 · 各司其职</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24a8 8 0 0 1 0 16H20V8z" fill="#a855f7" opacity=".85"/><path d="M8 24h16v24H8V24z" fill="#a855f7" opacity=".7"/><path d="M24 48h16a8 8 0 0 1 0 16H24V48z" fill="#a855f7" opacity=".7"/></svg></div>
+  <div class="icon-list-text"><h4>创新重心</h4><p>向应用层迁移</p></div>
+</div><div class="icon-list-item">
+  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24a8 8 0 0 1 0 16H20V8z" fill="#a855f7" opacity=".85"/><path d="M8 24h16v24H8V24z" fill="#a855f7" opacity=".7"/><path d="M24 48h16a8 8 0 0 1 0 16H24V48z" fill="#a855f7" opacity=".7"/></svg></div>
+  <div class="icon-list-text"><h4>未来展望</h4><p>AI Native 新范式</p></div>
+</div></div>
+  <div class="page-num">18/20</div><div class="timestamp">485s–520s</div>
+</div>
+<div class="slide" id="s18">
+  <div class="top-bar"></div>
+  <div class="tag">尾声</div>
+  <div class="ending-sub">架构升级的必然结果</div>
+  <div class="ending-emphasis">Agent 从宠物变成打工仔
+是 AI 行业逐渐走向成熟的标志</div>
+  <div class="page-num">19/20</div><div class="timestamp">520s–545s</div>
+</div>
+<div class="slide" id="s19">
+  <div class="top-bar"></div>
+  <div class="cover-bg"></div>
+  <div class="cover-glow"></div>
+  <div class="end-title">感谢收听
+下期再见</div>
+  <div class="cover-bottom"></div>
+  <div class="page-num">20/20</div><div class="timestamp">545s–565s</div>
+</div>
+</div>
+<script>
+const slides = document.querySelectorAll('.slide');
+const dots = document.querySelectorAll('.dot');
+const progress = document.getElementById('progress');
+
+function updateProgress() {
+    const total = slides.length;
+    const idx = Array.from(slides).findIndex(s => s.classList.contains('visible'));
+    if (idx >= 0) {
+        progress.style.width = ((idx + 1) / total * 100) + '%';
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+}
+
+const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => e.target.classList.toggle('visible', e.isIntersecting));
+    updateProgress();
+}, { threshold: 0.5 });
+slides.forEach(s => obs.observe(s));
+
+// 立即显示第一页
+slides[0].classList.add('visible');
+
+document.addEventListener('keydown', e => {
+    const cur = Array.from(slides).findIndex(s => s.classList.contains('visible'));
+    if ((e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') && cur < slides.length - 1) {
+        e.preventDefault(); slides[cur + 1].scrollIntoView();
+    }
+    if ((e.key === 'ArrowUp' || e.key === 'ArrowLeft') && cur > 0) {
+        e.preventDefault(); slides[cur - 1].scrollIntoView();
+    }
+});
+<\/script>
+</body>
+</html>

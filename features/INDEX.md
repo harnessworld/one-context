@@ -15,6 +15,7 @@
 | math-teacher-ai-platform      | 数学教师 AI 工作台 — Phase 1 可视化资产化与 AI 出题 MVP          | develop  | draft  | `features/develop/math-teacher-ai-platform/`      | FunctionCanvas  |
 | one-context-intro-short-video | one-context 中视频介绍（爆款口播框架）                             | develop  | draft  | `features/develop/one-context-intro-short-video/` | one-context     |
 | hermes-agent-short-video      | Hermes Agent 短视频口播成片（wav-auto）                          | develop  | draft  | `features/develop/hermes-agent-short-video/`      | one-context     |
+| anthropic-agent-harness-narration | Anthropic Agent Harness 哲学 — 口播稿                         | develop  | draft  | `features/develop/anthropic-agent-harness-narration/` | one-context |
 | damai-ticket-bot              | 大麦抢票助手 — 浏览器插件 + CLI 集成 one-context skill                 | develop  | draft  | `features/develop/damai-ticket-bot/`              | one-context     |
 | skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill                     | core     | done   | `features/core/skill-windows-c-drive-cleanup/`    | one-context     |
 | unified-adapter-rules         | 统一适配器规则源 — 声明式 manifest，消除 PROFILE_RULES 重复          | core     | done   | `features/core/unified-adapter-rules/`            | one-context     |
