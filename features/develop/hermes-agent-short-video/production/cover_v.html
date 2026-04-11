@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<title>Cover Vertical</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  width:1080px;height:1920px;
+  background:var(--bg0);
+  font-family:'Noto Serif SC','PingFang SC','Microsoft YaHei',serif;
+  color:#f8fafc;
+  overflow:hidden;position:relative;
+  --bg0:#0c0905;
+  --orange:#D4770E;
+  --gold:#d4a843;
+}
+.paper-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 10%, rgba(212,119,14,0.18) 0%, transparent 50%),
+    radial-gradient(ellipse 80% 40% at 80% 5%, rgba(212,168,67,0.10) 0%, transparent 45%),
+    radial-gradient(ellipse 60% 80% at 20% 100%, rgba(125,156,108,0.06) 0%, transparent 40%),
+    linear-gradient(175deg, #0c0905 0%, #1a1208 35%, #0c0905 100%);
+}
+.vignette{position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 75% at 50% 45%, transparent 30%, rgba(0,0,0,0.6) 100%);}
+.biz-top{position:absolute;top:0;left:0;right:0;height:8px;
+  background:linear-gradient(90deg, #D4770E, #d4a843, #7d9c6c);
+  box-shadow:0 0 32px rgba(212,119,14,0.4);}
+/* 顶部标签 */
+.tag-row{position:absolute;top:100px;left:0;right:0;display:flex;justify-content:center;}
+.tag{
+  display:inline-flex;align-items:center;
+  padding:16px 40px;border-radius:999px;
+  font-size:26px;font-weight:800;letter-spacing:0.2em;
+  background:rgba(212,119,14,0.15);color:#fde68a;
+  border:1px solid rgba(212,119,14,0.45);
+  box-shadow:0 4px 32px rgba(0,0,0,0.4);
+}
+/* 主标题 */
+.main-title{
+  position:absolute;top:420px;left:60px;right:60px;
+  font-size:108px;font-weight:900;line-height:1.12;
+  letter-spacing:-0.02em;
+  background:linear-gradient(160deg, #d4a843 0%, #D4770E 50%, #fde68a 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  text-shadow:none;
+  filter:drop-shadow(0 8px 32px rgba(212,119,14,0.35));
+}
+/* 副标题 */
+.sub-title{
+  position:absolute;top:620px;left:60px;right:60px;
+  font-size:52px;font-weight:700;line-height:1.4;
+  color:#e8d5b0;
+  text-shadow:0 4px 24px rgba(0,0,0,0.5);
+}
+/* 分隔线 */
+.divider{position:absolute;top:740px;left:80px;right:80px;height:2px;
+  background:linear-gradient(90deg, transparent, rgba(212,119,14,0.5), transparent);}
+/* 底部对比信息 */
+.comparison{
+  position:absolute;bottom:180px;left:0;right:0;
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+}
+.vs-row{display:flex;align-items:center;gap:48px;}
+.vs-box{
+  padding:18px 36px;border-radius:16px;
+  font-size:34px;font-weight:800;letter-spacing:0.05em;
+}
+.vs-box.left{
+  background:rgba(168,144,112,0.1);color:#a89070;
+  border:1px solid rgba(168,144,112,0.25);
+}
+.vs-box.right{
+  background:rgba(212,119,14,0.12);color:#fde68a;
+  border:1px solid rgba(212,119,14,0.4);
+}
+.vs-word{font-size:36px;font-weight:900;color:rgba(248,250,252,0.3);}
+/* 底部标签 */
+.bottom-tags{
+  position:absolute;bottom:80px;left:0;right:0;
+  display:flex;justify-content:center;gap:20px;flex-wrap:wrap;
+}
+.btag{
+  padding:12px 28px;border-radius:999px;
+  font-size:22px;font-weight:700;letter-spacing:0.1em;
+  background:rgba(255,255,255,0.05);color:#a89070;
+  border:1px solid rgba(255,255,255,0.1);
+}
+/* 装饰圆 */
+.deco{position:absolute;border-radius:50%;border:1px solid rgba(212,119,14,0.12);}
+.deco-1{width:600px;height:600px;top:-100px;right:-200px;
+  background:radial-gradient(circle at 50% 50%, rgba(212,119,14,0.06), transparent 70%);}
+.deco-2{width:300px;height:300px;bottom:200px;left:-80px;
+  background:radial-gradient(circle at 50% 50%, rgba(125,156,108,0.05), transparent 70%);}
+</style>
+</head>
+<body>
+<div class="paper-bg"></div>
+<div class="deco deco-1"></div>
+<div class="deco deco-2"></div>
+<div class="vignette"></div>
+<div class="biz-top"></div>
+
+<div class="tag-row">
+  <div class="tag">自我进化 · 自动生成技能 · 技能共享</div>
+</div>
+
+<div class="main-title">一个会自我进化的<br>AI 框架</div>
+<div class="sub-title">到底强在哪？</div>
+<div class="divider"></div>
+
+<div class="comparison">
+  <div class="vs-row">
+    <div class="vs-box left">OpenClaw</div>
+    <div class="vs-word">VS</div>
+    <div class="vs-box right">Hermes Agent</div>
+  </div>
+</div>
+
+<div class="bottom-tags">
+  <div class="btag">AI 助手</div>
+  <div class="btag">自动生成技能</div>
+  <div class="btag">技能共享</div>
+</div>
+</body>
+</html>
