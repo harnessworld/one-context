@@ -14,11 +14,10 @@ __pycache__/
 dist/
 build/
 
-# Skills (local npm install under skills/)
-skills/**/node_modules/
+# Node — all node_modules everywhere
+**/node_modules/
 
-# Node (skills: html-video-from-slides CLI)
-skills/html-video-from-slides/node_modules/
+# Node cache
 skills/html-video-from-slides/.cache/
 
 # Testing
@@ -38,6 +37,14 @@ skills/html-video-from-slides/.cache/
 *.wmv
 *.flv
 *.wav
+
+# Features: temporary build artifacts
+features/**/temp_*/
+features/**/scratch/
+tmp/
+
+# Ad-hoc search/test scripts with _ prefix
+_search*.cjs
 
 # OS
 .DS_Store
