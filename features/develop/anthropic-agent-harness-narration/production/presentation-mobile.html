@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent 是宠物还是牲口？</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0b0914;
+            --primary: #a855f7;
+            --accent: #22d3ee;
+            --success: #34d399;
+            --warning: #f472b6;
+            --text: #e8e0f5;
+            --text-dim: #a990c9;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg-dark);
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+        }
+
+        .presentation {
+            height: 100vh;
+            width: 100vw;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: auto;
+        }
+
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 5vh 5vw;
+            position: relative;
+            background: var(--bg-dark);
+            border-top: 4px solid var(--primary);
+            overflow: hidden;
+        }
+
+        .slide-title {
+            font-size: clamp(32px, 7vw, 44px);
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4vh;
+            line-height: 1.2;
+        }
+
+        .slide-body {
+            font-size: clamp(16px, 4vw, 22px);
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2vh;
+            overflow: hidden;
+        }
+
+        .slide-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: clamp(10px, 2.5vw, 12px);
+            color: rgba(255,255,255,0.3);
+            padding-top: 2vh;
+            margin-top: auto;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: var(--accent);
+            z-index: 100;
+        }
+
+        /* Section divider styles */
+        .slide.section-divider {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide.section-divider .slide-title {
+            margin-bottom: 0;
+            font-size: clamp(40px, 9vw, 56px);
+        }
+
+        .section-number {
+            font-size: clamp(80px, 18vw, 120px);
+            font-weight: 900;
+            position: absolute;
+            top: 5%;
+            right: 5%;
+            opacity: 0.2;
+        }
+
+        /* SVG container */
+        .svg-diagram {
+            width: 100%;
+            max-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2vh 0;
+            overflow: hidden;
+        }
+
+        .svg-diagram svg {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        /* Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3vw;
+            width: 100%;
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(34, 211, 238, 0.05));
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2vh;
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+        }
+
+        .card-title {
+            font-size: clamp(14px, 3.5vw, 18px);
+            color: var(--text);
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Comparison layout */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4vw;
+            width: 100%;
+        }
+
+        .comparison-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5vh;
+            padding: 16px;
+            border-radius: 12px;
+        }
+
+        .comparison-item.before {
+            background: rgba(244, 114, 182, 0.1);
+            border: 2px solid rgba(244, 114, 182, 0.3);
+        }
+
+        .comparison-item.after {
+            background: rgba(52, 211, 153, 0.1);
+            border: 2px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .comparison-title {
+            font-size: clamp(18px, 4vw, 22px);
+            font-weight: 600;
+        }
+
+        .comparison-item.before .comparison-title {
+            color: var(--warning);
+        }
+
+        .comparison-item.after .comparison-title {
+            color: var(--success);
+        }
+
+        /* Number display */
+        .big-number {
+            font-size: clamp(56px, 13vw, 72px);
+            font-weight: 900;
+            color: var(--success);
+            line-height: 1;
+        }
+
+        .number-label {
+            font-size: clamp(14px, 3.5vw, 18px);
+            color: var(--text-dim);
+        }
+
+        /* Flow diagram */
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 2vw;
+            margin: 1vh 0;
+        }
+
+        .flow-arrow {
+            font-size: clamp(20px, 5vw, 24px);
+            color: var(--text-dim);
+        }
+
+        /* List items */
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2vh;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 2vw;
+            font-size: clamp(16px, 4vw, 20px);
+        }
+
+        .feature-check {
+            width: clamp(20px, 5vw, 24px);
+            height: clamp(20px, 5vw, 24px);
+            color: var(--success);
+        }
+
+        /* End slide */
+        .end-slide {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .end-title {
+            font-size: clamp(36px, 8vw, 48px);
+            color: var(--text);
+            margin-bottom: 4vh;
+        }
+
+        .end-subtitle {
+            font-size: clamp(18px, 4.5vw, 24px);
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="presentation" id="presentation">
+
+        <!-- SLIDE 1: Cover -->
+        <div class="slide" id="slide-1" data-time="0:00">
+            <div class="svg-diagram">
+                <svg viewBox="0 0 350 300" width="350" height="300">
+                    <defs>
+                        <linearGradient id="coverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#a855f7;stop-opacity:0.2"/>
+                            <stop offset="100%" style="stop-color:#22d3ee;stop-opacity:0.1"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Pet circle on left -->
+                    <circle cx="80" cy="150" r="50" fill="rgba(168,85,247,0.3)" stroke="#a855f7" stroke-width="3"/>
+                    <text x="80" y="155" text-anchor="middle" font-size="14" fill="#a855f7" font-weight="bold">宠物</text>
+                    <!-- Livestock circle on right -->
+                    <circle cx="270" cy="150" r="50" fill="rgba(34,211,238,0.3)" stroke="#22d3ee" stroke-width="3"/>
+                    <text x="270" y="155" text-anchor="middle" font-size="14" fill="#22d3ee" font-weight="bold">牲口</text>
+                    <!-- Question mark -->
+                    <text x="175" y="165" text-anchor="middle" font-size="48" fill="#f472b6" font-weight="bold">?</text>
+                    <!-- Decorative elements -->
+                    <circle cx="175" cy="80" r="20" fill="rgba(168,85,247,0.15)"/>
+                    <circle cx="175" cy="220" r="20" fill="rgba(34,211,238,0.15)"/>
+                </svg>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title" style="text-align: center;">Agent 是宠物<br>还是牲口？</h1>
+            </div>
+            <div class="slide-footer">
+                <span>1/27</span>
+                <span>0:00-0:07</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Hook -->
+        <div class="slide" id="slide-2" data-time="0:07">
+            <div class="svg-diagram">
+                <svg viewBox="0 0 350 250" width="350" height="250">
+                    <!-- Pet box (left, dashed) -->
+                    <rect x="20" y="80" width="120" height="120" rx="12" fill="rgba(244,114,182,0.1)" stroke="#f472b6" stroke-width="3" stroke-dasharray="5,5"/>
+                    <text x="80" y="140" text-anchor="middle" font-size="16" fill="#f472b6" font-weight="bold">精心呵护</text>
+                    <text x="80" y="160" text-anchor="middle" font-size="12" fill="#e8e0f5">宠物</text>
+                    <!-- Livestock box (right, solid) -->
+                    <rect x="210" y="80" width="120" height="120" rx="12" fill="rgba(34,211,238,0.1)" stroke="#22d3ee" stroke-width="3"/>
+                    <text x="270" y="140" text-anchor="middle" font-size="16" fill="#22d3ee" font-weight="bold">可替换</text>
+                    <text x="270" y="160" text-anchor="middle" font-size="12" fill="#e8e0f5">牲口</text>
+                    <!-- Arrow -->
+                    <path d="M 150 140 L 200 140" fill="none" stroke="#34d399" stroke-width="4"/>
+                    <polygon points="205,140 195,135 195,145" fill="#34d399"/>
+                    <!-- Labels -->
+                    <text x="80" y="220" text-anchor="middle" font-size="24" fill="#f472b6" opacity="0.5">✗</text>
+                    <text x="270" y="220" text-anchor="middle" font-size="24" fill="#34d399">✓</text>
+                </svg>
+            </div>
+            <div class="slide-content" style="flex-direction: column; gap: 2vh;">
+                <p class="slide-body" style="text-align: center;">从精心呵护的宠物<br>→ 随时可替换的牲口</p>
+                <p class="slide-body" style="text-align: center; color: var(--primary);">Anthropic 的架构变革</p>
+            </div>
+            <div class="slide-footer">
+                <span>2/27</span>
+                <span>0:07-0:23</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Part I Title -->
+        <div class="slide section-divider" id="slide-3" data-time="0:23">
+            <span class="section-number">01</span>
+            <h1 class="slide-title">架构的转变</h1>
+            <div style="width: 80px; height: 2px; background: var(--primary); margin: 2vh auto;"></div>
+            <div class="slide-footer" style="align-self: stretch;">
+                <span>3/27</span>
+                <span>0:23-0:33</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Old Architecture -->
+        <div class="slide" id="slide-4" data-time="0:33">
+            <h2 class="slide-title">旧架构：全部塞进一个容器</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 300" width="370" height="300">
+                    <!-- Big container -->
+                    <rect x="30" y="30" width="310" height="240" rx="15" fill="rgba(244,114,182,0.1)" stroke="#f472b6" stroke-width="3"/>
+                    <text x="185" y="60" text-anchor="middle" font-size="18" fill="#f472b6" font-weight="bold">Monolithic Container</text>
+                    <!-- Inferencing -->
+                    <rect x="60" y="80" width="100" height="50" rx="8" fill="rgba(244,114,182,0.2)" stroke="#f472b6" stroke-width="2"/>
+                    <text x="110" y="110" text-anchor="middle" font-size="14" fill="#e8e0f5">推理循环</text>
+                    <!-- Execution -->
+                    <rect x="60" y="145" width="100" height="50" rx="8" fill="rgba(244,114,182,0.2)" stroke="#f472b6" stroke-width="2"/>
+                    <text x="110" y="175" text-anchor="middle" font-size="14" fill="#e8e0f5">执行环境</text>
+                    <!-- Session -->
+                    <rect x="60" y="210" width="100" height="45" rx="8" fill="rgba(244,114,182,0.2)" stroke="#f472b6" stroke-width="2"/>
+                    <text x="110" y="238" text-anchor="middle" font-size="14" fill="#e8e0f5">会话状态</text>
+                    <!-- Tangled lines -->
+                    <path d="M 160 105 L 200 105 L 200 170 L 260 170" fill="none" stroke="#f472b6" stroke-width="2" opacity="0.5"/>
+                    <path d="M 160 170 L 185 170 L 185 233 L 160 233" fill="none" stroke="#f472b6" stroke-width="2" opacity="0.5"/>
+                    <path d="M 110 195 L 110 210" fill="none" stroke="#f472b6" stroke-width="2" opacity="0.5"/>
+                    <!-- Label -->
+                    <text x="260" y="130" text-anchor="middle" font-size="12" fill="#f472b6">全部纠缠</text>
+                    <!-- Warning -->
+                    <circle cx="310" cy="60" r="12" fill="#f472b6"/>
+                    <text x="310" y="65" text-anchor="middle" font-size="14" fill="white">!</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>4/27</span>
+                <span>0:33-0:48</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Problems -->
+        <div class="slide" id="slide-5" data-time="0:48">
+            <h2 class="slide-title">单体的困境</h2>
+            <div class="card-grid">
+                <div class="card">
+                    <svg class="card-icon" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="25" fill="none" stroke="#f472b6" stroke-width="2"/>
+                        <path d="M 20 30 L 40 30 M 30 20 L 30 40" stroke="#f472b6" stroke-width="2"/>
+                    </svg>
+                    <div class="card-title">容器挂了</div>
+                    <p class="slide-body" style="font-size: clamp(12px, 3vw, 16px);">状态全失</p>
+                </div>
+                <div class="card">
+                    <svg class="card-icon" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="25" fill="none" stroke="#f472b6" stroke-width="2"/>
+                        <text x="30" y="35" text-anchor="middle" font-size="20" fill="#f472b6">?</text>
+                    </svg>
+                    <div class="card-title">调试困难</div>
+                    <p class="slide-body" style="font-size: clamp(12px, 3vw, 16px);">牵一发动全身</p>
+                </div>
+                <div class="card">
+                    <svg class="card-icon" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="25" fill="none" stroke="#f472b6" stroke-width="2"/>
+                        <rect x="20" y="25" width="20" height="10" fill="#f472b6"/>
+                    </svg>
+                    <div class="card-title">扩展受限</div>
+                    <p class="slide-body" style="font-size: clamp(12px, 3vw, 16px);">升级牵动全局</p>
+                </div>
+                <div class="card">
+                    <svg class="card-icon" viewBox="0 0 60 60">
+                        <circle cx="30" cy="30" r="25" fill="none" stroke="#f472b6" stroke-width="2"/>
+                        <circle cx="30" cy="30" r="10" fill="#f472b6"/>
+                    </svg>
+                    <div class="card-title">安全集中</div>
+                    <p class="slide-body" style="font-size: clamp(12px, 3vw, 16px);">风险不隔离</p>
+                </div>
+            </div>
+            <div class="slide-footer">
+                <span>5/27</span>
+                <span>0:48-1:07</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Pet Metaphor -->
+        <div class="slide" id="slide-6" data-time="1:07">
+            <h2 class="slide-title">就像养了一只宠物</h2>
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <svg viewBox="0 0 150 180" width="150" height="180">
+                        <circle cx="75" cy="80" r="40" fill="#f472b6"/>
+                        <circle cx="62" cy="75" r="5" fill="white"/>
+                        <circle cx="88" cy="75" r="5" fill="white"/>
+                        <path d="M 65 95 Q 75 105 85 95" fill="none" stroke="white" stroke-width="2"/>
+                        <text x="40" y="140" font-size="12" fill="#f472b6">不可替换</text>
+                        <text x="40" y="160" font-size="12" fill="#f472b6">精心呵护</text>
+                    </svg>
+                    <div class="comparison-title">宠物</div>
+                </div>
+                <div class="comparison-item after">
+                    <svg viewBox="0 0 150 180" width="150" height="180">
+                        <rect x="30" y="50" width="30" height="30" rx="4" fill="#34d399"/>
+                        <rect x="90" y="50" width="30" height="30" rx="4" fill="#34d399"/>
+                        <rect x="30" y="100" width="30" height="30" rx="4" fill="#34d399"/>
+                        <rect x="90" y="100" width="30" height="30" rx="4" fill="#34d399"/>
+                        <text x="20" y="150" font-size="12" fill="#34d399">可替换</text>
+                        <text x="20" y="170" font-size="12" fill="#34d399">标准化</text>
+                    </svg>
+                    <div class="comparison-title">牲口</div>
+                </div>
+            </div>
+            <div class="slide-footer">
+                <span>6/27</span>
+                <span>1:07-1:31</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Three Layers -->
+        <div class="slide" id="slide-7" data-time="1:31">
+            <h2 class="slide-title">新架构：三层分离</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 350" width="370" height="350">
+                    <!-- Sandbox (top) -->
+                    <rect x="45" y="30" width="280" height="70" rx="10" fill="rgba(34,211,238,0.1)" stroke="#22d3ee" stroke-width="3"/>
+                    <text x="185" y="55" text-anchor="middle" font-size="16" fill="#22d3ee" font-weight="bold">Sandbox</text>
+                    <text x="185" y="75" text-anchor="middle" font-size="12" fill="#e8e0f5">隔离执行</text>
+                    <!-- Harness (middle) -->
+                    <rect x="45" y="130" width="280" height="70" rx="10" fill="rgba(168,85,247,0.1)" stroke="#a855f7" stroke-width="3"/>
+                    <text x="185" y="155" text-anchor="middle" font-size="16" fill="#a855f7" font-weight="bold">Harness</text>
+                    <text x="185" y="175" text-anchor="middle" font-size="12" fill="#e8e0f5">无状态调度</text>
+                    <!-- Session (bottom) -->
+                    <rect x="45" y="230" width="280" height="65" rx="10" fill="rgba(52,211,153,0.1)" stroke="#34d399" stroke-width="3"/>
+                    <text x="185" y="255" text-anchor="middle" font-size="16" fill="#34d399" font-weight="bold">Session</text>
+                    <text x="185" y="275" text-anchor="middle" font-size="12" fill="#e8e0f5">追加日志</text>
+                    <!-- Arrows -->
+                    <path d="M 185 100 L 185 125" fill="none" stroke="#22d3ee" stroke-width="2"/>
+                    <polygon points="185,130 180,120 190,120" fill="#22d3ee"/>
+                    <text x="120" y="120" font-size="10" fill="#e8e0f5">调用</text>
+                    <path d="M 150 200 L 150 225" fill="none" stroke="#34d399" stroke-width="2"/>
+                    <polygon points="150,230 145,220 155,220" fill="#34d399"/>
+                    <text x="80" y="215" font-size="10" fill="#e8e0f5">返回</text>
+                    <path d="M 220 200 L 220 225" fill="none" stroke="#a855f7" stroke-width="2"/>
+                    <polygon points="220,230 215,220 225,220" fill="#a855f7"/>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>7/27</span>
+                <span>1:31-1:52</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Session Detail -->
+        <div class="slide" id="slide-8" data-time="1:52">
+            <h2 class="slide-title">Session 层</h2>
+            <p class="slide-body" style="margin-bottom: 2vh;">只追加的事件日志</p>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 300" width="370" height="300">
+                    <rect x="35" y="20" width="300" height="260" rx="12" fill="rgba(52,211,153,0.08)" stroke="#34d399" stroke-width="2"/>
+                    <!-- Log entries -->
+                    <rect x="55" y="40" width="260" height="40" rx="6" fill="rgba(52,211,153,0.15)"/>
+                    <text x="65" y="60" font-size="12" fill="#34d399">14:02:01</text>
+                    <text x="65" y="75" font-size="10" fill="#e8e0f5">用户消息</text>
+                    <rect x="55" y="90" width="260" height="40" rx="6" fill="rgba(34,211,238,0.15)"/>
+                    <text x="65" y="110" font-size="12" fill="#34d399">14:02:03</text>
+                    <text x="65" y="125" font-size="10" fill="#e8e0f5">思考</text>
+                    <rect x="55" y="140" width="260" height="40" rx="6" fill="rgba(168,85,247,0.15)"/>
+                    <text x="65" y="160" font-size="12" fill="#34d399">14:02:05</text>
+                    <text x="65" y="175" font-size="10" fill="#e8e0f5">调用工具</text>
+                    <rect x="55" y="190" width="260" height="40" rx="6" fill="rgba(52,211,153,0.15)" stroke="#22d3ee" stroke-width="2"/>
+                    <text x="65" y="210" font-size="12" fill="#22d3ee">14:02:10 ← 新</text>
+                    <text x="65" y="225" font-size="10" fill="#e8e0f5">继续处理</text>
+                    <!-- Append arrow -->
+                    <path d="M 315 210 L 330 210" fill="none" stroke="#34d399" stroke-width="2"/>
+                    <polygon points="335,210 325,205 325,215" fill="#34d399"/>
+                    <text x="185" y="265" text-anchor="middle" font-size="12" fill="#34d399">append →</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>8/27</span>
+                <span>1:52-2:06</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Harness Detail -->
+        <div class="slide" id="slide-9" data-time="2:06">
+            <h2 class="slide-title">Harness 层</h2>
+            <p class="slide-body" style="margin-bottom: 2vh;">无状态的大脑</p>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 280" width="370" height="280">
+                    <!-- Central Harness -->
+                    <circle cx="185" cy="100" r="50" fill="rgba(168,85,247,0.2)" stroke="#a855f7" stroke-width="3"/>
+                    <text x="185" y="95" text-anchor="middle" font-size="16" fill="#a855f7" font-weight="bold">Harness</text>
+                    <text x="185" y="115" text-anchor="middle" font-size="12" fill="#e8e0f5">任务调度</text>
+                    <!-- Tool nodes -->
+                    <circle cx="70" cy="180" r="30" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="2"/>
+                    <text x="70" y="185" text-anchor="middle" font-size="12" fill="#34d399">Search</text>
+                    <circle cx="185" cy="220" r="30" fill="rgba(34,211,238,0.15)" stroke="#22d3ee" stroke-width="2"/>
+                    <text x="185" y="225" text-anchor="middle" font-size="12" fill="#22d3ee">Code</text>
+                    <circle cx="300" cy="180" r="30" fill="rgba(168,85,247,0.15)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="300" y="185" text-anchor="middle" font-size="12" fill="#a855f7">Web</text>
+                    <circle cx="70" cy="80" r="25" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="2"/>
+                    <text x="70" y="85" text-anchor="middle" font-size="12" fill="#34d399">DB</text>
+                    <!-- Connection lines -->
+                    <path d="M 140 130 L 90 155" fill="none" stroke="#34d399" stroke-width="1.5" stroke-dasharray="4,2"/>
+                    <path d="M 185 150 L 185 190" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-dasharray="4,2"/>
+                    <path d="M 230 130 L 280 155" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4,2"/>
+                    <path d="M 140 80 L 95 80" fill="none" stroke="#34d399" stroke-width="1.5" stroke-dasharray="4,2"/>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>9/27</span>
+                <span>2:06-2:20</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Sandbox Detail -->
+        <div class="slide" id="slide-10" data-time="2:20">
+            <h2 class="slide-title">Sandbox 层</h2>
+            <p class="slide-body" style="margin-bottom: 2vh;">隔离的执行环境</p>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 280" width="370" height="280">
+                    <!-- Container with shield -->
+                    <rect x="50" y="40" width="270" height="220" rx="15" fill="rgba(34,211,238,0.08)" stroke="#22d3ee" stroke-width="3"/>
+                    <!-- Shield icon -->
+                    <path d="M 120 30 L 120 70 L 160 90 L 200 70 L 200 30 Z" fill="rgba(34,211,238,0.3)" stroke="#22d3ee" stroke-width="2"/>
+                    <text x="160" y="62" text-anchor="middle" font-size="20" fill="#22d3ee">+</text>
+                    <!-- Content boxes -->
+                    <rect x="80" y="100" width="90" height="45" rx="6" fill="rgba(34,211,238,0.15)" stroke="#22d3ee" stroke-width="1"/>
+                    <text x="125" y="128" text-anchor="middle" font-size="12" fill="#e8e0f5">文件系统</text>
+                    <rect x="200" y="100" width="90" height="45" rx="6" fill="rgba(168,85,247,0.15)" stroke="#a855f7" stroke-width="1"/>
+                    <text x="245" y="128" text-anchor="middle" font-size="12" fill="#e8e0f5">代码执行</text>
+                    <rect x="80" y="170" width="90" height="45" rx="6" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="1"/>
+                    <text x="125" y="198" text-anchor="middle" font-size="12" fill="#e8e0f5">网络隔离</text>
+                    <rect x="200" y="170" width="90" height="45" rx="6" fill="rgba(244,114,182,0.15)" stroke="#f472b6" stroke-width="1"/>
+                    <text x="245" y="198" text-anchor="middle" font-size="12" fill="#e8e0f5">资源限制</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>10/27</span>
+                <span>2:20-2:32</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: Benefits -->
+        <div class="slide" id="slide-11" data-time="2:32">
+            <h2 class="slide-title">各层独立升级扩展</h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <svg class="feature-check" viewBox="0 0 24 24">
+                        <path d="M 9 16.17 L 4.83 12 L 3.41 13.41 L 9 19 L 21 7 L 19.59 5.59 L 9 16.17 Z" fill="#34d399"/>
+                    </svg>
+                    <span style="font-size: clamp(14px, 3.5vw, 18px);">Session 可 replay 任意步骤</span>
+                </div>
+                <div class="feature-item">
+                    <svg class="feature-check" viewBox="0 0 24 24">
+                        <path d="M 9 16.17 L 4.83 12 L 3.41 13.41 L 9 19 L 21 7 L 19.59 5.59 L 9 16.17 Z" fill="#34d399"/>
+                    </svg>
+                    <span style="font-size: clamp(14px, 3.5vw, 18px);">Harness 多模型适配</span>
+                </div>
+                <div class="feature-item">
+                    <svg class="feature-check" viewBox="0 0 24 24">
+                        <path d="M 9 16.17 L 4.83 12 L 3.41 13.41 L 9 19 L 21 7 L 19.59 5.59 L 9 16.17 Z" fill="#34d399"/>
+                    </svg>
+                    <span style="font-size: clamp(14px, 3.5vw, 18px);">Sandbox 安全隔离</span>
+                </div>
+                <div class="feature-item">
+                    <svg class="feature-check" viewBox="0 0 24 24">
+                        <path d="M 9 16.17 L 4.83 12 L 3.41 13.41 L 9 19 L 21 7 L 19.59 5.59 L 9 16.17 Z" fill="#34d399"/>
+                    </svg>
+                    <span style="font-size: clamp(14px, 3.5vw, 18px);">层间稳定接口通信</span>
+                </div>
+            </div>
+            <div class="slide-footer">
+                <span>11/27</span>
+                <span>2:32-3:12</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: Part II Title -->
+        <div class="slide section-divider" id="slide-12" data-time="3:12" style="border-top-color: #22d3ee;">
+            <span class="section-number" style="color: #22d3ee;">02</span>
+            <h1 class="slide-title">变革带来的成效</h1>
+            <div style="width: 80px; height: 2px; background: var(--accent); margin: 2vh auto;"></div>
+            <div class="slide-footer" style="align-self: stretch;">
+                <span>12/27</span>
+                <span>3:12-3:40</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: Brain-Hand Separation -->
+        <div class="slide" id="slide-13" data-time="3:40">
+            <h2 class="slide-title">脑手分离·推理提前启动</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 300" width="370" height="300">
+                    <!-- Old architecture -->
+                    <text x="185" y="30" text-anchor="middle" font-size="14" fill="#f472b6" font-weight="bold">旧：顺序执行</text>
+                    <rect x="30" y="50" width="310" height="35" rx="8" fill="rgba(244,114,182,0.1)" stroke="#f472b6" stroke-width="2"/>
+                    <rect x="40" y="55" width="50" height="25" rx="4" fill="#f472b6"/>
+                    <text x="65" y="72" text-anchor="middle" font-size="10" fill="white">推理</text>
+                    <rect x="100" y="55" width="70" height="25" rx="4" fill="#a855f7"/>
+                    <text x="135" y="72" text-anchor="middle" font-size="10" fill="white">环境</text>
+                    <rect x="180" y="55" width="70" height="25" rx="4" fill="#22d3ee"/>
+                    <text x="215" y="72" text-anchor="middle" font-size="10" fill="white">执行</text>
+                    <rect x="260" y="55" width="70" height="25" rx="4" fill="#34d399"/>
+                    <text x="295" y="72" text-anchor="middle" font-size="10" fill="white">响应</text>
+
+                    <!-- New architecture -->
+                    <text x="185" y="130" text-anchor="middle" font-size="14" fill="#34d399" font-weight="bold">新：并行启动</text>
+                    <!-- Reasoning bar -->
+                    <rect x="30" y="150" width="310" height="30" rx="6" fill="rgba(168,85,247,0.1)" stroke="#a855f7" stroke-width="2"/>
+                    <rect x="40" y="155" width="120" height="20" rx="3" fill="#a855f7"/>
+                    <text x="50" y="170" font-size="10" fill="white">推理中...</text>
+                    <!-- Environment bar -->
+                    <rect x="30" y="190" width="310" height="30" rx="6" fill="rgba(34,211,238,0.1)" stroke="#22d3ee" stroke-width="2"/>
+                    <rect x="60" y="195" width="80" height="20" rx="3" fill="#22d3ee"/>
+                    <text x="70" y="210" font-size="10" fill="white">环境准备</text>
+                    <!-- Arrow showing parallel -->
+                    <path d="M 60 185 L 60 175" fill="none" stroke="#34d399" stroke-width="2" stroke-dasharray="3,2"/>
+                    <!-- Result -->
+                    <rect x="30" y="240" width="310" height="30" rx="6" fill="rgba(52,211,153,0.1)" stroke="#34d399" stroke-width="2"/>
+                    <text x="185" y="260" text-anchor="middle" font-size="12" fill="#34d399">推理与环境准备并行</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>13/27</span>
+                <span>3:40-4:02</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: Latency Numbers -->
+        <div class="slide" id="slide-14" data-time="4:02">
+            <h2 class="slide-title">延迟大幅降低</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 380" width="370" height="380">
+                    <!-- P50 Gauge -->
+                    <path d="M 95 170 A 70 70 0 0 1 25 100" fill="none" stroke="rgba(168,85,247,0.2)" stroke-width="14" stroke-linecap="round"/>
+                    <path d="M 95 170 A 70 70 0 0 1 53 42" fill="none" stroke="#22d3ee" stroke-width="14" stroke-linecap="round"/>
+                    <text x="70" y="115" text-anchor="middle" font-size="32" fill="#22d3ee" font-weight="900">60%</text>
+                    <text x="70" y="140" text-anchor="middle" font-size="12" fill="#e8e0f5">P50 首 Token</text>
+                    <text x="70" y="155" text-anchor="middle" font-size="12" fill="#e8e0f5">延迟降低</text>
+
+                    <!-- P95 Gauge -->
+                    <path d="M 295 170 A 70 70 0 0 1 225 100" fill="none" stroke="rgba(34,211,238,0.2)" stroke-width="14" stroke-linecap="round"/>
+                    <path d="M 295 170 A 70 70 0 0 1 232 38" fill="none" stroke="#34d399" stroke-width="14" stroke-linecap="round"/>
+                    <text x="270" y="115" text-anchor="middle" font-size="32" fill="#34d399" font-weight="900">90%+</text>
+                    <text x="270" y="140" text-anchor="middle" font-size="12" fill="#e8e0f5">P95 尾部</text>
+                    <text x="270" y="155" text-anchor="middle" font-size="12" fill="#e8e0f5">延迟降低</text>
+
+                    <!-- Bar chart below -->
+                    <text x="185" y="210" text-anchor="middle" font-size="14" fill="#e8e0f5" font-weight="bold">响应时间对比</text>
+                    <!-- Old bar -->
+                    <rect x="50" y="230" width="270" height="30" rx="6" fill="rgba(244,114,182,0.15)" stroke="#f472b6" stroke-width="2"/>
+                    <rect x="55" y="235" width="220" height="20" rx="4" fill="#f472b6" opacity="0.6"/>
+                    <text x="60" y="250" font-size="11" fill="white">旧架构</text>
+                    <!-- New bar -->
+                    <rect x="50" y="280" width="270" height="30" rx="6" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="2"/>
+                    <rect x="55" y="285" width="80" height="20" rx="4" fill="#34d399" opacity="0.6"/>
+                    <text x="60" y="300" font-size="11" fill="white">新架构</text>
+                    <!-- Arrow -->
+                    <path d="M 160 275 L 160 265" fill="none" stroke="#22d3ee" stroke-width="2"/>
+                    <text x="200" y="270" font-size="11" fill="#22d3ee">大幅缩短</text>
+
+                    <!-- User experience -->
+                    <rect x="60" y="330" width="250" height="35" rx="8" fill="rgba(168,85,247,0.1)" stroke="#a855f7" stroke-width="1"/>
+                    <text x="185" y="353" text-anchor="middle" font-size="13" fill="#a855f7">用户体验质的飞跃</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>14/27</span>
+                <span>4:02-4:12</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 15: Elasticity -->
+        <div class="slide" id="slide-15" data-time="4:12">
+            <h2 class="slide-title">无状态 = 随时扩缩容</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 280" width="370" height="280">
+                    <!-- Load balancer -->
+                    <rect x="135" y="20" width="100" height="35" rx="8" fill="rgba(52,211,153,0.2)" stroke="#34d399" stroke-width="2"/>
+                    <text x="185" y="42" text-anchor="middle" font-size="12" fill="#34d399" font-weight="bold">Load Balancer</text>
+                    <!-- Arrows -->
+                    <path d="M 185 55 L 185 85" fill="none" stroke="#34d399" stroke-width="2"/>
+                    <path d="M 150 55 L 100 85" fill="none" stroke="#34d399" stroke-width="2" stroke-dasharray="4,2"/>
+                    <path d="M 220 55 L 270 85" fill="none" stroke="#34d399" stroke-width="2" stroke-dasharray="4,2"/>
+                    <!-- Harness instances -->
+                    <rect x="135" y="95" width="100" height="50" rx="8" fill="rgba(168,85,247,0.2)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="185" y="125" text-anchor="middle" font-size="12" fill="#a855f7">Harness 1</text>
+                    <rect x="40" y="160" width="100" height="50" rx="8" fill="rgba(168,85,247,0.15)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="90" y="190" text-anchor="middle" font-size="12" fill="#a855f7">Harness 2</text>
+                    <rect x="230" y="160" width="100" height="50" rx="8" fill="rgba(168,85,247,0.15)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="280" y="190" text-anchor="middle" font-size="12" fill="#a855f7">Harness 3</text>
+                    <!-- New instance -->
+                    <rect x="135" y="225" width="100" height="45" rx="8" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="2" stroke-dasharray="5,3"/>
+                    <text x="185" y="253" text-anchor="middle" font-size="14" fill="#34d399" font-weight="bold">+ 新实例</text>
+                    <!-- Scaling labels -->
+                    <text x="340" y="185" font-size="12" fill="#34d399">▼</text>
+                    <text x="340" y="198" font-size="10" fill="#34d399">扩容</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>15/27</span>
+                <span>4:12-4:30</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 16: Fault Recovery -->
+        <div class="slide" id="slide-16" data-time="4:30">
+            <h2 class="slide-title">故障自动恢复</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 340" width="370" height="340">
+                    <!-- Step 1: State persisted -->
+                    <circle cx="60" cy="60" r="22" fill="rgba(52,211,153,0.3)" stroke="#34d399" stroke-width="2"/>
+                    <text x="60" y="66" text-anchor="middle" font-size="18" fill="#34d399" font-weight="bold">1</text>
+                    <rect x="100" y="40" width="240" height="40" rx="8" fill="rgba(52,211,153,0.1)" stroke="#34d399" stroke-width="2"/>
+                    <text x="220" y="56" text-anchor="middle" font-size="13" fill="#34d399" font-weight="bold">状态持久化</text>
+                    <text x="220" y="72" text-anchor="middle" font-size="11" fill="#e8e0f5">Session 层保存所有状态</text>
+                    <!-- Connector -->
+                    <path d="M 60 82 L 60 100" fill="none" stroke="#e8e0f5" stroke-width="2" opacity="0.4"/>
+                    <polygon points="60,105 55,95 65,95" fill="#e8e0f5" opacity="0.4"/>
+
+                    <!-- Step 2: Sandbox crashes -->
+                    <circle cx="60" cy="130" r="22" fill="rgba(244,114,182,0.3)" stroke="#f472b6" stroke-width="2"/>
+                    <text x="60" y="136" text-anchor="middle" font-size="18" fill="#f472b6" font-weight="bold">2</text>
+                    <rect x="100" y="110" width="240" height="40" rx="8" fill="rgba(244,114,182,0.1)" stroke="#f472b6" stroke-width="2"/>
+                    <text x="220" y="126" text-anchor="middle" font-size="13" fill="#f472b6" font-weight="bold">沙箱崩溃</text>
+                    <text x="220" y="142" text-anchor="middle" font-size="11" fill="#e8e0f5">隔离环境出现故障</text>
+                    <!-- Connector -->
+                    <path d="M 60 152 L 60 170" fill="none" stroke="#e8e0f5" stroke-width="2" opacity="0.4"/>
+                    <polygon points="60,175 55,165 65,165" fill="#e8e0f5" opacity="0.4"/>
+
+                    <!-- Step 3: Auto restart -->
+                    <circle cx="60" cy="200" r="22" fill="rgba(168,85,247,0.3)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="60" y="206" text-anchor="middle" font-size="18" fill="#a855f7" font-weight="bold">3</text>
+                    <rect x="100" y="180" width="240" height="40" rx="8" fill="rgba(168,85,247,0.1)" stroke="#a855f7" stroke-width="2"/>
+                    <text x="220" y="196" text-anchor="middle" font-size="13" fill="#a855f7" font-weight="bold">自动重启</text>
+                    <text x="220" y="212" text-anchor="middle" font-size="11" fill="#e8e0f5">新沙箱实例启动</text>
+                    <!-- Connector -->
+                    <path d="M 60 222 L 60 240" fill="none" stroke="#e8e0f5" stroke-width="2" opacity="0.4"/>
+                    <polygon points="60,245 55,235 65,235" fill="#e8e0f5" opacity="0.4"/>
+
+                    <!-- Step 4: Seamless resume -->
+                    <circle cx="60" cy="270" r="22" fill="rgba(34,211,238,0.3)" stroke="#22d3ee" stroke-width="2"/>
+                    <text x="60" y="276" text-anchor="middle" font-size="18" fill="#22d3ee" font-weight="bold">4</text>
+                    <rect x="100" y="250" width="240" height="40" rx="8" fill="rgba(34,211,238,0.1)" stroke="#22d3ee" stroke-width="2"/>
+                    <text x="220" y="266" text-anchor="middle" font-size="13" fill="#22d3ee" font-weight="bold">无缝恢复</text>
+                    <text x="220" y="282" text-anchor="middle" font-size="11" fill="#e8e0f5">从 Session 恢复现场继续执行</text>
+
+                    <!-- Result badge -->
+                    <rect x="80" y="305" width="210" height="28" rx="14" fill="rgba(52,211,153,0.15)" stroke="#34d399" stroke-width="1"/>
+                    <text x="185" y="324" text-anchor="middle" font-size="12" fill="#34d399">业务层面零感知故障</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>16/27</span>
+                <span>4:30-4:48</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 17: Error Isolation -->
+        <div class="slide" id="slide-17" data-time="4:48">
+            <h2 class="slide-title">错误隔离在沙箱内</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 280" width="370" height="280">
+                    <!-- Sandbox bounded box -->
+                    <rect x="50" y="40" width="270" height="140" rx="15" fill="rgba(34,211,238,0.08)" stroke="#34d399" stroke-width="3"/>
+                    <text x="185" y="65" text-anchor="middle" font-size="14" fill="#34d399" font-weight="bold">Sandbox</text>
+                    <!-- Error inside -->
+                    <circle cx="185" cy="100" r="35" fill="rgba(244,114,182,0.2)"/>
+                    <text x="185" y="108" text-anchor="middle" font-size="24" fill="#f472b6">!</text>
+                    <!-- Safe outside -->
+                    <circle cx="80" cy="210" r="25" fill="rgba(52,211,153,0.2)" stroke="#34d399" stroke-width="2"/>
+                    <text x="80" y="216" text-anchor="middle" font-size="16" fill="#34d399">✓</text>
+                    <text x="80" y="245" text-anchor="middle" font-size="12" fill="#e8e0f5">Harness 安全</text>
+                    <circle cx="290" cy="210" r="25" fill="rgba(52,211,153,0.2)" stroke="#34d399" stroke-width="2"/>
+                    <text x="290" y="216" text-anchor="middle" font-size="16" fill="#34d399">✓</text>
+                    <text x="290" y="245" text-anchor="middle" font-size="12" fill="#e8e0f5">Session 安全</text>
+                    <!-- Containment arrows -->
+                    <path d="M 145 100 L 105 100" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#block)"/>
+                    <path d="M 225 100 L 265 100" fill="none" stroke="#34d399" stroke-width="2" marker-end="url(#block)"/>
+                    <defs>
+                        <marker id="block" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                            <text x="0" y="4" font-size="10" fill="#34d399">✕</text>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>17/27</span>
+                <span>4:48-5:15</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 18: Security -->
+        <div class="slide" id="slide-18" data-time="5:15">
+            <h2 class="slide-title">安全边界重塑</h2>
+            <div class="comparison">
+                <div class="comparison-item before">
+                    <svg viewBox="0 0 150 180" width="150" height="180">
+                        <rect x="15" y="20" width="120" height="140" rx="10" fill="rgba(244,114,182,0.08)" stroke="#f472b6" stroke-width="2"/>
+                        <text x="75" y="45" text-anchor="middle" font-size="14" fill="#f472b6" font-weight="bold">BEFORE</text>
+                        <circle cx="75" cy="80" r="25" fill="rgba(244,114,182,0.2)"/>
+                        <text x="75" y="86" text-anchor="middle" font-size="18" fill="#f472b6">🔑</text>
+                        <text x="75" y="130" text-anchor="middle" font-size="14" fill="#f472b6">凭证暴露</text>
+                    </svg>
+                    <div class="comparison-title">旧</div>
+                </div>
+                <div class="comparison-item after">
+                    <svg viewBox="0 0 150 180" width="150" height="180">
+                        <rect x="15" y="20" width="120" height="140" rx="10" fill="rgba(52,211,153,0.08)" stroke="#34d399" stroke-width="2"/>
+                        <text x="75" y="45" text-anchor="middle" font-size="14" fill="#34d399" font-weight="bold">AFTER</text>
+                        <circle cx="50" cy="80" r="20" fill="none" stroke="#34d399" stroke-width="2"/>
+                        <text x="50" y="86" text-anchor="middle" font-size="16" fill="#34d399">🔐</text>
+                        <circle cx="100" cy="80" r="20" fill="none" stroke="#22d3ee" stroke-width="2"/>
+                        <text x="100" y="86" text-anchor="middle" font-size="16" fill="#22d3ee">🔒</text>
+                        <text x="75" y="125" text-anchor="middle" font-size="11" fill="#34d399">加密挂载</text>
+                        <text x="75" y="145" text-anchor="middle" font-size="11" fill="#22d3ee">代理访问</text>
+                    </svg>
+                    <div class="comparison-title">新</div>
+                </div>
+            </div>
+            <div class="slide-footer">
+                <span>18/27</span>
+                <span>5:15-5:56</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 19: Observability -->
+        <div class="slide" id="slide-19" data-time="5:56">
+            <h2 class="slide-title">可观测性与多Agent协作</h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <svg class="feature-check" viewBox="0 0 24 24">
+                        <path d="M 9 16.17 L 4.83 12 L 3.41 13.41 L 9 19 L 21 7 L 19.59 5.59 L 9 16.17 Z" fill="#34d399"/>
+                    </svg>
+                    <span style="font-size: clamp(14px, 3.5vw, 18px);">中间件：观测与流控</span>
+                </div>
+                <div class="feature-item">
+                    <svg class="feature-check" viewBox="0 0 24 24">
+                        <path d="M 9 16.17 L 4.83 12 L 3.41 13.41 L 9 19 L 21 7 L 19.59 5.59 L 9 16.17 Z" fill="#34d399"/>
+                    </svg>
+                    <span style="font-size: clamp(14px, 3.5vw, 18px);">标准接口：多Agent 协作</span>
+                </div>
+                <div class="feature-item">
+                    <svg class="feature-check" viewBox="0 0 24 24">
+                        <path d="M 9 16.17 L 4.83 12 L 3.41 13.41 L 9 19 L 21 7 L 19.59 5.59 L 9 16.17 Z" fill="#34d399"/>
+                    </svg>
+                    <span style="font-size: clamp(14px, 3.5vw, 18px);">管理平台：权限与审计</span>
+                </div>
+            </div>
+            <div class="slide-footer">
+                <span>19/27</span>
+                <span>5:56-6:40</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 20: Part III Title -->
+        <div class="slide section-divider" id="slide-20" data-time="6:40" style="border-top-color: #34d399;">
+            <span class="section-number" style="color: #34d399;">03</span>
+            <h1 class="slide-title">发展方向</h1>
+            <div style="width: 80px; height: 2px; background: var(--success); margin: 2vh auto;"></div>
+            <div class="slide-footer" style="align-self: stretch;">
+                <span>20/27</span>
+                <span>6:40-7:00</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 21: DIY Past -->
+        <div class="slide" id="slide-21" data-time="7:00">
+            <h2 class="slide-title">过去：各自造轮子</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 280" width="370" height="280">
+                    <!-- Broken components -->
+                    <circle cx="70" cy="80" r="35" fill="none" stroke="#f472b6" stroke-width="3" stroke-dasharray="6,4"/>
+                    <line x1="50" y1="60" x2="90" y2="100" stroke="#f472b6" stroke-width="2"/>
+                    <line x1="90" y1="60" x2="50" y2="100" stroke="#f472b6" stroke-width="2"/>
+                    <text x="70" y="130" text-anchor="middle" font-size="12" fill="#f472b6">编排</text>
+
+                    <rect x="155" y="50" width="60" height="60" rx="8" fill="none" stroke="#a855f7" stroke-width="3" stroke-dasharray="6,4"/>
+                    <line x1="170" y1="80" x2="200" y2="80" stroke="#a855f7" stroke-width="2"/>
+                    <text x="185" y="130" text-anchor="middle" font-size="12" fill="#a855f7">沙箱</text>
+
+                    <circle cx="300" cy="80" r="35" fill="none" stroke="#22d3ee" stroke-width="3" stroke-dasharray="6,4"/>
+                    <line x1="280" y1="80" x2="320" y2="80" stroke="#22d3ee" stroke-width="2"/>
+                    <text x="300" y="130" text-anchor="middle" font-size="12" fill="#22d3ee">会话</text>
+
+                    <!-- Pain points -->
+                    <rect x="40" y="160" width="290" height="90" rx="10" fill="rgba(244,114,182,0.08)" stroke="#f472b6" stroke-width="1"/>
+                    <text x="185" y="190" text-anchor="middle" font-size="14" fill="#f472b6" font-weight="bold">重复造轮子的痛苦</text>
+                    <text x="60" y="220" font-size="12" fill="#e8e0f5">各团队都要实现状态管理、沙箱隔离</text>
+                    <text x="60" y="240" font-size="12" fill="#e8e0f5">重复开发，缺乏统一标准</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>21/27</span>
+                <span>7:00-7:20</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 22: Standardization -->
+        <div class="slide" id="slide-22" data-time="7:20">
+            <h2 class="slide-title">标准化与平台化</h2>
+            <div style="display: flex; flex-direction: column; gap: 3vh; padding: 2vh 0;">
+                <div class="flow-step">
+                    <span style="font-size: clamp(16px, 4vw, 20px); color: var(--success);">Step 1</span>
+                    <span style="font-size: clamp(14px, 3.5vw, 16px);">初创公司 → 标准 Agent 框架</span>
+                </div>
+                <div class="flow-step">
+                    <span style="font-size: clamp(16px, 4vw, 20px); color: var(--accent);">Step 2</span>
+                    <span style="font-size: clamp(14px, 3.5vw, 16px);">云厂商 → Managed Agent 服务</span>
+                </div>
+                <div class="flow-step">
+                    <span style="font-size: clamp(16px, 4vw, 20px); color: var(--primary);">Step 3</span>
+                    <span style="font-size: clamp(14px, 3.5vw, 16px);">趋势 → 运行时托管出去</span>
+                </div>
+            </div>
+            <div class="slide-footer">
+                <span>22/27</span>
+                <span>7:20-7:50</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 23: Everything as Resource -->
+        <div class="slide" id="slide-23" data-time="7:50">
+            <h2 class="slide-title">一切都变成资源</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 280" width="370" height="280">
+                    <!-- Stackable blocks -->
+                    <!-- Agent -->
+                    <rect x="85" y="40" width="200" height="55" rx="10" fill="rgba(168,85,247,0.2)" stroke="#a855f7" stroke-width="3"/>
+                    <text x="185" y="72" text-anchor="middle" font-size="18" fill="#a855f7" font-weight="bold">Agent</text>
+
+                    <!-- Environment -->
+                    <rect x="85" y="110" width="200" height="55" rx="10" fill="rgba(34,211,238,0.2)" stroke="#22d3ee" stroke-width="3"/>
+                    <text x="185" y="142" text-anchor="middle" font-size="18" fill="#22d3ee" font-weight="bold">Environment</text>
+
+                    <!-- Session -->
+                    <rect x="85" y="180" width="200" height="55" rx="10" fill="rgba(52,211,153,0.2)" stroke="#34d399" stroke-width="3"/>
+                    <text x="185" y="212" text-anchor="middle" font-size="18" fill="#34d399" font-weight="bold">Session</text>
+
+                    <!-- Arrow -->
+                    <path d="M 185 240 L 185 260" fill="none" stroke="#e8e0f5" stroke-width="2"/>
+                    <polygon points="185,265 180,255 190,255" fill="#e8e0f5"/>
+                    <text x="290" y="258" font-size="12" fill="#e8e0f5">像搭积木</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>23/27</span>
+                <span>7:50-8:10</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 24: Developer Experience -->
+        <div class="slide" id="slide-24" data-time="8:10">
+            <h2 class="slide-title">开发者只需关心什么</h2>
+            <div style="display: flex; flex-direction: column; gap: 3vh; padding: 3vh 0;">
+                <!-- Focus area -->
+                <div style="border: 2px solid var(--success); border-radius: 12px; padding: 16px;">
+                    <p class="slide-body" style="text-align: center; color: var(--success);">
+                        <strong>能力定义</strong> + <strong>工具选择</strong>
+                    </p>
+                </div>
+                <!-- Platform area -->
+                <div style="border: 2px dashed var(--text-dim); border-radius: 12px; padding: 16px; opacity: 0.5;">
+                    <p class="slide-body" style="text-align: center;">
+                        状态管理 / 沙箱隔离 / 故障恢复
+                    </p>
+                    <p class="slide-body" style="text-align: center; font-size: clamp(12px, 3vw, 14px);">
+                        — 平台搞定 —
+                    </p>
+                </div>
+            </div>
+            <div class="slide-footer">
+                <span>24/27</span>
+                <span>8:10-8:40</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 25: AI Native OS -->
+        <div class="slide" id="slide-25" data-time="8:40">
+            <h2 class="slide-title">未来：AI Native 操作系统</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 300" width="370" height="300">
+                    <!-- Platform layer -->
+                    <rect x="35" y="210" width="300" height="70" rx="10" fill="rgba(168,85,247,0.2)" stroke="#a855f7" stroke-width="3"/>
+                    <text x="185" y="240" text-anchor="middle" font-size="14" fill="#a855f7" font-weight="bold">Platform Layer</text>
+                    <text x="185" y="260" text-anchor="middle" font-size="12" fill="#e8e0f5">调度·隔离·监控</text>
+
+                    <!-- Model/CPU -->
+                    <rect x="55" y="130" width="90" height="60" rx="8" fill="rgba(22d3ee,0.2)" stroke="#22d3ee" stroke-width="2" stroke-dasharray="4,2"/>
+                    <circle cx="100" cy="150" r="15" fill="#22d3ee"/>
+                    <text x="100" y="156" text-anchor="middle" font-size="14" fill="white">CPU</text>
+                    <text x="100" y="180" text-anchor="middle" font-size="12" fill="#22d3ee">Model</text>
+
+                    <!-- Tools/Peripherals -->
+                    <rect x="225" y="130" width="90" height="60" rx="8" fill="rgba(52,211,153,0.2)" stroke="#34d399" stroke-width="2" stroke-dasharray="4,2"/>
+                    <circle cx="270" cy="150" r="15" fill="#34d399"/>
+                    <text x="270" y="156" text-anchor="middle" font-size="14" fill="white">⚙</text>
+                    <text x="270" y="180" text-anchor="middle" font-size="12" fill="#34d399">Tools</text>
+
+                    <!-- Connections -->
+                    <path d="M 100 190 L 100 205" fill="none" stroke="#a855f7" stroke-width="2"/>
+                    <path d="M 270 190 L 270 205" fill="none" stroke="#a855f7" stroke-width="2"/>
+
+                    <!-- Apps at top -->
+                    <rect x="85" y="50" width="200" height="60" rx="10" fill="rgba(244,114,182,0.15)" stroke="#f472b6" stroke-width="2"/>
+                    <text x="185" y="85" text-anchor="middle" font-size="14" fill="#f472b6" font-weight="bold">Agent Applications</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>25/27</span>
+                <span>8:40-9:05</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 26: Conclusion -->
+        <div class="slide" id="slide-26" data-time="9:05">
+            <h2 class="slide-title" style="text-align: center;">宠物 → 打工仔</h2>
+            <div class="svg-diagram">
+                <svg viewBox="0 0 370 280" width="370" height="280">
+                    <!-- Pet side -->
+                    <circle cx="75" cy="150" r="50" fill="rgba(244,114,182,0.15)" stroke="#f472b6" stroke-width="3"/>
+                    <circle cx="75" cy="140" r="25" fill="#f472b6" opacity="0.5"/>
+                    <text x="75" y="215" text-anchor="middle" font-size="14" fill="#f472b6">宠物</text>
+
+                    <!-- Worker side -->
+                    <circle cx="295" cy="150" r="50" fill="rgba(34d399,0.15)" stroke="#34d399" stroke-width="3"/>
+                    <rect x="280" y="130" width="30" height="25" rx="4" fill="#34d399"/>
+                    <text x="295" y="215" text-anchor="middle" font-size="14" fill="#34d399">打工</text>
+
+                    <!-- Arrow -->
+                    <path d="M 140 150 L 230 150" fill="none" stroke="#e8e0f5" stroke-width="3"/>
+                    <polygon points="235,150 225,145 225,155" fill="#22d3ee"/>
+
+                    <!-- Bottom text -->
+                    <text x="185" y="260" text-anchor="middle" font-size="16" fill="#a855f7">架构升级的必然结果</text>
+                </svg>
+            </div>
+            <div class="slide-footer">
+                <span>26/27</span>
+                <span>9:05-9:25</span>
+            </div>
+        </div>
+
+        <!-- SLIDE 27: End -->
+        <div class="slide end-slide" id="slide-27" data-time="9:25" style="border-top-color: #34d399;">
+            <div style="font-size: clamp(40px, 10vw, 56px); background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700;">
+                感谢收听
+            </div>
+            <p class="end-subtitle" style="margin-top: 3vh;">下期再见</p>
+            <div class="slide-footer" style="align-self: stretch;">
+                <span>27/27</span>
+                <span>9:25+</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Update progress bar
+        const presentation = document.getElementById('presentation');
+        const progressBar = document.getElementById('progressBar');
+
+        presentation.addEventListener('scroll', () => {
+            const scrollTop = presentation.scrollTop;
+            const scrollHeight = presentation.scrollHeight - presentation.clientHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = progress + '%';
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            const slides = Array.from(document.querySelectorAll('.slide'));
+            const currentIndex = slides.findIndex(slide => {
+                const rect = slide.getBoundingClientRect();
+                return rect.top >= 0 && rect.top < window.innerHeight / 2;
+            });
+
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (currentIndex < slides.length - 1) {
+                    slides[currentIndex + 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    slides[currentIndex - 1].scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+
+        // Scroll to hash on load
+        window.addEventListener('load', () => {
+            const hash = window.location.hash;
+            if (hash) {
+                const slide = document.querySelector(hash);
+                if (slide) {
+                    slide.scrollIntoView();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "srtFile": "sub.srt",
+  "wrapSubtitles": true,
+  "srtReplacements": [
+    { "from": "Cloud Code", "to": "Claude Code", "ignoreCase": true },
+    { "from": "Cloud", "to": "Claude", "ignoreCase": true },
+    { "from": "OpenClock", "to": "OpenClaude", "ignoreCase": true },
+    { "from": "血距人", "to": "穴居人" },
+    { "from": "Avropotic", "to": "Anthropic" },
+    { "from": "Authropic", "to": "Anthropic" }
+  ],
+  "subtitle": {
+    "fontSize": 18,
+    "marginV": 18,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 24,
+    "primaryColour": "#FFFF00",
+    "primaryAlpha": 108
+  },
+  "slideDurationsSec": [
+    32.76,
+    12.68,
+    16.68,
+    22.14,
+    10.18,
+    31.46,
+    27.5,
+    33.12,
+    18.84,
+    42.96,
+    23.18,
+    11.4,
+    26.08,
+    34.16,
+    48.0,
+    34.06,
+    20.48,
+    32.8,
+    20.24,
+    29.76,
+    78.42
+  ],
+  "wavFile": "用穴居人模式让+Claude+省+Token.wav",
+  "totalDurationSec": 606.9
+}

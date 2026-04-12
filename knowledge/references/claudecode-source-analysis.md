@@ -1,7 +1,5 @@
 # Claude Code Source Analysis — 源码解析参考资料索引
 
-> 来源：one-context 内部整理（各条目出处见文中链接）
-
 > 本文档整理了关于 Claude Code 源码解析、架构分析的权威文章和资源，供 agent 框架建设参考。
 > 更新日期：2026-04-02
 
@@ -74,6 +72,6 @@
 | # | 项目 | 链接 | 说明 |
 |---|------|------|------|
 | 35 | ThreeFish-AI/analysis_claude_code | https://github.com/ThreeFish-AI/analysis_claude_code | Claude Code v1.0.33 逆向工程分析资料库 |
-| 36 | learn-claude-code（14.4k star） | https://github.com/anthropics/courses | Agent Loop 最小可行实现、v1_basic_agent.py |
+| 36 | learn-claude-code（14.4k star） | https://github.com/anthropics/courses （待确认具体仓库地址） | Agent Loop 最小可行实现、v1_basic_agent.py |
 
 > **注意**：本索引中的链接来自 AI 搜索引擎汇总，部分 URL（尤其知乎长 ID、CSDN adg 链接）可能已失效。使用前建议验证链接有效性。

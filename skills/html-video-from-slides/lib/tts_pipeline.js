@@ -9,6 +9,10 @@ const { chromium } = require('playwright');
 const ffmpegPath = require('ffmpeg-static');
 const fs = require('fs');
 const path = require('path');
+const {
+  hexToAssPrimaryColour,
+  DEFAULT_SUBTITLE_STYLE,
+} = require('./ass_colours');
 const { execSync } = require('child_process');
 const { pathToFileURL } = require('url');
 
@@ -173,11 +177,17 @@ async function run(projectRoot, skillDir) {
   const VIDEO_MAXRATE = cfg.video?.maxrate ?? '10M';
   const VIDEO_PRESET = cfg.video?.preset ?? 'slow';
   const SUBTITLE_ENABLE = cfg.subtitle?.enable !== false;
-  const SUBTITLE_FONT_SIZE = cfg.subtitle?.fontSize ?? 24;
-  const SUBTITLE_MARGIN_V = cfg.subtitle?.marginV ?? 18;
+  const SUBTITLE_FONT_SIZE =
+    cfg.subtitle?.fontSize ?? DEFAULT_SUBTITLE_STYLE.fontSize;
+  const SUBTITLE_MARGIN_V =
+    cfg.subtitle?.marginV ?? DEFAULT_SUBTITLE_STYLE.marginV;
   const SUBTITLE_FONT_NAME = cfg.subtitle?.fontName ?? 'Microsoft YaHei';
   const SUBTITLE_BOLD = cfg.subtitle?.bold !== false;
   const SUBTITLE_CHARS_PER_LINE = cfg.subtitle?.charsPerLine ?? 28;
+  const SUBTITLE_PRIMARY_ASS = hexToAssPrimaryColour(
+    cfg.subtitle?.primaryColour ?? DEFAULT_SUBTITLE_STYLE.primaryColour,
+    cfg.subtitle?.primaryAlpha ?? DEFAULT_SUBTITLE_STYLE.primaryAlpha
+  );
 
   function voiceForSlide(idx) {
     if (!USE_VOICE_ALTERNATE) return VOICE_SINGLE;
@@ -298,7 +308,7 @@ async function run(projectRoot, skillDir) {
         `-vf "subtitles='${srtFilter}':charenc=UTF-8:force_style='` +
         `FontName=${SUBTITLE_FONT_NAME},` +
         `FontSize=${SUBTITLE_FONT_SIZE},` +
-        `PrimaryColour=&H00FFFFFF,` +
+        `PrimaryColour=${SUBTITLE_PRIMARY_ASS},` +
         `OutlineColour=&H00000000,` +
         `BackColour=&H80000000,` +
         `Bold=${boldVal},Outline=2,Shadow=1,` +

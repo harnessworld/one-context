@@ -1,0 +1,26 @@
+{
+  "whisperModel": "medium",
+  "noSpeechThreshold": 0.85,
+  "whisperHotwords": "Claude Claude Code Anthropic",
+  "srtReplacements": [
+    { "from": "Cloud Code", "to": "Claude Code", "ignoreCase": true },
+    { "from": "OpenClock", "to": "OpenClaude", "ignoreCase": true },
+    { "from": "血距人", "to": "穴居人" },
+    { "from": "Avropotic", "to": "Anthropic" },
+    { "from": "Authropic", "to": "Anthropic" },
+    { "from": "Cloud", "to": "Claude", "ignoreCase": true }
+  ],
+  "wrapSubtitles": true,
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "subtitle": {
+    "fontSize": 18,
+    "marginV": 18,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 24,
+    "primaryColour": "#FFFF00",
+    "primaryAlpha": 108
+  },
+  "_comment": "medium：更易与幻灯文案对齐（翻页），CPU/耗时高于 small；align 含缺口二次转写；字幕请仍校对 sub.srt。"
+}

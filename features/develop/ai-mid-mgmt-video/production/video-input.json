@@ -1,0 +1,35 @@
+{
+  "wavFile": "AI+正在终结中层管理.wav",
+  "whisperModel": "small",
+  "vadFilter": false,
+  "strictSubtitles": false,
+  "maxSubtitleGapSec": 2.5,
+  "fillSrtGaps": true,
+  "whisperHotwords": "Block Dorsey Botha Palantir Andreessen Meta Amazon Shyam Sankar Palantir McKinsey Harvard Burnham",
+  "outputFile": "final_ai_mid_mgmt_mobile.mp4",
+  "burnSubtitles": true,
+  "wrapSubtitles": true,
+  "srtReplacements": [
+    { "from": "请使用简体中文转写中文转写中文转写。", "to": "" },
+    { "from": "请使用简体中文转写中文内容，专有名词保持常用英文拼写。", "to": "" },
+    { "from": "哈佛生学院", "to": "哈佛商学院" },
+    { "from": "麦肯西", "to": "麦肯锡" },
+    { "from": "红山资本", "to": "红杉资本" },
+    { "from": "然后他们的CEO Andreessen就说,", "to": "然后他们的 CEO 安迪·贾西就说," },
+    { "from": "因为McCanneson他不是一直都在讲说,", "to": "因为 Marc Andreessen 他不是一直都在讲说," },
+    { "from": "美洲立会", "to": "每周例会" },
+    { "from": "搞明白创新或者在常识中死去。", "to": "搞明白创新或者在尝试中死去。" },
+    { "from": "AI可以实实的去处理海量的信息", "to": "AI可以实时地去处理海量的信息" },
+    { "from": "没有回头录的", "to": "没有回头路的" },
+    { "from": "然后可以实时的去分配资源", "to": "然后可以实时地去分配资源" }
+  ],
+  "subtitle": {
+    "fontSize": 26,
+    "marginV": 30,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 20,
+    "primaryColour": "#FFFFCC",
+    "primaryAlpha": 80
+  }
+}

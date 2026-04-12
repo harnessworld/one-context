@@ -7,97 +7,16 @@ from typing import Any
 
 from one_context.adapters import AdapterBase, GeneratedFile, register
 from one_context.adapters._rules import (
-    AdapterOverride,
     FieldRule,
     collect_top_rules,
     match_rules,
     render_rules_by_section,
     resolve_rule_placement,
 )
+from one_context.adapters._shared_rules import GENERATED_HEADER_MD, PROFILE_RULES
 from one_context.agents import resolve_agent_knowledge
 
 _ADAPTER_NAME = "cursor"
-
-
-PROFILE_RULES: list[FieldRule] = [
-    # -- behavior --
-    FieldRule(
-        "behavior.plan_first", True,
-        "Always create a plan before making changes. Ask for approval first.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.plan_first", False,
-        "You may edit code directly without a formal plan.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.safety_level", "conservative",
-        "Be conservative: prefer minimal, reversible changes.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.safety_level", "standard",
-        "Follow standard safety practices.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.change_scope", "broad",
-        "Changes may span multiple files — consider cross-cutting concerns.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.change_scope", "focused",
-        "Keep changes focused on the immediate task.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.test_expectation", "targeted",
-        "Write targeted tests for changes.",
-        section="Behavior",
-    ),
-    FieldRule(
-        "behavior.test_expectation", "advisory",
-        "Suggest testing strategies when appropriate.",
-        section="Behavior",
-    ),
-    # -- output_style --
-    FieldRule(
-        "output_style.tone", "minimal",
-        "Default to minimal output (文言极简 / caveman-style): modern language, "
-        "shortest useful phrasing, no filler or pleasantries, do not restate the "
-        "user's question—lead with the answer. Unless the user explicitly requests "
-        "a different style, length, format, or language, keep replies short.",
-        section="Output Style",
-        adapter_overrides={
-            _ADAPTER_NAME: AdapterOverride(
-                output="Respond in ≤2 lines maximum. No pleasantries. "
-                "No restating user input. Lead with the answer.",
-                placement="top",
-            ),
-        },
-    ),
-    FieldRule(
-        "output_style.tone", "concise",
-        "Be concise.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.tone", "structured",
-        "Use structured output with clear headings.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.include_verification", True,
-        "Include verification steps after changes.",
-        section="Output Style",
-    ),
-    FieldRule(
-        "output_style.include_verification", False,
-        "Focus on design and rationale over verification.",
-        section="Output Style",
-    ),
-]
 
 
 def _build_mdc_frontmatter(workspace: dict[str, Any]) -> str:
@@ -150,7 +69,7 @@ class CursorAdapter(AdapterBase):
         context: dict[str, Any],
     ) -> list[GeneratedFile]:
         ws_id = workspace.get("id", "unknown")
-        parts: list[str] = [_build_mdc_frontmatter(workspace), ""]
+        parts: list[str] = [_build_mdc_frontmatter(workspace), "", GENERATED_HEADER_MD, ""]
 
         # Workspace summary
         ws_ctx = workspace.get("context") or {}
@@ -234,7 +153,7 @@ class CursorAdapter(AdapterBase):
             fm_lines.append("alwaysApply: false")
             fm_lines.append("---")
 
-            parts: list[str] = ["\n".join(fm_lines), "", f"# {name}", ""]
+            parts: list[str] = ["\n".join(fm_lines), "", GENERATED_HEADER_MD, "", f"# {name}", ""]
 
             if instructions:
                 parts.append(instructions)
@@ -309,6 +228,7 @@ class CursorAdapter(AdapterBase):
                 "globs:\n"
                 "alwaysApply: true\n"
                 "---\n\n"
+                + GENERATED_HEADER_MD + "\n\n"
                 + "\n".join(unique_top)
                 + "\n"
             )

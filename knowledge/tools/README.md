@@ -11,3 +11,5 @@ Tool-related reference documents — CLI usage, configuration, and integration n
 ## Status
 
 This directory is currently **empty** — awaiting tool reference pages (e.g. CLI quick-reference, editor configuration, CI integration).
+
+> Previously listed `cursor-cli.md` which did not exist. Removed pending actual content.

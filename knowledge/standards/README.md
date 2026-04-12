@@ -6,12 +6,8 @@ Tool-neutral engineering conventions and policies for `one-context`.
 
 | File | Scope |
 |------|-------|
-| `agent-framework.md` | Agent schema, role enum, adapter contract |
-| `agent-friendly-testing.md` | Design principles for AI agent tests |
-| `agent-team-coordination.md` | Multi-agent parallel coordination patterns |
-| `oracle-parallel-debugging.md` | Splitting large tasks with known-correct implementations |
-| `diagram-conventions.md` | Diagram format selection (text / image / prompt-generated) |
-| `one-context-conventions.md` | Canonical sources, adapter model, validation |
+| `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
+| `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
 
 ## What belongs here
 

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>竖版封面 · Hermes Agent</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #05050a;
+}
+
+body.theme-wenyan {
+    font-family: 'STKaiti', 'KaiTi', 'Noto Serif SC', 'SimSun', serif;
+    background: #1a1208;
+}
+body.theme-wenyan #overlay {
+    background: linear-gradient(to bottom,
+        rgba(26,18,8,0.93) 0%,
+        rgba(26,18,8,0.42) 18%,
+        rgba(26,18,8,0.12) 38%,
+        rgba(26,18,8,0.10) 55%,
+        rgba(26,18,8,0.38) 75%,
+        rgba(26,18,8,0.95) 100%
+    );
+}
+body.theme-wenyan #noise {
+    opacity: 0.85;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+}
+body.theme-wenyan #tagline { color: rgba(168,144,112,0.88); }
+body.theme-wenyan #brand-name { color: #e8d5b0; }
+body.theme-wenyan #headline { color: #e8d5b0; }
+body.theme-wenyan #subline { color: #a89070; text-shadow: 0 2px 14px rgba(0,0,0,0.5); }
+body.theme-wenyan .foot-item { color: #c4b59a; }
+body.theme-wenyan #watermark { color: rgba(168,144,112,0.38); }
+body.theme-wenyan #avatar-fallback {
+    background: rgba(200,160,80,0.08);
+    border-color: rgba(200,150,60,0.35);
+}
+body.theme-wenyan #avatar { border-color: rgba(200,150,60,0.38); }
+
+#cover { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+#bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+#bg-fallback { position: absolute; inset: 0; }
+#overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(3,3,8,0.82) 0%, rgba(3,3,8,0.30) 18%, rgba(3,3,8,0.08) 38%, rgba(3,3,8,0.08) 52%, rgba(3,3,8,0.45) 72%, rgba(3,3,8,0.92) 100%); }
+#noise { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"); pointer-events: none; }
+#header { position: absolute; top: 0; left: 0; right: 0; padding: 76px 76px 0; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+#tagline { font-size: 30px; font-weight: 400; color: rgba(255,255,255,0.55); letter-spacing: 6px; }
+#brand { display: flex; align-items: center; gap: 16px; }
+#brand-name { font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.80); letter-spacing: 3px; }
+#avatar { width: 78px; height: 78px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.25); display: block; }
+#avatar-fallback { width: 78px; height: 78px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.20); background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 36px; }
+#content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 200px 72px 280px; text-align: center; z-index: 20; gap: 0; }
+#tag { display: inline-block; font-size: 26px; font-weight: 600; letter-spacing: 8px; padding: 10px 32px; border-radius: 100px; margin-bottom: 52px; }
+#headline { font-family: 'Noto Serif SC', 'Source Han Serif SC', 'STKaiti', 'KaiTi', 'SimSun', serif; font-size: 200px; font-weight: 900; line-height: 1.0; letter-spacing: 4px; color: #ffffff; text-align: center; word-break: keep-all; }
+#headline.len5  { font-size: 220px; letter-spacing: 8px; }
+#headline.len6  { font-size: 200px; }
+#headline.len7  { font-size: 175px; letter-spacing: 2px; }
+#headline.len8  { font-size: 155px; letter-spacing: 2px; }
+#headline.len10 { font-size: 128px; letter-spacing: 0px; }
+#headline.len12 { font-size: 108px; }
+#headline.long  { font-size: 88px;  letter-spacing: 0px; }
+#headline em { font-style: normal; }
+#divider { width: 120px; height: 3px; border-radius: 2px; margin: 44px auto 44px; }
+#subline { font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Microsoft YaHei', 'PingFang SC', sans-serif; font-size: 48px; font-weight: 500; line-height: 1.55; color: rgba(255,255,255,0.78); letter-spacing: 2px; max-width: 900px; text-shadow: 0 2px 20px rgba(0,0,0,0.8); }
+#footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 76px 60px; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+#footer-left { display: flex; flex-direction: column; gap: 14px; }
+.foot-item { display: flex; align-items: center; gap: 14px; font-size: 30px; color: rgba(255,255,255,0.42); letter-spacing: 2px; }
+.foot-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+#watermark { font-size: 24px; color: rgba(255,255,255,0.22); letter-spacing: 3px; }
+#accent-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; }
+</style>
+</head>
+<body>
+<div id="cover">
+    <img id="bg" src="" alt="">
+    <div id="bg-fallback"></div>
+    <div id="overlay"></div>
+    <div id="noise"></div>
+    <div id="header">
+        <div id="tagline">大厂吾师兄</div>
+        <div id="brand">
+            <div id="brand-name">大厂吾师兄</div>
+            <img id="avatar" src="" onerror="this.style.display='none'" alt="">
+            <div id="avatar-fallback">🐶</div>
+        </div>
+    </div>
+    <div id="content">
+        <div id="tag"></div>
+        <div id="headline"></div>
+        <div id="divider"></div>
+        <div id="subline"></div>
+    </div>
+    <div id="footer">
+        <div id="footer-left"></div>
+        <div id="watermark"></div>
+    </div>
+    <div id="accent-bar"></div>
+</div>
+
+<script>
+const CONFIG = {
+    headline:    "一个会自我\n进化的 AI 框架\n到底强在哪？",
+    accentLine:  1,
+    subline:     "Hermes Agent vs OpenClaw：哪个更强？",
+    tag:         "2026 · Hermes Agent · OpenClaw",
+    bgImage:     "",
+    avatarImage: "",
+    footerItems: ["自动生成技能", "自我进化", "技能共享"],
+    watermark:   "",
+    theme:       "wenyan",
+};
+
+const THEMES = {
+    wenyan: {
+        accent: "#d4a843",
+        accent2: "#7d9c6c",
+        tagBg: "rgba(212,168,67,0.14)",
+        tagBorder: "rgba(212,168,67,0.42)",
+        tagColor: "#e8c86a",
+        glowColor: "rgba(212,168,67,0.14)",
+        glowColor2: "rgba(125,156,108,0.12)",
+        dotColor: "#d4a843",
+        bar: "linear-gradient(90deg, transparent 4%, rgba(192,57,43,0.85) 18%, #d4a843 42%, #c9a227 58%, #7d9c6c 78%, transparent 96%)",
+        textGlow: "0 0 52px rgba(212,168,67,0.30), 0 4px 20px rgba(0,0,0,0.78)",
+        accentGrad: "linear-gradient(135deg, #f0d060 0%, #d4a843 40%, #a67c28 70%, #7d9c6c 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 85% at 50% 28%, #2a2218 0%, #1a1208 38%, #100c06 100%), radial-gradient(ellipse 90% 60% at 80% 72%, rgba(180,120,40,0.08) 0%, transparent 55%), radial-gradient(ellipse 75% 50% at 15% 65%, rgba(125,156,108,0.07) 0%, transparent 50%)",
+    },
+};
+
+(function render() {
+    const t = THEMES[CONFIG.theme] || THEMES.wenyan;
+    document.body.className = CONFIG.theme === 'wenyan' ? 'theme-wenyan' : '';
+    const bgEl = document.getElementById('bg');
+    if (CONFIG.bgImage) {
+        bgEl.src = CONFIG.bgImage;
+        bgEl.onerror = () => { bgEl.style.display = 'none'; };
+    } else {
+        bgEl.style.display = 'none';
+    }
+    document.getElementById('bg-fallback').style.background =
+        t.fallbackBg + `, radial-gradient(ellipse 80% 60% at 50% 75%, ${t.glowColor} 0%, transparent 60%), radial-gradient(ellipse 60% 60% at 80% 20%, ${t.glowColor2} 0%, transparent 60%)`;
+    if (CONFIG.avatarImage) {
+        document.getElementById('avatar').src = CONFIG.avatarImage;
+        document.getElementById('avatar-fallback').style.display = 'none';
+    } else {
+        document.getElementById('avatar').style.display = 'none';
+    }
+    const tagEl = document.getElementById('tag');
+    tagEl.textContent = CONFIG.tag;
+    tagEl.style.cssText += `background:${t.tagBg}; border:1.5px solid ${t.tagBorder}; color:${t.tagColor};`;
+    const headEl = document.getElementById('headline');
+    const lines = CONFIG.headline.split('\n');
+    const totalChars = CONFIG.headline.replace(/\n/g, '').length;
+    const cls = totalChars <= 3 ? 'len3'
+              : totalChars <= 5 ? 'len5'
+              : totalChars <= 6 ? 'len6'
+              : totalChars <= 7 ? 'len7'
+              : totalChars <= 8 ? 'len8'
+              : totalChars <= 10 ? 'len10'
+              : totalChars <= 12 ? 'len12' : 'long';
+    headEl.classList.add(cls);
+    headEl.style.textShadow = t.textGlow;
+    headEl.innerHTML = lines.map((line, i) => {
+        if (CONFIG.accentLine === i + 1) {
+            return `<em style="background:${t.accentGrad}; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">${line}</em>`;
+        }
+        return `<span>${line}</span>`;
+    }).join('<br>');
+    document.getElementById('divider').style.background = t.accentGrad;
+    document.getElementById('subline').textContent = CONFIG.subline;
+    const footLeft = document.getElementById('footer-left');
+    (CONFIG.footerItems || []).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'foot-item';
+        div.innerHTML = `<div class="foot-dot" style="background:${t.dotColor};box-shadow:0 0 6px ${t.dotColor}"></div>${item}`;
+        footLeft.appendChild(div);
+    });
+    const wEl = document.getElementById('watermark');
+    if (CONFIG.watermark) {
+        wEl.textContent = CONFIG.watermark;
+        wEl.style.display = '';
+    } else {
+        wEl.style.display = 'none';
+    }
+    document.getElementById('accent-bar').style.background = t.bar;
+})();
+</script>
+</body>
+</html>

@@ -62,5 +62,5 @@ updated: "2026-04-04"
 
 # 开放问题
 
-- **脚本**：已提供 `skills/windows-c-drive-cleanup/survey-disk-hints.ps1`（仅只读统计；无批量删除）。若后续要加重试/超时/浅层扫描，可在 `tech_design.md` 扩展。
+- **脚本**：`survey-c-drive-report.ps1`（只读；五-A/五-B 交付）；`survey-disk-hints.ps1`（只读）；`invoke-c-drive-cleanup.ps1`（用户授权 + `-ChatAuthorizationNote` 后白名单清理；支持 `-DryRun`）。若后续要加重试/超时/浅层扫描，可在 `tech_design.md` 扩展。
 - **WSL**：`SKILL.md` 已设「高风险附录」；VHD 压缩等具体命令仍以微软文档为准，避免在 skill 内写死易过期路径。

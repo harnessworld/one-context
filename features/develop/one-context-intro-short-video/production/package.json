@@ -1,0 +1,11 @@
+{
+  "name": "one-context-intro-cover",
+  "private": true,
+  "description": "Playwright screenshot for cover.html → videos/cover.png",
+  "scripts": {
+    "cover": "node gen_cover.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

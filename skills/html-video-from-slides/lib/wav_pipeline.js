@@ -10,6 +10,12 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const { pathToFileURL } = require('url');
+const {
+  hexToAssWithAlpha,
+  hexToAssPrimaryColour,
+  DEFAULT_SUBTITLE_STYLE,
+} = require('./ass_colours');
+const { prepareSrtForBurn, suggestCharsPerLine } = require('./srt_postprocess');
 
 const FPS = 60;
 const VIDEO_BITRATE = '8M';
@@ -176,13 +182,53 @@ async function run(projectRoot, skillDir, options = {}) {
       throw new Error(`字幕文件不存在: ${srtAbs}`);
     }
     const subCfg = cfg.subtitle || {};
-    const fontSize = subCfg.fontSize || 24;
-    const marginV = subCfg.marginV || 18;
+    const fontSize = subCfg.fontSize ?? DEFAULT_SUBTITLE_STYLE.fontSize;
+    const marginV = subCfg.marginV ?? DEFAULT_SUBTITLE_STYLE.marginV;
     const fontName = subCfg.fontName || 'Microsoft YaHei';
     const bold = subCfg.bold !== false ? 1 : 0;
-    const charsPerLine = subCfg.charsPerLine || 28;
+    const srtReplacements = cfg.srtReplacements || [];
+    const wrapSubtitles = cfg.wrapSubtitles !== false;
+    const fontSizeEff = fontSize;
+    const primaryAss = hexToAssPrimaryColour(
+      subCfg.primaryColour ?? DEFAULT_SUBTITLE_STYLE.primaryColour,
+      subCfg.primaryAlpha ?? DEFAULT_SUBTITLE_STYLE.primaryAlpha
+    );
+    const outlineWidth =
+      typeof subCfg.outline === 'number' ? subCfg.outline : 2;
+    const borderStyle =
+      typeof subCfg.borderStyle === 'number' ? subCfg.borderStyle : 1;
+    const opaqueBar = borderStyle === 3;
+    const backAlpha =
+      typeof subCfg.backAlpha === 'number' ? subCfg.backAlpha : 255;
+    const backAss =
+      subCfg.backColour != null
+        ? hexToAssWithAlpha(subCfg.backColour, backAlpha)
+        : opaqueBar
+          ? '&HFF000000'
+          : '&H80000000';
+    const outlineCol = opaqueBar ? '&HFF000000' : '&H00000000';
+    const shadowVal = opaqueBar ? 0 : 1;
 
-    const srtFilter = srtAbs
+    let srtForBurn = srtAbs;
+    if (wrapSubtitles || srtReplacements.length > 0) {
+      const tmpSrt = path.join(TEMP_DIR, 'sub_for_burn.srt');
+      prepareSrtForBurn(srtAbs, tmpSrt, {
+        charsPerLine: subCfg.charsPerLine > 0 ? subCfg.charsPerLine : undefined,
+        fontSize: fontSizeEff,
+        replacements: srtReplacements,
+        wrap: wrapSubtitles,
+      });
+      srtForBurn = tmpSrt;
+      const effLine =
+        subCfg.charsPerLine > 0
+          ? subCfg.charsPerLine
+          : suggestCharsPerLine(fontSizeEff);
+      console.log(
+        `📝 字幕预处理: ${wrapSubtitles ? `每行≤${effLine} 字` : '不换行'}${srtReplacements.length ? `；${srtReplacements.length} 组替换` : ''}`
+      );
+    }
+
+    const srtFilter = srtForBurn
       .replace(/\\/g, '/')
       .replace(/^([A-Za-z]):/, (_, d) => `${d}\\:`);
 
@@ -192,11 +238,14 @@ async function run(projectRoot, skillDir, options = {}) {
       `-vf "subtitles='${srtFilter}':charenc=UTF-8:force_style='` +
       `FontName=${fontName},` +
       `FontSize=${fontSize},` +
-      `PrimaryColour=&H00FFFFFF,` +
-      `OutlineColour=&H00000000,` +
-      `BackColour=&H80000000,` +
-      `Bold=${bold},Outline=2,Shadow=1,` +
-      `Alignment=2,MarginV=${marginV}` +
+      `PrimaryColour=${primaryAss},` +
+      `OutlineColour=${outlineCol},` +
+      `BackColour=${backAss},` +
+      `Bold=${bold},` +
+      `BorderStyle=${borderStyle},` +
+      `Outline=${outlineWidth},` +
+      `Shadow=${shadowVal},` +
+      `Alignment=2,MarginV=${marginV},WrapStyle=0,MarginL=120,MarginR=120` +
       `'" ` +
       `-c:a copy "${OUTPUT}"`
     );
