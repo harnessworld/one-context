@@ -11,6 +11,7 @@ Step-by-step operating procedures for common tasks.
 | `multi-agent-parallel-development.md` | 多 agent 并行开发 — 任务拆分、分支隔离、合并策略 |
 | `prepare-test-suite-for-ai-agent.md` | 为 AI agent 准备测试套件 — 自主验证、质量标准、prompt 集成 |
 | `sre-release-process.md` | SRE 发布流程 — 发布前检查、灰度、回滚、验证 |
+| `use-microsoft-markitdown.md` | 使用 Microsoft MarkItDown：环境、安装、CLI、Python、MCP、Docker、排障 |
 
 ## Planned (not yet written)
 
