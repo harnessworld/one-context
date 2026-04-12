@@ -1,8 +1,9 @@
-# Sub-repositories: not committed; see meta/repos.yaml and scripts/sync_repos.py
-repos/research/*
-!repos/research/.gitkeep
-repos/develop/*
-!repos/develop/.gitkeep
+# Sub-repositories & optional external/ clones: not committed; see meta/repos.yaml and scripts/sync_repos.py
+repos/**
+!repos/**/.gitkeep
+
+external/*
+!external/README.md
 
 # Python
 .venv/
