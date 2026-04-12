@@ -1,7 +1,5 @@
 ﻿# Playbook: 新增伞仓级需求（`features/`）
 
-> 来源：one-context 内部原创
-
 适用于在 one-context 根目录记录跨仓库或产品级需求，而非仅在某一子仓库内写 issue 的场景。
 
 ## 前置阅读

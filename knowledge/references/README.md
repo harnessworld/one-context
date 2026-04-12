@@ -13,6 +13,7 @@ Curated indexes of external resources and analytical documents: articles, docume
 | `diagram-design-atoms.md` | 图表设计决策原子 — 从示例图提炼的可复用视觉设计策略 |
 | `karpathy-claudemd-principles.md` | Karpathy 编程原则 → CLAUDE.md — 本项目 agent 规则的溯源参考 |
 | `diagram-demos.md` | 绘图引擎示例集 — PlantUML / Mermaid / Graphviz 等多引擎图表模板 |
+| `anthropic-managed-agents.md` | Anthropic Managed Agents & Trustworthy Agents — Agent 脑手分离架构 + 信任框架（官方博客一手资料） |
 | `diagram-examples/` | 技术图范例（本地 PNG + prompt 文件 + README 索引） |
 
 ## What belongs here

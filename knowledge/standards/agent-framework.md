@@ -1,7 +1,5 @@
 # Agent Framework — 智能体框架规范
 
-> 来源：one-context 内部原创
-
 本文档是 one-context 智能体系统的**权威规范**。所有智能体定义、适配器生成逻辑、工作流约定均以此为准。
 
 ---
@@ -28,30 +26,30 @@
 version: "1"
 
 agents:
-  - id: <string>               # stable globally unique id (kebab-case)
-    name: <string>             # human-readable name
+  - id: <string>               # 稳定的全局唯一 id（kebab-case）
+    name: <string>             # 人类可读名称
     role: <enum>               # pm | architect | dev | qa | sre | knowledge-keeper
-    profile: <profile_id>      # references an id in meta/profiles.yaml
-    description: <string>      # brief description for onecxt agent list
+    profile: <profile_id>      # 引用 meta/profiles.yaml 中的 id
+    description: <string>      # 简短描述，供 onecxt agent list 展示
 
-    knowledge:                 # knowledge files/directories loaded into context (relative to one-context root)
+    knowledge:                 # 加载到上下文的知识文件/目录（相对 one-context 根）
       - knowledge/path/to/file.md
       - knowledge/path/to/dir/
 
-    owns:                      # artifacts this agent creates/maintains (glob, relative to root)
+    owns:                      # 此智能体负责创建/维护的产物（glob，相对根）
       - "features/**/spec.md"
 
-    instructions: |            # tool-neutral role description (injected into AI tools)
+    instructions: |            # Tool-neutral 角色说明（注入给 AI 工具）
       ...
 
-    # --- role=dev specific ---
+    # --- role=dev 专属 ---
     worktree:
-      branch_pattern: "feature/{feature_id}"        # {feature_id} placeholder
+      branch_pattern: "feature/{feature_id}"        # {feature_id} 占位符
       path_pattern: "repos/{repo_id}/.worktrees/{feature_id}"
-      base_branch: main                             # can be overridden per-repo
+      base_branch: main                             # 可在 repo 级覆盖
 
-    # --- role=sre specific ---
-    deploy_manifest: "deploy.yaml"  # file name to look for in each repo root
+    # --- role=sre 专属 ---
+    deploy_manifest: "deploy.yaml"  # 在每个 repo 根目录查找的文件名
 ```
 
 ### role 枚举说明
