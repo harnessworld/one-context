@@ -11,7 +11,20 @@ This file provides guidance for AI coding tools (Cursor, Claude Code, Codex, etc
 - **`knowledge/`**: canonical standards, playbooks, prompts; layout in `knowledge/README.md`
 - **`skills/`**: cross-tool executable helpers (e.g. HTML slides → MP4); see `skills/README.md`
 - **`features/`**: umbrella-level feature specs; see `features/README.md` and `features/INDEX.md`
+- **`external/`**: optional **local clones** of upstream reference repos (declared in `meta/repos.yaml`, not committed); see `external/README.md`
 - **`docs/`**: architecture docs and contributor templates
+
+## Skill routing (mandatory)
+
+When the user’s request matches a workflow below, **do not** answer with ad‑hoc system commands only. **Read the listed `SKILL.md` first**, then follow it (including running scripts from this repo).
+
+| User intent (examples) | Authoritative entry |
+|------------------------|---------------------|
+| Clean C: / free disk space / 清理 C 盘 / 腾空间 / Docker·npm·WSL eating C: | `skills/windows-c-drive-cleanup/SKILL.md` — phase 1: `survey-c-drive-report.ps1` (read-only); after user **explicitly approves** named cleanup switches: `invoke-c-drive-cleanup.ps1 -ChatAuthorizationNote '…' -DryRun` then without `-DryRun`; optional `survey-disk-hints.ps1` |
+| HTML slides + narration → MP4 / 生成视频 / 口播视频 | `skills/html-video-from-slides/SKILL.md` |
+| Selective merge to `main` (docs/framework/skills vs business assets) | `skills/merge-to-main/SKILL.md` |
+
+Until the matching `SKILL.md` has been read, treat generic snippets (e.g. only `Get-PSDrive`) as **insufficient** for those intents.
 
 ## Features / Umbrella Requirements
 
