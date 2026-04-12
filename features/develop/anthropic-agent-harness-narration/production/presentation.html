@@ -2,668 +2,724 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anthropic Agent Harness · 豆包AI播客</title>
+<title>Agent Harness — 从宠物到牲口</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+/* ══════════════════════════════════════════
+   BASE LAYER
+══════════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+body{overflow:hidden;background:#0b1a0d;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;color:#f0e8d0}
+#P{width:1920px;height:1080px;position:absolute;transform-origin:0 0;overflow:hidden}
+.s{position:absolute;inset:0;display:flex;opacity:0;pointer-events:none;z-index:2;padding:24px 36px}
+.s.on{opacity:1;pointer-events:auto}
+.col{display:flex;flex-direction:column}
+.row{display:flex;flex-direction:row}
+.f1{flex:1}
 
-body {
-    font-family: 'Microsoft YaHei UI', 'PingFang SC', 'Microsoft YaHei',
-                 'Source Han Sans CN', sans-serif;
-    background: #0b0914;
-    color: #e8e0f5;
-    overflow-x: hidden;
-}
+/* ── 字号规范（手机横屏安全线）
+   实际显示 = CSS值 × 缩放比（约0.73@1400px窗口）
+   t4 40px → 约29px 实际显示，已经是可接受最小值
+   ── */
+.t1{font-size:124px;font-weight:900;line-height:.95;letter-spacing:-5px}
+.t2{font-size:88px;font-weight:900;line-height:1.05;letter-spacing:-2px}
+.t3{font-size:60px;font-weight:800;line-height:1.2}
+.t4{font-size:40px;font-weight:500;line-height:1.6;color:var(--muted)}
+.t4 strong{color:var(--cream);font-weight:700}
+.t5{font-size:28px;color:var(--muted)}
+.ts{font-size:170px;font-weight:900;line-height:1}
 
-.slides {
-    width: 100vw;
-    height: 100vh;
-    overflow-y: scroll;
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
-}
+/* Whisper 隐藏锚文字 */
+.wa{position:absolute;left:-9999px;top:0;font-size:1px;opacity:0;pointer-events:none;width:1px;overflow:hidden;white-space:nowrap}
+#prog{position:fixed;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));z-index:100;transition:width .3s}
+#pn{position:fixed;bottom:18px;right:24px;font-size:16px;color:rgba(240,232,208,.15);z-index:100;font-weight:700;letter-spacing:2px}
 
-.slide {
-    width: 100vw;
-    height: 100vh;
-    min-height: 100vh;
-    scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 72px 60px 60px;
-    position: relative;
-    overflow: hidden;
+/* ══════════════════════════════════════════
+   ANIMAL THEME SKIN
+══════════════════════════════════════════ */
+:root{
+  --accent-a:#d4a843;--accent-al:#f0c960;
+  --accent-b:#4caf72;--accent-bd:#2d7a48;
+  --accent-c:#e07a3a;
+  --sky:#5bb3d0;--red-t:#e87070;
+  --cream:#f0e8d0;--muted:#7a9f7a;
+  --bg:#0b1a0d;--card:rgba(10,20,12,.9);--bdr:rgba(212,168,67,.2);
 }
-
-/* 紫色光晕 */
-.slide::before {
-    content: '';
-    position: absolute;
-    top: -300px; left: 50%;
-    transform: translateX(-50%);
-    width: 1000px; height: 1000px;
-    background: radial-gradient(ellipse at center,
-        rgba(168,85,247,0.12) 0%,
-        rgba(34,211,238,0.04) 50%,
-        transparent 70%);
-    pointer-events: none;
-    z-index: 0;
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 65% at 10% 8%,rgba(76,175,114,.08) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 55% at 90% 92%,rgba(212,168,67,.06) 0%,transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='69'%3E%3Cpath d='M40 2L78 22v26L40 68 2 48V22Z' fill='none' stroke='rgba(212,168,67,.04)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:100% 100%,100% 100%,80px 69px;
 }
-.slide > * { position: relative; z-index: 1; }
-
-/* 进度条 */
-#progress {
-    position: fixed; top: 0; left: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #a855f7, #22d3ee);
-    z-index: 999;
-    transition: width 0.3s ease;
-}
-
-/* 右侧导航点 */
-#dots {
-    position: fixed; right: 20px; top: 50%;
-    transform: translateY(-50%);
-    display: flex; flex-direction: column; gap: 8px;
-    z-index: 999;
-}
-.dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: rgba(168,85,247,0.3);
-    cursor: pointer; transition: all 0.3s;
-}
-.dot.active {
-    background: #a855f7;
-    box-shadow: 0 0 8px rgba(168,85,247,0.8);
-    transform: scale(1.6);
-}
-
-/* ─── 共用组件 ─── */
-.tag {
-    font-size: 13px; font-weight: 700;
-    letter-spacing: 6px;
-    color: #22d3ee;
-    text-transform: uppercase; opacity: 0.9;
-}
-.title {
-    font-size: clamp(44px, 6vw, 72px); font-weight: 900;
-    line-height: 1.15; color: #e8e0f5;
-    text-align: center; letter-spacing: 1px;
-    text-shadow: 0 0 40px rgba(168,85,247,0.2);
-    margin-top: 16px;
-}
-.body-text {
-    font-size: clamp(24px, 3vw, 36px); line-height: 1.7;
-    color: rgba(232,224,245,0.65);
-    text-align: center; margin-top: 24px; white-space: pre-line;
-}
-.divider {
-    width: 60px; height: 3px;
-    background: linear-gradient(90deg, #a855f7, #22d3ee);
-    border-radius: 2px; margin: 20px auto;
-}
-.top-bar {
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, #a855f7 30%, #22d3ee 70%, transparent);
-}
-.timestamp {
-    position: absolute; bottom: 24px; right: 36px;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 11px; color: rgba(153,136,184,0.4); letter-spacing: 1px;
-}
-.page-num {
-    position: absolute; bottom: 24px; left: 36px;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 11px; color: rgba(153,136,184,0.4); letter-spacing: 1px;
-}
-
-/* ─── 封面 ─── */
-.cover-bg {
-    position: absolute; inset: 0;
-    background:
-        radial-gradient(ellipse 80% 60% at 50% 30%,
-            rgba(168,85,247,0.18) 0%,
-            rgba(34,211,238,0.07) 40%,
-            transparent 70%),
-        radial-gradient(ellipse 60% 50% at 80% 80%,
-            rgba(168,85,247,0.10) 0%,
-            transparent 60%),
-        #0b0914;
-}
-.cover-glow {
-    position: absolute;
-    width: 700px; height: 700px;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -60%);
-    background: radial-gradient(ellipse, rgba(168,85,247,0.20) 0%, transparent 70%);
-    pointer-events: none;
-}
-.cover-eyebrow {
-    font-size: 14px; letter-spacing: 8px;
-    color: rgba(34,211,238,0.7); font-weight: 500;
-    text-transform: uppercase; margin-bottom: 32px;
-}
-.cover-headline {
-    font-size: clamp(72px, 10vw, 120px); font-weight: 900;
-    line-height: 1.0; text-align: center;
-    color: #e8e0f5; letter-spacing: 4px;
-    text-shadow: 0 0 60px rgba(168,85,247,0.35);
-    white-space: pre-line;
-}
-.cover-sub {
-    font-size: clamp(18px, 2.2vw, 26px);
-    color: rgba(232,224,245,0.55);
-    text-align: center; margin-top: 28px; line-height: 1.8; white-space: pre-line;
-}
-.cover-bottom {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
-    background: linear-gradient(90deg, #a855f7, #c084fc, #22d3ee);
-}
-
-/* ─── 章节分隔页 ─── */
-.section-icon { width: 80px; height: 80px; margin-bottom: 24px; }
-.section-icon svg { width: 80px; height: 80px; }
-.section-title {
-    font-size: clamp(52px, 7vw, 88px); font-weight: 900;
-    color: #e8e0f5; text-align: center; letter-spacing: 2px;
-    text-shadow: 0 0 40px rgba(168,85,247,0.25);
-    margin-top: 16px;
-}
-
-/* ─── 图标网格（四宫格）─── */
-.grid-2x2 {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 16px; width: 100%; margin-top: 28px;
-}
-.grid-card {
-    padding: 28px 20px; border-radius: 20px;
-    background: rgba(244,114,182,0.06);
-    border: 1px solid rgba(244,114,182,0.18);
-    text-align: center;
-}
-.grid-card-icon { width: 52px; height: 52px; margin: 0 auto 14px; }
-.grid-card-icon svg { width: 52px; height: 52px; }
-.grid-card h3 {
-    font-size: clamp(22px, 2.5vw, 30px); font-weight: 700; margin-bottom: 8px;
-}
-.grid-card p {
-    font-size: clamp(15px, 1.5vw, 18px);
-    color: rgba(232,224,245,0.55); line-height: 1.5; white-space: pre-line;
-}
-
-/* ─── 大居中 ─── */
-.big-center { text-align: center; margin-top: 24px; }
-.big-icon { width: 96px; height: 96px; margin: 0 auto 20px; }
-.big-icon svg { width: 96px; height: 96px; }
-.big-sub {
-    font-size: clamp(18px, 2vw, 24px);
-    color: rgba(192,132,252,0.7); letter-spacing: 4px; margin-top: 16px;
-}
-
-/* ─── 三层架构 ─── */
-.layers { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
-.layer-row {
-    display: grid; grid-template-columns: 160px 1fr;
-    align-items: center; gap: 20px; padding: 22px 28px; border-radius: 18px; border-left: 5px solid;
-}
-.layer-name { font-size: clamp(20px, 2.2vw, 26px); font-weight: 800; letter-spacing: 2px; }
-.layer-role { font-size: 13px; opacity: 0.65; letter-spacing: 2px; margin-top: 2px; }
-.layer-desc { font-size: clamp(16px, 1.6vw, 20px); color: rgba(232,224,245,0.82); line-height: 1.6; white-space: pre-line; }
-
-/* ─── 对比中心 ─── */
-.contrast-center { text-align: center; margin-top: 24px; width: 100%; }
-.contrast-row { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; }
-.contrast-box { padding: 28px 48px; border-radius: 20px; font-size: clamp(32px, 4vw, 52px); font-weight: 900; border: 2px solid; }
-.contrast-arrow-icon { width: 48px; height: 48px; }
-.contrast-arrow-icon svg { width: 48px; height: 48px; }
-
-/* ─── 数字卡片 ─── */
-.numbers-row { display: flex; gap: 24px; justify-content: center; margin-top: 32px; width: 100%; }
-.num-card { flex: 1; max-width: 280px; padding: 32px 24px; border-radius: 24px; text-align: center; border: 2px solid; }
-.num-value { font-family: 'Consolas', 'Courier New', monospace; font-size: clamp(52px, 6vw, 80px); font-weight: 900; line-height: 1; }
-.num-label { font-size: clamp(14px, 1.5vw, 18px); opacity: 0.65; margin-top: 10px; letter-spacing: 1px; }
-
-/* ─── 流程 ─── */
-.flow { display: flex; flex-direction: column; gap: 14px; width: 100%; margin-top: 28px; }
-.flow-step { display: flex; align-items: center; gap: 20px; padding: 22px 28px; border-radius: 16px; background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.15); }
-.flow-emoji { font-size: 36px; flex-shrink: 0; width: 56px; text-align: center; }
-.flow-step-title { font-size: clamp(20px, 2.2vw, 26px); font-weight: 700; color: #a855f7; margin-bottom: 4px; }
-.flow-step-desc { font-size: clamp(15px, 1.5vw, 18px); color: rgba(232,224,245,0.65); }
-
-/* ─── 左右对比 ─── */
-.contrast-layout { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: start; margin-top: 28px; width: 100%; }
-.contrast-col { padding: 24px 20px; border-radius: 20px; border: 1px solid; }
-.contrast-col-title { font-size: clamp(16px, 1.8vw, 22px); font-weight: 700; margin-bottom: 14px; }
-.contrast-item { font-size: clamp(15px, 1.5vw, 18px); padding: 6px 0; opacity: 0.82; }
-.contrast-arrow-col { display: flex; align-items: center; padding-top: 40px; }
-
-/* ─── 图标列表 ─── */
-.icon-list { width: 100%; margin-top: 24px; display: flex; flex-direction: column; gap: 14px; }
-.icon-list-item { display: flex; align-items: center; gap: 20px; padding: 20px 24px; border-radius: 16px; background: rgba(232,224,245,0.03); border: 1px solid rgba(232,224,245,0.08); }
-.icon-list-icon { width: 44px; height: 44px; flex-shrink: 0; }
-.icon-list-icon svg { width: 44px; height: 44px; }
-.icon-list-text h4 { font-size: clamp(18px, 2vw, 24px); font-weight: 700; color: #e8e0f5; margin-bottom: 4px; }
-.icon-list-text p { font-size: clamp(14px, 1.4vw, 17px); color: rgba(232,224,245,0.55); white-space: pre-line; }
-
-/* ─── 痛点 ─── */
-.pain-items { width: 100%; margin-top: 28px; display: flex; flex-direction: column; gap: 14px; }
-.pain-item { display: flex; align-items: center; gap: 20px; padding: 22px 28px; border-radius: 16px; background: rgba(244,114,182,0.07); border: 1px solid rgba(244,114,182,0.20); }
-.pain-item-icon { font-size: 32px; flex-shrink: 0; width: 44px; text-align: center; }
-.pain-item-text { font-size: clamp(22px, 2.8vw, 34px); font-weight: 700; color: #f472b6; }
-
-/* ─── 水平时间线 ─── */
-.timeline-horiz { width: 100%; margin-top: 32px; display: flex; flex-direction: column; gap: 20px; }
-.timeline-step { display: flex; align-items: center; gap: 24px; }
-.timeline-num { min-width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #22d3ee); display: flex; align-items: center; justify-content: center; font-family: 'Consolas', 'Courier New', monospace; font-size: 22px; font-weight: 700; flex-shrink: 0; color: #0b0914; }
-.timeline-content { flex: 1; padding: 20px 24px; border-radius: 16px; background: rgba(168,85,247,0.06); border: 1px solid rgba(168,85,247,0.15); }
-.timeline-title { font-size: clamp(18px, 2vw, 24px); font-weight: 700; color: #a855f7; margin-bottom: 6px; }
-.timeline-desc { font-size: clamp(15px, 1.5vw, 18px); color: rgba(232,224,245,0.65); }
-
-/* ─── 资源 ─── */
-.resources-grid { display: flex; flex-direction: column; gap: 16px; width: 100%; margin-top: 28px; }
-.resource-row { display: grid; grid-template-columns: 180px 1fr; align-items: center; gap: 20px; padding: 24px 28px; border-radius: 18px; border-left: 5px solid; }
-.resource-name { font-size: clamp(22px, 2.5vw, 32px); font-weight: 800; letter-spacing: 2px; }
-.resource-desc { font-size: clamp(16px, 1.6vw, 20px); color: rgba(232,224,245,0.82); line-height: 1.6; white-space: pre-line; }
-
-/* ─── 比喻 ─── */
-.metaphor-badges { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
-.metaphor-badge { padding: 12px 28px; border-radius: 100px; font-size: clamp(16px, 1.8vw, 22px); font-weight: 700; border: 2px solid rgba(34,211,238,0.4); color: #22d3ee; background: rgba(34,211,238,0.06); }
-
-/* ─── 结尾 ─── */
-.ending-emphasis { font-size: clamp(28px, 3.5vw, 48px); font-weight: 700; color: #e8e0f5; text-align: center; margin-top: 20px; }
-.ending-sub { font-size: clamp(22px, 2.5vw, 30px); font-weight: 700; color: #a855f7; text-align: center; margin-top: 20px; padding: 20px 40px; border: 2px solid rgba(168,85,247,0.4); border-radius: 16px; background: rgba(168,85,247,0.08); }
-
-/* ─── 最终页 ─── */
-.end-title {
-    font-size: clamp(64px, 9vw, 120px); font-weight: 900;
-    text-align: center; line-height: 1.1;
-    background: linear-gradient(135deg, #a855f7, #22d3ee);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    background-clip: text; letter-spacing: 4px; white-space: pre-line;
-    filter: drop-shadow(0 0 40px rgba(168,85,247,0.4));
-}
+/* Cards */
+.g{background:var(--card);border:1px solid var(--bdr);border-radius:18px;backdrop-filter:blur(10px)}
+.g-hi{border-color:rgba(212,168,67,.55)}
+.g-gn{border-color:rgba(76,175,114,.45);background:rgba(8,22,12,.94)}
+.g-or{border-color:rgba(224,122,58,.45);background:rgba(22,10,6,.94)}
+.g-rd{border-color:rgba(232,112,112,.4);background:rgba(22,8,8,.94)}
+.g-sk{border-color:rgba(91,179,208,.4);background:rgba(6,14,22,.94)}
+.g-pu{border-color:rgba(139,92,246,.4);background:rgba(14,8,26,.94)}
+/* Badges */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 20px;border-radius:100px;font-size:20px;font-weight:800;letter-spacing:1px}
+.ch-g{background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.4);color:var(--accent-a)}
+.ch-gn{background:rgba(76,175,114,.1);border:1px solid rgba(76,175,114,.4);color:var(--accent-b)}
+.ch-o{background:rgba(224,122,58,.1);border:1px solid rgba(224,122,58,.4);color:var(--accent-c)}
+.ch-r{background:rgba(232,112,112,.1);border:1px solid rgba(232,112,112,.4);color:var(--red-t)}
+.ch-sk{background:rgba(91,179,208,.1);border:1px solid rgba(91,179,208,.4);color:var(--sky)}
+.ch-pu{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.4);color:#c4b5fd}
+/* Gradient text */
+.gt{background:linear-gradient(135deg,var(--accent-a) 0%,var(--accent-al) 45%,var(--accent-b) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 20px rgba(212,168,67,.2))}
+.gto{background:linear-gradient(135deg,#f0a040,var(--accent-c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gtg{background:linear-gradient(135deg,var(--accent-b),#90e0b0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gtb{background:linear-gradient(135deg,var(--sky),#90d8f0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gtr{background:linear-gradient(135deg,#f08080,var(--red-t));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gtp{background:linear-gradient(135deg,#818cf8,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* Decorative */
+.orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(70px)}
+.animal-wm{position:absolute;font-size:420px;line-height:1;pointer-events:none;z-index:1;user-select:none;filter:saturate(0) brightness(.4)}
+.accent{height:3px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b),transparent);border-radius:2px;margin-bottom:16px}
+.sep{height:1px;background:linear-gradient(90deg,transparent,rgba(212,168,67,.22),transparent);margin:12px 0}
 </style>
 </head>
 <body>
-<div id="progress"></div>
-<div id="dots"><div class="dot" onclick="document.getElementById('s0').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s1').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s2').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s3').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s4').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s5').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s6').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s7').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s8').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s9').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s10').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s11').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s12').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s13').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s14').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s15').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s16').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s17').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s18').scrollIntoView()"></div>
-<div class="dot" onclick="document.getElementById('s19').scrollIntoView()"></div></div>
-<div class="slides">
-<div class="slide" id="s0">
-  <div class="top-bar"></div>
-  <div class="cover-bg"></div>
-  <div class="cover-glow"></div>
-  <div class="cover-eyebrow">豆包AI播客</div>
-  <div class="cover-headline">Agent
-是宠物
-还是牲口？</div>
-  <div class="cover-sub">Anthropic 把 AI 从精心呵护的宠物
-变成了随时可替换的打工仔</div>
-  <div class="cover-bottom"></div>
-  <div class="page-num">1/20</div><div class="timestamp">0s–7s</div>
-</div>
-<div class="slide" id="s1">
-  <div class="top-bar"></div>
-  <div class="tag">PART I</div>
-  <div class="section-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L8 20v24l24 12 24-12V20L32 8z" fill="#a855f7" opacity=".8"/><path d="M32 20L14 30v18l18 9 18-9V30L32 20z" fill="#a855f7" opacity=".5"/></svg></div>
-  <div class="section-title">架构的转变</div>
-  <div class="divider"></div>
-  <div class="page-num">2/20</div><div class="timestamp">7s–15s</div>
-</div>
-<div class="slide" id="s2">
-  <div class="top-bar"></div>
-  <div class="tag">PART I · 旧架构</div><div class="title">单体的困境</div>
-  <div class="grid-2x2"><div class="grid-card">
-  <div class="grid-card-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L4 56h56L32 8z" fill="#f472b6" opacity=".85"/><rect x="29" y="22" width="6" height="18" rx="3" fill="#0b0914" opacity=".85"/><circle cx="32" cy="46" r="3" fill="#0b0914" opacity=".85"/></svg></div>
-  <h3 style="color:#f472b6">容器挂了</h3>
-  <p>所有状态全失
-任务重来</p>
-</div><div class="grid-card">
-  <div class="grid-card-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L4 56h56L32 8z" fill="#f472b6" opacity=".85"/><rect x="29" y="22" width="6" height="18" rx="3" fill="#0b0914" opacity=".85"/><circle cx="32" cy="46" r="3" fill="#0b0914" opacity=".85"/></svg></div>
-  <h3 style="color:#f472b6">调试困难</h3>
-  <p>排查问题
-牵一发而动全身</p>
-</div><div class="grid-card">
-  <div class="grid-card-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L4 56h56L32 8z" fill="#f472b6" opacity=".85"/><rect x="29" y="22" width="6" height="18" rx="3" fill="#0b0914" opacity=".85"/><circle cx="32" cy="46" r="3" fill="#0b0914" opacity=".85"/></svg></div>
-  <h3 style="color:#f472b6">扩展受限</h3>
-  <p>模型升级
-牵动 Harness 全局</p>
-</div><div class="grid-card">
-  <div class="grid-card-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M32 8L4 56h56L32 8z" fill="#f472b6" opacity=".85"/><rect x="29" y="22" width="6" height="18" rx="3" fill="#0b0914" opacity=".85"/><circle cx="32" cy="46" r="3" fill="#0b0914" opacity=".85"/></svg></div>
-  <h3 style="color:#f472b6">安全集中</h3>
-  <p>风险都集中在
-一个容器内</p>
-</div></div>
-  <div class="page-num">3/20</div><div class="timestamp">15s–36s</div>
-</div>
-<div class="slide" id="s3">
-  <div class="top-bar"></div>
-  <div class="tag">PART I · 核心问题</div><div class="title">这个架构
-就像养了一只宠物</div>
-  <div class="big-center">
-    <div class="big-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><ellipse cx="32" cy="44" rx="12" ry="9" fill="#c084fc" opacity=".8"/><circle cx="18" cy="30" r="6" fill="#c084fc" opacity=".7"/><circle cx="46" cy="30" r="6" fill="#c084fc" opacity=".7"/><circle cx="24" cy="20" r="5" fill="#c084fc" opacity=".65"/><circle cx="40" cy="20" r="5" fill="#c084fc" opacity=".65"/></svg></div>
-    <div class="big-sub">精心呵护 · 不可替换 · 全局耦合</div>
-  </div>
-  <div class="page-num">4/20</div><div class="timestamp">36s–51s</div>
-</div>
-<div class="slide" id="s4">
-  <div class="top-bar"></div>
-  <div class="tag">PART I · 新架构</div><div class="title">三层分离</div><div class="body-text" style="margin-top:8px;font-size:clamp(16px,1.8vw,22px);opacity:0.45;color:#9988b8">Session · Harness · Sandbox</div>
-  <div class="layers"><div class="layer-row" style="background:rgba(168,85,247,0.1);border-color:rgba(168,85,247,0.5)">
-  <div>
-    <div class="layer-name" style="color:#a855f7">Session</div>
-    <div class="layer-role" style="color:#a855f7">日志层</div>
-  </div>
-  <div class="layer-desc">只追加事件记录
-不关业务逻辑
-支持 replay</div>
-</div><div class="layer-row" style="background:rgba(34,211,238,0.1);border-color:rgba(34,211,238,0.5)">
-  <div>
-    <div class="layer-name" style="color:#22d3ee">Harness</div>
-    <div class="layer-role" style="color:#22d3ee">大脑层</div>
-  </div>
-  <div class="layer-desc">无状态
-负责任务调度
-和工具选择</div>
-</div><div class="layer-row" style="background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.5)">
-  <div>
-    <div class="layer-name" style="color:#34d399">Sandbox</div>
-    <div class="layer-role" style="color:#34d399">执行层</div>
-  </div>
-  <div class="layer-desc">安全隔离
-执行命令
-返回结果</div>
-</div></div>
-  <div class="page-num">5/20</div><div class="timestamp">51s–67s</div>
-</div>
-<div class="slide" id="s5">
-  <div class="top-bar"></div>
-  <div class="tag">PART I · 优势</div><div class="title">各层职责清晰</div>
-  <div class="icon-list"><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><circle cx="32" cy="32" r="26" fill="#a855f7" opacity=".15" stroke="#a855f7" stroke-width="3"/><path d="M20 32l9 9 15-18" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-  <div class="icon-list-text"><h4>Session</h4><p>可随时 replay
-任意步骤</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><circle cx="32" cy="32" r="26" fill="#a855f7" opacity=".15" stroke="#a855f7" stroke-width="3"/><path d="M20 32l9 9 15-18" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-  <div class="icon-list-text"><h4>Harness</h4><p>多模型适配
-无状态扩容</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><circle cx="32" cy="32" r="26" fill="#a855f7" opacity=".15" stroke="#a855f7" stroke-width="3"/><path d="M20 32l9 9 15-18" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-  <div class="icon-list-text"><h4>Sandbox</h4><p>沙箱隔离
-错误不外溢</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><circle cx="32" cy="32" r="26" fill="#a855f7" opacity=".15" stroke="#a855f7" stroke-width="3"/><path d="M20 32l9 9 15-18" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-  <div class="icon-list-text"><h4>接口通信</h4><p>层间稳定接口
-系统灵活可靠</p></div>
-</div></div>
-  <div class="page-num">6/20</div><div class="timestamp">67s–82s</div>
-</div>
-<div class="slide" id="s6">
-  <div class="top-bar"></div>
-  <div class="tag">PART I · 小结</div><div class="title">从宠物变打工仔</div>
-  <div class="contrast-center">
-    <div class="contrast-row">
-      <div class="contrast-box" style="color:#f472b6;border-color:rgba(244,114,182,0.6);background:rgba(244,114,182,0.1)">🐾 宠物</div>
-      <div class="contrast-arrow-icon"><svg viewBox="0 0 64 64" width="32" height="32" fill="none"><path d="M12 32h40M40 20l12 12-12 12" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="contrast-box" style="color:#22d3ee;border-color:rgba(34,211,238,0.6);background:rgba(34,211,238,0.1)">⚙️ 打工仔</div>
+<div id="prog" style="width:0%"></div>
+<div id="P">
+
+<!-- ══ S1 · COVER ══ -->
+<div class="s on" id="s0">
+<div class="wa">欢迎收听豆包AI播客节目 Hello大家好 今天聊的话题是Agent是宠物还是牲口 Anthropic把Agent从精心呵护的宠物变成了可以随时替换的牲口 架构上的变革 应用到基础设施的发展过程</div>
+<div class="orb" style="width:720px;height:720px;background:radial-gradient(circle,rgba(76,175,114,.09),transparent 70%);top:-220px;left:-160px"></div>
+<div class="orb" style="width:560px;height:560px;background:radial-gradient(circle,rgba(212,168,67,.07),transparent 70%);bottom:-120px;right:-120px"></div>
+<div class="animal-wm" style="right:-40px;bottom:-90px;opacity:.02;color:var(--accent-a)">🐄</div>
+<!-- ✅ 三段全在文档流，space-between 撑满画布，无 position:absolute 内容区 -->
+<div class="col f1" style="justify-content:space-between;z-index:3">
+
+  <!-- 上段：进化条（IN FLOW） -->
+  <div style="display:flex;justify-content:center">
+    <div class="g" style="display:flex;align-items:center;gap:24px;padding:16px 44px;border-radius:60px">
+      <div style="text-align:center"><div style="font-size:60px">🐱</div><div style="font-size:22px;color:var(--muted);margin-top:4px;letter-spacing:1px">宠物</div></div>
+      <div style="color:rgba(212,168,67,.4);font-size:28px;letter-spacing:-5px;font-weight:900">──────▶</div>
+      <div style="text-align:center"><div style="font-size:60px">🐕</div><div style="font-size:22px;color:var(--muted);margin-top:4px;letter-spacing:1px">循环</div></div>
+      <div style="color:rgba(212,168,67,.4);font-size:28px;letter-spacing:-5px;font-weight:900">──────▶</div>
+      <div style="text-align:center"><div style="font-size:60px">🐄</div><div style="font-size:22px;color:var(--muted);margin-top:4px;letter-spacing:1px">牲口</div></div>
+      <div style="color:rgba(212,168,67,.4);font-size:28px;letter-spacing:-5px;font-weight:900">──────▶</div>
+      <div style="text-align:center"><div style="font-size:60px">🦅</div><div style="font-size:22px;color:var(--muted);margin-top:4px;letter-spacing:1px">平台</div></div>
     </div>
   </div>
-  <div class="page-num">7/20</div><div class="timestamp">82s–96s</div>
-</div>
-<div class="slide" id="s7">
-  <div class="top-bar"></div>
-  <div class="tag">PART II</div>
-  <div class="section-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24v24c0 8.84-5.37 16-12 16s-12-7.16-12-16V8z" fill="#a855f7" opacity=".9"/><path d="M20 16H8v8c0 6 4 10 12 10M44 16h12v8c0 6-4 10-12 10" stroke="#a855f7" stroke-width="3" fill="none" opacity=".8"/><rect x="28" y="48" width="8" height="8" fill="#a855f7" opacity=".9"/><rect x="20" y="54" width="24" height="4" rx="2" fill="#a855f7" opacity=".8"/></svg></div>
-  <div class="section-title">变革带来的成效</div>
-  <div class="divider"></div>
-  <div class="page-num">8/20</div><div class="timestamp">96s–113s</div>
-</div>
-<div class="slide" id="s8">
-  <div class="top-bar"></div>
-  <div class="tag">PART II · 延迟</div><div class="title">推理提前启动</div>
-  <div class="body-text">脑手分离之后
-Agent 不需要等沙箱完全起来
-才开始干活</div>
-  <div class="numbers-row"><div class="num-card" style="border-color:rgba(34,211,238,0.5);background:rgba(34,211,238,0.06)">
-  <div class="num-value" style="background:linear-gradient(135deg,#a855f7,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">↓60%</div>
-  <div class="num-label">P50 · 首 Token 延迟</div>
-</div><div class="num-card" style="border-color:rgba(34,211,238,0.5);background:rgba(34,211,238,0.06)">
-  <div class="num-value" style="background:linear-gradient(135deg,#a855f7,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">↓90%+</div>
-  <div class="num-label">P95 · 尾部延迟</div>
-</div></div>
-  <div class="page-num">9/20</div><div class="timestamp">113s–148s</div>
-</div>
-<div class="slide" id="s9">
-  <div class="top-bar"></div>
-  <div class="tag">PART II · 弹性</div><div class="title">故障自动恢复</div>
-  <div class="flow"><div class="flow-step">
-  <div class="flow-emoji">📦</div>
-  <div>
-    <div class="flow-step-title">会话状态</div>
-    <div class="flow-step-desc">持久化存储</div>
-  </div>
-</div><div class="flow-step">
-  <div class="flow-emoji">🔄</div>
-  <div>
-    <div class="flow-step-title">沙箱挂了</div>
-    <div class="flow-step-desc">自动重启</div>
-  </div>
-</div><div class="flow-step">
-  <div class="flow-emoji">⚡</div>
-  <div>
-    <div class="flow-step-title">新实例启动</div>
-    <div class="flow-step-desc">无缝恢复</div>
-  </div>
-</div><div class="flow-step">
-  <div class="flow-emoji">✅</div>
-  <div>
-    <div class="flow-step-title">业务层面</div>
-    <div class="flow-step-desc">零感知</div>
-  </div>
-</div></div>
-  <div class="page-num">10/20</div><div class="timestamp">148s–183s</div>
-</div>
-<div class="slide" id="s10">
-  <div class="top-bar"></div>
-  <div class="tag">PART II · 安全</div><div class="title">安全边界重塑</div>
-  <div class="contrast-layout">
-    <div class="contrast-col" style="background:rgba(244,114,182,0.06);border-color:rgba(244,114,182,0.20)">
-      <div class="contrast-col-title" style="color:#f472b6">旧：凭证藏沙箱</div>
-      <div class="contrast-item">• 风险集中</div><div class="contrast-item">• 被攻破即泄露</div>
-    </div>
-    <div class="contrast-arrow-col">
-      <div style="width:48px;height:48px;"><svg viewBox="0 0 64 64" width="32" height="32" fill="none"><path d="M12 32h40M40 20l12 12-12 12" stroke="#a855f7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-    </div>
-    <div class="contrast-col" style="background:rgba(168,85,247,0.06);border-color:rgba(168,85,247,0.20)">
-      <div class="contrast-col-title" style="color:#a855f7">新：凭证移出沙箱</div>
-      <div class="contrast-item">✓ 加密挂载</div><div class="contrast-item">✓ 代理访问</div><div class="contrast-item">✓ 隔离保护</div>
+
+  <!-- 中段：Hero 主内容（flex:1，justify-content:center 在内部垂直居中） -->
+  <div class="col f1" style="align-items:center;text-align:center;justify-content:center;gap:16px">
+    <div class="chip ch-g" style="font-size:24px;padding:10px 32px">🦁 ANTHROPIC AGENT ARCHITECTURE</div>
+    <div style="font-size:190px;font-weight:900;line-height:.92;letter-spacing:-7px;background:linear-gradient(135deg,var(--accent-a) 0%,var(--accent-al) 45%,var(--accent-b) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Agent Harness</div>
+    <div style="font-size:72px;font-weight:800;color:var(--cream);letter-spacing:2px">从宠物到牲口的架构哲学</div>
+    <div style="font-size:40px;color:var(--muted);max-width:1300px;line-height:1.5">
+      单靠更强的模型不够 — 套上 <strong style="color:var(--accent-a)">循环 + 工具 + 安全边界</strong> 的编排层才是生产级 Agent
     </div>
   </div>
-  <div class="page-num">11/20</div><div class="timestamp">183s–222s</div>
-</div>
-<div class="slide" id="s11">
-  <div class="top-bar"></div>
-  <div class="tag">PART II · 可观测</div><div class="title">中间件 + 多Agent</div>
-  <div class="icon-list"><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><rect x="8" y="12" width="48" height="14" rx="4" fill="#a855f7" opacity=".7"/><rect x="8" y="32" width="48" height="14" rx="4" fill="#a855f7" opacity=".85"/><rect x="8" y="52" width="48" height="14" rx="4" fill="#a855f7" opacity=".6"/><circle cx="18" cy="19" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="39" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="59" r="3" fill="#0b0914" opacity=".7"/></svg></div>
-  <div class="icon-list-text"><h4>中间件</h4><p>做观测和流控</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><rect x="8" y="12" width="48" height="14" rx="4" fill="#a855f7" opacity=".7"/><rect x="8" y="32" width="48" height="14" rx="4" fill="#a855f7" opacity=".85"/><rect x="8" y="52" width="48" height="14" rx="4" fill="#a855f7" opacity=".6"/><circle cx="18" cy="19" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="39" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="59" r="3" fill="#0b0914" opacity=".7"/></svg></div>
-  <div class="icon-list-text"><h4>多 Agent 协作</h4><p>标准接口支撑</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><rect x="8" y="12" width="48" height="14" rx="4" fill="#a855f7" opacity=".7"/><rect x="8" y="32" width="48" height="14" rx="4" fill="#a855f7" opacity=".85"/><rect x="8" y="52" width="48" height="14" rx="4" fill="#a855f7" opacity=".6"/><circle cx="18" cy="19" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="39" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="59" r="3" fill="#0b0914" opacity=".7"/></svg></div>
-  <div class="icon-list-text"><h4>管理平台</h4><p>权限控制和操作审计</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><rect x="8" y="12" width="48" height="14" rx="4" fill="#a855f7" opacity=".7"/><rect x="8" y="32" width="48" height="14" rx="4" fill="#a855f7" opacity=".85"/><rect x="8" y="52" width="48" height="14" rx="4" fill="#a855f7" opacity=".6"/><circle cx="18" cy="19" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="39" r="3" fill="#0b0914" opacity=".7"/><circle cx="18" cy="59" r="3" fill="#0b0914" opacity=".7"/></svg></div>
-  <div class="icon-list-text"><h4>可维护</h4><p>组件可替换</p></div>
-</div></div>
-  <div class="page-num">12/20</div><div class="timestamp">222s–261s</div>
-</div>
-<div class="slide" id="s12">
-  <div class="top-bar"></div>
-  <div class="tag">PART III</div>
-  <div class="section-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M8 24V8h16M56 24V8H40M8 40v16h16M56 40v16H40" stroke="#a855f7" stroke-width="4" stroke-linecap="round" opacity=".8"/></svg></div>
-  <div class="section-title">发展方向</div>
-  <div class="divider"></div>
-  <div class="page-num">13/20</div><div class="timestamp">261s–333s</div>
-</div>
-<div class="slide" id="s13">
-  <div class="top-bar"></div>
-  <div class="tag">PART III · 过去</div><div class="title">各自造轮子</div>
-  <div class="pain-items"><div class="pain-item">
-  <div class="pain-item-icon">✗</div>
-  <div class="pain-item-text">自己搞编排</div>
-</div><div class="pain-item">
-  <div class="pain-item-icon">✗</div>
-  <div class="pain-item-text">自己搞沙箱</div>
-</div><div class="pain-item">
-  <div class="pain-item-icon">✗</div>
-  <div class="pain-item-text">自己搞会话管理</div>
-</div></div>
-  <div class="body-text" style="margin-top:20px;font-size:clamp(18px,2vw,24px);color:rgba(244,114,182,0.7)">什么都要自己来，非常费劲</div>
-  <div class="page-num">14/20</div><div class="timestamp">333s–370s</div>
-</div>
-<div class="slide" id="s14">
-  <div class="top-bar"></div>
-  <div class="tag">PART III · 现在</div><div class="title">标准化与平台化</div>
-  <div class="timeline-horiz"><div class="timeline-step">
-  <div class="timeline-num">1</div>
-  <div class="timeline-content">
-    <div class="timeline-title">初创公司</div>
-    <div class="timeline-desc">标准 Agent 框架</div>
+
+  <!-- 下段：Pill 卡 + 来源（IN FLOW） -->
+  <div class="col" style="gap:12px">
+    <div class="row" style="gap:14px">
+      <div class="g g-gn" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div style="font-size:50px">💾</div>
+        <div style="font-size:36px;font-weight:800;color:var(--accent-b)">Session 持久层</div>
+        <div style="font-size:28px;color:var(--muted)">只追加事件日志</div>
+      </div>
+      <div class="g g-hi" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div style="font-size:50px">🧠</div>
+        <div style="font-size:36px;font-weight:800;color:var(--accent-a)">Harness 编排层</div>
+        <div style="font-size:28px;color:var(--muted)">无状态大脑</div>
+      </div>
+      <div class="g g-sk" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div style="font-size:50px">🤲</div>
+        <div style="font-size:36px;font-weight:800;color:var(--sky)">Sandbox 执行层</div>
+        <div style="font-size:28px;color:var(--muted)">完全隔离执行</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:24px;color:rgba(240,232,208,.22);letter-spacing:4px">基于 Anthropic Engineering Blog · 2024</div>
   </div>
-</div><div class="timeline-step">
-  <div class="timeline-num">2</div>
-  <div class="timeline-content">
-    <div class="timeline-title">云厂商</div>
-    <div class="timeline-desc">Managed Agent 服务</div>
+
+</div>
+</div>
+
+<!-- ══ S2 · 旧架构 ══ -->
+<div class="s" id="s1">
+<div class="wa">旧架构 之前把所有东西塞到一个容器里面 推理循环 执行环境 会话状态全部塞进去 开发简单但是生产灾难性耦合 容器挂了所有状态都没了 排差困难 扩展困难 安全风险集中 牵一发而动全身</div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(192,57,43,.07),transparent 70%);top:-100px;right:-80px"></div>
+<div class="animal-wm" style="left:-60px;top:-80px;opacity:.02;color:var(--red-t)">🐱</div>
+<div class="row f1" style="gap:28px;align-items:stretch">
+  <!-- 左侧 -->
+  <div class="col" style="flex:0 0 44%;justify-content:center;gap:0">
+    <div class="chip ch-r" style="margin-bottom:14px">⚠️ OLD · 旧架构</div>
+    <div class="accent" style="width:150px;background:linear-gradient(90deg,var(--red-t),rgba(232,112,112,.3),transparent)"></div>
+    <div class="t2" style="margin-bottom:16px">所有鸡蛋<br><span class="gtr">一个篮子</span></div>
+    <div class="t4" style="margin-bottom:22px">推理循环 + 执行环境 + 会话状态<br><strong>全部塞进一个容器</strong></div>
+    <div class="col g g-rd" style="padding:26px 28px;gap:0">
+      <div style="font-size:24px;font-weight:800;color:var(--red-t);margin-bottom:14px">❌ 四大痛点</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div><div style="font-size:32px;font-weight:800;color:var(--cream)">🔗 强耦合</div><div style="font-size:30px;color:var(--muted);margin-top:4px">牵一发而动全身</div></div>
+        <div><div style="font-size:32px;font-weight:800;color:var(--cream)">💥 单点崩溃</div><div style="font-size:30px;color:var(--muted);margin-top:4px">容器挂 = 全没了</div></div>
+        <div><div style="font-size:32px;font-weight:800;color:var(--cream)">🔍 难排查</div><div style="font-size:30px;color:var(--muted);margin-top:4px">日志全混一起</div></div>
+        <div><div style="font-size:32px;font-weight:800;color:var(--cream)">🔒 难升级</div><div style="font-size:30px;color:var(--muted);margin-top:4px">模型迭代极痛苦</div></div>
+      </div>
+    </div>
+    <div style="margin-top:18px;font-size:34px;font-weight:800;color:var(--red-t);text-align:center">🐦 容器挂 = 任务全崩 ❌</div>
   </div>
-</div><div class="timeline-step">
-  <div class="timeline-num">3</div>
-  <div class="timeline-content">
-    <div class="timeline-title">主流趋势</div>
-    <div class="timeline-desc">运行时 + 平台托管出去</div>
+  <!-- 右侧 SVG -->
+  <div class="f1 col" style="justify-content:center;align-items:center">
+    <svg viewBox="0 0 660 680" style="width:100%;max-height:960px">
+      <defs>
+        <filter id="gr"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <marker id="ar-r" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8" fill="rgba(232,112,112,.7)"/></marker>
+      </defs>
+      <rect x="28" y="28" width="604" height="618" rx="24" fill="rgba(192,57,43,.04)" stroke="rgba(232,112,112,.35)" stroke-width="2.5" stroke-dasharray="12 6"/>
+      <text x="330" y="72" text-anchor="middle" fill="rgba(232,112,112,.5)" font-size="20" font-weight="800" letter-spacing="2">📦 ONE CONTAINER — 致命耦合</text>
+      <rect x="68" y="88" width="524" height="146" rx="14" fill="rgba(139,92,246,.08)" stroke="rgba(139,92,246,.35)" stroke-width="2"/>
+      <text x="330" y="148" text-anchor="middle" fill="#c4b5fd" font-size="30" font-weight="800">🧠 推理循环 Loop</text>
+      <text x="330" y="190" text-anchor="middle" fill="rgba(120,100,180,.65)" font-size="21">提示词 · 工具选择 · 状态判断 · 决策</text>
+      <path d="M330 234 L330 268" stroke="rgba(232,112,112,.6)" stroke-width="3" marker-end="url(#ar-r)"/>
+      <path d="M190 216 Q130 332 190 414" stroke="rgba(232,112,112,.2)" stroke-width="2" fill="none" stroke-dasharray="5 3"/>
+      <path d="M470 216 Q530 332 470 414" stroke="rgba(232,112,112,.2)" stroke-width="2" fill="none" stroke-dasharray="5 3"/>
+      <rect x="68" y="276" width="524" height="146" rx="14" fill="rgba(56,189,248,.06)" stroke="rgba(56,189,248,.3)" stroke-width="2"/>
+      <text x="330" y="336" text-anchor="middle" fill="#7dd3fc" font-size="30" font-weight="800">⚡ 执行环境 Exec</text>
+      <text x="330" y="378" text-anchor="middle" fill="rgba(60,120,160,.65)" font-size="21">命令执行 · 沙箱 · 代码运行 · 工具调用</text>
+      <path d="M330 422 L330 456" stroke="rgba(232,112,112,.6)" stroke-width="3" marker-end="url(#ar-r)"/>
+      <rect x="68" y="464" width="524" height="146" rx="14" fill="rgba(16,185,129,.06)" stroke="rgba(16,185,129,.28)" stroke-width="2"/>
+      <text x="330" y="524" text-anchor="middle" fill="#6ee7b7" font-size="30" font-weight="800">💾 会话状态 State</text>
+      <text x="330" y="566" text-anchor="middle" fill="rgba(30,100,70,.65)" font-size="21">上下文 · 历史 · 凭证 · 进度</text>
+      <text x="592" y="170" fill="rgba(232,112,112,.6)" font-size="32" filter="url(#gr)">⚠</text>
+      <text x="592" y="358" fill="rgba(232,112,112,.6)" font-size="32" filter="url(#gr)">⚠</text>
+      <text x="592" y="546" fill="rgba(232,112,112,.6)" font-size="32" filter="url(#gr)">⚠</text>
+      <text x="330" y="656" text-anchor="middle" fill="rgba(232,112,112,.4)" font-size="20" font-weight="700">🐱 任何一层出错 → 整个容器崩溃 → 状态全失</text>
+    </svg>
   </div>
-</div></div>
-  <div class="page-num">15/20</div><div class="timestamp">370s–410s</div>
-</div>
-<div class="slide" id="s15">
-  <div class="top-bar"></div>
-  <div class="tag">PART III · 平台化</div><div class="title">一切皆为资源</div><div class="body-text" style="margin-top:8px;font-size:clamp(14px,1.5vw,18px);opacity:0.45;color:#9988b8">Cloud Managed Agents</div>
-  <div class="resources-grid"><div class="resource-row" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.4)">
-  <div class="resource-name" style="color:#a855f7">Agent</div>
-  <div class="resource-desc">可组合的
-能力单元</div>
-</div><div class="resource-row" style="background:rgba(34,211,238,0.08);border-color:rgba(34,211,238,0.4)">
-  <div class="resource-name" style="color:#22d3ee">Environment</div>
-  <div class="resource-desc">可替换的
-执行环境</div>
-</div><div class="resource-row" style="background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.4)">
-  <div class="resource-name" style="color:#34d399">Session</div>
-  <div class="resource-desc">可管理的
-会话状态</div>
-</div></div>
-  <div class="page-num">16/20</div><div class="timestamp">410s–450s</div>
-</div>
-<div class="slide" id="s16">
-  <div class="top-bar"></div>
-  <div class="tag">PART III · 未来</div><div class="title">模块化分层架构</div>
-  <div class="body-text">模型只是大脑
-通过稳定接口连接各种
-可替换的执行环境和工具</div>
-  <div class="metaphor-badges"><div class="metaphor-badge">模型 = CPU</div><div class="metaphor-badge">工具 = 外设</div><div class="metaphor-badge">平台 = 操作系统</div></div>
-  <div style="margin-top:28px;font-size:clamp(28px,3vw,40px);color:#22d3ee;font-weight:900">🤖 AI Native OS</div>
-  <div class="page-num">17/20</div><div class="timestamp">450s–485s</div>
-</div>
-<div class="slide" id="s17">
-  <div class="top-bar"></div>
-  <div class="tag">PART III · 趋势</div><div class="title">多Agent协作</div>
-  <div class="icon-list"><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24a8 8 0 0 1 0 16H20V8z" fill="#a855f7" opacity=".85"/><path d="M8 24h16v24H8V24z" fill="#a855f7" opacity=".7"/><path d="M24 48h16a8 8 0 0 1 0 16H24V48z" fill="#a855f7" opacity=".7"/></svg></div>
-  <div class="icon-list-text"><h4>行业标准</h4><p>接口统一 · 生态繁荣</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24a8 8 0 0 1 0 16H20V8z" fill="#a855f7" opacity=".85"/><path d="M8 24h16v24H8V24z" fill="#a855f7" opacity=".7"/><path d="M24 48h16a8 8 0 0 1 0 16H24V48z" fill="#a855f7" opacity=".7"/></svg></div>
-  <div class="icon-list-text"><h4>工具生态</h4><p>专业分工 · 各司其职</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24a8 8 0 0 1 0 16H20V8z" fill="#a855f7" opacity=".85"/><path d="M8 24h16v24H8V24z" fill="#a855f7" opacity=".7"/><path d="M24 48h16a8 8 0 0 1 0 16H24V48z" fill="#a855f7" opacity=".7"/></svg></div>
-  <div class="icon-list-text"><h4>创新重心</h4><p>向应用层迁移</p></div>
-</div><div class="icon-list-item">
-  <div class="icon-list-icon"><svg viewBox="0 0 64 64" width="48" height="48" fill="none"><path d="M20 8h24a8 8 0 0 1 0 16H20V8z" fill="#a855f7" opacity=".85"/><path d="M8 24h16v24H8V24z" fill="#a855f7" opacity=".7"/><path d="M24 48h16a8 8 0 0 1 0 16H24V48z" fill="#a855f7" opacity=".7"/></svg></div>
-  <div class="icon-list-text"><h4>未来展望</h4><p>AI Native 新范式</p></div>
-</div></div>
-  <div class="page-num">18/20</div><div class="timestamp">485s–520s</div>
-</div>
-<div class="slide" id="s18">
-  <div class="top-bar"></div>
-  <div class="tag">尾声</div>
-  <div class="ending-sub">架构升级的必然结果</div>
-  <div class="ending-emphasis">Agent 从宠物变成打工仔
-是 AI 行业逐渐走向成熟的标志</div>
-  <div class="page-num">19/20</div><div class="timestamp">520s–545s</div>
-</div>
-<div class="slide" id="s19">
-  <div class="top-bar"></div>
-  <div class="cover-bg"></div>
-  <div class="cover-glow"></div>
-  <div class="end-title">感谢收听
-下期再见</div>
-  <div class="cover-bottom"></div>
-  <div class="page-num">20/20</div><div class="timestamp">545s–565s</div>
 </div>
 </div>
+
+<!-- ══ S3 · 新架构：三层解耦 ══ -->
+<div class="s" id="s2">
+<div class="wa">新架构三层解耦 Session层只追加事件日志可以随时replay Harness层无状态大脑任务调度工具选择 Sandbox完全隔离执行命令 每一层都可以独立升级或者扩展 通过稳定接口通信 整个系统变得灵活可靠</div>
+<div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(76,175,114,.08),transparent 70%);bottom:-150px;left:-100px"></div>
+<div class="animal-wm" style="right:-40px;bottom:-90px;opacity:.02;color:var(--accent-b)">🐄</div>
+<div class="row f1" style="gap:28px;align-items:stretch">
+  <div class="col" style="flex:0 0 40%;justify-content:center">
+    <div class="chip ch-gn" style="margin-bottom:14px">🌿 NEW · 三层解耦</div>
+    <div class="accent" style="width:140px"></div>
+    <div class="t2" style="margin-bottom:14px;line-height:1.05">
+      <span class="gtg">Session</span><br>
+      <span class="gt">Harness</span><br>
+      <span class="gtb">Sandbox</span>
+    </div>
+    <div class="t4" style="margin-bottom:22px">每一层<strong>独立升级</strong>、<strong>独立扩展</strong>、<strong>独立容错</strong><br>通过稳定接口通信，灵活且可靠 🐄</div>
+    <div class="g g-gn" style="padding:22px 26px">
+      <div style="font-size:24px;font-weight:800;color:var(--accent-b);margin-bottom:12px">✅ 牧场式管理</div>
+      <div class="t4" style="font-size:34px">
+        • Session 挂 → 换一个读日志恢复<br>
+        • Harness 挂 → 新实例无缝接管<br>
+        • Sandbox 挂 → 自动重启不扩散
+      </div>
+    </div>
+    <div style="margin-top:18px;font-size:32px;font-weight:800;color:var(--accent-b);text-align:center">🐄 像服务器一样管理 ✅</div>
+  </div>
+  <div class="f1 col" style="justify-content:center;align-items:center">
+    <svg viewBox="0 0 700 700" style="width:100%;max-height:960px">
+      <defs>
+        <marker id="ar-g" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8" fill="rgba(76,175,114,.7)"/></marker>
+        <marker id="ar-b" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8" fill="rgba(91,179,208,.7)"/></marker>
+        <linearGradient id="lg-gn" x1="0" x2="1"><stop offset="0%" stop-color="rgba(76,175,114,.15)"/><stop offset="100%" stop-color="rgba(76,175,114,.04)"/></linearGradient>
+        <linearGradient id="lg-pu" x1="0" x2="1"><stop offset="0%" stop-color="rgba(139,92,246,.15)"/><stop offset="100%" stop-color="rgba(139,92,246,.04)"/></linearGradient>
+        <linearGradient id="lg-bl" x1="0" x2="1"><stop offset="0%" stop-color="rgba(91,179,208,.15)"/><stop offset="100%" stop-color="rgba(91,179,208,.04)"/></linearGradient>
+      </defs>
+      <rect x="40" y="16" width="620" height="162" rx="20" fill="url(#lg-gn)" stroke="rgba(76,175,114,.5)" stroke-width="2.5"/>
+      <text x="350" y="76" text-anchor="middle" fill="#6ee7b7" font-size="34" font-weight="900">💾 Session 持久层</text>
+      <text x="350" y="116" text-anchor="middle" fill="rgba(80,160,100,.7)" font-size="23">只追加事件日志 · 任意时刻 replay · 不关心业务逻辑</text>
+      <text x="350" y="152" text-anchor="middle" fill="rgba(80,160,100,.45)" font-size="19">🌾 粮仓般的持久记忆 — 数据永不丢</text>
+      <path d="M350 178 L350 228" stroke="rgba(76,175,114,.4)" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#ar-g)"/>
+      <rect x="262" y="192" width="176" height="30" rx="8" fill="rgba(76,175,114,.08)" stroke="rgba(76,175,114,.2)" stroke-width="1"/>
+      <text x="350" y="212" text-anchor="middle" fill="rgba(76,175,114,.6)" font-size="16" font-weight="700">稳定接口 · 事件记录</text>
+      <rect x="40" y="236" width="620" height="162" rx="20" fill="url(#lg-pu)" stroke="rgba(139,92,246,.5)" stroke-width="2.5"/>
+      <text x="350" y="296" text-anchor="middle" fill="#c4b5fd" font-size="34" font-weight="900">🧠 Harness 编排层</text>
+      <text x="350" y="336" text-anchor="middle" fill="rgba(120,90,200,.7)" font-size="23">无状态大脑 · 任务调度 · 工具选择 · 多模型适配</text>
+      <text x="350" y="372" text-anchor="middle" fill="rgba(120,90,200,.45)" font-size="19">🧑‍🌾 牧场主的决策大脑 — 可随时替换</text>
+      <path d="M350 398 L350 448" stroke="rgba(91,179,208,.4)" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#ar-b)"/>
+      <rect x="262" y="412" width="176" height="30" rx="8" fill="rgba(91,179,208,.08)" stroke="rgba(91,179,208,.2)" stroke-width="1"/>
+      <text x="350" y="432" text-anchor="middle" fill="rgba(91,179,208,.6)" font-size="16" font-weight="700">稳定接口 · 指令下发</text>
+      <rect x="40" y="456" width="620" height="162" rx="20" fill="url(#lg-bl)" stroke="rgba(91,179,208,.5)" stroke-width="2.5"/>
+      <text x="350" y="516" text-anchor="middle" fill="#7dd3fc" font-size="34" font-weight="900">🤲 Sandbox 执行层</text>
+      <text x="350" y="556" text-anchor="middle" fill="rgba(60,120,160,.7)" font-size="23">完全隔离 · 命令执行 · 错误不扩散 · 可随时重启</text>
+      <text x="350" y="592" text-anchor="middle" fill="rgba(60,120,160,.45)" font-size="19">🐄 牲口在围栏里干活 — 出了问题不影响整体</text>
+      <path d="M40 456 Q-50 336 40 236" fill="none" stroke="rgba(76,175,114,.18)" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="2" y="348" fill="rgba(76,175,114,.4)" font-size="13" transform="rotate(-90 2 348)">🔄 replay</text>
+      <text x="350" y="660" text-anchor="middle" fill="rgba(212,168,67,.32)" font-size="19" font-weight="700">各层独立升级 · 各层独立扩展 · 各层独立容错</text>
+    </svg>
+  </div>
+</div>
+</div>
+
+<!-- ══ S4 · 架构优势（全屏 2×2，无 header）══
+     card title 52px · card body 38px · emoji 84px
+     每格约 913×505px 内容区 857×449px 充分填满 -->
+<div class="s" id="s3">
+<div class="wa">新架构优势 像服务器一样管理 容器挂了不影响会话 Session层可以持久化 恢复重试很容易 不会整个系统崩溃 安全边界很清晰 敏感信息在下层 执行环境完全隔离 多Agent协作很容易 Harness无状态随时扩容</div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(212,168,67,.07),transparent 70%);top:-80px;right:-80px"></div>
+<div class="animal-wm" style="right:-40px;top:-90px;opacity:.02;color:var(--accent-a)">🐕</div>
+<!-- 全屏 2×2 grid，flex:1 吃满全部高度 -->
+<!-- ✅ 每格 col space-between：内容顶置，底部 tag 撑满 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;flex:1;width:100%">
+  <div class="g g-gn" style="padding:32px 36px;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="display:flex;align-items:flex-start;gap:24px">
+      <div style="font-size:96px;line-height:1;flex-shrink:0">🐑</div>
+      <div>
+        <div style="font-size:56px;font-weight:900;color:var(--accent-b);margin-bottom:12px">弹性恢复</div>
+        <div style="font-size:40px;color:var(--muted);line-height:1.65">容器挂了<strong style="color:var(--cream)">不影响会话</strong><br>新实例读取 Session 日志<br>无缝继续执行，用户完全无感<br><strong style="color:var(--cream)">状态不在进程里 · 永不丢失</strong></div>
+      </div>
+    </div>
+    <div style="background:linear-gradient(90deg,rgba(76,175,114,.18),rgba(76,175,114,.04));border-radius:10px;padding:12px 20px;text-align:center;font-size:30px;color:var(--accent-b);font-weight:700">🌱 Session 外置的核心价值</div>
+  </div>
+  <div class="g g-hi" style="padding:32px 36px;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="display:flex;align-items:flex-start;gap:24px">
+      <div style="font-size:96px;line-height:1;flex-shrink:0">🔧</div>
+      <div>
+        <div style="font-size:56px;font-weight:900;color:var(--accent-a);margin-bottom:12px">独立升级</div>
+        <div style="font-size:40px;color:var(--muted);line-height:1.65">每一层<strong style="color:var(--cream)">单独迭代</strong><br>换模型不动 Sandbox<br>升级 Harness 不影响 Session<br><strong style="color:var(--cream)">三层完全解耦 · 互不锁定</strong></div>
+      </div>
+    </div>
+    <div style="background:linear-gradient(90deg,rgba(212,168,67,.18),rgba(212,168,67,.04));border-radius:10px;padding:12px 20px;text-align:center;font-size:30px;color:var(--accent-a);font-weight:700">🔧 改一层，不动其余两层</div>
+  </div>
+  <div class="g g-sk" style="padding:32px 36px;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="display:flex;align-items:flex-start;gap:24px">
+      <div style="font-size:96px;line-height:1;flex-shrink:0">🛡️</div>
+      <div>
+        <div style="font-size:56px;font-weight:900;color:var(--sky);margin-bottom:12px">安全边界</div>
+        <div style="font-size:40px;color:var(--muted);line-height:1.65">凭证在沙箱外<strong style="color:var(--cream)">加密存储</strong><br>执行环境与主系统完全隔离<br>攻破沙箱也拿不到核心信息<br><strong style="color:var(--cream)">狼进了院子 · 拿不到粮仓钥匙</strong></div>
+      </div>
+    </div>
+    <div style="background:linear-gradient(90deg,rgba(91,179,208,.18),rgba(91,179,208,.04));border-radius:10px;padding:12px 20px;text-align:center;font-size:30px;color:var(--sky);font-weight:700">🛡️ 漏洞影响半径大幅缩小</div>
+  </div>
+  <div class="g g-or" style="padding:32px 36px;display:flex;flex-direction:column;justify-content:space-between">
+    <div style="display:flex;align-items:flex-start;gap:24px">
+      <div style="font-size:96px;line-height:1;flex-shrink:0">🦅</div>
+      <div>
+        <div style="font-size:56px;font-weight:900;color:var(--accent-c);margin-bottom:12px">弹性扩缩</div>
+        <div style="font-size:40px;color:var(--muted);line-height:1.65">Harness 无状态<strong style="color:var(--cream)">随时扩容</strong><br>Sandbox 按需启停<br>冷启动 + 突增流量都无惧<br><strong style="color:var(--cream)">从单机到千并发 · 无缝升级</strong></div>
+      </div>
+    </div>
+    <div style="background:linear-gradient(90deg,rgba(230,150,60,.18),rgba(230,150,60,.04));border-radius:10px;padding:12px 20px;text-align:center;font-size:30px;color:var(--accent-c);font-weight:700">🦅 无状态 = 无限弹性</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ S5 · 延迟飞跃（数字 170px，slim header）══ -->
+<div class="s" id="s4">
+<div class="wa">脑手分离之后 Agent不需要等沙箱完全起来才开始干活 推理可以提前启动 首Token延迟P50下降了60% P95下降了90%以上 性能提升很夸张 Harness本身无状态可以随时扩容缩容 Sandbox也可以按需provision</div>
+<div class="orb" style="width:700px;height:700px;background:radial-gradient(circle,rgba(212,168,67,.09),transparent 70%);top:-200px;right:-150px"></div>
+<div class="animal-wm" style="right:-60px;bottom:-100px;opacity:.02;color:var(--accent-c)">🦅</div>
+<div class="col f1" style="gap:14px">
+  <!-- Slim header: badge + 标题 + 说明 同行或两行但压缩 -->
+  <div class="row g" style="align-items:center;gap:20px;padding:16px 28px;flex-shrink:0">
+    <div class="chip ch-g" style="flex-shrink:0;margin-bottom:0">🐎 性能飞跃</div>
+    <div class="t2 gt" style="font-size:64px;line-height:1;flex:1">脑手分离 · 延迟暴降</div>
+    <div style="font-size:30px;color:var(--muted);text-align:right;flex-shrink:0;line-height:1.4">Brain 无状态<br>= 提前推理</div>
+  </div>
+  <!-- 两大数字卡，flex:1 吃满剩余高度 -->
+  <div class="row f1" style="gap:14px">
+    <div class="g g-hi" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 40px;gap:10px">
+      <div style="font-size:28px;color:var(--muted);letter-spacing:2px;font-weight:700">首 TOKEN 延迟 · P50 中位数</div>
+      <div class="ts gt">60%</div>
+      <div style="font-size:38px;color:var(--muted);font-weight:700">↓ 大幅下降</div>
+      <div class="sep" style="width:80%"></div>
+      <div style="font-size:30px;color:var(--muted);text-align:center;line-height:1.55">Harness 推理提前启动<br>拿到 Sandbox 后直接执行</div>
+      <div class="sep" style="width:80%"></div>
+      <div style="display:flex;gap:32px;align-items:center">
+        <div style="text-align:center"><div style="font-size:42px">🐎</div><div style="font-size:24px;color:var(--accent-b);margin-top:6px;font-weight:700">Harness<br>随时扩容</div></div>
+        <div style="text-align:center"><div style="font-size:42px">🐂</div><div style="font-size:24px;color:var(--accent-b);margin-top:6px;font-weight:700">Sandbox<br>按需启停</div></div>
+        <div style="text-align:center"><div style="font-size:42px">🦅</div><div style="font-size:24px;color:var(--accent-b);margin-top:6px;font-weight:700">突增流量<br>快速响应</div></div>
+      </div>
+    </div>
+    <div class="g g-hi" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 40px;gap:10px">
+      <div style="font-size:28px;color:var(--muted);letter-spacing:2px;font-weight:700">首 TOKEN 延迟 · P95 尾部</div>
+      <div style="font-size:170px;font-weight:900;line-height:1;background:linear-gradient(135deg,var(--accent-al),var(--accent-c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">90%+</div>
+      <div style="font-size:38px;color:var(--muted);font-weight:700">↓ 几乎消除长尾</div>
+      <div class="sep" style="width:80%"></div>
+      <div style="font-size:30px;color:var(--muted);text-align:center;line-height:1.55">尾部抖动基本消失<br>用户体验质的飞跃</div>
+      <div class="sep" style="width:80%"></div>
+      <div style="font-size:34px;font-weight:800;color:var(--accent-a);text-align:center;line-height:1.4">脑手分离之前<br>必须等 Sandbox 就绪才能推理</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ S6 · 容错机制 ══ -->
+<div class="s" id="s5">
+<div class="wa">容错机制 任何一个Harness或者Sandbox挂了都不会影响整个系统 会话状态保存在外面 新实例起来之后可以无缝恢复现场继续执行 业务层面几乎感受不到故障 沙箱挂了会被自动重启 错误被隔离在沙箱里不会扩散 整体架构弹性非常强 很难出现整个系统级崩溃</div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(91,179,208,.07),transparent 70%);top:-80px;left:-80px"></div>
+<div class="animal-wm" style="right:-40px;top:-90px;opacity:.02;color:var(--sky)">🐑</div>
+<div class="row f1" style="gap:28px;align-items:stretch">
+  <div class="f1 col" style="justify-content:center">
+    <div style="text-align:center;margin-bottom:14px">
+      <div class="chip ch-sk" style="margin-bottom:10px">容错 🐑</div>
+      <div class="t2 gtb" style="text-align:center;line-height:1.05">挂了也<br>不怕</div>
+    </div>
+    <svg viewBox="0 0 560 460" style="width:100%;flex:1;max-height:580px">
+      <defs><marker id="ar-s" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8" fill="rgba(91,179,208,.7)"/></marker></defs>
+      <rect x="40" y="14" width="480" height="96" rx="15" fill="rgba(232,112,112,.06)" stroke="rgba(232,112,112,.3)" stroke-width="2"/>
+      <text x="280" y="58" text-anchor="middle" fill="#e87070" font-size="26" font-weight="800">🧠 Harness 实例挂了</text>
+      <text x="280" y="92" text-anchor="middle" fill="rgba(180,80,80,.6)" font-size="19">会话状态 → 已安全保存在 Session 层</text>
+      <path d="M280 110 L280 150" stroke="rgba(91,179,208,.5)" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#ar-s)"/>
+      <text x="310" y="138" fill="rgba(91,179,208,.5)" font-size="16">自动发现</text>
+      <rect x="40" y="158" width="480" height="96" rx="15" fill="rgba(76,175,114,.06)" stroke="rgba(76,175,114,.35)" stroke-width="2"/>
+      <text x="280" y="204" text-anchor="middle" fill="#6ee7b7" font-size="26" font-weight="800">🆕 新 Harness 实例启动</text>
+      <text x="280" y="236" text-anchor="middle" fill="rgba(60,160,90,.6)" font-size="19">读取 Session 事件日志 → 恢复现场</text>
+      <path d="M280 254 L280 294" stroke="rgba(76,175,114,.5)" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#ar-s)"/>
+      <text x="310" y="282" fill="rgba(76,175,114,.5)" font-size="16">无缝继续</text>
+      <rect x="40" y="302" width="480" height="96" rx="15" fill="rgba(212,168,67,.06)" stroke="rgba(212,168,67,.3)" stroke-width="2"/>
+      <text x="280" y="348" text-anchor="middle" fill="#d4a843" font-size="26" font-weight="800">✅ 用户无感知 · 任务继续</text>
+      <text x="280" y="380" text-anchor="middle" fill="rgba(180,140,40,.6)" font-size="19">业务连续性保持 · 零数据丢失</text>
+      <rect x="80" y="416" width="400" height="36" rx="12" fill="rgba(91,179,208,.06)" stroke="rgba(91,179,208,.22)" stroke-width="1.5"/>
+      <text x="280" y="439" text-anchor="middle" fill="rgba(91,179,208,.75)" font-size="21" font-weight="800">🤲 Sandbox 挂了 → 自动重启 · 错误不扩散</text>
+    </svg>
+  </div>
+  <div class="col" style="flex:0 0 46%;gap:14px;justify-content:center">
+    <div class="g" style="padding:26px 28px">
+      <div style="font-size:26px;font-weight:800;color:var(--sky);margin-bottom:16px">🛡️ 核心容错机制</div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:flex-start;gap:16px">
+          <div style="font-size:40px;flex-shrink:0">📦</div>
+          <div><div style="font-size:36px;font-weight:800;color:var(--cream);margin-bottom:4px">状态外置</div><div style="font-size:32px;color:var(--muted);line-height:1.5">会话保存在外部，不随实例消亡</div></div>
+        </div>
+        <div class="sep"></div>
+        <div style="display:flex;align-items:flex-start;gap:16px">
+          <div style="font-size:40px;flex-shrink:0">🔄</div>
+          <div><div style="font-size:36px;font-weight:800;color:var(--cream);margin-bottom:4px">即时恢复</div><div style="font-size:32px;color:var(--muted);line-height:1.5">新实例读日志，继续执行，用户无感</div></div>
+        </div>
+        <div class="sep"></div>
+        <div style="display:flex;align-items:flex-start;gap:16px">
+          <div style="font-size:40px;flex-shrink:0">🏖️</div>
+          <div><div style="font-size:36px;font-weight:800;color:var(--cream);margin-bottom:4px">错误围栏</div><div style="font-size:32px;color:var(--muted);line-height:1.5">Sandbox 的故障不能扩散到外层</div></div>
+        </div>
+        <div class="sep"></div>
+        <div style="display:flex;align-items:flex-start;gap:16px">
+          <div style="font-size:40px;flex-shrink:0">🌊</div>
+          <div><div style="font-size:36px;font-weight:800;color:var(--cream);margin-bottom:4px">系统弹性</div><div style="font-size:32px;color:var(--muted);line-height:1.5">几乎不可能出现整个系统级崩溃</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="g g-gn" style="padding:18px 24px;text-align:center">
+      <div style="font-size:32px;font-weight:900;line-height:1.45">🐑 牧场里丢一头羊<br><span style="color:var(--accent-b)">整个牧场照常运转</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ S7 · 安全 Part 1：凭证隔离 + 沙箱隔离（拆分出来，2 大卡）══ -->
+<div class="s" id="s6">
+<div class="wa">安全性 新的架构把敏感凭证挪到沙箱之外 通过加密挂载和代理访问 即使沙箱被攻破也拿不到核心信息 执行环境完全隔离 凭证分离 安全漏洞影响范围大大缩小</div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(232,112,112,.06),transparent 70%);top:-80px;right:-80px"></div>
+<div class="animal-wm" style="left:-60px;bottom:-90px;opacity:.02;color:var(--red-t)">🐺</div>
+<!-- slim header -->
+<div class="col f1" style="gap:14px">
+  <div class="row g" style="align-items:center;gap:20px;padding:14px 26px;flex-shrink:0">
+    <div class="chip ch-r" style="margin-bottom:0;flex-shrink:0">🐺 PART 3 · 安全</div>
+    <div class="t2 gtr" style="font-size:60px;line-height:1;flex:1">没有安全边界的 Agent 是生产灾难</div>
+    <div style="font-size:26px;color:var(--red-t);font-weight:700;flex-shrink:0">1 / 2</div>
+  </div>
+  <!-- ✅ 大卡：space-between + 无 br 空行，5行实质内容 + separator + sub-note -->
+  <div class="row f1" style="gap:14px">
+    <div class="g g-rd f1" style="padding:40px 44px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="font-size:100px;margin-bottom:18px;line-height:1">🔐</div>
+        <div style="font-size:60px;font-weight:900;color:var(--red-t);margin-bottom:16px">凭证隔离</div>
+        <div style="font-size:40px;color:var(--muted);line-height:1.65">
+          敏感信息<strong style="color:var(--cream)">挪到沙箱外</strong><br>
+          加密挂载 + 代理访问模式<br>
+          执行层无法直接接触密钥<br>
+          Agent 只看到代理接口，不看源凭证<br>
+          沙箱被攻破 · 凭证依然安全
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(232,112,112,.25);padding-top:16px">
+        <div style="font-size:32px;color:#e8a0a0;font-weight:700;margin-bottom:8px">📌 核心原则</div>
+        <div style="font-size:32px;color:var(--muted);line-height:1.5">零信任执行环境 · 默认不信任任何层</div>
+      </div>
+    </div>
+    <div class="g g-rd f1" style="padding:40px 44px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="font-size:100px;margin-bottom:18px;line-height:1">🔒</div>
+        <div style="font-size:60px;font-weight:900;color:var(--red-t);margin-bottom:16px">沙箱隔离</div>
+        <div style="font-size:40px;color:var(--muted);line-height:1.65">
+          执行环境<strong style="color:var(--cream)">完全隔离</strong><br>
+          文件系统 · 网络 · 进程各自独立<br>
+          沙箱故障不扩散到主系统<br>
+          攻破一个沙箱 · 不影响其他任务<br>
+          漏洞影响半径 · 大幅缩小
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(232,112,112,.25);padding-top:16px">
+        <div style="font-size:32px;color:#e8a0a0;font-weight:700;margin-bottom:8px">🏖️ 围栏原则</div>
+        <div style="font-size:32px;color:var(--muted);line-height:1.5">狼进了院子 · 也进不了粮仓</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ S8 · 安全 Part 2：权限审计 + 可观测性（拆分第 2 页）══ -->
+<div class="s" id="s7">
+<div class="wa">组件之间通过标准接口通信 底层实现可以随时替换 管理平台做了很多权限控制和操作审计 安全性和可观测性大大增强 中间件流控观测 安全漏洞范围缩小</div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(232,112,112,.06),transparent 70%);bottom:-80px;left:-80px"></div>
+<div class="animal-wm" style="right:-50px;top:-90px;opacity:.02;color:var(--red-t)">🐺</div>
+<div class="col f1" style="gap:14px">
+  <div class="row g" style="align-items:center;gap:20px;padding:14px 26px;flex-shrink:0">
+    <div class="chip ch-r" style="margin-bottom:0;flex-shrink:0">🐺 PART 3 · 安全</div>
+    <div class="t2 gtr" style="font-size:60px;line-height:1;flex:1">审计 · 观测 · 可替换</div>
+    <div style="font-size:26px;color:var(--red-t);font-weight:700;flex-shrink:0">2 / 2</div>
+  </div>
+  <!-- ✅ 大卡：justify-content:space-between 撑满高度，6行内容 + separator + sub-note -->
+  <div class="row" style="gap:14px;flex:1">
+    <div class="g g-rd f1" style="padding:40px 44px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="font-size:100px;margin-bottom:18px;line-height:1">📋</div>
+        <div style="font-size:60px;font-weight:900;color:var(--red-t);margin-bottom:16px">权限审计</div>
+        <div style="font-size:40px;color:var(--muted);line-height:1.65">
+          所有操作<strong style="color:var(--cream)">全记录</strong><br>
+          权限控制细粒度<br>
+          可追溯任意历史动作<br>
+          每次工具调用都有溯源记录<br>
+          Agent 越权立刻拦截 · 不等事后审查
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(232,112,112,.25);padding-top:18px">
+        <div style="font-size:34px;color:#e8a0a0;font-weight:700;margin-bottom:10px">📌 关键原则</div>
+        <div style="font-size:32px;color:var(--muted);line-height:1.55">声明式权限 · 事先声明 Agent 能做什么<br>超出声明范围的动作 → 直接拒绝</div>
+      </div>
+    </div>
+    <div class="g g-rd f1" style="padding:40px 44px;display:flex;flex-direction:column;justify-content:space-between">
+      <div>
+        <div style="font-size:100px;margin-bottom:18px;line-height:1">🔍</div>
+        <div style="font-size:60px;font-weight:900;color:var(--red-t);margin-bottom:16px">可观测性</div>
+        <div style="font-size:40px;color:var(--muted);line-height:1.65">
+          中间件<strong style="color:var(--cream)">流控 + 观测</strong><br>
+          异常行为即时告警<br>
+          底层实现可随时替换<br>
+          Harness 是天然监控卡口<br>
+          所有进出沙箱的数据都经过中间件
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(232,112,112,.25);padding-top:18px">
+        <div style="font-size:34px;color:#e8a0a0;font-weight:700;margin-bottom:10px">🔄 可替换性</div>
+        <div style="font-size:32px;color:var(--muted);line-height:1.55">换底层模型不影响监控体系<br>观测层与执行层完全解耦</div>
+      </div>
+    </div>
+  </div>
+  <div class="g g-rd" style="padding:14px 28px;text-align:center;flex-shrink:0">
+    <div style="font-size:28px;color:#e8c0c0;line-height:1.5">
+      ⚠️ 即使沙箱被狼攻破 🐺 — 也<strong style="color:var(--cream)">拿不到核心凭证</strong> · 牧场围栏让狼进不了粮仓 🚫🌾
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ S9 · 发展方向：三阶段进化 ══ -->
+<div class="s" id="s8">
+<div class="wa">发展方向 一开始大家都是自己造轮子 编排沙箱会话管理全自己搞 非常费劲 重复造轮子 然后有初创公司和中间建厂商做标准化agent框架 云厂商做managed agent服务 现在主流趋势是把运行时和底层平台托管出去 开发者更专注业务逻辑</div>
+<div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(212,168,67,.07),transparent 70%);top:-150px;right:-100px"></div>
+<div class="animal-wm" style="left:-50px;bottom:-90px;opacity:.02;color:var(--accent-c)">🐔</div>
+<div class="col f1" style="gap:14px">
+  <div style="text-align:center;flex-shrink:0">
+    <div class="chip ch-g" style="margin-bottom:10px">🐔→🦅 发展方向 · 平台化</div>
+    <div class="t2 gt" style="text-align:center">从造轮子到基础设施</div>
+  </div>
+  <div class="col f1" style="gap:12px;justify-content:center">
+    <div class="row g g-rd" style="align-items:center;gap:24px;padding:22px 28px">
+      <div style="font-size:72px;font-weight:900;color:rgba(232,112,112,.5);flex-shrink:0;min-width:84px;text-align:center;line-height:1">1.0</div>
+      <div style="font-size:54px;flex-shrink:0">🐔</div>
+      <div class="col f1">
+        <div style="font-size:36px;font-weight:900;color:#e0a0a0;margin-bottom:8px">自己造轮子 — 蛮荒时代</div>
+        <div style="font-size:32px;color:var(--muted);line-height:1.5">编排、沙箱、会话管理全部<strong style="color:var(--cream)">自己搞</strong> · 每家公司从零开始 · 重复造轮子 · 生产风险自负</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:28px;color:rgba(212,168,67,.3)">▼</div>
+    <div class="row g g-sk" style="align-items:center;gap:24px;padding:22px 28px">
+      <div style="font-size:72px;font-weight:900;background:linear-gradient(180deg,var(--sky),rgba(91,179,208,.3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;min-width:84px;text-align:center;line-height:1">2.0</div>
+      <div style="font-size:54px;flex-shrink:0">🐑</div>
+      <div class="col f1">
+        <div style="font-size:36px;font-weight:900;color:var(--sky);margin-bottom:8px">标准化框架 + 云服务 — 整合时代</div>
+        <div style="font-size:32px;color:var(--muted);line-height:1.5">初创公司做 Agent 框架 · 云厂商推出 <strong style="color:var(--cream)">Managed Agent 服务</strong> · SDK 化 · 运行时托管</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:28px;color:rgba(212,168,67,.3)">▼</div>
+    <div class="row g g-gn" style="align-items:center;gap:24px;padding:22px 28px">
+      <div style="font-size:72px;font-weight:900;background:linear-gradient(180deg,var(--accent-b),rgba(76,175,114,.3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0;min-width:84px;text-align:center;line-height:1">3.0</div>
+      <div style="font-size:54px;flex-shrink:0">🦅</div>
+      <div class="col f1">
+        <div style="font-size:36px;font-weight:900;color:var(--accent-b);margin-bottom:8px">一切皆资源 — 平台时代</div>
+        <div style="font-size:32px;color:var(--muted);line-height:1.5">Agent = 资源 · Environment = 资源 · Session = 资源 · <strong style="color:var(--cream)">像搭积木一样组合</strong> · 只关心能力和工具</div>
+      </div>
+    </div>
+  </div>
+  <div class="g" style="padding:12px 24px;text-align:center;flex-shrink:0">
+    <div style="font-size:26px;color:var(--muted);line-height:1.5">就像从 <strong style="color:var(--cream)">自建机房 → IaaS → Serverless</strong> 的演进路径 🌾</div>
+  </div>
+</div>
+</div>
+
+<!-- ══ S10 · 未来：AI 操作系统 ══ -->
+<div class="s" id="s9">
+<div class="wa">未来架构 大家会往模块化分层的方向走 模型本身只是一个大脑 通过稳定接口连接到各种各样可替换的执行环境和工具 就像操作系统管理各种硬件一样 平台负责底层安全隔离和资源管理 创新重心往上移到应用层和工具生态 未来甚至可能出现专门为AI设计的全新操作系统</div>
+<div class="orb" style="width:700px;height:700px;background:radial-gradient(circle,rgba(139,92,246,.08),transparent 70%);top:-200px;left:-150px"></div>
+<div class="animal-wm" style="right:-50px;bottom:-90px;opacity:.02;color:#a78bfa">🦅</div>
+<!-- ✅ Split 左列：space-between 三段结构，撑满 1032px -->
+<div class="row f1" style="gap:28px;align-items:stretch">
+  <div class="col" style="flex:0 0 40%;justify-content:space-between;gap:0">
+
+    <!-- 顶段：badge + 线 + 主标题 -->
+    <div class="col" style="gap:14px">
+      <div class="chip ch-pu">🐎 未来架构</div>
+      <div style="height:3px;background:linear-gradient(90deg,#818cf8,#c4b5fd,transparent);border-radius:2px;width:160px"></div>
+      <div style="font-size:88px;font-weight:900;line-height:1.0">AI<br><span style="background:linear-gradient(135deg,#818cf8,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">操作系统</span></div>
+    </div>
+
+    <!-- 中段：body，flex:1 居中 -->
+    <div style="font-size:40px;color:var(--muted);line-height:1.65;flex:1;display:flex;flex-direction:column;justify-content:center;gap:0">
+      模型只是大脑，不是系统<br>
+      <strong style="color:var(--cream)">平台管硬件 · 开发者管能力</strong><br>
+      创新往上走 · 基础设施标准化<br>
+      <div style="margin-top:16px;font-size:36px;color:#a78bfa">
+        就像 IaaS → PaaS → Serverless<br>
+        Agent 运行时也在平台化
+      </div>
+    </div>
+
+    <!-- 底段：总结卡 -->
+    <div class="g g-pu" style="padding:22px 26px">
+      <div style="font-size:32px;font-weight:900;color:#c4b5fd;margin-bottom:10px">🔭 可能出现的新形态</div>
+      <div style="font-size:32px;color:var(--muted);line-height:1.6">专为 AI 设计的全新操作系统<br>模型即 CPU · 工具即外设</div>
+    </div>
+
+  </div>
+  <div class="f1 col" style="justify-content:center;align-items:center">
+    <svg viewBox="0 0 720 680" style="width:100%;max-height:960px">
+      <rect x="60" y="10" width="600" height="118" rx="18" fill="rgba(240,193,74,.07)" stroke="rgba(240,193,74,.3)" stroke-width="2"/>
+      <text x="360" y="58" text-anchor="middle" fill="#fde68a" font-size="30" font-weight="900">📱 应用层 &amp; 工具生态</text>
+      <text x="360" y="96" text-anchor="middle" fill="rgba(200,170,60,.6)" font-size="23">创新重心上移 · 多 Agent 协作 · 业务逻辑专注</text>
+      <text x="678" y="72" fill="rgba(255,255,255,.04)" font-size="56">🦅</text>
+      <text x="360" y="155" text-anchor="middle" fill="rgba(139,92,246,.28)" font-size="14" letter-spacing="8">• • • 标准化接口 • • •</text>
+      <line x1="130" y1="128" x2="130" y2="162" stroke="rgba(139,92,246,.18)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="590" y1="128" x2="590" y2="162" stroke="rgba(139,92,246,.18)" stroke-width="1" stroke-dasharray="4 3"/>
+      <rect x="60" y="166" width="600" height="118" rx="18" fill="rgba(139,92,246,.08)" stroke="rgba(139,92,246,.38)" stroke-width="2"/>
+      <text x="360" y="214" text-anchor="middle" fill="#c4b5fd" font-size="30" font-weight="900">🧠 Harness 编排内核</text>
+      <text x="360" y="252" text-anchor="middle" fill="rgba(120,90,200,.6)" font-size="23">标准化接口 · 调度 · 工具路由 · 多模型适配</text>
+      <text x="678" y="228" fill="rgba(255,255,255,.04)" font-size="56">🐕</text>
+      <text x="360" y="311" text-anchor="middle" fill="rgba(56,189,248,.28)" font-size="14" letter-spacing="8">• • • 执行协议 • • •</text>
+      <line x1="130" y1="284" x2="130" y2="318" stroke="rgba(56,189,248,.18)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="590" y1="284" x2="590" y2="318" stroke="rgba(56,189,248,.18)" stroke-width="1" stroke-dasharray="4 3"/>
+      <rect x="60" y="322" width="600" height="118" rx="18" fill="rgba(56,189,248,.06)" stroke="rgba(56,189,248,.3)" stroke-width="2"/>
+      <text x="360" y="370" text-anchor="middle" fill="#7dd3fc" font-size="30" font-weight="900">⚙️ 基础设施层</text>
+      <text x="360" y="408" text-anchor="middle" fill="rgba(60,130,170,.6)" font-size="23">安全隔离 · 资源管理 · Sandbox · 弹性扩缩</text>
+      <text x="678" y="384" fill="rgba(255,255,255,.04)" font-size="56">🐄</text>
+      <text x="360" y="467" text-anchor="middle" fill="rgba(76,175,114,.28)" font-size="14" letter-spacing="8">• • • 模型 API • • •</text>
+      <line x1="200" y1="440" x2="200" y2="474" stroke="rgba(76,175,114,.18)" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="520" y1="440" x2="520" y2="474" stroke="rgba(76,175,114,.18)" stroke-width="1" stroke-dasharray="4 3"/>
+      <rect x="150" y="478" width="420" height="108" rx="18" fill="rgba(76,175,114,.07)" stroke="rgba(76,175,114,.3)" stroke-width="2"/>
+      <text x="360" y="528" text-anchor="middle" fill="#6ee7b7" font-size="30" font-weight="900">🤖 模型 = CPU</text>
+      <text x="360" y="566" text-anchor="middle" fill="rgba(60,160,100,.6)" font-size="23">可替换大脑 · 通过稳定接口连接</text>
+      <text x="600" y="530" fill="rgba(255,255,255,.04)" font-size="56">🐎</text>
+      <text x="360" y="628" text-anchor="middle" fill="rgba(212,168,67,.32)" font-size="18" font-weight="700">创新往上走 · 基础设施标准化 · 开发者专注业务能力</text>
+    </svg>
+  </div>
+</div>
+</div>
+
+<!-- ══ S11 · 总结（全屏 2×2 无 header，slim 进化底条）══
+     card title 52px · card body 38px · emoji 84px -->
+<div class="s" id="s10">
+<div class="wa">总结 LLM不是Agent 需要Loop加Tools加Guardrails才是真正的智能体 三层解耦Session Harness Sandbox各自独立升级扩展 脑手分离带来性能提升和安全保障 Agent从精心呵护的宠物变成可随时替换的牲口 是架构升级的必然结果 也是行业逐渐走向成熟的标志</div>
+<div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(212,168,67,.08),transparent 70%);top:-100px;right:-100px"></div>
+<div class="orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(76,175,114,.06),transparent 70%);bottom:-80px;left:-60px"></div>
+<div class="animal-wm" style="right:-40px;bottom:-90px;opacity:.02;color:var(--accent-a)">🌾</div>
+<!-- ✅ 去掉 header 进化条，全屏 2×2 grid 直接从顶到底，每格 space-between + 5行内容 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px;flex:1;width:100%">
+    <div class="g g-sk" style="padding:30px 36px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:flex-start;gap:22px">
+        <div style="font-size:80px;font-weight:900;min-width:76px;text-align:center;background:linear-gradient(135deg,var(--sky),#90d8f0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;flex-shrink:0">1</div>
+        <div>
+          <div style="font-size:54px;font-weight:900;color:var(--sky);margin-bottom:12px">LLM ≠ Agent</div>
+          <div style="font-size:38px;color:var(--muted);line-height:1.6">需要 Loop + Tools + Guardrails<br>才是真正的智能体<br>没有循环就没有多步推理<br>没有工具就是纯文本游戏 🐕</div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(90deg,rgba(91,179,208,.18),rgba(91,179,208,.04));border-radius:10px;padding:10px 18px;font-size:30px;color:var(--sky);font-weight:700;text-align:center">模型只是大脑，不是智能体</div>
+    </div>
+    <div class="g g-gn" style="padding:30px 36px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:flex-start;gap:22px">
+        <div style="font-size:80px;font-weight:900;min-width:76px;text-align:center;background:linear-gradient(135deg,var(--accent-b),#80e0a0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;flex-shrink:0">2</div>
+        <div>
+          <div style="font-size:54px;font-weight:900;color:var(--accent-b);margin-bottom:12px">三层解耦</div>
+          <div style="font-size:38px;color:var(--muted);line-height:1.6">Session / Harness / Sandbox<br>各层独立升级、扩展、容错<br>改一层不动其他层<br>故障不跨层扩散 🐄</div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(90deg,rgba(76,175,114,.18),rgba(76,175,114,.04));border-radius:10px;padding:10px 18px;font-size:30px;color:var(--accent-b);font-weight:700;text-align:center">解耦 = 每层都能独立水平扩展</div>
+    </div>
+    <div class="g g-hi" style="padding:30px 36px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:flex-start;gap:22px">
+        <div style="font-size:80px;font-weight:900;min-width:76px;text-align:center;background:linear-gradient(135deg,var(--accent-a),var(--accent-al));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;flex-shrink:0">3</div>
+        <div>
+          <div style="font-size:54px;font-weight:900;color:var(--accent-a);margin-bottom:12px">脑手分离</div>
+          <div style="font-size:38px;color:var(--muted);line-height:1.6">推理提前启动 · 凭证隔离<br>延迟暴降 60% / 90%+<br>大脑不等手准备好就开始想<br>手坏了换一只，大脑不受影响 🛡️</div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(90deg,rgba(212,168,67,.18),rgba(212,168,67,.04));border-radius:10px;padding:10px 18px;font-size:30px;color:var(--accent-a);font-weight:700;text-align:center">性能 + 安全的双重收益</div>
+    </div>
+    <div class="g g-or" style="padding:30px 36px;display:flex;flex-direction:column;justify-content:space-between">
+      <div style="display:flex;align-items:flex-start;gap:22px">
+        <div style="font-size:80px;font-weight:900;min-width:76px;text-align:center;background:linear-gradient(135deg,#f0a040,var(--accent-c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;flex-shrink:0">4</div>
+        <div>
+          <div style="font-size:54px;font-weight:900;color:var(--accent-c);margin-bottom:12px">宠物 → 牲口</div>
+          <div style="font-size:38px;color:var(--muted);line-height:1.6">架构升级的必然结果<br>行业走向成熟的标志<br>精心呵护 → 工业化生产<br>随时可替换，随时可扩展 🦅</div>
+        </div>
+      </div>
+      <div style="background:linear-gradient(90deg,rgba(230,150,60,.18),rgba(230,150,60,.04));border-radius:10px;padding:10px 18px;font-size:30px;color:var(--accent-c);font-weight:700;text-align:center">Agent 基础设施正在平台化</div>
+    </div>
+</div>
+</div>
+
+</div><!-- /P -->
+<div id="pn"></div>
 <script>
-const slides = document.querySelectorAll('.slide');
-const dots = document.querySelectorAll('.dot');
-const progress = document.getElementById('progress');
-
-function updateProgress() {
-    const total = slides.length;
-    const idx = Array.from(slides).findIndex(s => s.classList.contains('visible'));
-    if (idx >= 0) {
-        progress.style.width = ((idx + 1) / total * 100) + '%';
-        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-    }
+(function(){
+var PW=1920,PH=1080;
+function fit(){
+  var el=document.getElementById('P'),
+      r=Math.min(window.innerWidth/PW,window.innerHeight/PH),
+      x=(window.innerWidth-PW*r)/2,
+      y=(window.innerHeight-PH*r)/2;
+  el.style.transform='scale('+r+')';
+  el.style.left=x+'px';
+  el.style.top=y+'px';
 }
-
-const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => e.target.classList.toggle('visible', e.isIntersecting));
-    updateProgress();
-}, { threshold: 0.5 });
-slides.forEach(s => obs.observe(s));
-
-// 立即显示第一页
-slides[0].classList.add('visible');
-
-document.addEventListener('keydown', e => {
-    const cur = Array.from(slides).findIndex(s => s.classList.contains('visible'));
-    if ((e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') && cur < slides.length - 1) {
-        e.preventDefault(); slides[cur + 1].scrollIntoView();
-    }
-    if ((e.key === 'ArrowUp' || e.key === 'ArrowLeft') && cur > 0) {
-        e.preventDefault(); slides[cur - 1].scrollIntoView();
-    }
+window.addEventListener('resize',fit);
+fit();
+var slides=document.querySelectorAll('.s'),total=slides.length,cur=0;
+function ui(){
+  document.getElementById('pn').textContent=(cur+1)+' / '+total;
+  var b=document.getElementById('prog');
+  if(b)b.style.width=(cur/(total-1)*100)+'%';
+}
+function go(i){
+  if(i<0||i>=total)return;
+  slides[cur].classList.remove('on');
+  cur=i;
+  slides[cur].classList.add('on');
+  ui();
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1);}
 });
-<\/script>
+document.addEventListener('click',function(e){
+  if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1);
+});
+ui();
+})();
+</script>
 </body>
 </html>

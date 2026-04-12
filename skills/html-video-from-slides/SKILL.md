@@ -23,6 +23,23 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 
 幻灯按 **1920×1080** 视口截图。
 
+## 制作 presentation.html（视觉规范）
+
+**先读以下两份文档，再开始写 HTML**：
+
+| 文档 | 作用 |
+|------|------|
+| `DESIGN-STANDARD.md`（同目录） | 字号规范、信息密度、主题系统、反模式列表、新建流程 |
+| `TEMPLATES.md`（同目录） | 5 种布局的可复制 HTML 模板 + Minimum Fill Table + AI 生成 Checklist |
+
+**核心约束**（详见上述文档）：
+- 每张 slide 画面覆盖率 ≥ 85%
+- 卡片/大图布局用 `justify-content:space-between`（不用 `center`）
+- 禁止 `<br>` 空行当间距，禁止内容区用 `position:absolute`
+- 总字数 ≤ 120 汉字/张
+
+---
+
 ## 一键生成成片（wav-auto）
 
 在**已安装依赖**的前提下（见下文「一次性安装」），素材目录内放好 **`presentation.html`**、**单个 `.wav`**，可选 **`video-input.json`**，在仓库中执行：
