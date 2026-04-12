@@ -12,6 +12,7 @@ This file provides guidance for AI coding tools (Cursor, Claude Code, Codex, etc
 - **`skills/`**: cross-tool executable helpers (e.g. HTML slides → MP4); see `skills/README.md`
 - **`features/`**: umbrella-level feature specs; see `features/README.md` and `features/INDEX.md`
 - **`external/`**: optional **local clones** of upstream reference repos (declared in `meta/repos.yaml`, not committed); see `external/README.md`
+- **`docs/`**: architecture docs and contributor templates
 
 ## Skill routing (mandatory)
 
@@ -24,7 +25,6 @@ When the user’s request matches a workflow below, **do not** answer with ad‑
 | Selective merge to `main` (docs/framework/skills vs business assets) | `skills/merge-to-main/SKILL.md` |
 
 Until the matching `SKILL.md` has been read, treat generic snippets (e.g. only `Get-PSDrive`) as **insufficient** for those intents.
-- **`docs/`**: architecture docs and contributor templates
 
 ## Features / Umbrella Requirements
 
@@ -52,7 +52,6 @@ Canonical machine-readable policy: `meta/profiles.yaml`; tool-specific text is e
 ## Agent Templates
 
 The `docs/templates/` directory contains template files (SOUL.md, USER.md, etc.) that demonstrate how to configure personal AI agent behavior. These are **examples**, not active configuration.
-
 
 <!-- autoclaw:skill-path-guidance -->
 ## Installing Skills
