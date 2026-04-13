@@ -1,0 +1,79 @@
+/*
+ * theme-animal.css — 深林绿黑 + 金色动物主题
+ *
+ * 视觉：深林绿黑底 + 金/绿/橙强调 + 蜂巢纹理 + 动物水印
+ * 适用：架构、系统设计、动物隐喻话题
+ * 参考：DESIGN-STANDARD.md 中 animal 主题定义
+ */
+
+:root{
+  /* ── 背景 ── */
+  --bg:#0b1a0d;
+  --bg-pattern:
+    radial-gradient(ellipse 80% 60% at 20% 30%,rgba(76,175,114,0.08),transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 70%,rgba(212,168,67,0.06),transparent 60%),
+    #0b1a0d;
+
+  /* ── 主色调 ── */
+  --accent-a:#d4a843;       /* 金色阳光 */
+  --accent-al:#e8c468;      /* 金色亮 */
+  --accent-b:#4caf72;       /* 丛林绿 */
+  --accent-c:#e07a3a;       /* 日落橙 */
+
+  /* ── 语义色 ── */
+  --sky:#60A5FA;
+  --green:#34D399;
+  --danger:#F87171;
+  --purple:#A78BFA;
+  --warn:#FDE68A;
+
+  /* ── 文字 ── */
+  --cream:#f0e8d0;
+  --muted:#7a9f7a;
+  --dim:#5a7a5a;
+
+  /* ── 卡片 ── */
+  --card:rgba(15,30,18,0.55);
+  --bdr:rgba(212,168,67,0.12);
+  --glass-blur:20px;
+
+  /* ── 字体 ── */
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans SC','PingFang SC',system-ui,sans-serif;
+
+  /* ── Chip 主题色 ── */
+  --tag-bg-a:rgba(212,168,67,0.12);--tag-bdr-a:rgba(212,168,67,0.35);
+  --tag-bg-b:rgba(76,175,114,0.12);--tag-bdr-b:rgba(76,175,114,0.35);
+  --tag-bg-c:rgba(224,122,58,0.12);--tag-bdr-c:rgba(224,122,58,0.35);
+  --tag-bg-sk:rgba(96,165,250,0.12);--tag-bdr-sk:rgba(96,165,250,0.35);
+  --tag-bg-rd:rgba(239,68,68,0.12);--tag-bdr-rd:rgba(239,68,68,0.35);
+  --tag-bg-gn:rgba(52,211,153,0.12);--tag-bdr-gn:rgba(52,211,153,0.35);
+  --tag-bg-purple:rgba(139,92,246,0.12);--tag-bdr-purple:rgba(139,92,246,0.35);
+
+  /* ── 渐变文字 ── */
+  --grad-hero:linear-gradient(135deg,#d4a843 0%,#e8c468 40%,#4caf72 80%,#e07a3a 100%);
+  --grad-stat:linear-gradient(135deg,var(--accent-a),var(--accent-al),var(--accent-b));
+
+  /* ── Orb 辉光色 ── */
+  --orb-a:radial-gradient(circle,rgba(212,168,67,0.10),transparent 70%);
+  --orb-b:radial-gradient(circle,rgba(76,175,114,0.08),transparent 70%);
+  --orb-c:radial-gradient(circle,rgba(224,122,58,0.07),transparent 70%);
+  --orb-d:radial-gradient(circle,rgba(212,168,67,0.06),transparent 70%);
+
+  /* ── 水印透明度 ── */
+  --wm-opacity:0.025;
+}
+
+/* 蜂巢纹理背景 */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:var(--bg-pattern,var(--bg));
+  pointer-events:none
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='rgba(212,168,67,0.06)' stroke-width='1'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='rgba(212,168,67,0.04)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size:56px 100px;
+  pointer-events:none
+}
+
+.animal-wm{color:var(--accent-a)}

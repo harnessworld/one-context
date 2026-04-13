@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1">
+<title>Reference — 结构参考，不要直接复制</title>
+<!-- ═══ 引入基础 CSS + 主题（三选一，取消注释） ═══ -->
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="theme-tech.css">
+<!-- <link rel="stylesheet" href="theme-animal.css"> -->
+<!-- <link rel="stylesheet" href="theme-wenyan.css"> -->
+<style>
+/* ═══ 此处仅放本视频专属覆盖，不改 base.css ═══ */
+</style>
+</head>
+<body>
+<div id="prog" style="width:0%"></div>
+<div id="P">
+
+<!-- ════════════════════════════════════════════
+     SLIDE 0 — COVER（封面）
+     结构：光晕 + 进化条 + Hero + Pill 行
+     ════════════════════════════════════════════ -->
+<div class="s on" id="s0">
+<div class="wa">【封面口播关键词 摘自讲稿第一段】</div>
+
+<!-- 光晕装饰 -->
+<div class="orb" style="width:720px;height:720px;background:var(--orb-a);top:-220px;right:-100px"></div>
+<div class="orb" style="width:560px;height:560px;background:var(--orb-b);bottom:-120px;left:-80px"></div>
+<div class="animal-wm" style="right:-40px;bottom:-90px;opacity:var(--wm-opacity,0.02)">🦅</div>
+<div class="gd"></div>
+
+<!-- 三段式：顶(进化条) / 中(hero) / 下(pill+来源) -->
+<div class="col f1" style="justify-content:space-between;z-index:3">
+
+  <!-- 顶段：进化条 -->
+  <div style="display:flex;justify-content:center">
+    <div class="evo-bar">
+      <div style="text-align:center"><div style="font-size:56px">🔍</div><div style="font-size:20px;color:var(--muted)">发现</div></div>
+      <div class="evo-arrow">──────▶</div>
+      <div style="text-align:center"><div style="font-size:56px">💡</div><div style="font-size:20px;color:var(--muted)">方案</div></div>
+      <div class="evo-arrow">──────▶</div>
+      <div style="text-align:center"><div style="font-size:56px">🚀</div><div style="font-size:20px;color:var(--muted)">落地</div></div>
+      <div class="evo-arrow">──────▶</div>
+      <div style="text-align:center"><div style="font-size:56px">📊</div><div style="font-size:20px;color:var(--muted)">成效</div></div>
+    </div>
+  </div>
+
+  <!-- 中段：Hero 主内容 -->
+  <div class="col f1" style="align-items:center;text-align:center;justify-content:center;gap:14px">
+    <div class="chip ch-a" style="font-size:22px;padding:8px 28px">【Badge 文字】</div>
+    <div style="font-size:190px;font-weight:900;line-height:.95;letter-spacing:-6px;background:var(--grad-hero);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">主标题</div>
+    <div style="font-size:72px;font-weight:800;color:var(--cream);letter-spacing:2px">副标题</div>
+    <div style="font-size:40px;color:var(--muted);max-width:1300px;line-height:1.5">1~2 句说明文字，<strong style="color:var(--cream)">高亮关键词</strong></div>
+  </div>
+
+  <!-- 下段：Pill 卡 + 来源 -->
+  <div class="col" style="gap:12px">
+    <div class="row" style="gap:14px">
+      <div class="g g-hi" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div style="font-size:44px">⭐</div>
+        <div style="font-size:36px;font-weight:800;color:var(--accent-a)">亮点一</div>
+        <div style="font-size:28px;color:var(--muted)">简要说明</div>
+      </div>
+      <div class="g g-gn" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div style="font-size:44px">🔥</div>
+        <div style="font-size:36px;font-weight:800;color:var(--accent-b)">亮点二</div>
+        <div style="font-size:28px;color:var(--muted)">简要说明</div>
+      </div>
+      <div class="g g-sk" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div style="font-size:44px">💎</div>
+        <div style="font-size:36px;font-weight:800;color:var(--sky)">亮点三</div>
+        <div style="font-size:28px;color:var(--muted)">简要说明</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:24px;color:rgba(255,255,255,0.15);letter-spacing:4px">来源说明</div>
+  </div>
+
+</div><!-- /col f1 -->
+</div><!-- /slide 0 -->
+
+
+<!-- ════════════════════════════════════════════
+     SLIDE 1 — SPLIT（左文右图）
+     结构：左 44% 三段(顶/中/底) / 右 56% SVG
+     ════════════════════════════════════════════ -->
+<div class="s" id="s1">
+<div class="wa">【第二页口播关键词】</div>
+<div class="orb" style="width:500px;height:500px;background:var(--orb-c);bottom:-100px;right:-80px"></div>
+<div class="animal-wm" style="right:20px;bottom:-60px;opacity:var(--wm-opacity,0.02)">🐕</div>
+<div class="gf"></div>
+
+<div class="row f1" style="gap:28px;align-items:stretch;z-index:3">
+  <!-- 左侧文字区 -->
+  <div class="col" style="flex:0 0 44%;justify-content:space-between;gap:0">
+
+    <!-- 顶段：badge + 装饰线 + 主标题 -->
+    <div class="col" style="gap:14px">
+      <div class="chip ch-b">【Badge】</div>
+      <div style="height:3px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b),transparent);border-radius:2px;width:160px"></div>
+      <div class="t2">标题文字<br>第二行</div>
+    </div>
+
+    <!-- 中段：body -->
+    <div style="font-size:40px;color:var(--muted);line-height:1.65;flex:1;display:flex;flex-direction:column;justify-content:center">
+      第一行说明，可 <strong style="color:var(--cream)">高亮</strong><br>
+      第二行说明<br>
+      第三行说明<br>
+      <div style="margin-top:18px">
+        <strong style="color:var(--cream)">强调结论一</strong><br>
+        <strong style="color:var(--cream)">强调结论二</strong>
+      </div>
+    </div>
+
+    <!-- 底段：总结卡 -->
+    <div class="g g-hi" style="padding:22px 26px">
+      <div style="font-size:34px;font-weight:800;color:var(--accent-b);margin-bottom:10px">📌 小标题</div>
+      <div style="font-size:32px;color:var(--muted);line-height:1.6">• 要点一<br>• 要点二<br>• 要点三</div>
+    </div>
+
+  </div>
+
+  <!-- 右侧图形区 -->
+  <div class="f1 col" style="justify-content:center;align-items:center">
+    <!-- 将 svg-snippets.md 中的 SVG 粘贴到这里 -->
+    <svg viewBox="0 0 600 620" style="width:100%;max-height:960px">
+      <ellipse cx="300" cy="120" rx="210" ry="90" fill="rgba(16,185,129,0.06)" stroke="var(--accent-b)" stroke-width="2.5"/>
+      <text x="300" y="105" text-anchor="middle" fill="var(--accent-b)" font-size="28" font-weight="900">💾 层名 A</text>
+      <text x="300" y="145" text-anchor="middle" fill="var(--dim,#64748B)" font-size="18">描述文字</text>
+      <path d="M300 210 L300 260" stroke="var(--accent-b)" stroke-width="2" stroke-dasharray="6 4" opacity="0.3"/>
+      <ellipse cx="300" cy="340" rx="210" ry="90" fill="rgba(139,92,246,0.06)" stroke="var(--purple)" stroke-width="2.5"/>
+      <text x="300" y="325" text-anchor="middle" fill="var(--purple)" font-size="28" font-weight="900">🧠 层名 B</text>
+      <text x="300" y="365" text-anchor="middle" fill="var(--dim,#64748B)" font-size="18">描述文字</text>
+      <path d="M300 430 L300 480" stroke="var(--purple)" stroke-width="2" stroke-dasharray="6 4" opacity="0.3"/>
+      <ellipse cx="300" cy="550" rx="210" ry="80" fill="rgba(56,189,248,0.06)" stroke="var(--sky)" stroke-width="2.5"/>
+      <text x="300" y="536" text-anchor="middle" fill="var(--sky)" font-size="28" font-weight="900">🤲 层名 C</text>
+      <text x="300" y="572" text-anchor="middle" fill="var(--dim,#64748B)" font-size="18">描述文字</text>
+    </svg>
+  </div>
+
+</div><!-- /row -->
+</div><!-- /slide 1 -->
+
+
+<!-- ════════════════════════════════════════════
+     SLIDE 2 — GRID 2×2（四格并列）
+     结构：直接 grid，无 header 行
+     ════════════════════════════════════════════ -->
+<div class="s" id="s2">
+<div class="wa">【第三页口播关键词】</div>
+<div class="orb" style="width:400px;height:400px;background:var(--orb-c);top:-80px;left:-60px"></div>
+<div class="animal-wm" style="left:-20px;bottom:-60px;opacity:var(--wm-opacity,0.02)">🐝</div>
+<div class="gd"></div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;flex:1;width:100%;z-index:3">
+
+  <div class="g g-hi" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+    <div style="font-size:84px;line-height:1;flex-shrink:0">🏗️</div>
+    <div>
+      <div style="font-size:52px;font-weight:900;color:var(--accent-a);margin-bottom:10px">格子一</div>
+      <div style="font-size:38px;color:var(--muted);line-height:1.55">说明文字 <strong style="color:var(--cream)">高亮</strong><br>第二行说明</div>
+    </div>
+  </div>
+
+  <div class="g g-gn" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+    <div style="font-size:84px;line-height:1;flex-shrink:0">🔧</div>
+    <div>
+      <div style="font-size:52px;font-weight:900;color:var(--accent-b);margin-bottom:10px">格子二</div>
+      <div style="font-size:38px;color:var(--muted);line-height:1.55">说明文字 <strong style="color:var(--cream)">高亮</strong><br>第二行说明</div>
+    </div>
+  </div>
+
+  <div class="g g-or" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+    <div style="font-size:84px;line-height:1;flex-shrink:0">🛡️</div>
+    <div>
+      <div style="font-size:52px;font-weight:900;color:var(--accent-c);margin-bottom:10px">格子三</div>
+      <div style="font-size:38px;color:var(--muted);line-height:1.55">说明文字 <strong style="color:var(--cream)">高亮</strong><br>第二行说明</div>
+    </div>
+  </div>
+
+  <div class="g g-sk" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+    <div style="font-size:84px;line-height:1;flex-shrink:0">🚀</div>
+    <div>
+      <div style="font-size:52px;font-weight:900;color:var(--sky);margin-bottom:10px">格子四</div>
+      <div style="font-size:38px;color:var(--muted);line-height:1.55">说明文字 <strong style="color:var(--cream)">高亮</strong><br>第二行说明</div>
+    </div>
+  </div>
+
+</div><!-- /grid -->
+</div><!-- /slide 2 -->
+
+
+</div><!-- /P -->
+<div id="pn"></div>
+
+<!-- ═══ 导航脚本（无需修改） ═══ -->
+<script>
+(function(){
+var PW=1920,PH=1080;
+function fit(){var el=document.getElementById('P'),r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;el.style.transform='scale('+r+')';el.style.transformOrigin='0 0';el.style.left=x+'px';el.style.top=y+'px'}
+window.addEventListener('resize',fit);fit();
+var slides=document.querySelectorAll('.s'),total=slides.length,cur=0;
+function ui(){document.getElementById('pn').textContent=(cur+1)+' / '+total;var b=document.getElementById('prog');if(b)b.style.width=(cur/(total-1)*100)+'%'}
+function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('on');cur=i;slides[cur].classList.add('on');ui()}
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1)}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}});
+document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1)});
+ui();
+})();
+</script>
+</body>
+</html>

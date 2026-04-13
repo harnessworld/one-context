@@ -20,6 +20,7 @@
 |------|------|
 | 画布尺寸 | **1920 × 1080 px**（`#P` 固定宽高） |
 | Slide 类名 | `.s`，激活态加 `.on` |
+| Slide 内边距 | **`padding:32px 48px`**（四周留呼吸空间，内容不顶边） |
 | 导航 JS | `go(i)` 函数，键盘 + 点击左右分区 |
 | 字幕对齐 | 每张 slide 必须含 `.wa`（Whisper 隐藏锚文字），见下文 |
 
@@ -44,18 +45,23 @@
 | 英雄大标题（t1） | **124px** | ~91px |
 | 页面主标题（t2） | **88px** | ~64px |
 | 副标题（t3） | **60px** | ~44px |
-| 正文 / 要点（t4） | **40px** | ~29px ← 绝对最小值 |
-| 注释 / 说明（t5） | **28px** | ~20px |
+| 正文 / 要点（t4） | **42px** | ~31px ← 绝对最小值 |
+| 注释 / 说明（t5） | **32px** | ~23px |
 | 卡片标题（Grid 内） | **52px** | ~38px |
-| 卡片正文（Grid 内） | **38px** | ~28px |
+| 卡片正文（Grid 内） | **42px** | ~31px |
+| Cover Pill 标题 | **40px** | ~29px |
+| Cover Pill 副说明 | **32px** | ~23px |
 | 数据统计数字（ts） | **170px** | ~124px |
+| 统计指标名 | **34px** | ~25px |
+| 统计解释文字 | **36px** | ~26px |
 | 卡片 emoji | **84px** | ~61px |
 
 ### ⚠️ 常见错误
 
 - ❌ 在 Grid 卡片内使用 `.t4`（40px）作为卡片标题 — 太小
-- ❌ 在 Split 布局的说明文字里用低于 30px — 太小
-- ✅ Grid 卡片的内容直接写 `font-size:52px`（标题）和 `font-size:38px`（说明）
+- ❌ 在任何说明文字里用低于 32px — 手机看不清
+- ❌ Cover Pill 副说明低于 32px — 在手机上变成蚂蚁字
+- ✅ Grid 卡片的内容直接写 `font-size:52px`（标题）和 `font-size:42px`（说明）
 - ✅ 全屏 2×2 Grid 不需要页面标题行；卡片自身 emoji+标题就是视觉锚点
 
 ---
@@ -212,10 +218,10 @@ body::before { /* 背景纹理/图案 */ }
 ## 新建 Presentation 流程
 
 1. 通读 SRT，划分话题段落，确定 slide 数量（建议 10–14 张，每张平均 30–50s）
-2. 确认话题匹配主题（选用或新建 Theme Skin）
-3. **先读 `TEMPLATES.md`**，为每张 slide 选定对应模板（Cover / Split / Grid-2×2 / Slim+大卡 / 两大卡），直接复制模板 HTML 骨架再填内容
+2. 准备 CSS：复制 `base.css` + 选定主题 `theme-*.css` 到素材目录
+3. **每张 slide 独立组合**：从 `TEMPLATES.md` 选布局，从 `svg-snippets.md` 选图形，从 `base.css` 选卡片/芯片配色——相邻 slide 布局不同，图形不重复
 4. 编写 `.wa` 隐藏锚文字（摘自该段 SRT 关键词）
-5. 按字号规范填写文字，按图形清单添加 SVG / CSS 图形；每张 slide 完成后对照 `TEMPLATES.md` Minimum Fill Table 验证填充率
+5. 每张 slide 完成后对照 `TEMPLATES.md` Minimum Fill Table 验证填充率
 6. 用 `node cli.js wav-auto --project <dir>` 验证对齐效果
 
 ---
@@ -245,7 +251,7 @@ body::before { /* 背景纹理/图案 */ }
 
 - ❌ 大块空白：单张 slide 空白区域 > 15% 视觉面积
 - ❌ 纯文字页：没有任何图形元素（装饰水印也算）
-- ❌ **字号过小：Grid 卡片标题 < 50px，卡片正文 < 36px，全局 body < 40px，Cover Pill 标题 < 36px**
+- ❌ **字号过小：Grid 卡片标题 < 52px，卡片正文 < 42px，全局 body < 42px，Cover Pill 标题 < 40px，任何说明文字 < 32px**
 - ❌ 缺少 `.wa`：任何 slide 不含 Whisper 锚文字
 - ❌ 超过 3 信息块：单页信息过载
 - ❌ 动画/transition 影响截图：截图时应为最终态
@@ -257,4 +263,4 @@ body::before { /* 背景纹理/图案 */ }
 
 ## HTML 模板参考
 
-生成新 presentation 时，**必须**先读 `TEMPLATES.md`（同目录），直接复制对应模板结构后填入内容。**禁止从零设计布局。** 每页生成后对照 TEMPLATES.md 的 Minimum Fill Table 自验填充率。
+生成新 presentation 时，**必须**使用 `base.css` 的共享类名（不自己写 CSS），每张 slide 从 `TEMPLATES.md` 选布局骨架、从 `svg-snippets.md` 选图形。`reference.html` 展示了完整的 HTML 结构（CSS 引用、#P 容器、导航脚本），仅作结构参考，**不要直接复制后填空——那会千篇一律**。每页生成后对照 TEMPLATES.md 的 Minimum Fill Table 自验填充率。

@@ -10,9 +10,9 @@
 |----------|----------------|----------|--------------|
 | Cover 封面 | 1032px 整页 | ≥ 85% | 进化条(in-flow) + 标题(≥180px) + 副标题(≥70px) + 正文(≥2行×40px) + Pill行 |
 | Split 左右 | 1032px 整页 | ≥ 85% | 左侧：标题+正文**≥6行(40px)**+卡片；右侧：SVG 填满 |
-| Grid 2×2 | 每格 ~505px | ≥ 85% = 429px | emoji(96px)+标题(56px)+**正文≥4行(40px×1.65=264px)**+底tag(42px) = 458px ✓ |
-| Slim header + 大卡 | 每卡 ~940px | ≥ 85% = 799px | emoji(100px)+标题(60px)+**正文≥6行(40px×1.65=396px)**+separator+sub-note(2行×34px=100px) = 712px；再加 justify-content:space-between 把 100px 富余分到边距 |
-| 两大卡并排 | 每卡 ~940px | ≥ 85% = 799px | emoji(100px)+标题(60px)+**正文≥6行(40px×1.65=396px)**+separator+sub-note(2行) |
+| Grid 2×2 | 每格 ~476px | ≥ 85% = 405px | emoji(96px)+标题(56px)+**正文≥4行(42px×1.6=269px)**+底tag(42px) = 459px ✓ |
+| Slim header + 大卡 | 每卡 ~912px | ≥ 85% = 775px | emoji(100px)+标题(60px)+**正文≥6行(42px×1.6=403px)**+separator+sub-note(2行×36px=115px) = 726px；再加 justify-content:space-between 把 ~50px 富余分到边距 |
+| 两大卡并排 | 每卡 ~912px | ≥ 85% = 775px | emoji(100px)+标题(60px)+**正文≥6行(42px×1.6=403px)**+separator+sub-note(2行) |
 | Takeaways 2×2 | 每格 ~510px（无header时） | ≥ 85% = 433px | number(80px)+标题(54px)+**正文≥4行(38px×1.6=244px)**+底tag(42px) = 420px；补 justify-content:space-between |
 
 **自测方法（每格必查）**：
@@ -99,13 +99,13 @@
   <!-- 上段：进化条（IN FLOW，不用 position:absolute） -->
   <div style="display:flex;justify-content:center">
     <div class="g" style="display:flex;align-items:center;gap:24px;padding:16px 44px;border-radius:60px">
-      <div style="text-align:center"><div style="font-size:56px">【emoji1】</div><div style="font-size:20px;color:var(--muted);margin-top:4px">【label1】</div></div>
+      <div style="text-align:center"><div style="font-size:56px">【emoji1】</div><div style="font-size:24px;color:var(--muted);margin-top:4px">【label1】</div></div>
       <div style="color:rgba(212,168,67,.4);font-size:26px;font-weight:900">──────▶</div>
-      <div style="text-align:center"><div style="font-size:56px">【emoji2】</div><div style="font-size:20px;color:var(--muted);margin-top:4px">【label2】</div></div>
+      <div style="text-align:center"><div style="font-size:56px">【emoji2】</div><div style="font-size:24px;color:var(--muted);margin-top:4px">【label2】</div></div>
       <div style="color:rgba(212,168,67,.4);font-size:26px;font-weight:900">──────▶</div>
-      <div style="text-align:center"><div style="font-size:56px">【emoji3】</div><div style="font-size:20px;color:var(--muted);margin-top:4px">【label3】</div></div>
+      <div style="text-align:center"><div style="font-size:56px">【emoji3】</div><div style="font-size:24px;color:var(--muted);margin-top:4px">【label3】</div></div>
       <div style="color:rgba(212,168,67,.4);font-size:26px;font-weight:900">──────▶</div>
-      <div style="text-align:center"><div style="font-size:56px">【emoji4】</div><div style="font-size:20px;color:var(--muted);margin-top:4px">【label4】</div></div>
+      <div style="text-align:center"><div style="font-size:56px">【emoji4】</div><div style="font-size:24px;color:var(--muted);margin-top:4px">【label4】</div></div>
     </div>
   </div>
 
@@ -127,18 +127,18 @@
       <!-- 每个 pill flex:1，高度自然撑开，标题 36px -->
       <div class="g 【卡片主题 class】" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
         <div style="font-size:44px">【emoji】</div>
-        <div style="font-size:36px;font-weight:800;color:var(--accent-b)">【Pill 标题】</div>
-        <div style="font-size:28px;color:var(--muted)">【副说明】</div>
+        <div style="font-size:40px;font-weight:800;color:var(--accent-b)">【Pill 标题】</div>
+        <div style="font-size:32px;color:var(--muted)">【副说明】</div>
       </div>
       <div class="g 【卡片主题 class】" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
         <div style="font-size:44px">【emoji】</div>
-        <div style="font-size:36px;font-weight:800;color:var(--accent-a)">【Pill 标题】</div>
-        <div style="font-size:28px;color:var(--muted)">【副说明】</div>
+        <div style="font-size:40px;font-weight:800;color:var(--accent-a)">【Pill 标题】</div>
+        <div style="font-size:32px;color:var(--muted)">【副说明】</div>
       </div>
       <div class="g 【卡片主题 class】" style="flex:1;padding:22px 32px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
         <div style="font-size:44px">【emoji】</div>
-        <div style="font-size:36px;font-weight:800;color:var(--sky)">【Pill 标题】</div>
-        <div style="font-size:28px;color:var(--muted)">【副说明】</div>
+        <div style="font-size:40px;font-weight:800;color:var(--sky)">【Pill 标题】</div>
+        <div style="font-size:32px;color:var(--muted)">【副说明】</div>
       </div>
     </div>
     <!-- 来源行（IN FLOW） -->
@@ -225,36 +225,36 @@
 <!-- ✅ grid 直接是 .s 的 flex 子元素，flex:1 吃满全部高度 -->
 <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;flex:1;width:100%">
 
-  <!-- 每格：emoji 84px + 标题 52px + 正文 38px，合计约 340px，格子 505px，填充 67% + padding -->
-  <div class="g 【主题 class】" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+  <!-- 每格：emoji 84px + 标题 52px + 正文 42px，合计约 340px，格子 ~476px，填充 ~71% + padding -->
+  <div class="g 【主题 class】" style="padding:28px 32px;display:flex;align-items:flex-start;gap:22px">
     <div style="font-size:84px;line-height:1;flex-shrink:0">【emoji】</div>
     <div>
       <div style="font-size:52px;font-weight:900;color:【颜色】;margin-bottom:10px">【格子标题】</div>
-      <div style="font-size:38px;color:var(--muted);line-height:1.55">【说明，2~3 行，strong 高亮】</div>
+      <div style="font-size:42px;color:var(--muted);line-height:1.55">【说明，2~3 行，strong 高亮】</div>
     </div>
   </div>
 
-  <div class="g 【主题 class】" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+  <div class="g 【主题 class】" style="padding:28px 32px;display:flex;align-items:flex-start;gap:22px">
     <div style="font-size:84px;line-height:1;flex-shrink:0">【emoji】</div>
     <div>
       <div style="font-size:52px;font-weight:900;color:【颜色】;margin-bottom:10px">【格子标题】</div>
-      <div style="font-size:38px;color:var(--muted);line-height:1.55">【说明，2~3 行，strong 高亮】</div>
+      <div style="font-size:42px;color:var(--muted);line-height:1.55">【说明，2~3 行，strong 高亮】</div>
     </div>
   </div>
 
-  <div class="g 【主题 class】" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+  <div class="g 【主题 class】" style="padding:28px 32px;display:flex;align-items:flex-start;gap:22px">
     <div style="font-size:84px;line-height:1;flex-shrink:0">【emoji】</div>
     <div>
       <div style="font-size:52px;font-weight:900;color:【颜色】;margin-bottom:10px">【格子标题】</div>
-      <div style="font-size:38px;color:var(--muted);line-height:1.55">【说明，2~3 行，strong 高亮】</div>
+      <div style="font-size:42px;color:var(--muted);line-height:1.55">【说明，2~3 行，strong 高亮】</div>
     </div>
   </div>
 
-  <div class="g 【主题 class】" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+  <div class="g 【主题 class】" style="padding:28px 32px;display:flex;align-items:flex-start;gap:22px">
     <div style="font-size:84px;line-height:1;flex-shrink:0">【emoji】</div>
     <div>
       <div style="font-size:52px;font-weight:900;color:【颜色】;margin-bottom:10px">【格子标题】</div>
-      <div style="font-size:38px;color:var(--muted);line-height:1.55">【说明，2~3 行，strong 高亮】</div>
+      <div style="font-size:42px;color:var(--muted);line-height:1.55">【说明，2~3 行，strong 高亮】</div>
     </div>
   </div>
 
@@ -284,26 +284,26 @@
   <div class="row g" style="align-items:center;gap:20px;padding:16px 28px;flex-shrink:0">
     <div class="chip 【class】" style="flex-shrink:0">【badge】</div>
     <div style="font-size:64px;font-weight:900;line-height:1;flex:1">【页面标题】</div>
-    <div style="font-size:30px;color:var(--muted);text-align:right;flex-shrink:0;line-height:1.4">【2 行辅助说明】</div>
+    <div style="font-size:34px;color:var(--muted);text-align:right;flex-shrink:0;line-height:1.4">【2 行辅助说明】</div>
   </div>
 
   <!-- 两大数字卡（flex:1 row 吃满剩余高度） -->
   <div class="row f1" style="gap:14px">
     <div class="g g-hi f1" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:14px">
-      <div style="font-size:28px;color:var(--muted);letter-spacing:2px;font-weight:700">【指标名称】</div>
+      <div style="font-size:34px;color:var(--muted);letter-spacing:2px;font-weight:700">【指标名称】</div>
       <!-- 超大数字：170px -->
       <div style="font-size:170px;font-weight:900;line-height:1;background:linear-gradient(135deg,var(--accent-a),var(--accent-al),var(--accent-b));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">【数字】</div>
       <div style="font-size:40px;color:var(--muted);font-weight:700">【涵义，如"↓ 大幅下降"】</div>
       <div style="height:1px;width:80%;background:linear-gradient(90deg,transparent,rgba(212,168,67,.2),transparent)"></div>
-      <div style="font-size:32px;color:var(--muted);text-align:center;line-height:1.55">【2 行解释】</div>
+      <div style="font-size:36px;color:var(--muted);text-align:center;line-height:1.55">【2 行解释】</div>
     </div>
 
     <div class="g g-hi f1" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:14px">
-      <div style="font-size:28px;color:var(--muted);letter-spacing:2px;font-weight:700">【指标名称】</div>
+      <div style="font-size:34px;color:var(--muted);letter-spacing:2px;font-weight:700">【指标名称】</div>
       <div style="font-size:170px;font-weight:900;line-height:1;background:linear-gradient(135deg,var(--accent-al),var(--accent-c));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">【数字】</div>
       <div style="font-size:40px;color:var(--muted);font-weight:700">【涵义】</div>
       <div style="height:1px;width:80%;background:linear-gradient(90deg,transparent,rgba(212,168,67,.2),transparent)"></div>
-      <div style="font-size:32px;color:var(--muted);text-align:center;line-height:1.55">【2 行解释】</div>
+      <div style="font-size:36px;color:var(--muted);text-align:center;line-height:1.55">【2 行解释】</div>
     </div>
   </div>
 
@@ -333,7 +333,7 @@
   <div class="row g" style="align-items:center;gap:20px;padding:14px 26px;flex-shrink:0">
     <div class="chip 【class】" style="flex-shrink:0">【badge】</div>
     <div style="font-size:60px;font-weight:900;line-height:1;flex:1">【页面标题】</div>
-    <div style="font-size:26px;color:var(--muted);flex-shrink:0;font-weight:700">【如 "1/2"】</div>
+    <div style="font-size:30px;color:var(--muted);flex-shrink:0;font-weight:700">【如 "1/2"】</div>
   </div>
 
   <!-- 两大卡（flex:1 吃满剩余高度） -->
@@ -379,8 +379,8 @@
 □ 3. Cover 用 justify-content:space-between，三段全在流中
 □ 4. Grid 2×2 直接是 flex 子元素，无外层 header div
 □ 5. Slim header 仅一行（badge + 标题 + 辅助文字同行）
-□ 6. 卡片标题 ≥ 52px，卡片正文 ≥ 38px，Cover pill 标题 ≥ 36px
-□ 7. 任何正文（说明、注释）≥ 28px，无例外
+□ 6. 卡片标题 ≥ 52px，卡片正文 ≥ 42px，Cover pill 标题 ≥ 40px
+□ 7. 任何正文（说明、注释）≥ 32px，无例外
 □ 8. .wa 存在且包含该页口播关键词
 □ 9. 若内容感觉"撑不满"：先加大字号，再考虑拆页
 □ 10. 无动画、无 transition（截图是静态的）
