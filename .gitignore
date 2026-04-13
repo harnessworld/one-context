@@ -14,14 +14,18 @@ __pycache__/
 dist/
 build/
 
-# Skills (local npm install under skills/)
-skills/**/node_modules/
+# Node — all node_modules everywhere
+**/node_modules/
 
+<<<<<<< HEAD
 # Node (repo root / feature production sandboxes — do not commit)
 node_modules/
 
 # Node (skills: html-video-from-slides CLI)
 skills/html-video-from-slides/node_modules/
+=======
+# Node cache
+>>>>>>> origin/main
 skills/html-video-from-slides/.cache/
 
 # Feature pipelines: local npm installs; wav/tts 中间文件（cli 写入 production/tmp/）
@@ -45,15 +49,22 @@ skills/.skills_store_lock.json
 # Local env (proxy, etc.); README "Network / HTTP proxy"
 .env
 
-# Video assets (large binaries; do not commit)
+# Features: production/ directories are build artifacts (covers, srt, JSON, node_modules, etc.)
+features/**/production/
+
+# Features: temporary build artifacts
+features/**/temp_*/
+features/**/scratch/
+tmp/
+
+# Ad-hoc scripts with _ prefix (fix, search, test, etc.)
+_*_*.py
+_*-*.txt
+_search*.cjs
+
+# Video media files (generated, not for repo)
 *.mp4
 *.webm
-*.mov
-*.mkv
-*.avi
-*.m4v
-*.wmv
-*.flv
 *.wav
 
 # OS
@@ -73,8 +84,7 @@ memory/*
 
 # Generated tool configs (run `onecxt adapt` locally)
 # These are local-first: each developer generates their own
-.cursor/rules/onecxt-*.mdc
-.cursor/rules/agent-*.mdc
+.cursor/rules/
+!.cursor/rules/.gitkeep
 .claude/
-!.claude/agents/
 CLAUDE.md

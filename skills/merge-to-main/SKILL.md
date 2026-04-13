@@ -1,0 +1,123 @@
+---
+name: merge-to-main
+description: >-
+  将功能分支上「伞仓基础设施」类改动选择性合并到主干（main）：按 one-context
+  约定把路径分为可合（文档/框架/工具/技能）与不可合（业务资产与个人配置），向用户展示清单并征求意见；
+  仅在用户明确确认后执行 git 提交与推送。用户提到「合并到主干、合 main、选择性合并、哪些能进
+  trunk」时使用。
+---
+
+# 选择性合并到主干（one-context）
+
+## 目标
+
+把源分支（如 `superno`、功能分支）上 **属于伞仓本体** 的改动合入 **`main`**，**排除** 带业务属性或个人化的内容；**先咨询、后执行**，且 **仅在用户明确确认后** 才运行会改写历史的 `git commit` / `git push`。
+
+## 权威原则（与 `AGENTS.md`、`features/README.md` 一致）
+
+| 类别 | 含义 | 默认是否合入 `main` |
+|------|------|---------------------|
+| **文档** | 给人与工具读的约定：`README.md`、`knowledge/`、`docs/`、`AGENTS.md`、贡献说明等 | **可合** |
+| **框架** | 伞仓元数据与编排：`meta/*.yaml`（`repos` / `workspaces` / `profiles` / `agents` 等）、与多仓协作相关的顶层约定 | **可合** |
+| **工具** | 可安装的 CLI 与库：`packages/one-context/**`（含测试）；为工具链服务的 `.gitignore` 等 | **可合** |
+| **技能** | 跨工具可执行流程：`skills/**`；以及 **仅当** 内容为「技能/平台能力」说明时的 `features/core/skill-*/spec.md` | **可合** |
+| **业务属性** | 特定产品/项目的交付物与运营叙事：例如某条视频的 `production/` 下大体积素材、字幕成片、口播工程树；客户或项目专有且不宜共享的交付文档；**根目录个人 Agent 配置**（如 `HEARTBEAT.md`、`IDENTITY.md`、`SOUL.md`、`USER.md`、`TOOLS.md`、`canvas-philosophy.md`、个人 `cover.*`） | **默认不合** |
+| **灰区** | `features/develop/**` 下偏「知识整理」的规格（源码解析笔记等）、或混合了业务资产与文档的目录 | **须逐项问用户** |
+
+**硬规则**
+
+- 不得把 **密钥、token、未脱敏客户信息** 合入 `main`。
+- **任何** `git push`（尤其 `main`）与 **删除** 远端可见内容，须在对话中得到 **用户明确确认**（例如用户回复「确认按此清单合并并推送」）。
+- 若用户只同意部分路径，**只 checkout 那些路径**，不要整分支 `merge` 进 `main`（避免把业务文件带进来）。
+
+## 何时触发
+
+用户表达类似：**合并到主干、合进 main、选择性合并、从某分支挑内容合 main、哪些能进 trunk** 等。
+
+## 执行流程（代理须按序）
+
+### 1. 收集参数
+
+- **源分支**：默认当前分支；若用户指定则用指定分支（如 `superno`）。
+- **目标分支**：默认 `main`。
+- **仓库根**：`one-context` 克隆根（含 `meta/`、`packages/`、`skills/`）。
+
+若不在 git 仓库或目标分支不存在 → 说明并停止。
+
+### 2. 生成差异清单
+
+在仓库根执行（将 `SOURCE` 换成源分支名）：
+
+```bash
+git fetch origin
+git diff --name-status origin/main...SOURCE
+```
+
+（若本地已更新，也可用 `main...SOURCE`。）
+
+### 3. 分类每一行
+
+对 `A`/`M`/`D`/`R` 的每个路径，标为：
+
+- **合**：符合上表「文档 / 框架 / 工具 / 技能」且无明显业务专有资产。
+- **不合**：符合「业务属性」或根目录个人配置。
+- **问**：灰区或路径同时含可合与不合子树（例如某 `features/develop/*` 下既有 `spec.md` 又有 `production/videos/`）。
+
+输出 **Markdown 表格** 给用户：`路径 | 状态(合/不合/问) | 一行理由`。
+
+对 **`features/INDEX.md`**：若只合入部分 `features/`，**禁止** 直接整文件替换成源分支版本（避免把未合并需求的索引行写进 `main`）。应 **在 `main` 当前版本上仅追加/修改与本次「合」条目相关的行**，或把「合」与「不合」的索引拆成用户可见说明，请用户确认后再改索引。
+
+### 4. 咨询用户
+
+用简短摘要提问，例如：
+
+- 是否同意 **「合」** 列表？
+- **「问」** 条目用户希望算合还是不合？
+- 是否 **推送 `origin/main`**？
+
+**在收到明确确认前**，不要执行步骤 5。
+
+### 5. 确认后的 Git 操作（选择性检出）
+
+在本地 `main` 上（先 `git checkout main` 并 `git pull origin main`）：
+
+```bash
+git checkout main
+git pull origin main
+# 将 PATHS 换成本次确认要合入的路径列表（空格分隔）
+git checkout SOURCE -- PATHS...
+git add -A
+# 若改了 packages/one-context：运行 pytest tests/test_cli.py tests/test_context.py 等相关测试
+# 若改了 meta：运行 onecxt doctor 或 python -m one_context doctor
+git commit -m "feat: selective merge from SOURCE (docs/framework/tools/skills)"
+git push origin main
+```
+
+- 若用户 **只确认合并、不确认推送**：执行到 `commit` 为止，不 `push`。
+- **不要** `git push --force` 到 `main`，除非用户用原话明确要求且你已再次说明风险。
+
+### 6. 收尾
+
+- 汇报：已合入路径、未合入路径、是否已推送。
+- 若源分支仍需保留业务文件 → 提醒用户业务内容仍在源分支，仅 `main` 保持伞仓边界。
+
+## 示例（分类示意）
+
+| 路径 | 建议 |
+|------|------|
+| `packages/one-context/one_context/cli.py` | 合（工具） |
+| `skills/html-video-from-slides/SKILL.md` | 合（技能） |
+| `meta/repos.yaml` | 合（框架）；若含明显私密 URL 先问 |
+| `features/core/skill-foo/spec.md` | 合（技能伞状规格） |
+| `features/develop/one-context-intro-short-video/production/videos/*.png` | 不合（业务资产） |
+| `SOUL.md`（仓库根） | 不合（个人配置） |
+| `knowledge/playbooks/foo.md` | 合（文档） |
+
+## 与「整分支 merge」的区别
+
+- **`git merge SOURCE`**：会把源分支上 **所有** 提交与文件带入，**不适合** 本工作流。
+- **`git checkout SOURCE -- <paths>`**：只引入确认的路径，符合「咨询后选择性合并」。
+
+---
+
+**摘要**：先 `diff` 分类 → 表格 + 问清灰区 → 用户 **明确确认** → 再对 `main` 做路径级检出、测试与 `doctor`（如适用）→ 提交与（可选）推送。

@@ -6,6 +6,7 @@ Optional **local git clones** of upstream repositories used as reference materia
 
 | Path | Declared in | Upstream |
 |------|-------------|----------|
+| `awesome-design-md/` | `repos.yaml` → `path: external/awesome-design-md` | [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) |
 | `claude-code-best-practice/` | `repos.yaml` → `path: external/claude-code-best-practice` | [shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice) |
 
 ## Get or update the clone
@@ -13,6 +14,7 @@ Optional **local git clones** of upstream repositories used as reference materia
 From the one-context root (after `pip install -e ./packages/one-context` if needed):
 
 ```text
+onecxt sync awesome-design-md
 onecxt sync claude-code-best-practice
 ```
 

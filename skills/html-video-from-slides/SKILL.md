@@ -23,20 +23,108 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 
 幻灯按 **1920×1080** 视口截图。
 
-## 制作 presentation.html（视觉规范）
+## 制作 presentation.html（核心工作流）
 
-**先读以下两份文档，再开始写 HTML**：
+**核心原则：每张 slide 独立组合，不要千篇一律。**
 
-| 文档 | 作用 |
-|------|------|
-| `DESIGN-STANDARD.md`（同目录） | 字号规范、信息密度、主题系统、反模式列表、新建流程 |
-| `TEMPLATES.md`（同目录） | 5 种布局的可复制 HTML 模板 + Minimum Fill Table + AI 生成 Checklist |
+三層素材库让你自由组合 → 每期视频视觉自然不同：
 
-**核心约束**（详见上述文档）：
-- 每张 slide 画面覆盖率 ≥ 85%
+| 层 | 来源 | 作用 |
+|----|------|------|
+| **砖头** | `base.css` | 共享类名（玻璃卡 / chip / 字号 / orb / 光晕）——不需要写 CSS |
+| **图纸** | `TEMPLATES.md` | 5 种布局骨架——每张 slide 选不同布局 |
+| **插图** | `svg-snippets.md` | 8 种 SVG 图形——每张 slide 选不同图形 |
+| **皮色** | `theme-*.css` | 3 套配色/纹理——整期视频统一气质 |
+
+### 第一步：准备 CSS 文件
+
+```bash
+cp skills/html-video-from-slides/base.css <素材目录>/
+cp skills/html-video-from-slides/theme-tech.css <素材目录>/   # 三选一
+# cp skills/html-video-from-slides/theme-animal.css <素材目录>/
+# cp skills/html-video-from-slides/theme-wenyan.css <素材目录>/
+```
+
+CSS 文件与 presentation.html 放同一目录，`<link>` 用相对路径。
+
+### 第二步：选主题（三选一）
+
+| 主题 CSS | 视觉风格 | 适用话题 |
+|----------|----------|----------|
+| `theme-tech.css` | 深空蓝紫 + 玻璃拟态 + 光晕 | 架构、系统、AI/技术 |
+| `theme-animal.css` | 深林绿黑 + 金/绿/橙 + 蜂巢纹理 | 工程、动物隐喻、系统设计 |
+| `theme-wenyan.css` | 宣纸黑黄 + 朱砂红/墨绿 + 噪点 | 中文故事、历史、哲学 |
+
+### 第三步：每张 slide 独立组合
+
+通读 SRT/讲稿，划分话题段落（建议 10–14 张，每张 30–50s）。**每张 slide 单独选择**：
+
+1. **选布局**（TEMPLATES.md）：Cover / Split / Grid 2×2 / Slim+大卡 / 两大卡 —— **相邻 slide 不要用同一布局**
+2. **选图形**（svg-snippets.md）：架构分层图 / 循环图 / 对比面板 / 数据环 / 时间线 / 流程图 / 数值箭头 / 矩阵堆叠 —— **同一期视频尽量不重复用同一种**
+3. **选卡片/芯片配色**（base.css）：每张 slide 用不同的 `g-*`（g-hi/g-gn/g-or/g-sk/g-rd/g-purple）+ `ch-*`（ch-a/ch-b/ch-c/ch-sk/ch-rd/ch-gn/ch-purple/ch-g）组合
+4. **填内容**：标题、正文（≤120 汉字）、`.wa` 锚文字
+5. **加装饰**：每张 slide 至少 1 个 orb 光晕 + 1 个 `.gd` 或 `.gf` 网格背景
+
+### 第四步：组装 HTML
+
+每个 presentation.html 必须包含以下骨架（`reference.html` 展示了完整示例，仅作结构参考，**不要直接复制后填空**）：
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1">
+<title>视频标题</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="theme-tech.css">  <!-- 三选一 -->
+<style>/* 此处仅放本视频专属覆盖 */</style>
+</head>
+<body>
+<div id="prog" style="width:0%"></div>
+<div id="P">
+  <!-- 每张 slide 用 TEMPLATES.md 布局 + svg-snippets.md 图形 组合 -->
+  <div class="s on" id="s0">...</div>
+  <div class="s" id="s1">...</div>
+  ...
+</div>
+<div id="pn"></div>
+<script>
+(function(){
+var PW=1920,PH=1080;
+function fit(){var el=document.getElementById('P'),r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;el.style.transform='scale('+r+')';el.style.transformOrigin='0 0';el.style.left=x+'px';el.style.top=y+'px'}
+window.addEventListener('resize',fit);fit();
+var slides=document.querySelectorAll('.s'),total=slides.length,cur=0;
+function ui(){document.getElementById('pn').textContent=(cur+1)+' / '+total;var b=document.getElementById('prog');if(b)b.style.width=(cur/(total-1)*100)+'%'}
+function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('on');cur=i;slides[cur].classList.add('on');ui()}
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1)}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}});
+document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1)});
+ui();
+})();
+</script>
+</body>
+</html>
+```
+
+### 第五步：验证核心约束
+
+- 每张 slide 画面覆盖率 ≥ 85%（对照 TEMPLATES.md Minimum Fill Table）
 - 卡片/大图布局用 `justify-content:space-between`（不用 `center`）
 - 禁止 `<br>` 空行当间距，禁止内容区用 `position:absolute`
 - 总字数 ≤ 120 汉字/张
+- 相邻 slide 布局不同、图形不重复
+- **8 张以上 slide 的视频，必须至少用到 3 种不同布局和 3 种不同 SVG 图形**
+
+### 参考文档
+
+| 文档 | 作用 |
+|------|------|
+| `base.css` | 类名词典——所有可用 class 及其效果 |
+| `TEMPLATES.md` | 5 种布局骨架 + Minimum Fill Table + AI Checklist |
+| `svg-snippets.md` | 8 种可复用 SVG 图形片段 |
+| `theme-*.css` | 主题变量包（颜色 / 字体 / 背景 / orb 辉光 / chip 色） |
+| `reference.html` | 完整 HTML 结构示范（仅参考，不直接复制） |
+| `DESIGN-STANDARD.md` | 字号规范、信息密度、反模式列表 |
 
 ---
 

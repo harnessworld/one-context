@@ -1,0 +1,91 @@
+/*
+ * theme-wenyan.css — 古文宣纸水墨主题
+ *
+ * 视觉：暖米黄/宣纸底 + 朱砂红 + 墨绿 + 金 + 噪点纸纹
+ * 适用：中文故事、历史、哲学、文言文话题
+ * 参考：claude-caveman-mode 产品级产出
+ */
+
+:root{
+  /* ── 背景 ── */
+  --bg:#1a1208;
+  --bg-pattern:
+    radial-gradient(ellipse 90% 70% at 20% 0%,rgba(180,120,40,0.08),transparent 55%),
+    radial-gradient(ellipse 70% 60% at 80% 100%,rgba(140,80,20,0.06),transparent 55%),
+    #1a1208;
+
+  /* ── 主色调 ── */
+  --accent-a:#d4a843;       /* 金色 */
+  --accent-al:#e8c468;      /* 亮金 */
+  --accent-b:#7d9c6c;       /* 墨绿 */
+  --accent-c:#c0392b;       /* 朱砂红 */
+
+  /* ── 语义色 ── */
+  --sky:#60A5FA;
+  --green:#7d9c6c;
+  --danger:#c0392b;
+  --purple:#A78BFA;
+  --warn:#e8c468;
+
+  /* ── 文字 ── */
+  --cream:#e8d5b0;
+  --muted:#a89070;
+  --dim:#7a6848;
+
+  /* ── 卡片 ── */
+  --card:rgba(200,160,80,0.05);
+  --bdr:rgba(200,150,60,0.12);
+  --glass-blur:16px;
+
+  /* ── 字体 ── */
+  --font:'STKaiti','KaiTi','Noto Serif SC','SimSun',serif;
+
+  /* ── Chip 主题色 ── */
+  --tag-bg-a:rgba(212,168,67,0.12);--tag-bdr-a:rgba(212,168,67,0.4);
+  --tag-bg-b:rgba(125,156,108,0.12);--tag-bdr-b:rgba(125,156,108,0.4);
+  --tag-bg-c:rgba(192,57,43,0.12);--tag-bdr-c:rgba(192,57,43,0.4);
+  --tag-bg-sk:rgba(96,165,250,0.12);--tag-bdr-sk:rgba(96,165,250,0.4);
+  --tag-bg-rd:rgba(192,57,43,0.12);--tag-bdr-rd:rgba(192,57,43,0.4);
+  --tag-bg-gn:rgba(125,156,108,0.12);--tag-bdr-gn:rgba(125,156,108,0.4);
+  --tag-bg-purple:rgba(139,92,246,0.12);--tag-bdr-purple:rgba(139,92,246,0.4);
+
+  /* ── 渐变文字 ── */
+  --grad-hero:linear-gradient(135deg,#d4a843 0%,#e8c468 30%,#e8d5b0 60%,#7d9c6c 100%);
+  --grad-stat:linear-gradient(135deg,var(--accent-a),var(--accent-al),var(--accent-b));
+
+  /* ── Orb 辉光色 ── */
+  --orb-a:radial-gradient(circle,rgba(212,168,67,0.10),transparent 70%);
+  --orb-b:radial-gradient(circle,rgba(125,156,108,0.08),transparent 70%);
+  --orb-c:radial-gradient(circle,rgba(192,57,43,0.06),transparent 70%);
+  --orb-d:radial-gradient(circle,rgba(180,120,40,0.07),transparent 70%);
+
+  /* ── 水印透明度 ── */
+  --wm-opacity:0.03;
+}
+
+/* 宣纸噪点纹理 */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:var(--bg-pattern,var(--bg));
+  pointer-events:none
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+  pointer-events:none
+}
+
+.animal-wm{color:var(--accent-a)}
+
+/* 文言文特别：标题加 text-shadow 墨韵 */
+.t1,.t2{letter-spacing:4px;text-shadow:0 0 40px rgba(212,168,67,0.3),0 4px 12px rgba(0,0,0,0.8)}
+
+/* 墨线装饰符 */
+.ink-line{width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(212,168,67,0.5),transparent);margin:0 auto 14px}
+
+/* 印章效果 */
+.seal{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 22px;border-radius:4px;
+  font-size:18px;font-weight:700;
+  background:rgba(125,156,108,0.1);color:var(--accent-b);border:1px solid rgba(125,156,108,0.3)
+}
