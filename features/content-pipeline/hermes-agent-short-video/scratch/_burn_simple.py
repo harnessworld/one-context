@@ -5,7 +5,7 @@ _SCRATCH = pathlib.Path(__file__).resolve().parent
 PROD = pathlib.Path(r"D:\harnessworld\one-context\features\develop\hermes-agent-short-video\production")
 video = str(PROD / "final_auto.mp4")
 out = str(PROD / "final_auto_sub.mp4")
-tmp_dir = str(PROD / "temp_video_wav")
+tmp_dir = str(PROD / "tmp")
 
 cfg = json.loads((PROD / "video-input.json").read_text(encoding="utf-8"))
 replacements = cfg.get("srtReplacements", [])

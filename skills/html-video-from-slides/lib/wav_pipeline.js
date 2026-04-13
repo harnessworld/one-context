@@ -49,7 +49,7 @@ async function run(projectRoot, skillDir, options = {}) {
   void skillDir;
   const HTML_FILE = path.join(projectRoot, 'presentation.html');
   const CONFIG_FILE = path.join(projectRoot, 'wav-durations.json');
-  const TEMP_DIR = path.join(projectRoot, 'temp_video_wav');
+  const TEMP_DIR = path.join(projectRoot, 'tmp');
 
   let cfg = options.cfg;
   if (!cfg) {

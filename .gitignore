@@ -24,9 +24,12 @@ node_modules/
 skills/html-video-from-slides/node_modules/
 skills/html-video-from-slides/.cache/
 
-# Feature pipelines: local npm installs and ffmpeg temp
+# Feature pipelines: local npm installs; wav/tts 中间文件（cli 写入 production/tmp/）
 features/**/production/node_modules/
+features/**/production/tmp/
+# 旧版目录名，若本地仍有残留则继续忽略
 features/**/production/temp_video_wav/
+features/**/production/temp_video/
 
 # Local CLI / scratch (repo root)
 .opencli/

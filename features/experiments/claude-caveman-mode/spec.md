@@ -29,7 +29,7 @@ updated: 2026-04-05
 - [x] 竖版封面生成（1080×1920）→ `production/videos/cover.png`
 - [x] 横版封面生成（1440×1080）→ `production/videos/cover_h.png`（由 `cover_h.html` + 视频工厂 `gen_cover_h.js` 导出）
 - [x] Whisper 转写生成 SRT 字幕 → `production/sub.srt`（口播对齐阶段生成；`video-input.json` 指定 `srtFile` 供烧录）
-- [x] 字幕校对后烧录（已修正明显错字如「摸尾→末尾」；首条文案与口播对齐；用 `temp_video_wav/merged.mp4` + 当前 `sub.srt` 重烧 `final_auto.mp4`）
+- [x] 字幕校对后烧录（已修正明显错字如「摸尾→末尾」；首条文案与口播对齐；用 `tmp/merged.mp4` + 当前 `sub.srt` 重烧 `final_auto.mp4`）
 - [x] final_auto.mp4 生成 → `production/final_auto.mp4`
 
 # 实现落点

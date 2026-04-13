@@ -2,7 +2,7 @@
 """诊断 ffmpeg ass filter Windows 路径 bug"""
 import subprocess, pathlib, os
 
-tmp = r"D:\harnessworld\one-context\features\develop\hermes-agent-short-video\production\temp_video_wav"
+tmp = r"D:\harnessworld\one-context\features\content-pipeline\hermes-agent-short-video\production\tmp"
 
 # Create minimal ASS file
 ass_content = (

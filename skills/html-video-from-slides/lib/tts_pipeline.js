@@ -2,7 +2,7 @@
 
 /**
  * presentation.html + 讲稿.md + Edge TTS → final.mp4
- * 临时文件：{projectRoot}/temp_video/
+ * 临时文件：{projectRoot}/tmp/
  */
 
 const { chromium } = require('playwright');
@@ -161,7 +161,7 @@ async function run(projectRoot, skillDir) {
     ? JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'))
     : {};
 
-  const TEMP_DIR = path.join(projectRoot, 'temp_video');
+  const TEMP_DIR = path.join(projectRoot, 'tmp');
   const HTML_FILE = path.join(projectRoot, cfg.input?.htmlFile ?? 'presentation.html');
   const SCRIPT_FILE = path.join(projectRoot, cfg.input?.scriptFile ?? '讲稿.md');
   const OUTPUT_MP4 = path.join(projectRoot, cfg.output?.file ?? 'final.mp4');

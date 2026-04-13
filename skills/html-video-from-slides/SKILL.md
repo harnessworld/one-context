@@ -118,9 +118,11 @@ node path/to/one-context/skills/html-video-from-slides/cli.js wav-auto --project
 
 | 模式 | 默认成片 | 临时目录 |
 |------|----------|----------|
-| tts | `final.mp4` | `<素材>/temp_video/` |
-| wav | `wav-durations.json` 内 `outputFile` | `<素材>/temp_video_wav/` |
+| tts | `final.mp4` | `<素材>/tmp/` |
+| wav | `wav-durations.json` 内 `outputFile` | `<素材>/tmp/` |
 | wav-auto | `final_auto.mp4`（`video-input.json` 可改） | 同上 + 技能目录 `.cache/`（可删） |
+
+说明：`<素材>` 一般为 `…/production/`。中间帧、分段音视频、`concat.txt` 等均写入 **`tmp/`**，可整夹删除；勿把成片唯一信源只放在 `tmp/`。
 
 ## 故障排除
 

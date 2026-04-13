@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>横版封面 · Agent Harness</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 1440px; height: 1080px; overflow: hidden; font-family: 'Helvetica Neue','Microsoft YaHei','PingFang SC',sans-serif; background: #05050a; }
+#cover { position: relative; width: 1440px; height: 1080px; overflow: hidden; }
+#bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+#bg-fallback { position: absolute; inset: 0; }
+#overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(3,3,8,0.88) 0%, rgba(3,3,8,0.35) 25%, rgba(3,3,8,0.12) 48%, rgba(3,3,8,0.12) 52%, rgba(3,3,8,0.35) 75%, rgba(3,3,8,0.88) 100%); }
+#noise { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"); pointer-events: none; }
+#grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px); background-size: 60px 60px; pointer-events: none; }
+
+.orb { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(80px); }
+#orb1 { width: 500px; height: 500px; background: radial-gradient(circle,rgba(99,102,241,0.18),transparent 70%); top: -150px; right: 10%; }
+#orb2 { width: 350px; height: 350px; background: radial-gradient(circle,rgba(56,189,248,0.12),transparent 70%); bottom: 50px; right: 30%; }
+#orb3 { width: 250px; height: 250px; background: radial-gradient(circle,rgba(52,211,153,0.10),transparent 70%); top: 20%; right: 50%; }
+
+#header { position: absolute; top: 0; left: 0; right: 0; padding: 48px 64px 0; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+#tagline { font-size: 22px; font-weight: 400; color: rgba(255,255,255,0.5); letter-spacing: 6px; }
+#brand { display: flex; align-items: center; gap: 14px; }
+#brand-name { font-size: 22px; font-weight: 600; color: rgba(255,255,255,0.75); letter-spacing: 3px; }
+#avatar { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.22); }
+#avatar-fallback { width: 54px; height: 54px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 26px; }
+
+#content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; justify-content: center; padding: 140px 80px 80px; z-index: 20; gap: 0; }
+#left-col { display: flex; flex-direction: column; }
+#tag { display: inline-block; font-size: 20px; font-weight: 600; letter-spacing: 7px; padding: 9px 26px; border-radius: 100px; margin-bottom: 28px; align-self: flex-start; }
+#emoji { font-size: 48px; margin-bottom: 16px; letter-spacing: 12px; }
+#headline { font-size: 130px; font-weight: 900; line-height: 1.05; letter-spacing: -3px; color: #ffffff; word-break: keep-all; margin-bottom: 20px; }
+#headline em { font-style: normal; }
+#subline { font-size: 40px; font-weight: 500; line-height: 1.5; color: rgba(255,255,255,0.70); letter-spacing: 3px; max-width: 700px; margin-bottom: 32px; }
+
+#cards { display: flex; gap: 16px; }
+.card { background: rgba(15,23,42,0.55); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 18px 24px; text-align: center; min-width: 180px; }
+.card-icon { font-size: 28px; margin-bottom: 8px; }
+.card-text { font-size: 18px; font-weight: 700; line-height: 1.35; }
+
+#right-col { position: absolute; right: 80px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 14px; }
+#sub-card { background: rgba(15,23,42,0.55); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px 26px; max-width: 320px; }
+#sub-card-title { font-size: 20px; font-weight: 700; color: #C4B5FD; margin-bottom: 8px; }
+#sub-card-text { font-size: 22px; color: rgba(255,255,255,0.65); line-height: 1.5; }
+#sub-card2 { background: rgba(15,23,42,0.55); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px 26px; max-width: 320px; }
+#sub-card2-title { font-size: 20px; font-weight: 700; color: #7DD3FC; margin-bottom: 8px; }
+#sub-card2-text { font-size: 22px; color: rgba(255,255,255,0.65); line-height: 1.5; }
+
+#footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 64px 36px; display: flex; justify-content: flex-end; z-index: 20; }
+#watermark { font-size: 18px; color: rgba(255,255,255,0.20); letter-spacing: 3px; }
+#accent-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, transparent 2%, #818CF8 30%, #38BDF8 60%, #34D399 80%, transparent 98%); }
+</style>
+</head>
+<body>
+<div id="cover">
+    <div class="orb" id="orb1"></div>
+    <div class="orb" id="orb2"></div>
+    <div class="orb" id="orb3"></div>
+    <img id="bg" src="" alt="">
+    <div id="bg-fallback"></div>
+    <div id="overlay"></div>
+    <div id="noise"></div>
+    <div id="grid"></div>
+    <div id="header">
+        <div id="tagline">ANTHROPIC AGENT</div>
+        <div id="brand">
+            <div id="brand-name">大厂吾师兄</div>
+            <img id="avatar" src="" onerror="this.style.display='none'" alt="">
+            <div id="avatar-fallback">🐶</div>
+        </div>
+    </div>
+    <div id="content">
+        <div id="left-col">
+            <div id="tag"></div>
+            <div id="emoji">🐾 🐱 → 🐕 → 🐄 → 🦅</div>
+            <div id="headline"></div>
+            <div id="subline"></div>
+            <div id="cards">
+                <div class="card"><div class="card-icon">🧠</div><div class="card-text">Harness 无状态大脑</div></div>
+                <div class="card"><div class="card-icon">🔄</div><div class="card-text">Agentic 循环</div></div>
+                <div class="card"><div class="card-icon">🛡️</div><div class="card-text">Sandbox 隔离执行</div></div>
+            </div>
+        </div>
+    </div>
+    <div id="right-col">
+        <div id="sub-card">
+            <div id="sub-card-title">🧠 LLM ≠ Agent</div>
+            <div id="sub-card-text">循环 + 工具 + 安全边界<br>才是真正的 Agent</div>
+        </div>
+        <div id="sub-card2">
+            <div id="sub-card2-title">🏗️ 三层解耦</div>
+            <div id="sub-card2-text">Session / Harness /<br>Sandbox 独立升级</div>
+        </div>
+    </div>
+    <div id="footer"><div id="watermark"></div></div>
+    <div id="accent-bar"></div>
+</div>
+<script>
+const CONFIG = {
+    headline:    "从宠物到牲口",
+    accentWord:  "从宠物到牲口",
+    subline:     "Agent Harness · Anthropic 架构革命",
+    tag:         "2026 · 技术分享",
+    bgImage:     "",
+    avatarImage: "",
+    watermark:   "",
+    theme:       "anthro",
+};
+
+const THEMES = {
+    anthro: {
+        accent:     "#818CF8",
+        accent2:    "#38BDF8",
+        tagBg:      "rgba(139,92,248,0.12)",
+        tagBorder:  "rgba(139,92,248,0.40)",
+        tagColor:   "#C4B5FD",
+        glowColor:  "rgba(99,102,241,0.25)",
+        glowColor2: "rgba(56,189,248,0.15)",
+        dotColor:   "#818CF8",
+        bar:        "linear-gradient(90deg, transparent 2%, #818CF8 30%, #38BDF8 60%, #34D399 80%, transparent 98%)",
+        textGlow:   "0 0 60px rgba(99,102,241,0.35), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #818CF8 0%, #6366F1 30%, #38BDF8 55%, #34D399 78%, #F0C14A 100%)",
+        fallbackBg: "radial-gradient(ellipse 100% 70% at 30% 50%, #0a1628 0%, #030712 40%, #050210 100%)",
+        cardColor:  "#C4B5FD",
+        cardColor2: "#7DD3FC",
+        cardColor3: "#6EE7B7",
+    },
+};
+
+(function render() {
+    const t = THEMES[CONFIG.theme] || THEMES.anthro;
+    const bgEl = document.getElementById('bg');
+    if (CONFIG.bgImage) { bgEl.src = CONFIG.bgImage; bgEl.onerror = () => { bgEl.style.display = 'none'; }; }
+    else { bgEl.style.display = 'none'; }
+    document.getElementById('bg-fallback').style.background = t.fallbackBg + `, radial-gradient(ellipse 60% 70% at 70% 50%, ${t.glowColor} 0%, transparent 60%), radial-gradient(ellipse 50% 60% at 20% 30%, ${t.glowColor2} 0%, transparent 60%)`;
+    if (CONFIG.avatarImage) { document.getElementById('avatar').src = CONFIG.avatarImage; document.getElementById('avatar-fallback').style.display = 'none'; }
+    else { document.getElementById('avatar').style.display = 'none'; }
+
+    const tagEl = document.getElementById('tag');
+    tagEl.textContent = CONFIG.tag;
+    tagEl.style.cssText += `background:${t.tagBg}; border:1.5px solid ${t.tagBorder}; color:${t.tagColor};`;
+
+    const headEl = document.getElementById('headline');
+    headEl.style.textShadow = t.textGlow;
+    headEl.innerHTML = `<em style="background:${t.accentGrad}; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">${CONFIG.headline}</em>`;
+
+    document.getElementById('subline').textContent = CONFIG.subline;
+
+    const cards = document.querySelectorAll('.card-text');
+    if (cards[0]) cards[0].style.color = t.cardColor;
+    if (cards[1]) cards[1].style.color = t.cardColor2;
+    if (cards[2]) cards[2].style.color = t.cardColor3;
+
+    const wEl = document.getElementById('watermark');
+    if (CONFIG.watermark) { wEl.textContent = CONFIG.watermark; wEl.style.display = ''; }
+    else { wEl.style.display = 'none'; }
+    document.getElementById('accent-bar').style.background = t.bar;
+})();
+</script>
+</body>
+</html>
