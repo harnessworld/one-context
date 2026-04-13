@@ -17,10 +17,12 @@
 | hermes-agent-short-video      | Hermes Agent 短视频口播成片（wav-auto）                          | develop  | draft  | `features/develop/hermes-agent-short-video/`      | one-context     |
 | anthropic-agent-harness-narration | Anthropic Agent Harness 哲学 — 口播稿                         | develop  | draft  | `features/develop/anthropic-agent-harness-narration/` | one-context |
 | damai-ticket-bot              | 大麦抢票助手 — 浏览器插件 + CLI 集成 one-context skill                 | develop  | draft  | `features/develop/damai-ticket-bot/`              | one-context     |
+| operator-spaces-paper-analysis | 算子空间论文深度分析 — 发现证明漏洞与改进机会 | research | in_progress | `features/research/operator-spaces-paper-analysis/` | paperwork |
 | skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill                     | core     | done   | `features/core/skill-windows-c-drive-cleanup/`    | one-context     |
 | unified-adapter-rules         | 统一适配器规则源 — 声明式 manifest，消除 PROFILE_RULES 重复          | core     | done   | `features/core/unified-adapter-rules/`            | one-context     |
 | ai-mid-mgmt-video             | AI 中视频管理 — 素材与发布工具链                                       | develop  | draft  | `features/develop/ai-mid-mgmt-video/`             | one-context     |
 | hermes-adapter                | Hermes Adapter — one-context 支持 Hermes Agent CLI                     | core     | draft  | `features/core/hermes-adapter/`                   | one-context     |
+| gsd-integration               | GSD 集成 — one-context 上下文注入 GSD 工作流                              | core     | draft  | `features/core/gsd-integration/`                  | one-context     |
 
 
 **Columns**
