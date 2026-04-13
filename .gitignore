@@ -17,9 +17,23 @@ build/
 # Skills (local npm install under skills/)
 skills/**/node_modules/
 
+# Node (repo root / feature production sandboxes — do not commit)
+node_modules/
+
 # Node (skills: html-video-from-slides CLI)
 skills/html-video-from-slides/node_modules/
 skills/html-video-from-slides/.cache/
+
+# Feature pipelines: local npm installs and ffmpeg temp
+features/**/production/node_modules/
+features/**/production/temp_video_wav/
+
+# Local CLI / scratch (repo root)
+.opencli/
+/_*.py
+/_*.ps1
+/_shots_*/
+skills/.skills_store_lock.json
 
 # Testing
 .coverage
