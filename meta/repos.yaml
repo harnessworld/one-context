@@ -39,6 +39,9 @@ repos:
   - url: https://github.com/CarmanMS/paperwork
     category: research
     description: paperwork
+  - url: https://github.com/CarmanMS/hangprofile
+    category: develop
+    description: Student learning & growth archive (课内/课外/原始材料/归纳); AI-friendly folder layout.
   - url: https://github.com/VoltAgent/awesome-design-md
     path: external/awesome-design-md
     id: awesome-design-md
