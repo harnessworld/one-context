@@ -2,6 +2,8 @@
 
 > 配合 `SKILL.md`（html-video-from-slides）使用。本文档定义所有口播视频 presentation.html 的**视觉规范与主题系统**。
 
+**姊妹约束（不重复全文）**：若幻灯以 **大量 inline 样式** 自包含排版（`slide-main`、`fill-deck`、整页 flex 等），**版式操作级**说明见 `skills/html-deck-layout/SKILL.md`（防空白、示意图区、与本文字号下限对齐）。
+
 ## 适用场景
 
 面向**短视频手机横屏观看**（1920×1080 截图合成 MP4），需要：
