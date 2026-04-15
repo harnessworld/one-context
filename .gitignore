@@ -2,8 +2,7 @@
 repos/**
 !repos/**/.gitkeep
 
-external/*
-!external/README.md
+
 
 # Python
 .venv/

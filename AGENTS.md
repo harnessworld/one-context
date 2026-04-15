@@ -11,7 +11,7 @@ This file provides guidance for AI coding tools (Cursor, Claude Code, Codex, etc
 - **`knowledge/`**: canonical standards, playbooks, prompts; layout in `knowledge/README.md`
 - **`skills/`**: cross-tool executable helpers (e.g. HTML slides → MP4); see `skills/README.md`
 - **`features/`**: umbrella-level feature specs; see `features/README.md` and `features/INDEX.md`
-- **`external/`**: optional **local clones** of upstream reference repos (declared in `meta/repos.yaml`, not committed); see `external/README.md`
+- **`repos/reference/`**: upstream reference repos (declared in `meta/repos.yaml` with `category: reference`, not committed); same sync model as other `repos/` categories
 - **`docs/`**: architecture docs and contributor templates
 
 ## Skill routing (mandatory)

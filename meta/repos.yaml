@@ -43,17 +43,17 @@ repos:
     category: develop
     description: Student learning & growth archive (课内/课外/原始材料/归纳); AI-friendly folder layout.
   - url: https://github.com/VoltAgent/awesome-design-md
-    path: external/awesome-design-md
+    category: reference
     id: awesome-design-md
     alias: awesome-design
     description: Curated DESIGN.md design-system snippets for agent-driven UI (reference only).
   - url: https://github.com/shanraisshan/claude-code-best-practice.git
-    path: external/claude-code-best-practice
+    category: reference
     id: claude-code-best-practice
     alias: ccbp
     description: Claude Code workflow demos (slash commands, agents, skills, development-workflows); local reference only, not bundled.
   - url: https://github.com/Cocoon-AI/architecture-diagram-generator
-    path: external/architecture-diagram-generator
+    category: reference
     id: arch-diagram-gen
     alias: archdiag
     description: Claude AI skill for generating dark-themed system architecture diagrams (HTML/SVG).
