@@ -327,6 +327,47 @@ def build_char_timeline(
     return big, times
 
 
+def _extract_keywords(s: str, min_len: int = 2) -> list[str]:
+    """从规范化文本中提取关键词（连续中文段 ≥ min_len 或英文单词）。"""
+    parts = re.findall(r'[a-z]+|[\u4e00-\u9fff]{2,}', s)
+    return [p for p in parts if len(p) >= min_len]
+
+
+def _keyword_match_pos(
+    keywords: list[str], big: str, cursor: int, min_ratio: float = 0.4
+) -> tuple[int, int] | None:
+    """
+    用关键词在 big[cursor:] 中找最佳匹配区间。
+    返回 (match_start, match_end) 或 None。
+    min_ratio: 关键词命中率阈值，低于此值视为不匹配。
+    """
+    if not keywords or cursor >= len(big):
+        return None
+    search_zone = big[cursor:]
+    n_kw = len(keywords)
+    # 每个关键词在搜索区域中首次出现的位置
+    hits: list[tuple[int, str]] = []
+    for kw in keywords:
+        pos = search_zone.find(kw)
+        if pos != -1:
+            hits.append((pos, kw))
+    if not hits:
+        return None
+    ratio = len(hits) / n_kw
+    if ratio < min_ratio:
+        return None
+    # 按 hit 位置排序，找连续匹配区间
+    hits.sort(key=lambda x: x[0])
+    # 取最早命中到最晚命中关键词结尾的区间
+    first_pos = hits[0][0]
+    last_kw = hits[-1][1]
+    last_end = hits[-1][0] + len(last_kw)
+    # 映射回 big 的绝对位置
+    abs_start = cursor + first_pos
+    abs_end = cursor + last_end
+    return (abs_start, abs_end)
+
+
 def align_slides_to_timeline(
     slide_texts: list[str], big: str, times: list[tuple[float, float]], audio_end: float
 ) -> tuple[list[float], list[str]]:
@@ -343,18 +384,32 @@ def align_slides_to_timeline(
             warnings.append(f"第 {i + 1} 页 HTML 几乎无文字，将用插值补时长")
             continue
 
+        # 策略 1：精确子串匹配
         idx = big.find(sn, cursor)
         matched_len = len(sn)
+        match_method = "exact"
         if idx == -1:
+            # 策略 2：前缀匹配（从长到短）
             for L in range(len(sn), max(1, min(len(sn), 16)), -1):
                 idx = big.find(sn[:L], cursor)
                 if idx != -1:
                     matched_len = L
+                    match_method = "prefix"
                     warnings.append(f"第 {i + 1} 页仅匹配前 {L} 字（ASR 可能与幻灯文案不完全一致）")
                     break
         if idx == -1:
-            warnings.append(f"第 {i + 1} 页在转写中未找到匹配，将用插值")
-            continue
+            # 策略 3：关键词模糊匹配
+            keywords = _extract_keywords(sn)
+            kw_result = _keyword_match_pos(keywords, big, cursor)
+            if kw_result is not None:
+                idx, end_pos = kw_result
+                matched_len = end_pos - idx
+                match_method = "keyword"
+                hit_ratio = len([kw for kw in keywords if kw in big[cursor:]]) / max(len(keywords), 1)
+                warnings.append(f"第 {i + 1} 页使用关键词模糊匹配（命中率 {hit_ratio:.0%}）")
+            else:
+                warnings.append(f"第 {i + 1} 页在转写中未找到匹配，将用插值")
+                continue
 
         hi = idx + matched_len - 1
         if hi >= len(times):

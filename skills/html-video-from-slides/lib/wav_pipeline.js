@@ -101,7 +101,7 @@ async function run(projectRoot, skillDir, options = {}) {
   await page.waitForTimeout(1500);
 
   const numSlides = await page.evaluate(
-    () => document.querySelectorAll('.slide').length
+    () => document.querySelectorAll('.s, .slide').length
   );
   if (slideDurations.length !== numSlides) {
     await browser.close();

@@ -28,16 +28,22 @@ async function extractSlideTexts(projectRoot) {
   await page.goto(pathToFileURL(html).href);
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1000);
-  const texts = await page.evaluate(() =>
-    Array.from(document.querySelectorAll('.slide')).map((s) =>
-      (s.innerText || '').replace(/\r/g, '\n').trim()
-    )
+  const result = await page.evaluate(() =>
+    Array.from(document.querySelectorAll('.s, .slide')).map((s) => {
+      const wa = s.querySelector('.wa');
+      const anchor = wa ? (wa.textContent || '').replace(/\r/g, '\n').trim() : '';
+      const full = (s.innerText || '').replace(/\r/g, '\n').trim();
+      return { anchor, full };
+    })
   );
   await browser.close();
-  if (texts.length === 0) {
-    throw new Error('HTML 中未找到 .slide');
+  if (result.length === 0) {
+    throw new Error('HTML 中未找到 slide 元素');
   }
-  return texts;
+  // slides 数组：优先用 .wa 锚文字（更短、更贴近口播），无则用整页 innerText
+  const slides = result.map((r) => r.anchor || r.full);
+  const anchors = result.map((r) => !!r.anchor);
+  return { slides, anchors };
 }
 
 function findWavPath(projectRoot, explicit) {
@@ -160,8 +166,9 @@ async function run(projectRoot, skillDir, options = {}) {
     `   烧录折行: ${wrapSubtitles ? `每行≤${cpl} 字` : '关闭（整段一行）'}\n`
   );
 
-  const slides = await extractSlideTexts(projectRoot);
-  console.log(`✅ 从 HTML 提取 ${slides.length} 页文案（用于与口播对齐）\n`);
+  const { slides, anchors } = await extractSlideTexts(projectRoot);
+  const anchorCount = anchors.filter(Boolean).length;
+  console.log(`✅ 从 HTML 提取 ${slides.length} 页文案（${anchorCount} 页有 .wa 锚文字，${slides.length - anchorCount} 页用全文）\n`);
 
   const cacheDir = path.join(skillDir, '.cache');
   fs.mkdirSync(cacheDir, { recursive: true });
