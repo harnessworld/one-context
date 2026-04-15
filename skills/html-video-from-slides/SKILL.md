@@ -233,94 +233,40 @@ node path/to/one-context/skills/html-video-from-slides/cli.js wav-auto --project
 
 ---
 
-## 封面生成（竖版 + 横版）
+## 封面生成
 
-竖版 **1080×1920** → `videos/cover.png`；横版 **1440×1080** → `videos/cover_h.png`。文案与配色在对应 HTML 的 **`CONFIG`** 里改。
+> **封面设计规范已独立为 `skills/cover-design/` skill**。制作封面前请先阅读该 skill，确保风格一致性。
 
-### 优先：项目自带脚本（本仓 feature 推荐）
-
-在**素材目录**（多为 `…/production/`）放置 `cover.html`、`cover_h.html`、`gen_cover.js`、`gen_cover_h.js`、`package.json`（`devDependencies` 含 `playwright`）。与口播项目同目录维护，不依赖本机固定盘符。
+### 快速命令
 
 ```bash
-cd <素材目录>   # 例如 features/develop/claude-caveman-mode/production
-npm install
-npx playwright install chromium   # 首次
-node gen_cover.js                 # → videos/cover.png
-node gen_cover_h.js               # → videos/cover_h.png
+# 竖版封面 (1080×1920)
+node cli.js cover --project <素材目录>
+
+# 横版封面 (1440×1080)
+node cli.js cover --project <素材目录> --horizontal
 ```
 
-参考实现：
+### 封面 Skill 引用
 
-- `features/develop/claude-caveman-mode/production/`（竖横一体、`theme: "wenyan"` 等与 `presentation.html` 纸墨色一致时可加 `body.theme-wenyan`）
-- `features/develop/one-context-intro-short-video/production/`（竖版 + `theme: "onecontext"`）
+封面设计详细规范见 **`skills/cover-design/`**：
 
-**竖版 CONFIG 要点：**
+| 文件 | 内容 |
+|------|------|
+| `SKILL.md` | 核心规范、画布规格、字号下限 |
+| `PRESETS.md` | 3 种预设风格（简约/科技/数据），开箱即用 HTML |
+| `ELEMENTS.md` | 组件库（Hero 标题、进化条、Pill 卡、光晕等） |
 
-```javascript
-const CONFIG = {
-    headline:    "主标题\n可选第二行",  // 每行 ≤6 字为宜，共 ≤2 行
-    accentLine:  1,
-    subline:     "副标题",
-    tag:         "2026 · 分类",
-    bgImage:     "",
-    avatarImage: "",
-    footerItems: ["亮点1", "亮点2"],
-    watermark:   "",
-    theme:       "tech",   // 或项目内定义的 wenyan / onecontext 等
-};
-```
+### 封面工作流
 
-**横版 CONFIG 要点：** 用 `accentWord` 高亮标题中的词；`infoItems` 为右侧条列。
-
-```javascript
-const CONFIG = {
-    headline:    "主标题",
-    accentWord:  "要高亮的词",
-    subline:     "副标题",
-    tag:         "2026 · 分类",
-    bgImage:     "",
-    avatarImage: "",
-    infoItems:   ["亮点1", "亮点2", "…"],
-    watermark:   "",
-    theme:       "wenyan",
-};
-```
-
-### 备选：VideoFactory 固定路径（旧环境）
-
-若本机仍有 `D:\自媒体\视频工厂\_工具`，可从 `_模板` 复制 `cover_template.html` / `cover_template_h.html` 为 `cover.html` / `cover_h.html`，再执行：
-
-```bash
-node "D:\自媒体\视频工厂\_工具\gen_cover.js"
-node "D:\自媒体\视频工厂\_工具\gen_cover_h.js" cover_h.html
-```
-
-### 定制主题示例：onecontext（与某期幻灯蓝紫渐变一致）
-
-```javascript
-const THEMES = {
-    onecontext: {
-        accent:     "#60A5FA",
-        accent2:    "#8B5CF6",
-        tagBg:      "rgba(96,165,250,0.12)",
-        tagBorder:  "rgba(96,165,250,0.5)",
-        tagColor:   "#60A5FA",
-        glowColor:  "rgba(96,165,250,0.25)",
-        glowColor2: "rgba(139,92,246,0.15)",
-        dotColor:   "#60A5FA",
-        bar:        "linear-gradient(90deg, transparent 2%, #60A5FA 35%, #8B5CF6 70%, #34D399 85%, transparent 98%)",
-        textGlow:   "0 0 80px rgba(96,165,250,0.35), 0 4px 30px rgba(0,0,0,0.9)",
-        accentGrad: "linear-gradient(135deg, #60A5FA 0%, #818CF8 30%, #C084FC 55%, #34D399 78%, #FBBF24 100%)",
-        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #0a1628 0%, #030712 40%, #050210 100%)",
-    },
-};
-```
+1. **选风格**：根据内容类型选择预设（简约/科技/数据）
+2. **复制模板**：从 `PRESETS.md` 复制对应竖版/横版 HTML
+3. **填内容**：替换占位符（【主标题】【副标题】等）
+4. **截图输出**：运行 `node cli.js cover` 命令
 
 ### 发布素材（全平台通用格式）
 
-**不按抖音 / B 站 / 小红书等分块**；对外粘贴用同一套字段即可。
-
-建议在素材目录增加 **`05-publish-kit.md`**，文首用**纯文本代码块**（无 Markdown 加粗）便于整段复制，格式为：
+建议在素材目录增加 **`05-publish-kit.md`**，格式：
 
 ```
 标题：……
@@ -330,45 +276,4 @@ const THEMES = {
 话题：#话题1 #话题2 …
 ```
 
-示例：`features/develop/claude-caveman-mode/production/05-publish-kit.md`。下文可接标题备选、封面定稿说明、置顶评论、章节轴、素材路径、发布前检查等备忘。
-
-### SRT→Slide 手动映射（Whisper 对齐失败时）
-
-当 `wav-auto` 日志出现 **`whisper_align_partial`** 或所有幻灯片时长几乎相等时，说明 Whisper 无法将口播与 HTML 幻灯文字对齐（通常因为 PPT 文案是提炼要点而非逐字对应口播）。此时：
-
-**Step 1** — 分析 SRT 与幻灯片：
-
-```bash
-node cli.js srt-map --project <素材目录>
-```
-
-输出：全部 SRT 条目（序号、时间、内容预览）+ 全部幻灯片文本。AI 阅读后判断每页幻灯片对应的 SRT 条目范围。
-
-**Step 2** — 提供边界，生成时长配置：
-
-```bash
-node cli.js srt-map --project <素材目录> --boundaries "0:0-0,1:1-2,2:3-5,..."
-```
-
-格式：`slide_idx:first_entry-last_entry`，逗号分隔。脚本自动计算每页时长、找 .wav 文件，写入 `wav-durations.json`。
-
-**Step 3** — 用精确时长渲染：
-
-```bash
-node cli.js wav --project <素材目录>
-```
-
-### 封面一键截图
-
-```bash
-node cli.js cover --project <素材目录>              # → videos/cover.png (1080×1920)
-node cli.js cover --project <素材目录> --horizontal # → videos/cover_h.png (1440×1080)
-```
-
-在素材目录放 `cover.html`（竖版）和/或 `cover_h.html`（横版），内含 `CONFIG` 对象控制文案与配色（见上文 CONFIG 要点）。命令使用 Playwright 截图输出到 `videos/` 子目录。
-
-### 优化要点
-
-- **字号**：竖版主标题宜 **140px～220px**（按字数 class 调整）；横版标题建议 **140px 级及以上**，副标题 **36px+**，保证小图可读。
-- **装饰**：背景服务于文字；与 `presentation.html` 同系列时可用纸墨 / 渐变主题（如 `wenyan`），避免与成片气质冲突。
-- **亮点数量**：竖版底部 **2～3** 条；横版右侧 **5** 条左右。
+示例：`features/develop/claude-caveman-mode/production/05-publish-kit.md`

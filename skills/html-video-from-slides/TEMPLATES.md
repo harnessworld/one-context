@@ -77,6 +77,8 @@
 
 ## 模板一：封面（Cover）
 
+> **封面设计已独立为 `skills/cover-design/` skill**。新建封面建议使用独立 skill 的预设模板（3 种风格），确保跨项目一致性。下方模板仅作参考。
+
 **布局原理**：`col f1` + `justify-content:space-between`，三段全部在文档流中，不用 `position:absolute`。
 
 **高度预算**：

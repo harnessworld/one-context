@@ -4,6 +4,7 @@
 
 | 路径 | 说明 |
 |------|------|
+| [`cover-design/`](cover-design/) | **封面设计规范**；3 种预设风格（简约/科技/数据）；横竖版模板；被 `html-video-from-slides` 引用 |
 | [`html-video-from-slides/`](html-video-from-slides/) | HTML 幻灯 + 口播 → MP4；**wav-auto** 仅需单个 WAV + HTML（Whisper 自动对齐）；见 `SKILL.md` |
 | [`html-deck-layout/`](html-deck-layout/) | 全屏 `presentation.html` **版式**：防空白、`fill-deck`、字号与示意图区；改幻灯视觉时必读；见 `SKILL.md` |
 | [`openclaw-slides/`](openclaw-slides/) | OpenClaw 演示幻灯生成；多语言 README（中/英/日/德/法/西/意/俄）；见 `SKILL.md` |
