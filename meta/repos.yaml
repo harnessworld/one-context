@@ -52,3 +52,8 @@ repos:
     id: claude-code-best-practice
     alias: ccbp
     description: Claude Code workflow demos (slash commands, agents, skills, development-workflows); local reference only, not bundled.
+  - url: https://github.com/Cocoon-AI/architecture-diagram-generator
+    path: external/architecture-diagram-generator
+    id: arch-diagram-gen
+    alias: archdiag
+    description: Claude AI skill for generating dark-themed system architecture diagrams (HTML/SVG).

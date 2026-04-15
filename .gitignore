@@ -17,15 +17,11 @@ build/
 # Node — all node_modules everywhere
 **/node_modules/
 
-<<<<<<< HEAD
 # Node (repo root / feature production sandboxes — do not commit)
 node_modules/
 
 # Node (skills: html-video-from-slides CLI)
 skills/html-video-from-slides/node_modules/
-=======
-# Node cache
->>>>>>> origin/main
 skills/html-video-from-slides/.cache/
 
 # Feature pipelines: local npm installs; wav/tts 中间文件（cli 写入 production/tmp/）

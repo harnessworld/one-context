@@ -37,7 +37,11 @@ Read these files for context:
 
 @knowledge/standards/README.md
 @knowledge/standards/agent-framework.md
+@knowledge/standards/agent-friendly-testing.md
+@knowledge/standards/agent-team-coordination.md
+@knowledge/standards/diagram-conventions.md
 @knowledge/standards/one-context-conventions.md
+@knowledge/standards/oracle-parallel-debugging.md
 @features/INDEX.md
 @features/README.md
 @features/_template/tech_design.md
