@@ -78,8 +78,8 @@ memory/*
 !memory/README.md
 
 # Generated tool configs (run `onecxt adapt` locally)
-# These are local-first: each developer generates their own
+# Tracked so all tools stay in sync from meta/agents.yaml
 .cursor/rules/
-!.cursor/rules/.gitkeep
-.claude/
-CLAUDE.md
+.claude/agents/
+.claude/adapters/
+!CLAUDE.md

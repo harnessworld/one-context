@@ -1,4 +1,4 @@
-# openclaw-slides
+# html-slides
 
 [![Powered by MyClaw.ai](https://img.shields.io/badge/Powered%20by-MyClaw.ai-gold?style=flat-square)](https://myclaw.ai)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-blue?style=flat-square)](https://github.com/openclaw/openclaw)
@@ -45,13 +45,13 @@ An OpenClaw agent skill that helps anyone build beautiful web slide decks with z
 ## 🚀 Installation
 
 ```bash
-clawhub install openclaw-slides
+clawhub install html-slides
 ```
 
 Or manually copy to your OpenClaw workspace skills directory:
 
 ```bash
-cp -r openclaw-slides/ ~/.openclaw/workspace/skills/
+cp -r html-slides/ ~/.openclaw/workspace/skills/
 ```
 
 ## 💬 Usage

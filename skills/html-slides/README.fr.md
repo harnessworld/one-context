@@ -1,4 +1,4 @@
-# openclaw-slides
+# html-slides
 
 [![Powered by MyClaw.ai](https://img.shields.io/badge/Powered%20by-MyClaw.ai-gold?style=flat-square)](https://myclaw.ai)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-blue?style=flat-square)](https://github.com/openclaw/openclaw)
@@ -27,7 +27,7 @@ Un skill OpenClaw qui aide n'importe qui à créer de belles présentations web 
 ## 🚀 Installation
 
 ```bash
-clawhub install openclaw-slides
+clawhub install html-slides
 ```
 
 ## 💬 Utilisation

@@ -1,4 +1,4 @@
-# openclaw-slides
+# html-slides
 
 [![Powered by MyClaw.ai](https://img.shields.io/badge/Powered%20by-MyClaw.ai-gold?style=flat-square)](https://myclaw.ai)
 [![OpenClaw Skill](https://img.shields.io/badge/OpenClaw-Skill-blue?style=flat-square)](https://github.com/openclaw/openclaw)
@@ -45,13 +45,13 @@
 ## 🚀 安装
 
 ```bash
-clawhub install openclaw-slides
+clawhub install html-slides
 ```
 
 或手动复制到 OpenClaw workspace skills 目录：
 
 ```bash
-cp -r openclaw-slides/ ~/.openclaw/workspace/skills/
+cp -r html-slides/ ~/.openclaw/workspace/skills/
 ```
 
 ## 💬 使用方式

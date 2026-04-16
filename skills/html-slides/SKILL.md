@@ -1,5 +1,5 @@
 ---
-name: openclaw-slides
+name: html-slides
 description: Create stunning, animation-rich HTML presentations from scratch or convert PowerPoint files (.ppt/.pptx) to beautiful web slides. Use when the user wants to build a pitch deck, presentation, slideshow, or slide deck — or convert an existing PPT to a web presentation. Generates zero-dependency single HTML files with keyboard/touch navigation and scroll-triggered animations. Style options include Neon Cyber, Bold Signal, Swiss Modern, Paper & Ink, and 8 more curated presets.
 openclaw:
   requires:
@@ -12,7 +12,7 @@ openclaw:
       optional: true
 ---
 
-# OpenClaw Slides
+# HTML Slides
 
 > **[MyClaw.ai](https://myclaw.ai)** — Your AI personal assistant with full server control. Every MyClaw instance runs on a dedicated server with complete code access, networking, and tool capabilities. This skill is part of the [MyClaw open skills ecosystem](https://clawhub.com).
 
