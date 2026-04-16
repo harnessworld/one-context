@@ -1,0 +1,44 @@
+<section class="s slide" id="slide-diagram">
+  <div class="slide-header">
+    <span class="badge">数据流</span>
+    <h2>请求处理全链路</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+    <div class="g" style="flex-shrink:0">
+      <p class="g-body" style="margin:0">从用户请求到数据返回，经过 5 个核心环节。每一层都有独立的限流、熔断和可观测能力。</p>
+    </div>
+    <div class="card-diagram" style="min-height:300px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+      <svg viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid meet">
+        <!-- Gateway -->
+        <rect x="20" y="100" width="240" height="200" rx="16" fill="var(--c-accent-a)" opacity="0.12" stroke="var(--c-accent-a)" stroke-width="2"/>
+        <text x="140" y="170" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-a)">Gateway</text>
+        <text x="140" y="210" text-anchor="middle" font-size="18" fill="var(--c-text-2)">负载均衡</text>
+        <text x="140" y="240" text-anchor="middle" font-size="18" fill="var(--c-text-2)">限流熔断</text>
+        <!-- Arrow -->
+        <line x1="280" y1="200" x2="360" y2="200" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr)"/>
+        <!-- Service -->
+        <rect x="370" y="100" width="240" height="200" rx="16" fill="var(--c-accent-b)" opacity="0.12" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="490" y="170" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-b)">Service</text>
+        <text x="490" y="210" text-anchor="middle" font-size="18" fill="var(--c-text-2)">业务逻辑</text>
+        <text x="490" y="240" text-anchor="middle" font-size="18" fill="var(--c-text-2)">参数校验</text>
+        <line x1="630" y1="200" x2="710" y2="200" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr)"/>
+        <!-- Cache -->
+        <rect x="720" y="100" width="240" height="200" rx="16" fill="var(--c-accent-c)" opacity="0.12" stroke="var(--c-accent-c)" stroke-width="2"/>
+        <text x="840" y="170" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-c)">Cache</text>
+        <text x="840" y="210" text-anchor="middle" font-size="18" fill="var(--c-text-2)">Redis 缓存</text>
+        <text x="840" y="240" text-anchor="middle" font-size="18" fill="var(--c-text-2)">本地缓存</text>
+        <line x1="980" y1="200" x2="1060" y2="200" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr)"/>
+        <!-- DB -->
+        <rect x="1070" y="100" width="240" height="200" rx="16" fill="var(--c-surface-2)" stroke="var(--c-text-2)" stroke-width="2"/>
+        <text x="1190" y="170" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-text-1)">Database</text>
+        <text x="1190" y="210" text-anchor="middle" font-size="18" fill="var(--c-text-2)">读写分离</text>
+        <text x="1190" y="240" text-anchor="middle" font-size="18" fill="var(--c-text-2)">分库分表</text>
+        <defs><marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker></defs>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>数据流</span>
+    <span>04</span>
+  </div>
+</section>

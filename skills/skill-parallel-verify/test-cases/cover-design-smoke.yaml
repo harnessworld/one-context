@@ -1,0 +1,9 @@
+# cover-design 冒烟测试
+skill_path: "skills/cover-design/SKILL.md"
+test_name: "cover-design 科技风格冒烟测试"
+acceptance_criteria: "生成的 HTML 为单一自包含文件，包含一个封面设计，使用科技风格预设（深色背景+渐变/光效），横版 1440×1080 比例，包含标题、副标题和装饰元素"
+
+test_cases:
+  - id: tc-1
+    prompt: "帮我设计一个科技风格的封面，标题是「AI 基础设施 2026」，副标题是「大规模推理引擎架构实践」"
+    description: "测试科技风格封面生成能力"

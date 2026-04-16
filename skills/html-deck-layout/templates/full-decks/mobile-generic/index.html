@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>Mobile Generic Deck</title>
+  <link rel="stylesheet" href="../../assets/base.css">
+  <link rel="stylesheet" href="../../assets/fonts.css">
+  <link rel="stylesheet" href="../../assets/mobile-layout.css">
+  <link rel="stylesheet" href="../../assets/themes/mobile-tech.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="P" class="tpl-mobile-generic">
+
+  <!-- Slide 1: Cover -->
+  <section class="s slide is-active" id="s1">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="emoji-xl">📊</div>
+        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 12px">项目汇报</h1>
+        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 32px">2024年度工作总结与展望</p>
+        <span class="pill">📌 季度报告</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>产品部 · 张小明</span>
+      <span>01</span>
+    </div>
+  </section>
+
+  <!-- Slide 2: 2x2 Grid -->
+  <section class="s slide" id="s2">
+    <div class="slide-header">
+      <span class="badge">核心成果</span>
+      <h2>四大关键指标</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards grid-2x2">
+        <div class="g">
+          <div class="emoji-lg">🚀</div>
+          <h3 class="g-title">用户增长</h3>
+          <p class="g-body">月活跃用户突破 500 万，同比增长 120%，新用户留存率提升至 45%</p>
+        </div>
+        <div class="g">
+          <div class="emoji-lg">⚡</div>
+          <h3 class="g-title">性能优化</h3>
+          <p class="g-body">页面加载速度提升 60%，首屏时间从 2.5s 降至 1.0s</p>
+        </div>
+        <div class="g">
+          <div class="emoji-lg">🛡️</div>
+          <h3 class="g-title">系统稳定</h3>
+          <p class="g-body">全年可用性达 99.99%，故障平均恢复时间缩短至 3 分钟</p>
+        </div>
+        <div class="g">
+          <div class="emoji-lg">💰</div>
+          <h3 class="g-title">营收目标</h3>
+          <p class="g-body">年度营收达成率 135%，超额完成既定目标</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>核心成果</span>
+      <span>02</span>
+    </div>
+  </section>
+
+  <!-- Slide 3: Split -->
+  <section class="s slide" id="s3">
+    <div class="slide-header">
+      <span class="badge">产品升级</span>
+      <h2>新旧版本对比</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g">
+          <h3 class="g-title" style="color:var(--c-text-2)">旧版本痛点</h3>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px">
+            <div style="font-size:var(--fs-body);color:var(--c-text-2)">
+              <div style="margin-bottom:16px">❌ 操作步骤繁琐，用户流失率高</div>
+              <div style="margin-bottom:16px">❌ 响应速度慢，平均等待 5 秒以上</div>
+              <div style="margin-bottom:16px">❌ 界面设计过时，用户满意度低</div>
+              <div>❌ 功能分散，跳转次数过多</div>
+            </div>
+          </div>
+        </div>
+        <div class="g">
+          <h3 class="g-title" style="color:var(--c-accent-a)">新版本优势</h3>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px">
+            <div style="font-size:var(--fs-body)">
+              <div style="margin-bottom:16px">✅ 一键直达，转化率提升 35%</div>
+              <div style="margin-bottom:16px">✅ 毫秒级响应，体验流畅顺滑</div>
+              <div style="margin-bottom:16px">✅ 全新 UI，用户好评率 98%</div>
+              <div>✅ 流程整合，操作步骤减少 60%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>产品升级</span>
+      <span>03</span>
+    </div>
+  </section>
+
+  <!-- Slide 4: Card + Diagram -->
+  <section class="s slide" id="s4">
+    <div class="slide-header">
+      <span class="badge">技术架构</span>
+      <h2>系统架构图</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards grid-2">
+        <div class="g">
+          <h3 class="g-title">微服务架构</h3>
+          <p class="g-body">采用容器化部署，支持弹性扩缩容，服务间通过消息队列解耦</p>
+          <div class="card-diagram">
+            <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+              <!-- Gateway -->
+              <rect x="150" y="20" width="100" height="50" rx="8" fill="var(--c-accent-a)" opacity="0.3"/>
+              <text x="200" y="52" text-anchor="middle" fill="var(--c-text-1)" font-size="18">API Gateway</text>
+              <!-- Services -->
+              <rect x="40" y="110" width="90" height="60" rx="6" fill="var(--c-surface-2)"/>
+              <text x="85" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="14">User</text>
+              <rect x="155" y="110" width="90" height="60" rx="6" fill="var(--c-surface-2)"/>
+              <text x="200" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="14">Order</text>
+              <rect x="270" y="110" width="90" height="60" rx="6" fill="var(--c-surface-2)"/>
+              <text x="315" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="14">Pay</text>
+              <!-- DB -->
+              <ellipse cx="130" cy="240" rx="50" ry="30" fill="var(--c-accent-b)" opacity="0.3"/>
+              <text x="130" y="248" text-anchor="middle" fill="var(--c-text-1)" font-size="14">MySQL</text>
+              <ellipse cx="270" cy="240" rx="50" ry="30" fill="var(--c-accent-c)" opacity="0.3"/>
+              <text x="270" y="248" text-anchor="middle" fill="var(--c-text-1)" font-size="14">Redis</text>
+              <!-- Arrows -->
+              <line x1="200" y1="70" x2="200" y2="95" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="200" y1="95" x2="85" y2="95" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="200" y1="95" x2="315" y2="95" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="85" y1="95" x2="85" y2="110" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="315" y1="95" x2="315" y2="110" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="85" y1="170" x2="85" y2="200" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="85" y1="200" x2="130" y2="200" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="130" y1="200" x2="270" y2="200" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="200" y1="170" x2="200" y2="200" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="200" y1="200" x2="270" y2="200" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="315" y1="170" x2="315" y2="200" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="130" y1="200" x2="130" y2="210" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="270" y1="200" x2="270" y2="210" stroke="var(--c-text-2)" stroke-width="2"/>
+            </svg>
+          </div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">核心优势</h3>
+          <p class="g-body" style="margin-bottom:24px">模块化设计，独立部署，故障隔离</p>
+          <div style="font-size:var(--fs-body);line-height:2">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <span style="width:32px;height:32px;background:var(--c-accent-a);border-radius:50%;display:flex;align-items:center;justify-content:center">1</span>
+              <span>高可用：多实例部署，自动故障转移</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <span style="width:32px;height:32px;background:var(--c-accent-b);border-radius:50%;display:flex;align-items:center;justify-content:center">2</span>
+              <span>高性能：缓存加速，读写分离</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+              <span style="width:32px;height:32px;background:var(--c-accent-c);border-radius:50%;display:flex;align-items:center;justify-content:center">3</span>
+              <span>易扩展：按需扩容，成本优化</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>技术架构</span>
+      <span>04</span>
+    </div>
+  </section>
+
+  <!-- Slide 5: Stat -->
+  <section class="s slide" id="s5">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="stat-value" style="margin-bottom:24px">99.99%</div>
+        <div class="stat-label" style="font-size:var(--fs-subtitle);margin-bottom:48px">系统可用性保障</div>
+        <div style="display:flex;gap:96px;justify-content:center">
+          <div style="text-align:center">
+            <div style="font-size:var(--fs-page-title);font-weight:700;color:var(--c-accent-a)">50ms</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">平均响应延迟</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:var(--fs-page-title);font-weight:700;color:var(--c-accent-b)">0</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">重大事故次数</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:var(--fs-page-title);font-weight:700;color:var(--c-accent-c)">24/7</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">全天候监控</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>关键数据</span>
+      <span>05</span>
+    </div>
+  </section>
+
+  <!-- Slide 6: Thanks -->
+  <section class="s slide" id="s6">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="emoji-xl">🙏</div>
+        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 16px">感谢聆听</h1>
+        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 48px">期待与您进一步交流</p>
+        <div style="display:flex;gap:24px;justify-content:center">
+          <span class="pill">📧 contact@example.com</span>
+          <span class="pill">🌐 www.example.com</span>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>产品部</span>
+      <span>结束</span>
+    </div>
+  </section>
+
+</div>
+<script>
+document.addEventListener('keydown', e => {
+  const slides = [...document.querySelectorAll('.s.slide')];
+  const idx = slides.findIndex(s => s.classList.contains('is-active'));
+  if (e.key === 'ArrowRight' || e.key === ' ') { slides[idx]?.classList.remove('is-active'); slides[Math.min(idx+1, slides.length-1)]?.classList.add('is-active'); }
+  if (e.key === 'ArrowLeft') { slides[idx]?.classList.remove('is-active'); slides[Math.max(idx-1, 0)]?.classList.add('is-active'); }
+});
+</script>
+</body>
+</html>

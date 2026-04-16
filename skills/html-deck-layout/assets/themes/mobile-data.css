@@ -1,0 +1,16 @@
+/* Mobile Data — 数据报告 */
+:root {
+  --c-bg: #eff6ff;
+  --c-surface: #dbeafe;
+  --c-surface-2: #bfdbfe;
+  --c-text-1: #1e3a5f;
+  --c-text-2: #3b6fa0;
+  --c-accent-a: #2563eb;
+  --c-accent-b: #7c3aed;
+  --c-accent-c: #dc2626;
+  --c-border: rgba(30, 58, 95, 0.08);
+  --c-overlay: rgba(239, 246, 255, 0.6);
+  --shadow-sm: 0 1px 4px rgba(30, 58, 95, 0.06);
+  --shadow-md: 0 2px 8px rgba(30, 58, 95, 0.1);
+  --shadow-lg: 0 4px 16px rgba(30, 58, 95, 0.14);
+}

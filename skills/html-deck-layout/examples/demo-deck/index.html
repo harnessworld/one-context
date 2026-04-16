@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Deck 演示</title>
+  <link rel="stylesheet" href="../../assets/base.css">
+  <link rel="stylesheet" href="../../assets/mobile-layout.css">
+  <link rel="stylesheet" href="../../assets/themes/mobile-tech.css">
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    #navigation-hint {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--c-text-2);
+      font-size: 14px;
+      font-family: var(--font-sans), system-ui, sans-serif;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="P">
+
+    <!-- Slide 1: Cover -->
+    <section class="s slide is-active" id="slide-1">
+      <div class="col slide-main v-center">
+        <div style="text-align:center">
+          <div class="emoji-xl">📱</div>
+          <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 12px">Mobile Deck 演示</h1>
+          <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 32px">7 种布局 · 完整展示 · 一键切换</p>
+          <span class="pill">🎨 mobile-tech 主题</span>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>HTML Deck Layout</span>
+        <span>01 / 08</span>
+      </div>
+    </section>
+
+    <!-- Slide 2: Grid 2x2 - 四大核心能力 -->
+    <section class="s slide" id="slide-2">
+      <div class="slide-header">
+        <span class="badge">核心能力</span>
+        <h2>四大核心能力</h2>
+      </div>
+      <div class="col slide-main fill-deck">
+        <div class="slide-cards grid-2x2">
+          <div class="g">
+            <div class="emoji-lg">⚡</div>
+            <h3 class="g-title">极速响应</h3>
+            <p class="g-body">首屏加载 &lt; 1.5s，交互延迟 &lt; 100ms</p>
+            <div class="card-diagram">
+              <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                <rect x="50" y="100" width="180" height="120" rx="12" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+                <text x="140" y="170" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">优化前</text>
+                <text x="140" y="200" text-anchor="middle" font-size="16" fill="var(--c-text-2)">3.2s</text>
+                <rect x="570" y="100" width="180" height="120" rx="12" fill="var(--c-accent-a)" opacity="0.15" stroke="var(--c-accent-a)" stroke-width="2"/>
+                <text x="660" y="170" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-accent-a)">优化后</text>
+                <text x="660" y="200" text-anchor="middle" font-size="16" fill="var(--c-accent-a)">1.2s</text>
+                <line x1="250" y1="160" x2="550" y2="160" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arrow1)"/>
+                <defs><marker id="arrow1" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker></defs>
+              </svg>
+            </div>
+          </div>
+          <div class="g">
+            <div class="emoji-lg">🛡️</div>
+            <h3 class="g-title">安全保障</h3>
+            <p class="g-body">端到端加密，零信任架构，合规认证</p>
+            <div class="card-diagram">
+              <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                <circle cx="400" cy="150" r="80" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="3"/>
+                <text x="400" y="135" text-anchor="middle" font-size="20" fill="var(--c-accent-b)">🛡️</text>
+                <text x="400" y="170" text-anchor="middle" font-size="18" font-weight="600" fill="var(--c-text-1)">安全内核</text>
+                <circle cx="200" cy="150" r="50" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+                <text x="200" y="155" text-anchor="middle" font-size="16" fill="var(--c-text-1)">TLS</text>
+                <circle cx="600" cy="150" r="50" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+                <text x="600" y="155" text-anchor="middle" font-size="16" fill="var(--c-text-1)">OAuth</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g">
+            <div class="emoji-lg">🔗</div>
+            <h3 class="g-title">互联互通</h3>
+            <p class="g-body">REST/gRPC/GraphQL 多协议支持</p>
+            <div class="card-diagram">
+              <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                <rect x="350" y="110" width="100" height="80" rx="12" fill="var(--c-accent-c)" opacity="0.2" stroke="var(--c-accent-c)" stroke-width="2"/>
+                <text x="400" y="155" text-anchor="middle" font-size="20" font-weight="700" fill="var(--c-accent-c)">Hub</text>
+                <rect x="80" y="130" width="100" height="50" rx="8" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="1.5"/>
+                <text x="130" y="160" text-anchor="middle" font-size="16" fill="var(--c-text-1)">REST</text>
+                <rect x="620" y="130" width="100" height="50" rx="8" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="1.5"/>
+                <text x="670" y="160" text-anchor="middle" font-size="16" fill="var(--c-text-1)">gRPC</text>
+                <line x1="180" y1="155" x2="350" y2="150" stroke="var(--c-accent-a)" stroke-width="1.5"/>
+                <line x1="450" y1="150" x2="620" y2="155" stroke="var(--c-accent-a)" stroke-width="1.5"/>
+              </svg>
+            </div>
+          </div>
+          <div class="g">
+            <div class="emoji-lg">📊</div>
+            <h3 class="g-title">智能运维</h3>
+            <p class="g-body">全链路追踪，AI 异常检测，自动告警</p>
+            <div class="card-diagram">
+              <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                <polyline points="60,240 180,200 320,180 480,120 580,160 700,100 740,130" fill="none" stroke="var(--c-accent-a)" stroke-width="3"/>
+                <circle cx="480" cy="120" r="10" fill="var(--c-accent-a)"/>
+                <text x="480" y="90" text-anchor="middle" font-size="20" font-weight="700" fill="var(--c-accent-a)">异常点</text>
+                <rect x="600" y="220" width="160" height="60" rx="8" fill="var(--c-surface-2)"/>
+                <text x="680" y="250" text-anchor="middle" font-size="16" fill="var(--c-text-2)">AI 自动分析</text>
+                <text x="680" y="270" text-anchor="middle" font-size="14" fill="var(--c-text-2)">命中率 98%</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>核心能力展示</span>
+        <span>02 / 08</span>
+      </div>
+    </section>
+
+    <!-- Slide 3: Split 50/50 - 前端 vs 后端 -->
+    <section class="s slide" id="slide-3">
+      <div class="slide-header">
+        <span class="badge">架构对比</span>
+        <h2>前端 vs 后端</h2>
+      </div>
+      <div class="col slide-main fill-deck">
+        <div class="slide-cards split" style="align-items:stretch">
+          <div class="g" style="justify-content:flex-start">
+            <div class="emoji-lg">🎨</div>
+            <h3 class="g-title">前端技术栈</h3>
+            <p class="g-body" style="flex:1">
+              React 18 + TypeScript 5<br>
+              Next.js SSR / SSG 渲染<br>
+              Tailwind CSS 样式系统<br>
+              PWA 离线应用支持<br>
+              CDN 全球加速部署
+            </p>
+            <div style="margin-top:auto;padding-top:var(--sp-md)">
+              <span class="pill">✅ 生产就绪 v3.2</span>
+            </div>
+          </div>
+          <div class="g" style="justify-content:flex-start">
+            <div class="emoji-lg">⚙️</div>
+            <h3 class="g-title">后端技术栈</h3>
+            <p class="g-body" style="flex:1">
+              Java 17 + Spring Boot 3<br>
+              微服务架构 120+ 服务<br>
+              Kubernetes 容器编排<br>
+              异地多活自动容灾<br>
+              弹性扩缩容 0-1000 Pod
+            </p>
+            <div style="margin-top:auto;padding-top:var(--sp-md)">
+              <span class="pill">🔄 迭代中 v2.8</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>技术架构</span>
+        <span>03 / 08</span>
+      </div>
+    </section>
+
+    <!-- Slide 4: Card + Diagram - 数据流架构 -->
+    <section class="s slide" id="slide-4">
+      <div class="slide-header">
+        <span class="badge">系统架构</span>
+        <h2>数据流架构</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+        <div class="g" style="flex-shrink:0">
+          <p class="g-body" style="margin:0">从用户请求到数据返回，经过 4 层核心处理。每一层都具备独立限流、熔断降级和可观测能力。</p>
+        </div>
+        <div class="card-diagram" style="min-height:320px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+          <svg viewBox="0 0 1600 420" preserveAspectRatio="xMidYMid meet">
+            <!-- Gateway -->
+            <rect x="30" y="110" width="260" height="200" rx="16" fill="var(--c-accent-a)" opacity="0.12" stroke="var(--c-accent-a)" stroke-width="2"/>
+            <text x="160" y="170" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-a)">Gateway</text>
+            <text x="160" y="210" text-anchor="middle" font-size="20" fill="var(--c-text-2)">负载均衡</text>
+            <text x="160" y="240" text-anchor="middle" font-size="20" fill="var(--c-text-2)">限流熔断</text>
+            <text x="160" y="270" text-anchor="middle" font-size="20" fill="var(--c-text-2)">SSL 终止</text>
+            <!-- Arrow -->
+            <line x1="310" y1="210" x2="390" y2="210" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr2)"/>
+            <!-- Service -->
+            <rect x="400" y="110" width="260" height="200" rx="16" fill="var(--c-accent-b)" opacity="0.12" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <text x="530" y="170" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-b)">Service</text>
+            <text x="530" y="210" text-anchor="middle" font-size="20" fill="var(--c-text-2)">业务逻辑</text>
+            <text x="530" y="240" text-anchor="middle" font-size="20" fill="var(--c-text-2)">参数校验</text>
+            <text x="530" y="270" text-anchor="middle" font-size="20" fill="var(--c-text-2)">权限控制</text>
+            <!-- Arrow -->
+            <line x1="680" y1="210" x2="760" y2="210" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr2)"/>
+            <!-- Cache -->
+            <rect x="770" y="110" width="260" height="200" rx="16" fill="var(--c-accent-c)" opacity="0.12" stroke="var(--c-accent-c)" stroke-width="2"/>
+            <text x="900" y="170" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-c)">Cache</text>
+            <text x="900" y="210" text-anchor="middle" font-size="20" fill="var(--c-text-2)">Redis 集群</text>
+            <text x="900" y="240" text-anchor="middle" font-size="20" fill="var(--c-text-2)">本地缓存</text>
+            <text x="900" y="270" text-anchor="middle" font-size="20" fill="var(--c-text-2)">热点探测</text>
+            <!-- Arrow -->
+            <line x1="1050" y1="210" x2="1130" y2="210" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr2)"/>
+            <!-- DB -->
+            <rect x="1140" y="110" width="260" height="200" rx="16" fill="var(--c-surface-2)" stroke="var(--c-text-2)" stroke-width="2"/>
+            <text x="1270" y="170" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-text-1)">Database</text>
+            <text x="1270" y="210" text-anchor="middle" font-size="20" fill="var(--c-text-2)">读写分离</text>
+            <text x="1270" y="240" text-anchor="middle" font-size="20" fill="var(--c-text-2)">分库分表</text>
+            <text x="1270" y="270" text-anchor="middle" font-size="20" fill="var(--c-text-2)">自动备份</text>
+            <defs><marker id="arr2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker></defs>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>数据流架构</span>
+        <span>04 / 08</span>
+      </div>
+    </section>
+
+    <!-- Slide 5: Stat Highlight - 关键指标 -->
+    <section class="s slide" id="slide-5">
+      <div class="slide-header">
+        <span class="badge">数据驱动</span>
+        <h2>关键指标</h2>
+      </div>
+      <div class="col slide-main fill-deck">
+        <div class="slide-cards split" style="align-items:stretch">
+          <div class="g" style="justify-content:center;align-items:center;text-align:center">
+            <div class="emoji-xl">🚀</div>
+            <div class="stat-value">99.99<span style="font-size:var(--fs-page-title)">%</span></div>
+            <div class="stat-label">服务可用性 SLA</div>
+            <div class="divider-h" style="width:60%;margin:var(--sp-md) auto"></div>
+            <p style="font-size:var(--fs-caption);color:var(--c-text-2);margin:0">年度停机时间 &lt; 52 分钟</p>
+          </div>
+          <div class="g" style="justify-content:center;align-items:center;text-align:center">
+            <div class="emoji-xl">⚡</div>
+            <div class="stat-value">12<span style="font-size:var(--fs-page-title)">ms</span></div>
+            <div class="stat-label">P99 响应延迟</div>
+            <div class="divider-h" style="width:60%;margin:var(--sp-md) auto"></div>
+            <p style="font-size:var(--fs-caption);color:var(--c-text-2);margin:0">同比优化 75% (48ms → 12ms)</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>关键业务指标</span>
+        <span>05 / 08</span>
+      </div>
+    </section>
+
+    <!-- Slide 6: Process Flow - 发布流程 -->
+    <section class="s slide" id="slide-6">
+      <div class="slide-header">
+        <span class="badge">DevOps</span>
+        <h2>发布流程</h2>
+      </div>
+      <div class="col slide-main fill-deck">
+        <div class="process-flow" style="padding:var(--sp-lg) 0">
+          <div class="g step" style="flex:1">
+            <div class="emoji-lg">📝</div>
+            <h3 class="g-title" style="margin-top:var(--sp-sm)">代码提交</h3>
+            <p class="g-body">PR 提交至主干<br>自动触发 CI Pipeline</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="g step" style="flex:1">
+            <div class="emoji-lg">🧪</div>
+            <h3 class="g-title" style="margin-top:var(--sp-sm)">测试验证</h3>
+            <p class="g-body">单元 + 集成测试<br>代码覆盖率 ≥ 80%</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="g step" style="flex:1">
+            <div class="emoji-lg">🔍</div>
+            <h3 class="g-title" style="margin-top:var(--sp-sm)">Code Review</h3>
+            <p class="g-body">2 人审批通过<br>安全扫描无高危</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="g step" style="flex:1">
+            <div class="emoji-lg">🚀</div>
+            <h3 class="g-title" style="margin-top:var(--sp-sm)">灰度发布</h3>
+            <p class="g-body">5% → 50% → 100%<br>自动回滚 &lt; 30s</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>CI/CD 流程</span>
+        <span>06 / 08</span>
+      </div>
+    </section>
+
+    <!-- Slide 7: Grid 2x2 - 技术栈 (Second use) -->
+    <section class="s slide" id="slide-7">
+      <div class="slide-header">
+        <span class="badge">技术生态</span>
+        <h2>完整技术栈</h2>
+      </div>
+      <div class="col slide-main fill-deck">
+        <div class="slide-cards grid-2x2">
+          <div class="g">
+            <div class="emoji-lg">☁️</div>
+            <h3 class="g-title">基础设施</h3>
+            <p class="g-body">阿里云 + AWS 双云部署</p>
+            <div class="card-diagram">
+              <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                <rect x="200" y="100" width="150" height="100" rx="12" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+                <text x="275" y="155" text-anchor="middle" font-size="20" fill="var(--c-text-1)">阿里云</text>
+                <rect x="450" y="100" width="150" height="100" rx="12" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+                <text x="525" y="155" text-anchor="middle" font-size="20" fill="var(--c-text-1)">AWS</text>
+                <text x="400" y="250" text-anchor="middle" font-size="18" fill="var(--c-text-2)">专线互通 10Gbps</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g">
+            <div class="emoji-lg">🐳</div>
+            <h3 class="g-title">容器平台</h3>
+            <p class="g-body">Kubernetes + Docker 全容器化</p>
+            <div class="card-diagram">
+              <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                <rect x="300" y="80" width="200" height="60" rx="8" fill="var(--c-accent-a)" opacity="0.2"/>
+                <text x="400" y="120" text-anchor="middle" font-size="20" fill="var(--c-accent-a)">K8s Master</text>
+                <rect x="150" y="180" width="140" height="50" rx="8" fill="var(--c-surface-2)"/>
+                <text x="220" y="210" text-anchor="middle" font-size="16" fill="var(--c-text-1)">Node 1</text>
+                <rect x="330" y="180" width="140" height="50" rx="8" fill="var(--c-surface-2)"/>
+                <text x="400" y="210" text-anchor="middle" font-size="16" fill="var(--c-text-1)">Node 2</text>
+                <rect x="510" y="180" width="140" height="50" rx="8" fill="var(--c-surface-2)"/>
+                <text x="580" y="210" text-anchor="middle" font-size="16" fill="var(--c-text-1)">Node 3</text>
+                <line x1="270" y1="140" x2="220" y2="180" stroke="var(--c-accent-a)" stroke-width="1"/>
+                <line x1="400" y1="140" x2="400" y2="180" stroke="var(--c-accent-a)" stroke-width="1"/>
+                <line x1="530" y1="140" x2="580" y2="180" stroke="var(--c-accent-a)" stroke-width="1"/>
+              </svg>
+            </div>
+          </div>
+          <div class="g">
+            <div class="emoji-lg">📦</div>
+            <h3 class="g-title">数据存储</h3>
+            <p class="g-body">MySQL + Redis + ES 多引擎</p>
+            <div class="card-diagram">
+              <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                <rect x="100" y="120" width="140" height="80" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+                <text x="170" y="165" text-anchor="middle" font-size="18" fill="var(--c-text-1)">MySQL</text>
+                <rect x="330" y="120" width="140" height="80" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+                <text x="400" y="165" text-anchor="middle" font-size="18" fill="var(--c-text-1)">Redis</text>
+                <rect x="560" y="120" width="140" height="80" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-c)" stroke-width="2"/>
+                <text x="630" y="165" text-anchor="middle" font-size="18" fill="var(--c-text-1)">ES</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g">
+            <div class="emoji-lg">🔧</div>
+            <h3 class="g-title">监控告警</h3>
+            <p class="g-body">Prometheus + Grafana 全栈监控</p>
+            <div class="card-diagram">
+              <svg viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                <rect x="250" y="80" width="300" height="160" rx="12" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+                <text x="400" y="120" text-anchor="middle" font-size="20" fill="var(--c-text-1)">Grafana 大盘</text>
+                <polyline points="280,200 340,170 400,180 460,140 520,160" fill="none" stroke="var(--c-accent-a)" stroke-width="3"/>
+                <circle cx="460" cy="140" r="6" fill="var(--c-accent-a)"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>技术生态全景</span>
+        <span>07 / 08</span>
+      </div>
+    </section>
+
+    <!-- Slide 8: Thanks - 感谢观看 -->
+    <section class="s slide" id="slide-8">
+      <div class="col slide-main v-center">
+        <div style="text-align:center">
+          <div class="emoji-xl">🙏</div>
+          <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 16px">感谢观看</h1>
+          <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 32px">Mobile Deck Layout · 让演示更专业</p>
+          <div style="display:flex;gap:var(--sp-lg);justify-content:center">
+            <span class="pill">📧 demo@example.com</span>
+            <span class="pill">🔗 github.com/demo</span>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>HTML Deck Layout</span>
+        <span>08 / 08</span>
+      </div>
+    </section>
+
+  </div>
+
+  <div id="navigation-hint">← → 或 ↑ ↓ 切换幻灯片</div>
+
+  <script>
+    // Keyboard navigation
+    (function() {
+      const slides = document.querySelectorAll('.s.slide');
+      let current = 0;
+
+      function showSlide(index) {
+        if (index < 0 || index >= slides.length) return;
+        slides.forEach((s, i) => {
+          s.classList.toggle('is-active', i === index);
+        });
+        current = index;
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+          e.preventDefault();
+          showSlide(current + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          showSlide(current - 1);
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          showSlide(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          showSlide(slides.length - 1);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

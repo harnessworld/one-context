@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>大模型应用开发入门</title>
+  <link rel="stylesheet" href="../../assets/base.css">
+  <link rel="stylesheet" href="../../assets/fonts.css">
+  <link rel="stylesheet" href="../../assets/mobile-layout.css">
+  <link rel="stylesheet" href="../../assets/themes/mobile-nature.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="P" class="tpl-mobile-course-intro">
+
+  <!-- Slide 1: Cover -->
+  <section class="s slide is-active" id="s1">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="emoji-xl">🌱</div>
+        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 12px">大模型应用开发入门</h1>
+        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 32px">从零开始掌握 AI 应用开发核心技术</p>
+        <span class="pill">🎓 系统课程 · 实战导向 · 项目驱动</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>讲师：王小明 · 高级 AI 工程师</span>
+      <span>01</span>
+    </div>
+  </section>
+
+  <!-- Slide 2: Course Overview -->
+  <section class="s slide" id="s2">
+    <div class="slide-header">
+      <span class="badge">课程简介</span>
+      <h2>课程概览</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards">
+        <div class="g" style="flex:1;display:flex;flex-direction:column">
+          <div style="flex:1;display:flex;gap:48px">
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+              <p style="font-size:var(--fs-body);line-height:1.8;margin:0 0 24px 0">本课程专为希望掌握大模型应用开发的学员设计。通过 8 周系统学习，你将深入理解 LLM 原理，熟练使用主流开发框架，并能够独立设计和实现 AI 驱动的应用程序。</p>
+              <div style="display:flex;gap:24px;margin-top:16px">
+                <div style="text-align:center;padding:24px 32px;background:var(--c-bg);border-radius:var(--r-lg);flex:1">
+                  <div style="font-size:48px;margin-bottom:8px">📚</div>
+                  <div style="font-size:var(--fs-card-title);font-weight:600">8 周</div>
+                  <div style="font-size:var(--fs-caption);color:var(--c-text-2)">系统课程</div>
+                </div>
+                <div style="text-align:center;padding:24px 32px;background:var(--c-bg);border-radius:var(--r-lg);flex:1">
+                  <div style="font-size:48px;margin-bottom:8px">🛠️</div>
+                  <div style="font-size:var(--fs-card-title);font-weight:600">6 个</div>
+                  <div style="font-size:var(--fs-caption);color:var(--c-text-2)">实战项目</div>
+                </div>
+                <div style="text-align:center;padding:24px 32px;background:var(--c-bg);border-radius:var(--r-lg);flex:1">
+                  <div style="font-size:48px;margin-bottom:8px">👥</div>
+                  <div style="font-size:var(--fs-card-title);font-weight:600">1对1</div>
+                  <div style="font-size:var(--fs-caption);color:var(--c-text-2)">作业批改</div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center">
+              <div style="background:var(--c-bg);padding:20px 24px;border-radius:var(--r-md);border-left:4px solid var(--c-accent-a)">
+                <div style="font-weight:600;margin-bottom:4px">📖 理论结合实践</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2)">每个知识点配套实战练习</div>
+              </div>
+              <div style="background:var(--c-bg);padding:20px 24px;border-radius:var(--r-md);border-left:4px solid var(--c-accent-b)">
+                <div style="font-weight:600;margin-bottom:4px">🔧 工具链全覆盖</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2)">LangChain、LlamaIndex、OpenAI API</div>
+              </div>
+              <div style="background:var(--c-bg);padding:20px 24px;border-radius:var(--r-md);border-left:4px solid var(--c-accent-c)">
+                <div style="font-weight:600;margin-bottom:4px">💼 就业导向</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2)">真实企业案例，简历项目指导</div>
+              </div>
+              <div style="background:var(--c-bg);padding:20px 24px;border-radius:var(--r-md);border-left:4px solid var(--c-accent-a)">
+                <div style="font-weight:600;margin-bottom:4px">🌐 社群支持</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2)">专属学习群，答疑交流，终身更新</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>课程简介</span>
+      <span>02</span>
+    </div>
+  </section>
+
+  <!-- Slide 3: What You'll Learn -->
+  <section class="s slide" id="s3">
+    <div class="slide-header">
+      <span class="badge">学习收获</span>
+      <h2>四大核心模块</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards grid-2x2">
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+            <span style="font-size:56px">🧠</span>
+            <h3 class="g-title" style="margin:0">大模型原理</h3>
+          </div>
+          <ul style="font-size:var(--fs-body);line-height:2;margin:0;padding-left:24px;color:var(--c-text-2)">
+            <li>Transformer 架构深度解析</li>
+            <li>注意力机制工作原理</li>
+            <li>预训练与微调概念</li>
+            <li>Prompt Engineering 技巧</li>
+          </ul>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+            <span style="font-size:56px">⚡</span>
+            <h3 class="g-title" style="margin:0">API 与集成</h3>
+          </div>
+          <ul style="font-size:var(--fs-body);line-height:2;margin:0;padding-left:24px;color:var(--c-text-2)">
+            <li>OpenAI API 完整指南</li>
+            <li>国内大模型 API 接入</li>
+            <li>流式响应与错误处理</li>
+            <li>成本优化与限流策略</li>
+          </ul>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+            <span style="font-size:56px">🛠️</span>
+            <h3 class="g-title" style="margin:0">开发框架</h3>
+          </div>
+          <ul style="font-size:var(--fs-body);line-height:2;margin:0;padding-left:24px;color:var(--c-text-2)">
+            <li>LangChain 核心组件</li>
+            <li>Chains 与 Agents 开发</li>
+            <li>向量数据库与 RAG</li>
+            <li>LlamaIndex 索引构建</li>
+          </ul>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+            <span style="font-size:56px">🚀</span>
+            <h3 class="g-title" style="margin:0">项目实战</h3>
+          </div>
+          <ul style="font-size:var(--fs-body);line-height:2;margin:0;padding-left:24px;color:var(--c-text-2)">
+            <li>智能客服机器人开发</li>
+            <li>企业知识库问答系统</li>
+            <li>AI 写作助手应用</li>
+            <li>多 Agent 协作系统</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>学习收获</span>
+      <span>03</span>
+    </div>
+  </section>
+
+  <!-- Slide 4: Syllabus -->
+  <section class="s slide" id="s4">
+    <div class="slide-header">
+      <span class="badge">课程大纲</span>
+      <h2>8 周学习路径</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards">
+        <div class="g" style="flex:1;display:flex;flex-direction:column">
+          <div style="flex:1;display:flex;align-items:center;gap:24px">
+            <!-- Week 1-2 -->
+            <div style="flex:1;text-align:center">
+              <div style="background:var(--c-accent-a);color:var(--c-bg);padding:8px 16px;border-radius:var(--r-full);font-weight:700;display:inline-block;margin-bottom:16px">阶段一</div>
+              <div style="background:var(--c-bg);padding:20px;border-radius:var(--r-lg)">
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-bottom:8px">第 1-2 周</div>
+                <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:8px">基础入门</div>
+                <div style="font-size:var(--fs-caption);color:var(--c-text-2);line-height:1.6">大模型发展历程<br/>API 调用基础<br/>Prompt 设计原则</div>
+              </div>
+            </div>
+            <div style="font-size:24px;color:var(--c-accent-a)">→</div>
+            <!-- Week 3-4 -->
+            <div style="flex:1;text-align:center">
+              <div style="background:var(--c-accent-b);color:var(--c-bg);padding:8px 16px;border-radius:var(--r-full);font-weight:700;display:inline-block;margin-bottom:16px">阶段二</div>
+              <div style="background:var(--c-bg);padding:20px;border-radius:var(--r-lg)">
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-bottom:8px">第 3-4 周</div>
+                <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:8px">框架精通</div>
+                <div style="font-size:var(--fs-caption);color:var(--c-text-2);line-height:1.6">LangChain 核心<br/>Chains 模式<br/>Memory 与工具</div>
+              </div>
+            </div>
+            <div style="font-size:24px;color:var(--c-accent-b)">→</div>
+            <!-- Week 5-6 -->
+            <div style="flex:1;text-align:center">
+              <div style="background:var(--c-accent-c);color:var(--c-bg);padding:8px 16px;border-radius:var(--r-full);font-weight:700;display:inline-block;margin-bottom:16px">阶段三</div>
+              <div style="background:var(--c-bg);padding:20px;border-radius:var(--r-lg)">
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-bottom:8px">第 5-6 周</div>
+                <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:8px">RAG 系统</div>
+                <div style="font-size:var(--fs-caption);color:var(--c-text-2);line-height:1.6">向量数据库<br/>文档切分策略<br/>检索优化技巧</div>
+              </div>
+            </div>
+            <div style="font-size:24px;color:var(--c-accent-c)">→</div>
+            <!-- Week 7-8 -->
+            <div style="flex:1;text-align:center">
+              <div style="background:var(--c-accent-a);color:var(--c-bg);padding:8px 16px;border-radius:var(--r-full);font-weight:700;display:inline-block;margin-bottom:16px">阶段四</div>
+              <div style="background:var(--c-bg);padding:20px;border-radius:var(--r-lg)">
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-bottom:8px">第 7-8 周</div>
+                <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:8px">项目实战</div>
+                <div style="font-size:var(--fs-caption);color:var(--c-text-2);line-height:1.6">完整项目开发<br/>部署与优化<br/>求职项目包装</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>课程大纲</span>
+      <span>04</span>
+    </div>
+  </section>
+
+  <!-- Slide 5: Instructor -->
+  <section class="s slide" id="s5">
+    <div class="slide-header">
+      <span class="badge">讲师介绍</span>
+      <h2>关于讲师</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+          <div style="width:200px;height:200px;border-radius:50%;background:linear-gradient(135deg,var(--c-accent-a),var(--c-accent-b));display:flex;align-items:center;justify-content:center;margin-bottom:24px">
+            <span style="font-size:100px">👨‍💻</span>
+          </div>
+          <h3 class="g-title" style="margin-bottom:8px">王小明</h3>
+          <p style="font-size:var(--fs-body);color:var(--c-text-2);margin:0">高级 AI 工程师 / 技术布道师</p>
+        </div>
+        <div class="g">
+          <h3 class="g-title">讲师背景</h3>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px">
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="font-size:32px">💼</span>
+              <div>
+                <div style="font-size:var(--fs-card-title);font-weight:600">10+ 年开发经验</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);line-height:1.6">曾在阿里巴巴、字节跳动担任技术专家，主导多个大型 AI 项目落地</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="font-size:32px">🤖</span>
+              <div>
+                <div style="font-size:var(--fs-card-title);font-weight:600">大模型专家</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);line-height:1.6">拥有 5 年 NLP 和 LLM 实战经验，熟悉 GPT、Claude、Llama 等主流模型</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="font-size:32px">🎓</span>
+              <div>
+                <div style="font-size:var(--fs-card-title);font-weight:600">资深讲师</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);line-height:1.6">累计培训学员 10000+，课程好评率 98%，擅长将复杂概念简单化</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <span style="font-size:32px">✍️</span>
+              <div>
+                <div style="font-size:var(--fs-card-title);font-weight:600">技术作者</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);line-height:1.6">技术博客阅读量 500万+，出版《AI 应用开发实战》等技术图书</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>讲师介绍</span>
+      <span>结束</span>
+    </div>
+  </section>
+
+</div>
+<script>
+document.addEventListener('keydown', e => {
+  const slides = [...document.querySelectorAll('.s.slide')];
+  const idx = slides.findIndex(s => s.classList.contains('is-active'));
+  if (e.key === 'ArrowRight' || e.key === ' ') { slides[idx]?.classList.remove('is-active'); slides[Math.min(idx+1, slides.length-1)]?.classList.add('is-active'); }
+  if (e.key === 'ArrowLeft') { slides[idx]?.classList.remove('is-active'); slides[Math.max(idx-1, 0)]?.classList.add('is-active'); }
+});
+</script>
+</body>
+</html>

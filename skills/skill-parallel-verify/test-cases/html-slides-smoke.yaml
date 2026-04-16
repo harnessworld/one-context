@@ -1,0 +1,9 @@
+# html-slides 冒烟测试
+skill_path: "skills/html-slides/SKILL.md"
+test_name: "html-slides 商务风格冒烟测试"
+acceptance_criteria: "生成的 HTML 为单一自包含文件，包含至少 3 页幻灯（标题页 + 内容页），使用 Bold Signal 或类似商务风格预设，支持键盘导航，每页适配视口（100vw×100vh）"
+
+test_cases:
+  - id: tc-1
+    prompt: "帮我做一个 5 页的商务风格演示文稿，主题是「2026 年 Q1 营收汇报」，要求简洁专业"
+    description: "测试商务风格 PPT 生成能力，验证核心流程（Style Discovery → Generate → Delivery）"

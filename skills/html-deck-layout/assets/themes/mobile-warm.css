@@ -1,0 +1,16 @@
+/* Mobile Warm — 暖橙亲和 */
+:root {
+  --c-bg: #fffbeb;
+  --c-surface: #fef3c7;
+  --c-surface-2: #fde68a;
+  --c-text-1: #451a03;
+  --c-text-2: #92400e;
+  --c-accent-a: #f97316;
+  --c-accent-b: #ef4444;
+  --c-accent-c: #eab308;
+  --c-border: rgba(120, 53, 15, 0.1);
+  --c-overlay: rgba(255, 251, 235, 0.6);
+  --shadow-sm: 0 2px 8px rgba(120, 53, 15, 0.08);
+  --shadow-md: 0 4px 16px rgba(120, 53, 15, 0.12);
+  --shadow-lg: 0 8px 32px rgba(120, 53, 15, 0.16);
+}

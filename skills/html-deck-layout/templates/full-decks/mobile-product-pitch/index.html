@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>CloudDB 2.0 产品发布</title>
+  <link rel="stylesheet" href="../../assets/base.css">
+  <link rel="stylesheet" href="../../assets/fonts.css">
+  <link rel="stylesheet" href="../../assets/mobile-layout.css">
+  <link rel="stylesheet" href="../../assets/themes/mobile-warm.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="P" class="tpl-mobile-product-pitch">
+
+  <!-- Slide 1: Cover -->
+  <section class="s slide is-active" id="s1">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="emoji-xl">☁️</div>
+        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 12px">CloudDB 2.0</h1>
+        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 32px">新一代云原生数据库，让数据管理更简单</p>
+        <span class="pill">🚀 正式发布</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>产品发布会 · 2024</span>
+      <span>01</span>
+    </div>
+  </section>
+
+  <!-- Slide 2: Problem -->
+  <section class="s slide" id="s2">
+    <div class="slide-header">
+      <span class="badge">痛点洞察</span>
+      <h2>传统数据库面临的挑战</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g">
+          <h3 class="g-title">企业数据管理困境</h3>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px">
+            <div style="display:flex;align-items:flex-start;gap:16px">
+              <span style="font-size:40px">😫</span>
+              <div>
+                <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:4px">部署复杂</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2)">传统数据库需要专业 DBA 团队，部署周期长、成本高</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:16px">
+              <span style="font-size:40px">📈</span>
+              <div>
+                <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:4px">扩展困难</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2)">业务高峰期扩容慢，无法应对突发流量</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:16px">
+              <span style="font-size:40px">💸</span>
+              <div>
+                <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:4px">成本高昂</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2)">硬件采购、运维人力、 licence 费用层层叠加</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:16px">
+              <span style="font-size:40px">🔒</span>
+              <div>
+                <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:4px">安全隐患</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2)">备份恢复机制不完善，数据丢失风险高</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">企业主说</h3>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px">
+            <div style="background:var(--c-bg);padding:24px;border-radius:var(--r-md);position:relative">
+              <div style="font-size:60px;position:absolute;top:-10px;left:16px;color:var(--c-accent-a);opacity:0.3">"</div>
+              <div style="font-size:var(--fs-body);line-height:1.6;padding-left:24px">我们希望有一个开箱即用的数据库，不需要花费大量时间调优和运维。</div>
+              <div style="text-align:right;margin-top:16px;font-size:var(--fs-caption);color:var(--c-text-2)">— 某电商 CTO</div>
+            </div>
+            <div style="background:var(--c-bg);padding:24px;border-radius:var(--r-md);position:relative">
+              <div style="font-size:60px;position:absolute;top:-10px;left:16px;color:var(--c-accent-a);opacity:0.3">"</div>
+              <div style="font-size:var(--fs-body);line-height:1.6;padding-left:24px">双 11 期间数据库扛不住，扩容要提前一个月准备，太被动了。</div>
+              <div style="text-align:right;margin-top:16px;font-size:var(--fs-caption);color:var(--c-text-2)">— 某零售技术总监</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>痛点洞察</span>
+      <span>02</span>
+    </div>
+  </section>
+
+  <!-- Slide 3: Solution -->
+  <section class="s slide" id="s3">
+    <div class="slide-header">
+      <span class="badge">解决方案</span>
+      <h2>CloudDB 2.0 产品架构</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards">
+        <div class="g" style="flex:1">
+          <h3 class="g-title">云原生全托管架构</h3>
+          <p class="g-body">基于 Kubernetes 的云原生设计，自动扩缩容、自动备份恢复、智能监控告警，让开发者专注于业务创新</p>
+          <div class="card-diagram">
+            <svg viewBox="0 0 800 260" xmlns="http://www.w3.org/2000/svg">
+              <!-- Application Layer -->
+              <rect x="50" y="20" width="200" height="50" rx="6" fill="var(--c-accent-a)" opacity="0.3"/>
+              <text x="150" y="52" text-anchor="middle" fill="var(--c-text-1)" font-size="14">应用程序 / SDK</text>
+              <!-- API Gateway -->
+              <rect x="300" y="20" width="200" height="50" rx="6" fill="var(--c-accent-b)" opacity="0.3"/>
+              <text x="400" y="52" text-anchor="middle" fill="var(--c-text-1)" font-size="14">API Gateway</text>
+              <!-- Query Engine -->
+              <rect x="550" y="20" width="200" height="50" rx="6" fill="var(--c-accent-c)" opacity="0.3"/>
+              <text x="650" y="52" text-anchor="middle" fill="var(--c-text-1)" font-size="14">Query Engine</text>
+              <!-- Storage Layer -->
+              <rect x="100" y="120" width="150" height="60" rx="6" fill="var(--c-surface-2)"/>
+              <text x="175" y="155" text-anchor="middle" fill="var(--c-text-1)" font-size="14">热数据存储</text>
+              <rect x="325" y="120" width="150" height="60" rx="6" fill="var(--c-surface-2)"/>
+              <text x="400" y="155" text-anchor="middle" fill="var(--c-text-1)" font-size="14">分布式事务</text>
+              <rect x="550" y="120" width="150" height="60" rx="6" fill="var(--c-surface-2)"/>
+              <text x="625" y="155" text-anchor="middle" fill="var(--c-text-1)" font-size="14">冷数据归档</text>
+              <!-- Backup & Monitor -->
+              <rect x="200" y="210" width="180" height="40" rx="6" fill="var(--c-accent-a)" opacity="0.2"/>
+              <text x="290" y="236" text-anchor="middle" fill="var(--c-text-1)" font-size="13">自动备份 · 异地容灾</text>
+              <rect x="420" y="210" width="180" height="40" rx="6" fill="var(--c-accent-b)" opacity="0.2"/>
+              <text x="510" y="236" text-anchor="middle" fill="var(--c-text-1)" font-size="13">智能监控 · 告警通知</text>
+              <!-- Arrows -->
+              <line x1="250" y1="45" x2="290" y2="45" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="500" y1="45" x2="540" y2="45" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="620" y1="70" x2="620" y2="105" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="400" y1="70" x2="400" y2="105" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="175" y1="70" x2="175" y2="90" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="175" y1="90" x2="400" y2="90" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="400" y1="90" x2="625" y2="90" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="175" y1="90" x2="175" y2="115" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="625" y1="90" x2="625" y2="115" stroke="var(--c-text-2)" stroke-width="2"/>
+              <line x1="290" y1="180" x2="290" y2="200" stroke="var(--c-text-2)" stroke-width="1" stroke-dasharray="4"/>
+              <line x1="510" y1="180" x2="510" y2="200" stroke="var(--c-text-2)" stroke-width="1" stroke-dasharray="4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>解决方案</span>
+      <span>03</span>
+    </div>
+  </section>
+
+  <!-- Slide 4: Core Features -->
+  <section class="s slide" id="s4">
+    <div class="slide-header">
+      <span class="badge">核心功能</span>
+      <h2>四大产品亮点</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards grid-2x2">
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:48px">⚡</span>
+            <h3 class="g-title" style="margin:0">弹性扩展</h3>
+          </div>
+          <p class="g-body">秒级自动扩缩容，支持 0-10000+ QPS 无缝切换，按需付费，成本降低 60%</p>
+          <div style="margin-top:16px;font-size:var(--fs-caption);color:var(--c-text-2)">
+            ✓ 水平扩展 · ✓ 读写分离 · ✓ 自动负载均衡
+          </div>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:48px">🛡️</span>
+            <h3 class="g-title" style="margin:0">高可用保障</h3>
+          </div>
+          <p class="g-body">99.999% SLA 承诺，跨可用区部署，自动故障切换，RPO=0 RTO&lt;30s</p>
+          <div style="margin-top:16px;font-size:var(--fs-caption);color:var(--c-text-2)">
+            ✓ 多活架构 · ✓ 自动备份 · ✓ 异地容灾
+          </div>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:48px">🔐</span>
+            <h3 class="g-title" style="margin:0">企业安全</h3>
+          </div>
+          <p class="g-body">全链路 SSL 加密，细粒度访问控制，审计日志，符合 SOC2 / 等保三级</p>
+          <div style="margin-top:16px;font-size:var(--fs-caption);color:var(--c-text-2)">
+            ✓ 数据加密 · ✓ 审计追溯 · ✓ 权限管控
+          </div>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:48px">🤖</span>
+            <h3 class="g-title" style="margin:0">智能运维</h3>
+          </div>
+          <p class="g-body">AI 驱动的性能优化建议，自动慢查询诊断，可视化监控大盘</p>
+          <div style="margin-top:16px;font-size:var(--fs-caption);color:var(--c-text-2)">
+            ✓ 智能诊断 · ✓ 自动调优 · ✓ 实时告警
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>核心功能</span>
+      <span>04</span>
+    </div>
+  </section>
+
+  <!-- Slide 5: Stats -->
+  <section class="s slide" id="s5">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="stat-value" style="margin-bottom:16px;color:var(--c-accent-a)">50,000+</div>
+        <div class="stat-label" style="font-size:var(--fs-subtitle);margin-bottom:64px">企业客户信赖之选</div>
+        <div style="display:flex;gap:48px;justify-content:center">
+          <div style="text-align:center;min-width:200px">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-b);line-height:1">99.999%</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">服务可用性</div>
+          </div>
+          <div style="text-align:center;min-width:200px">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-c);line-height:1">10PB+</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">日处理数据量</div>
+          </div>
+          <div style="text-align:center;min-width:200px">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-a);line-height:1">&lt;10ms</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">平均响应延迟</div>
+          </div>
+          <div style="text-align:center;min-width:200px">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-b);line-height:1">60%</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">成本节省</div>
+          </div>
+        </div>
+        <div style="margin-top:64px;padding:24px;background:var(--c-surface);border-radius:var(--r-lg);display:inline-block">
+          <div style="font-size:var(--fs-caption);color:var(--c-text-2);margin-bottom:12px">客户行业分布</div>
+          <div style="display:flex;gap:32px;justify-content:center;font-size:var(--fs-body)">
+            <span>🏪 电商零售 35%</span>
+            <span>🏦 金融科技 25%</span>
+            <span>📱 互联网 20%</span>
+            <span>🏭 制造业 12%</span>
+            <span>📚 教育 8%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>市场数据</span>
+      <span>05</span>
+    </div>
+  </section>
+
+  <!-- Slide 6: Pricing -->
+  <section class="s slide" id="s6">
+    <div class="slide-header">
+      <span class="badge">定价方案</span>
+      <h2>灵活透明的定价模式</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g">
+          <h3 class="g-title">按需选择</h3>
+          <div style="flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center">
+            <div style="padding:20px;border:2px solid var(--c-border);border-radius:var(--r-md)">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:var(--fs-card-title);font-weight:600">开发者版</span>
+                <span style="font-size:var(--fs-card-title);color:var(--c-accent-a);font-weight:700">免费</span>
+              </div>
+              <div style="font-size:var(--fs-body);color:var(--c-text-2)">适合个人开发者和小项目，包含 5GB 存储空间</div>
+            </div>
+            <div style="padding:20px;border:2px solid var(--c-accent-a);border-radius:var(--r-md);position:relative">
+              <div style="position:absolute;top:-12px;right:20px;background:var(--c-accent-a);color:var(--c-bg);padding:2px 12px;border-radius:var(--r-full);font-size:var(--fs-caption)">推荐</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:var(--fs-card-title);font-weight:600">专业版</span>
+                <span style="font-size:var(--fs-card-title);color:var(--c-accent-a);font-weight:700">¥299/月</span>
+              </div>
+              <div style="font-size:var(--fs-body);color:var(--c-text-2)">适合中小企业，无限存储、优先支持、高级安全</div>
+            </div>
+            <div style="padding:20px;border:2px solid var(--c-border);border-radius:var(--r-md)">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <span style="font-size:var(--fs-card-title);font-weight:600">企业版</span>
+                <span style="font-size:var(--fs-card-title);color:var(--c-text-1);font-weight:700">定制化</span>
+              </div>
+              <div style="font-size:var(--fs-body);color:var(--c-text-2)">专属客户经理、私有化部署、定制开发</div>
+            </div>
+          </div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">为什么选择 CloudDB 2.0</h3>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:24px">
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="width:40px;height:40px;background:var(--c-accent-a);border-radius:50%;display:flex;align-items:center;justify-content:center">✓</span>
+              <span style="font-size:var(--fs-body)">无 upfront 费用，按需付费无负担</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="width:40px;height:40px;background:var(--c-accent-a);border-radius:50%;display:flex;align-items:center;justify-content:center">✓</span>
+              <span style="font-size:var(--fs-body)">14 天免费试用，随时可退订</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="width:40px;height:40px;background:var(--c-accent-a);border-radius:50%;display:flex;align-items:center;justify-content:center">✓</span>
+              <span style="font-size:var(--fs-body)">年付享 8 折优惠，老用户续费 9 折</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px">
+              <span style="width:40px;height:40px;background:var(--c-accent-a);border-radius:50%;display:flex;align-items:center;justify-content:center">✓</span>
+              <span style="font-size:var(--fs-body)">迁移咨询免费，提供全程技术支持</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>定价方案</span>
+      <span>06</span>
+    </div>
+  </section>
+
+  <!-- Slide 7: Roadmap -->
+  <section class="s slide" id="s7">
+    <div class="slide-header">
+      <span class="badge">产品路线图</span>
+      <h2>未来发展规划</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards">
+        <div class="g" style="flex:1;display:flex;flex-direction:column">
+          <div style="flex:1;display:flex;align-items:center;gap:32px">
+            <div style="flex:1;text-align:center;padding:32px;background:var(--c-bg);border-radius:var(--r-lg)">
+              <div style="font-size:var(--fs-card-title);color:var(--c-accent-a);font-weight:700;margin-bottom:12px">2024 Q1</div>
+              <div style="font-size:var(--fs-body);font-weight:600;margin-bottom:8px">2.0 正式发布</div>
+              <div style="font-size:var(--fs-caption);color:var(--c-text-2)">核心功能全面上线<br/>企业级特性就绪</div>
+              <div style="margin-top:16px;font-size:32px">✅</div>
+            </div>
+            <div style="font-size:32px;color:var(--c-accent-a)">→</div>
+            <div style="flex:1;text-align:center;padding:32px;background:var(--c-surface);border-radius:var(--r-lg)">
+              <div style="font-size:var(--fs-card-title);color:var(--c-accent-b);font-weight:700;margin-bottom:12px">2024 Q2</div>
+              <div style="font-size:var(--fs-body);font-weight:600;margin-bottom:8px">AI 智能分析</div>
+              <div style="font-size:var(--fs-caption);color:var(--c-text-2)">内置 AI 查询优化<br/>智能索引推荐</div>
+              <div style="margin-top:16px;font-size:32px">🚧</div>
+            </div>
+            <div style="font-size:32px;color:var(--c-accent-b)">→</div>
+            <div style="flex:1;text-align:center;padding:32px;background:var(--c-surface);border-radius:var(--r-lg)">
+              <div style="font-size:var(--fs-card-title);color:var(--c-accent-c);font-weight:700;margin-bottom:12px">2024 Q3</div>
+              <div style="font-size:var(--fs-body);font-weight:600;margin-bottom:8px">多云部署</div>
+              <div style="font-size:var(--fs-caption);color:var(--c-text-2)">跨云容灾能力<br/>混合云架构支持</div>
+              <div style="margin-top:16px;font-size:32px">🔮</div>
+            </div>
+            <div style="font-size:32px;color:var(--c-accent-c)">→</div>
+            <div style="flex:1;text-align:center;padding:32px;background:var(--c-surface);border-radius:var(--r-lg)">
+              <div style="font-size:var(--fs-card-title);color:var(--c-accent-a);font-weight:700;margin-bottom:12px">2024 Q4</div>
+              <div style="font-size:var(--fs-body);font-weight:600;margin-bottom:8px">Serverless</div>
+              <div style="font-size:var(--fs-caption);color:var(--c-text-2)">按请求计费<br/>极致弹性伸缩</div>
+              <div style="margin-top:16px;font-size:32px">🚀</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>产品部</span>
+      <span>结束</span>
+    </div>
+  </section>
+
+</div>
+<script>
+document.addEventListener('keydown', e => {
+  const slides = [...document.querySelectorAll('.s.slide')];
+  const idx = slides.findIndex(s => s.classList.contains('is-active'));
+  if (e.key === 'ArrowRight' || e.key === ' ') { slides[idx]?.classList.remove('is-active'); slides[Math.min(idx+1, slides.length-1)]?.classList.add('is-active'); }
+  if (e.key === 'ArrowLeft') { slides[idx]?.classList.remove('is-active'); slides[Math.max(idx-1, 0)]?.classList.add('is-active'); }
+});
+</script>
+</body>
+</html>

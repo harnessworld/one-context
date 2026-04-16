@@ -1,0 +1,16 @@
+# skill-parallel-verify test-case template v1
+# 复制此模板并填写你的测试配置
+
+# ===== 必填字段 =====
+skill_path: ""           # 被测 Skill 的 SKILL.md 文件路径（如 skills/xxx/SKILL.md）
+test_name: ""            # 测试名称
+
+# ===== 可选字段 =====
+acceptance_criteria: ""  # 验收标准（不填则使用 prompt 本身作为验收依据）
+description: ""          # 测试整体目的描述
+
+# ===== 测试用例（至少 1 个） =====
+test_cases:
+  - id: tc-1
+    prompt: ""            # 模拟用户输入的提示词
+    description: ""       # 可选：测试目的

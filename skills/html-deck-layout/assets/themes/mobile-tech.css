@@ -1,0 +1,16 @@
+/* Mobile Tech — 深蓝科技 */
+:root {
+  --c-bg: #0f172a;
+  --c-surface: #1e293b;
+  --c-surface-2: #334155;
+  --c-text-1: #f1f5f9;
+  --c-text-2: #94a3b8;
+  --c-accent-a: #38bdf8;
+  --c-accent-b: #818cf8;
+  --c-accent-c: #a78bfa;
+  --c-border: rgba(255, 255, 255, 0.08);
+  --c-overlay: rgba(15, 23, 42, 0.6);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+}

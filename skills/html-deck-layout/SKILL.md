@@ -1,329 +1,146 @@
 ---
 name: html-deck-layout
-description: 手机横屏 HTML 幻灯（presentation.html，#P 1920×1080 输出规格）的版式、防空白、字号与示意图区规范。与 html-video-from-slides 配套：成片截图即版式；改幻灯内容/样式时优先读本文件，减少反复口头说明。
+description: Mobile-first HTML presentation generator (1920×1080 landscape). Creates phone-optimized slides for video production with fill-deck layouts, ≥42px body text, ≥85% coverage. Use when the user wants a mobile presentation, phone-optimized slides, presentation.html for video, or mobile PPT with emoji/SVG diagrams. Triggers: "mobile PPT", "phone presentation", "presentation.html", "video slides", "1920x1080", "手机横屏PPT", "手机PPT", "移动端幻灯片", "录屏PPT", "口播幻灯片".
 ---
 
-# HTML 全屏幻灯 · 版式与信息密度（one-context）
+# html-deck-layout — Mobile PPT Generator
 
-> **目标场景**：手机横屏播放（投屏/录屏），视口 1920×1080 输出。不做竖屏适配，不做响应式断点。
+Generate mobile-optimized HTML presentations (1920×1080 landscape) for
+phone-screen viewing: 投屏、录屏、口播视频配图。All slides enforce
+**fill-deck** (zero wasted space), **≥42px body text**, **≥85% coverage**.
 
-## 何时必读
+## When to use
 
-在以下任一情形，**先完整阅读本文件再改 HTML/CSS**（不要只靠对话里临时回忆）：
+| 走这个 skill | 走 html-ppt |
+|-------------|-------------|
+| 手机横屏播放（投屏/录屏） | 桌面演示（键盘翻页） |
+| 口播视频配幻灯 | 线下演讲 / 会议分享 |
+| 1920×1080 固定视口 | 响应式/全屏自适应 |
+| 需要 fill-deck 防空白 | 需要 runtime.js 键盘导航 |
 
-- 用户提到：**空白多、字太小、图太小、只有底图网格、卡片里很空**；
-- 编辑仓库内任意 **`presentation.html`**（或同结构 `#P` + `.s.slide`）；
-- 新建与 **口播视频** 配套的幻灯（与 `skills/html-video-from-slides/SKILL.md` 一起用）。
+**不确定时**：如果最终在手机上看 → html-deck-layout；如果在电脑/投影上看 → html-ppt。
 
-## 与 `html-video-from-slides` 的分工（不必合并成一个技能）
+## Before you author anything — ALWAYS ask
 
-| 文档 | 负责（保留在原处，不整体搬迁） |
-|------|--------------------------------|
-| `skills/html-video-from-slides/SKILL.md` | **成片流程**：`node cli.js`、wav-auto / tts、依赖、选题目录结构 |
-| `skills/html-video-from-slides/DESIGN-STANDARD.md` | **通用规范**：1920×1080、`.wa`、画面覆盖率、**字号最小值**（t2/t4 等）、主题与反模式 |
-| `skills/html-video-from-slides/TEMPLATES.md` | **base.css 图纸流**：Cover / Grid / Split 等骨架 |
-| **本文件** | **实操层**：`slide-main` / **`fill-deck`**、卡内 **flex:1 示意图区**、何时别用 `v-center` 糊弄空白；适用于 **大量 inline 样式** 的自包含 deck（与纯 class 模板流并存） |
+**Do not start writing slides until you confirm three things.** Either ask
+the user directly, or — if they already provided rich content — propose a
+default and confirm.
 
-**不需要**把 `cli.js` 或 wav 逻辑挪到本仓库新 skill；也**不必**把 `DESIGN-STANDARD` 整篇搬进本文件——避免双份维护。改字号下限时以 **`DESIGN-STANDARD.md`** 为硬约束；本文件「字号档位」是 **与近期口播页对齐的实操区间**，与之冲突时 **以 DESIGN-STANDARD 为准**。
+1. **Content & audience.** 什么主题？大概多少页？观众是谁（内部/公开/学员）？
+2. **Style / theme.** 推荐风格：
+   - 技术分享 → `mobile-tech`（深蓝科技，默认最安全）
+   - 亲和/生活 → `mobile-warm`（暖橙）
+   - 正式汇报 → `mobile-minimal`（白底极简）或 `mobile-data`（数据蓝）
+   - 赛博/活动 → `mobile-dark`（OLED 黑）
+   - 文化/教育 → `mobile-nature`（自然绿）
+3. **Starting point.** 用哪个 full-deck 模板打底？
+   - 通用 → `mobile-generic`
+   - 技术分享 → `mobile-tech-sharing`
+   - 产品发布 → `mobile-product-pitch`
+   - 课程介绍 → `mobile-course-intro`
 
----
+A good opening message:
 
-## 根因（避免再犯）
+> 我来给你做这份手机横屏 PPT！先确认三件事：
+> 1. 主题 / 大概页数 / 观众？
+> 2. 风格偏好？建议：`mobile-tech`（技术分享默认）、`mobile-warm`（生活类）、`mobile-data`（数据报告）
+> 3. 用 `mobile-generic` 全 deck 模板打底，还是从单页 layout 组装？
 
-1. **`.slide-main` 占满高度 + `justify-content: flex-start`**  
-   若中间区（卡片行）**不增高**，多余像素会落在 **整页最下方**，像「半屏空」。
-2. **中间行 `flex:1` + 子项 `align-items: flex-start` + 卡片高度随内容**  
-   行被拉高，卡片仍矮 → **卡片下方、底栏上方**出现一条「空带」（不是浏览器没刷新）。
-3. **仅 `justify-content: center`（v-center）**  
-   只是把整块内容上移/下移，**空白仍在**，只是均分到上下；用户要的是 **信息或图形吃掉空间**，不是挪位置。
-4. **正文与示意图左右并排且栏窄**  
-   字和 SVG 都显小，中间易出现 **卡内上下留白**。
+## Quick start
 
----
+1. **Copy a full-deck template.**
+   ```
+   cp -r templates/full-decks/mobile-generic examples/my-talk
+   ```
+2. **Pick a theme.** Change the CSS link in `<head>`:
+   ```html
+   <link rel="stylesheet" href="../../assets/themes/mobile-warm.css">
+   ```
+   See [references/mobile-themes.md](references/mobile-themes.md).
+3. **Replace content.** Edit text, emoji, and SVG in each slide.
+4. **Swap layouts.** Copy `<section class="s slide">...</section>` blocks from
+   [templates/single-page/](templates/single-page/) as needed.
+   See [references/mobile-layouts.md](references/mobile-layouts.md).
+5. **Add diagrams.** Use SVG snippets from [references/svg-snippets.md](references/svg-snippets.md)
+   and emoji from [references/emoji-guide.md](references/emoji-guide.md).
+6. **Self-check.** Verify against [references/spec-cheatsheet.md](references/spec-cheatsheet.md):
+   - fill-deck on all content pages
+   - Body ≥42px, card title ≥52px
+   - Coverage ≥85%, ≤120 chars/page
+   - Layout variety (no 3+ consecutive same layout)
 
-## 推荐结构（主列）
+## Mobile constraints (summary)
 
-主内容放在 **`.col.slide-main`**（单页内主列，`flex:1; min-height:0; flex-direction:column`）。
+| Constraint | Value | Source |
+|-----------|-------|--------|
+| Canvas | 1920×1080 | Fixed viewport |
+| Body text | **≥42px** | Hard minimum |
+| Card title | **≥52px** | Tier table |
+| Coverage | **≥85%** | Visual estimate |
+| Chars/page | **≤120 汉字** | Slide = skeleton, detail via voiceover |
+| Info blocks/page | **≤3** | Title + cards count |
+| Layout variety | **≥2–3 types/deck** | No 3+ same in a row |
+| SVG text (viewBox) | **≥18px** | In viewBox coordinates |
 
-### A. 竖向铺满（优先，「防空白」主手段）
+Full spec with CSS code: [references/spec-cheatsheet.md](references/spec-cheatsheet.md).
 
-对 **标题 + 多卡/主内容 + 底栏** 类页面使用 **`.slide-main.fill-deck`**：
+## Catalogs (load when needed)
 
-```css
-/* 关键 CSS 片段 — 可直接复用 */
-.slide-main.fill-deck {
-  flex: 1;
-  min-height: 0;
-  flex-direction: column;
-}
-.slide-main.fill-deck .slide-cards {
-  flex: 1 1 0;
-  min-height: 0;
-  align-items: stretch;
-}
-.slide-main.fill-deck .slide-cards > .g {
-  align-self: stretch;  /* 避免用 !important，通过父容器 align-items: stretch 达到同样效果 */
-  height: 100%;
-  min-height: 0;
-}
-```
+- [references/mobile-themes.md](references/mobile-themes.md) — 6 themes with when-to-use
+- [references/mobile-layouts.md](references/mobile-layouts.md) — 7 layout types
+- [references/authoring-guide.md](references/authoring-guide.md) — step-by-step workflow
+- [references/spec-cheatsheet.md](references/spec-cheatsheet.md) — full layout spec (fill-deck, font tiers, self-check)
+- [references/svg-snippets.md](references/svg-snippets.md) — SVG icon fragments
+- [references/emoji-guide.md](references/emoji-guide.md) — emoji quick reference
 
-**问题识别**：若发现「卡片行与底栏之间有一条与内容无关的空白横带」，大概率是 `.slide-cards` 设了 `flex:1` 但子卡用 `align-self: flex-start` 且高度不拉伸。
+## Relationship with html-video-from-slides
 
-### B. 卡内如何「吃掉」高度（比单纯撑容器更有效）
+| This skill | html-video-from-slides |
+|-----------|----------------------|
+| **Generate** slides (prompt → HTML) | **Render** video (HTML + audio → MP4) |
+| Layout rules & templates | CLI pipeline (`node cli.js`) |
+| Standalone output | Adds `.wa` anchors, Whisper timing |
 
-每张卡建议 **列方向**：**标题区（-shrink-0）→ 正文（-shrink-0，大字）→ 示意图区（flex:1，min-height 如 200–320px）→ 要点/小结（-shrink-0）**。
+Workflow: use this skill to create slides → then use html-video-from-slides to produce video.
+Layout spec is shared: [references/spec-cheatsheet.md](references/spec-cheatsheet.md).
 
-```css
-/* 卡内 flex:1 示意图区 */
-.card-diagram {
-  flex: 1;
-  min-height: 240px;   /* 下限，防止过扁 */
-}
-.card-diagram svg {
-  width: 100%;
-  height: 100%;
-}
-```
-
-- SVG 用 `viewBox="0 0 800 340"`（或每卡一列时 `420×260`），`preserveAspectRatio="xMidYMid meet"`，让图随 flex 区放大。
-- SVG 内标签字号用 **viewBox 坐标下足够大** 的值（如 18–28），避免「图画了但像蚂蚁」。
-- **不要**在正文与图之间用 `justify-content: center` 除非刻意；优先 **`flex-start` + 中间区 flex:1**。
-
-### C. 何时才用垂直居中（`.slide-main.v-center`）
-
-仅当 **内容块确实短**、且 **没有** 合适的示意图填满中间（例如纯致谢页）。  
-**禁止**用 v-center 代替「加图或加大字号」来解决「空」。
-
-**收口 / 致谢页**：可 **整页无图**，用大号标题、订阅与三连的 **字标排布**、短句即可；**不要**为撑版面硬画流程图（易显牵强）。
-
-**频道 / 栏目名（chip、与订阅同屏的标识）**：须用 **当期真实账号或栏目名**（由选题目录/项目约定），交付前**替换占位文案**，避免成片与发布账号不一致（例如勿遗留其他平台的默认栏目名）。
-
----
-
-## 字号档位
-
-**硬下限**以 `skills/html-video-from-slides/DESIGN-STANDARD.md` 为准（如正文 ≥42px）。
-
-本节仅提供 **实操常用区间**（勿低于硬下限）：
-
-| 层级 | 建议（px） | CSS 变量（建议） |
-|------|------------|------------------|
-| 页主标题 | 68–76 | `--fs-page-title` |
-| 副标题/一行说明 | 34–40 | `--fs-subtitle` |
-| 卡片主标题 | 40–52 | `--fs-card-title` |
-| 卡片正文 | 34–42 | `--fs-body` |
-| 卡片底条/「要点」 | 32–38 | `--fs-hint` |
-| 全宽底栏（一句话/自检） | 34–38 | `--fs-footer` |
-
-### CSS 变量系统（推荐）
-
-在 `base.css` 或页面 `<style>` 顶部定义：
-
-```css
-:root {
-  /* 字号系统（与 DESIGN-STANDARD 对齐） */
-  --fs-hero: 190px;       /* 封面主标题，等效 t1 */
-  --fs-page-title: 88px;  /* 页面主标题，等效 t2 */
-  --fs-subtitle: 60px;    /* 副标题，等效 t3 */
-  --fs-body: 42px;        /* 正文最小值，等效 t4 */
-  --fs-hint: 32px;        /* 注释说明，等效 t5 */
-  --fs-card-title: 52px;  /* 卡片标题 */
-  --fs-card-body: 42px;   /* 卡片正文 */
-  --fs-stat: 170px;       /* 超大数字 */
-  
-  /* 颜色系统（由主题定义，此处示例） */
-  --accent-a: #d4a843;
-  --accent-b: #4caf72;
-  --cream: #f0e8d0;
-  --muted: #7a9f7a;
-}
-```
-
-使用方式：`font-size: var(--fs-page-title)`，便于全局调整。
-
-**文案原则**：允许字少、句短；字号大时更忌废话。
-
----
-
-## SVG 内文字规范
-
-SVG 内的文字常被忽略，导致「图画了但字像蚂蚁」：
-
-| 属性 | 规范 |
-|------|------|
-| viewBox 内字号 | **18–28px**（viewBox 坐标系），保证缩放后清晰可读 |
-| line-height | `1.4–1.6`，避免行拥挤 |
-| letter-spacing | 正常 `0`，标题可 `-1` 到 `-2`（紧凑） |
-| 字重 | 正文 `font-weight: 400`，标题 `700` |
-| 对比度 | SVG 内文字与背景对比度 **≥ 4.5:1**（WCAG AA） |
-
-**示例**：
-```svg
-<svg viewBox="0 0 800 340" preserveAspectRatio="xMidYMid meet">
-  <text x="100" y="80" font-size="24" font-weight="700" fill="#f0e8d0">架构层</text>
-  <text x="100" y="120" font-size="20" fill="#7a9f7a">负责请求路由与负载均衡</text>
-</svg>
-```
-
----
-
-## 视觉动线设计
-
-手机横屏时，眼睛自然从 **左上 → 右下** 扫视。设计时应引导视线：
-
-### Z-Pattern（封面/总结页）
+## File structure
 
 ```
-┌─────────────────────────────┐
-│ ★ 起点                      │
-│     主标题                   │
-│                    副标题 ★ │
-│                             │
-│ ★ 行动按钮                  │
-└─────────────────────────────┘
+html-deck-layout/
+├── SKILL.md                    (this file)
+├── references/                 (detailed catalogs & spec)
+│   ├── spec-cheatsheet.md      (layout rules, CSS code, self-check)
+│   ├── authoring-guide.md      (6-step authoring workflow)
+│   ├── mobile-themes.md        (6 themes catalog)
+│   ├── mobile-layouts.md       (7 layouts catalog)
+│   ├── svg-snippets.md         (SVG icon library)
+│   └── emoji-guide.md          (emoji quick reference)
+├── assets/
+│   ├── base.css                (mobile-first design tokens)
+│   ├── fonts.css               (font stack)
+│   ├── mobile-layout.css       (fill-deck, #P, slide structure)
+│   └── themes/                 (6 theme CSS overrides)
+│       ├── mobile-tech.css
+│       ├── mobile-warm.css
+│       ├── mobile-minimal.css
+│       ├── mobile-dark.css
+│       ├── mobile-data.css
+│       └── mobile-nature.css
+├── templates/
+│   ├── deck.html               (minimal 3-slide starter)
+│   ├── full-decks/             (4 complete deck templates)
+│   │   ├── mobile-generic/
+│   │   ├── mobile-tech-sharing/
+│   │   ├── mobile-product-pitch/
+│   │   └── mobile-course-intro/
+│   └── single-page/            (7 layout templates)
+│       ├── cover.html
+│       ├── grid-2x2.html
+│       ├── split-50-50.html
+│       ├── card-plus-diagram.html
+│       ├── stat-highlight.html
+│       ├── process-flow.html
+│       └── thanks.html
+└── examples/                   (working examples)
 ```
-
-- 左上角放 **核心标题/badge**
-- 右侧放 **副标题或视觉元素**
-- 底部放 **行动号召/总结**
-
-### F-Pattern（内容页）
-
-```
-┌─────────────────────────────┐
-│ ████████ 标题行             │
-│ ████ badge + 装饰线         │
-│                             │
-│ 正文第1行 ████████████      │
-│ 正文第2行 ██████████        │
-│ 正文第3行 ████████          │
-│                             │
-│ [图形/卡片占位]             │
-└─────────────────────────────┘
-```
-
-- 标题行横跨顶部
-- 正文左对齐，每行长度递减（自然的 F 形）
-- 图形放右下角或右侧
-
-### 分割线法则
-
-- **垂直分割线**：左右分栏时，分割线颜色 `rgba(255,255,255,0.1)`，宽度 2px
-- **水平分割线**：用渐变 `linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)`，更柔和
-
----
-
-## 何时留白（不是消灭所有空白）
-
-**错误的空白**：无信息区域，视觉上感觉「没做完」。
-
-**正确的留白**：
-
-| 场景 | 留白方式 | 比例 |
-|------|----------|------|
-| 封面 Hero 区 | 标题上下留 60–100px 呼吸空间 | 10–15% |
-| 致谢/收口页 | 居中大字，四周留白 | 30–40% |
-| 章节转折页 | 仅标题 + 章节号，无图形 | 50% |
-| 卡片内文段之间 | `margin-top: 18px` 分组，非 `<br>` 空行 | N/A |
-
-**判断标准**：留白是否 **服务于视觉节奏**？若是，则是对的；若只是「没内容了」，则是错的。
-
----
-
-## 信息密度客观指标
-
-| 指标 | 标准 | 验证方法 |
-|------|------|----------|
-| 画面覆盖率 | **≥ 85%** | 视觉估算：非空白区域占比 |
-| 每页信息块 | **≤ 3 个** | 标题算 1，每个独立卡片算 1 |
-| 每页关键信息点 | **3–5 个** | 核心概念/数字/结论 |
-| 每页总字数 | **≤ 120 汉字** | Slide 是骨架，细节靠口播 |
-| 每行字数 | **≤ 18 汉字** | 超出自动换行影响可读性 |
-| 图形元素 | **≥ 1 个/页** | SVG、emoji、装饰性图形皆可（收口/致谢页除外） |
-
-**自测公式（每格卡片）**：
-```
-格子可用高度（减去 padding）× 0.85 
-  ≤ (emoji + title + body行数×字号×line-height + 底部装饰)
-```
-
----
-
-## 示意图（图形）原则
-
-- **每页至少一个视觉锚点**：整卡宽图、或每卡一块图，避免只有 chip+字。（**收口/致谢页**可无图，以大字与字标层次为主。）
-- **优先全宽**：示意图放在 **正文下方、独立一层**，比「左字右窄图」更易做大。
-- **与叙事一致**：对比、趋势、流程、靶心/窗口等，减少纯装饰无信息图形。
-
-### 避免同质化
-
-**问题模式识别**：若连续 3 页以上都用「深色底 + 方框流程图 + 箭头」，视觉疲劳概率高。
-
-**解法思路**（每期至少选 2–3 种交替）：
-
-| 版式手段 | 适用场景 | 信息量 |
-|----------|----------|--------|
-| 超大数字/标题 | 数据展示、里程碑 | 高 |
-| 杂志分栏 | 对比、并列论点 | 中 |
-| 渐变条带 | 时间线、进度 | 中 |
-| 标签云式 pill | 关键词、特性列表 | 低 |
-| 引用块（大引号）| 观点、金句 | 低 |
-| 对角分割色块 | 二元对立、转折 | 中 |
-| 等宽字模拟终端 | 代码、命令 | 高 |
-| 层叠卡片 | 演进、堆栈 | 中 |
-
-核心原则：**信息密度与层次**，而非「必须有图」。同一页内也应有版式变化，避免三张卡同一套路。
-
-### 双栏对仗 + 中间分隔条（易挤、易重叠）
-
-- **左右栏**：`flex: 1 1 38%`（或相近）+ **`min-width: 0`**，左右 **`padding` 足够**（如 18–20px），避免长文案顶到中缝。
-- **中间条**：**固定窄宽**（约 **80–96px**），标签优先 **横向短词**（如「对齐」）；慎用 **`writing-mode: vertical-rl` + 过大字号**，否则易与两侧抢视觉、显得「竖条压字」。
-- **同页 pill / 流程链**（输入→输出→…）：pill、箭头与「+」后标签的 **字号要与主标题档位匹配**，并适当 **`gap` / `row-gap`**，避免相对整页显小。
-
-**禁止把「没有空白」理解成「另一种空白」**：仅靠 **拉大卡片框、加大字号、增高行距** 而不增加 **可读层次**（图或上述版式），只是在毛玻璃里铺字，画布仍会显得「空」。**最终验收**：除底纹外，视线所及应有 **字 + 视觉层次**（图或强排版）共同占满；多卡页 = **每卡一块 flex:1 内容区**，且 **同页内版式宜有变化**，避免三张同一套路框图。
-
----
-
-## 自检清单（改完一页或一期）
-
-### 布局与空白
-- [ ] 是否仍有大片 **仅网格/背景** 且无字、无图？（若有 → 检查 fill-deck + 卡内 flex:1 图区）
-- [ ] 卡片行与底栏之间是否出现 **与内容无关的空白带**？（若有 → 检查 `.slide-cards` 是否 flex:1 而子卡未 stretch）
-- [ ] 正文与非文字层次（SVG / 大标题排版 / 分栏）是否 **可读、可区分**？
-
-### 字号与可读性
-- [ ] 正文是否 **≥42px**？（DESIGN-STANDARD 硬下限）
-- [ ] 卡片标题是否 **≥40px**？
-- [ ] 底栏/要点是否 **≥32px**？
-- [ ] SVG 内文字是否 **在 viewBox 坐标下 ≥18px**？
-
-### 视觉动线与留白
-- [ ] 核心信息是否在 **左上或视觉中心**？
-- [ ] 留白是否 **服务于节奏**（封面/转折页）而非「没内容」？
-- [ ] 连续页面版式是否有 **变化**？
-
-### 口播对齐
-- [ ] `.wa`（口播锚字）是否与可见文案同步？（见 `html-video-from-slides`）
-- [ ] 幻灯片顺序是否与口播脚本一致？
-
-### 版式多样性
-- [ ] 同一期是否至少用了 **2–3 种不同版式手段**？（避免连续 3 页以上同一套路）
-- [ ] 同一页多卡布局是否 **不完全相同**？
-
----
-
-## 参考实现（仓库内）
-
-可搜索 **`fill-deck`**、**`slide-main`** 阅读已调过的页（例如同一 `presentation.html` 内 **组织震荡**、**Part 3 · 职业路径** 等块），**复用结构再换文案与 SVG**，不要从零猜 flex。
-
----
-
-## 禁止
-
-- 仅用 **`justify-content: center`** 处理「空白太多」而不改信息密度或示意图。
-- 给 **`.slide-cards` 设 `flex:1`** 却又让子卡 **`align-self: flex-start` 且高度不拉伸**（旧坑），除非明确使用 **fill-deck 覆盖**。
-- 在未读 **`skills/html-video-from-slides/SKILL.md`** 的情况下改与 **成片/口播** 强相关的字段（如 `.wa`、幻灯片顺序）。
-- 连续 **超过 3 页** 使用相同布局套路（深色底 + 方框流程图 + 箭头）。
-- 使用 `<br>` 空行当视觉间距——改用 `margin-top` 或 separator div。
-- 在未定义 CSS 变量的情况下硬编码字号（降维护性）。

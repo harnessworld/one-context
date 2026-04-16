@@ -1,0 +1,16 @@
+/* Mobile Dark — 暗色 OLED */
+:root {
+  --c-bg: #000000;
+  --c-surface: #0a0a0a;
+  --c-surface-2: #1a1a1a;
+  --c-text-1: #f5f5f5;
+  --c-text-2: #737373;
+  --c-accent-a: #22d3ee;
+  --c-accent-b: #f472b6;
+  --c-accent-c: #a3e635;
+  --c-border: rgba(255, 255, 255, 0.06);
+  --c-overlay: rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+}

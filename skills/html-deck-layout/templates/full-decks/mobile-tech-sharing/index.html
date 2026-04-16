@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>vLLM 推理引擎优化实践</title>
+  <link rel="stylesheet" href="../../assets/base.css">
+  <link rel="stylesheet" href="../../assets/fonts.css">
+  <link rel="stylesheet" href="../../assets/mobile-layout.css">
+  <link rel="stylesheet" href="../../assets/themes/mobile-tech.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="P" class="tpl-mobile-tech-sharing">
+
+  <!-- Slide 1: Cover -->
+  <section class="s slide is-active" id="s1">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="emoji-xl">🤖</div>
+        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 12px">vLLM 推理引擎</h1>
+        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 32px">高性能 LLM 推理优化实践分享</p>
+        <span class="pill">⚡ 推理加速 · 显存优化 · 吞吐提升</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>AI Infra Team · 李明</span>
+      <span>01</span>
+    </div>
+  </section>
+
+  <!-- Slide 2: Background & Challenges -->
+  <section class="s slide" id="s2">
+    <div class="slide-header">
+      <span class="badge">背景与挑战</span>
+      <h2>LLM 推理面临的痛点</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g">
+          <h3 class="g-title">生成式 AI 爆发</h3>
+          <p class="g-body" style="line-height:1.8">大语言模型参数规模从 7B 增长到 175B+，推理成本呈指数级上升。传统推理框架面临显存瓶颈和吞吐限制，难以满足生产环境的低延迟要求。</p>
+          <div style="margin-top:32px;padding:24px;background:var(--c-surface-2);border-radius:var(--r-md)">
+            <div style="font-size:var(--fs-caption);color:var(--c-text-2);margin-bottom:8px">模型规模增长趋势</div>
+            <div style="display:flex;align-items:end;gap:16px;height:120px">
+              <div style="flex:1;background:var(--c-accent-a);height:30%;border-radius:4px 4px 0 0;opacity:0.6"></div>
+              <div style="flex:1;background:var(--c-accent-b);height:50%;border-radius:4px 4px 0 0;opacity:0.7"></div>
+              <div style="flex:1;background:var(--c-accent-c);height:100%;border-radius:4px 4px 0 0"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:var(--fs-caption);color:var(--c-text-2);margin-top:8px">
+              <span>GPT-3 7B</span><span>LLaMA 65B</span><span>GPT-4 175B+</span>
+            </div>
+          </div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">核心挑战</h3>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px">
+            <div style="font-size:var(--fs-body);display:flex;align-items:center;gap:16px">
+              <span style="width:48px;height:48px;background:var(--c-accent-a);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px">💾</span>
+              <div>
+                <div style="font-weight:600">显存瓶颈</div>
+                <div style="color:var(--c-text-2);font-size:var(--fs-caption)">KV Cache 随序列长度线性增长</div>
+              </div>
+            </div>
+            <div style="font-size:var(--fs-body);display:flex;align-items:center;gap:16px">
+              <span style="width:48px;height:48px;background:var(--c-accent-b);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px">⏱️</span>
+              <div>
+                <div style="font-weight:600">延迟敏感</div>
+                <div style="color:var(--c-text-2);font-size:var(--fs-caption)">首 Token 时间(TTFT)需 < 100ms</div>
+              </div>
+            </div>
+            <div style="font-size:var(--fs-body);display:flex;align-items:center;gap:16px">
+              <span style="width:48px;height:48px;background:var(--c-accent-c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px">📊</span>
+              <div>
+                <div style="font-weight:600">吞吐瓶颈</div>
+                <div style="color:var(--c-text-2);font-size:var(--fs-caption)">GPU 利用率不足，批处理受限</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>背景与挑战</span>
+      <span>02</span>
+    </div>
+  </section>
+
+  <!-- Slide 3: Architecture Overview -->
+  <section class="s slide" id="s3">
+    <div class="slide-header">
+      <span class="badge">技术架构</span>
+      <h2>vLLM 核心架构</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards">
+        <div class="g" style="flex:1">
+          <h3 class="g-title">PagedAttention 革命</h3>
+          <p class="g-body">借鉴操作系统虚拟内存思想，将 KV Cache 划分为固定大小的块(Block)，实现高效的显存管理和内存共享</p>
+          <div class="card-diagram">
+            <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
+              <!-- Request Queue -->
+              <rect x="20" y="20" width="120" height="80" rx="6" fill="var(--c-surface-2)"/>
+              <text x="80" y="62" text-anchor="middle" fill="var(--c-text-1)" font-size="14">Request Queue</text>
+              <!-- Scheduler -->
+              <rect x="180" y="30" width="100" height="60" rx="6" fill="var(--c-accent-a)" opacity="0.3"/>
+              <text x="230" y="66" text-anchor="middle" fill="var(--c-text-1)" font-size="14">Scheduler</text>
+              <!-- PagedAttention -->
+              <rect x="320" y="20" width="160" height="80" rx="6" fill="var(--c-accent-b)" opacity="0.3"/>
+              <text x="400" y="62" text-anchor="middle" fill="var(--c-text-1)" font-size="14" font-weight="600">PagedAttention</text>
+              <!-- GPU Blocks -->
+              <g transform="translate(520, 20)">
+                <rect x="0" y="0" width="40" height="35" fill="var(--c-accent-a)" opacity="0.8"/>
+                <rect x="45" y="0" width="40" height="35" fill="var(--c-accent-b)" opacity="0.8"/>
+                <rect x="90" y="0" width="40" height="35" fill="var(--c-accent-c)" opacity="0.8"/>
+                <rect x="0" y="45" width="40" height="35" fill="var(--c-accent-a)" opacity="0.5"/>
+                <rect x="45" y="45" width="40" height="35" fill="var(--c-accent-b)" opacity="0.5"/>
+                <rect x="90" y="45" width="40" height="35" fill="var(--c-surface-2)"/>
+              </g>
+              <text x="620" y="115" text-anchor="middle" fill="var(--c-text-2)" font-size="12">GPU Block Manager</text>
+              <!-- Model Execution -->
+              <rect x="700" y="20" width="80" height="80" rx="6" fill="var(--c-surface-2)"/>
+              <text x="740" y="66" text-anchor="middle" fill="var(--c-text-1)" font-size="14">LLM</text>
+              <!-- Arrows -->
+              <line x1="140" y1="60" x2="170" y2="60" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <polygon points="170,60 163,56 163,64" fill="var(--c-accent-a)"/>
+              <line x1="280" y1="60" x2="310" y2="60" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="480" y1="60" x2="510" y2="60" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <line x1="660" y1="60" x2="690" y2="60" stroke="var(--c-accent-a)" stroke-width="2"/>
+              <!-- Block Table -->
+              <rect x="320" y="140" width="160" height="120" rx="6" fill="var(--c-surface)" stroke="var(--c-border)"/>
+              <text x="400" y="165" text-anchor="middle" fill="var(--c-text-1)" font-size="12">Block Table</text>
+              <line x1="340" y1="175" x2="460" y2="175" stroke="var(--c-border)"/>
+              <text x="350" y="195" fill="var(--c-text-2)" font-size="10">Seq 0: [0, 1, 2]</text>
+              <text x="350" y="215" fill="var(--c-text-2)" font-size="10">Seq 1: [0, 1, 3]</text>
+              <text x="350" y="235" fill="var(--c-text-2)" font-size="10">Seq 2: [4, 5, 6]</text>
+              <text x="350" y="250" fill="var(--c-accent-a)" font-size="10">→ 共享块 0,1 节省 33% 显存</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>技术架构</span>
+      <span>03</span>
+    </div>
+  </section>
+
+  <!-- Slide 4: KV Cache Optimization -->
+  <section class="s slide" id="s4">
+    <div class="slide-header">
+      <span class="badge">核心技术</span>
+      <h2>KV Cache 优化策略</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards grid-2x2">
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:48px">🧩</span>
+            <h3 class="g-title" style="margin:0">分块存储</h3>
+          </div>
+          <p class="g-body">将 KV Cache 拆分为固定大小的块(通常 16 tokens)，非连续存储，通过 Block Table 映射逻辑位置到物理块</p>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:48px">🔄</span>
+            <h3 class="g-title" style="margin:0">内存复用</h3>
+          </div>
+          <p class="g-body">相同前缀的序列共享物理块，Copy-on-Write 机制确保独立性，显著降低显存占用</p>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:48px">📦</span>
+            <h3 class="g-title" style="margin:0">动态分配</h3>
+          </div>
+          <p class="g-body">按需分配/回收块，避免预分配浪费，支持变长序列，最大序列长度不再受静态缓存限制</p>
+        </div>
+        <div class="g">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <span style="font-size:48px">⚡</span>
+            <h3 class="g-title" style="margin:0">高效内核</h3>
+          </div>
+          <p class="g-body">定制化 CUDA Kernel 实现块级注意力计算，支持 FP16/BF16/INT8 多种精度，充分利用 Tensor Core</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>核心技术</span>
+      <span>04</span>
+    </div>
+  </section>
+
+  <!-- Slide 5: Continuous Batching -->
+  <section class="s slide" id="s5">
+    <div class="slide-header">
+      <span class="badge">吞吐优化</span>
+      <h2>连续批处理 (Continuous Batching)</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards">
+        <div class="g" style="flex:1">
+          <h3 class="g-title">动态批调度流程</h3>
+          <p class="g-body">打破静态批处理限制，新请求随时加入批次，完成的序列立即释放资源，GPU 利用率最大化</p>
+          <div class="card-diagram">
+            <div class="process-flow">
+              <div class="step">
+                <div style="width:100px;height:100px;border-radius:50%;background:var(--c-surface-2);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+                  <span style="font-size:48px">📥</span>
+                </div>
+                <div style="font-size:var(--fs-card-title);font-weight:600">接收请求</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">新请求进入队列</div>
+              </div>
+              <div class="arrow">▶</div>
+              <div class="step">
+                <div style="width:100px;height:100px;border-radius:50%;background:var(--c-accent-a);opacity:0.3;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+                  <span style="font-size:48px">⚖️</span>
+                </div>
+                <div style="font-size:var(--fs-card-title);font-weight:600">调度决策</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">评估显存与优先级</div>
+              </div>
+              <div class="arrow">▶</div>
+              <div class="step">
+                <div style="width:100px;height:100px;border-radius:50%;background:var(--c-accent-b);opacity:0.3;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+                  <span style="font-size:48px">🚀</span>
+                </div>
+                <div style="font-size:var(--fs-card-title);font-weight:600">执行迭代</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">单步推理所有序列</div>
+              </div>
+              <div class="arrow">▶</div>
+              <div class="step">
+                <div style="width:100px;height:100px;border-radius:50%;background:var(--c-accent-c);opacity:0.3;display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+                  <span style="font-size:48px">✓</span>
+                </div>
+                <div style="font-size:var(--fs-card-title);font-weight:600">完成检测</div>
+                <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">EOS 释放资源</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>吞吐优化</span>
+      <span>05</span>
+    </div>
+  </section>
+
+  <!-- Slide 6: Quantization -->
+  <section class="s slide" id="s6">
+    <div class="slide-header">
+      <span class="badge">模型压缩</span>
+      <h2>量化与压缩技术</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g">
+          <h3 class="g-title">量化方案对比</h3>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--c-border)">
+              <span style="font-size:var(--fs-body)">FP16 (Baseline)</span>
+              <span style="font-size:var(--fs-card-title);color:var(--c-text-2)">100%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--c-border)">
+              <span style="font-size:var(--fs-body)">INT8 权重量化</span>
+              <span style="font-size:var(--fs-card-title);color:var(--c-accent-c)">50% ↓</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--c-border)">
+              <span style="font-size:var(--fs-body)">INT8 KV Cache</span>
+              <span style="font-size:var(--fs-card-title);color:var(--c-accent-b)">50% ↓</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:1px solid var(--c-border)">
+              <span style="font-size:var(--fs-body)">FP8 (H100)</span>
+              <span style="font-size:var(--fs-card-title);color:var(--c-accent-a)">50% ↓</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 0">
+              <span style="font-size:var(--fs-body)">AWQ/GPTQ 4-bit</span>
+              <span style="font-size:var(--fs-card-title);color:var(--c-accent-a);font-weight:700">75% ↓</span>
+            </div>
+          </div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">性能与精度权衡</h3>
+          <div style="flex:1;display:flex;flex-direction:column;gap:20px">
+            <div style="background:var(--c-surface);padding:20px;border-radius:var(--r-md);border-left:4px solid var(--c-accent-a)">
+              <div style="font-weight:600;margin-bottom:8px">推荐方案：W4A16</div>
+              <div style="font-size:var(--fs-body);color:var(--c-text-2)">4-bit 权重 + FP16 激活，显存减少 70%，精度损失 &lt; 1%</div>
+            </div>
+            <div style="background:var(--c-surface);padding:20px;border-radius:var(--r-md);border-left:4px solid var(--c-accent-b)">
+              <div style="font-weight:600;margin-bottom:8px">极致压缩：W4A8</div>
+              <div style="font-size:var(--fs-body);color:var(--c-text-2)">适用于边缘部署，需配合 SmoothQuant 校准</div>
+            </div>
+            <div style="background:var(--c-surface);padding:20px;border-radius:var(--r-md);border-left:4px solid var(--c-accent-c)">
+              <div style="font-weight:600;margin-bottom:8px">动态缩放：FP8</div>
+              <div style="font-size:var(--fs-body);color:var(--c-text-2)">H100 原生支持，零精度损失，硬件级加速</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>模型压缩</span>
+      <span>06</span>
+    </div>
+  </section>
+
+  <!-- Slide 7: Benchmark -->
+  <section class="s slide" id="s7">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="stat-value" style="margin-bottom:16px">23×</div>
+        <div class="stat-label" style="font-size:var(--fs-subtitle);margin-bottom:64px">吞吐提升 (vs. HuggingFace)</div>
+        <div style="display:flex;gap:80px;justify-content:center">
+          <div style="text-align:center;padding:32px 48px;background:var(--c-surface);border-radius:var(--r-lg)">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-a);line-height:1">8.5×</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">vs. TensorRT-LLM</div>
+          </div>
+          <div style="text-align:center;padding:32px 48px;background:var(--c-surface);border-radius:var(--r-lg)">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-b);line-height:1">3.2×</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">vs. TGI</div>
+          </div>
+          <div style="text-align:center;padding:32px 48px;background:var(--c-surface);border-radius:var(--r-lg)">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-c);line-height:1">1.8×</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">vs. DeepSpeed</div>
+          </div>
+        </div>
+        <div style="margin-top:48px;font-size:var(--fs-caption);color:var(--c-text-2)">测试环境：A100-80GB × 1, LLaMA-2-70B, 2048 input / 256 output tokens</div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>性能基准</span>
+      <span>07</span>
+    </div>
+  </section>
+
+  <!-- Slide 8: Summary -->
+  <section class="s slide" id="s8">
+    <div class="col slide-main v-center">
+      <div style="text-align:center;max-width:1200px">
+        <div class="emoji-xl">🎯</div>
+        <h1 style="font-size:var(--fs-page-title);font-weight:800;margin:24px 0 32px">总结与展望</h1>
+        <div style="display:flex;gap:24px;justify-content:center;margin-bottom:48px">
+          <div style="background:var(--c-surface);padding:24px 32px;border-radius:var(--r-lg);text-align:left;min-width:280px">
+            <div style="font-size:36px;margin-bottom:12px">✅</div>
+            <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:8px">已完成</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2)">PagedAttention 核心优化<br/>连续批处理上线<br/>INT8/FP8 量化支持</div>
+          </div>
+          <div style="background:var(--c-surface);padding:24px 32px;border-radius:var(--r-lg);text-align:left;min-width:280px">
+            <div style="font-size:36px;margin-bottom:12px">🚧</div>
+            <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:8px">进行中</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2)">投机采样 (Speculative Decoding)<br/>专家混合模型优化<br/>多模态推理支持</div>
+          </div>
+          <div style="background:var(--c-surface);padding:24px 32px;border-radius:var(--r-lg);text-align:left;min-width:280px">
+            <div style="font-size:36px;margin-bottom:12px">🔮</div>
+            <div style="font-size:var(--fs-card-title);font-weight:600;margin-bottom:8px">未来</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2)">异步注意力计算<br/>异构集群调度<br/>自适应批大小</div>
+          </div>
+        </div>
+        <p style="font-size:var(--fs-body);color:var(--c-text-2);margin:0">感谢聆听 · 欢迎交流讨论</p>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>AI Infra Team</span>
+      <span>结束</span>
+    </div>
+  </section>
+
+</div>
+<script>
+document.addEventListener('keydown', e => {
+  const slides = [...document.querySelectorAll('.s.slide')];
+  const idx = slides.findIndex(s => s.classList.contains('is-active'));
+  if (e.key === 'ArrowRight' || e.key === ' ') { slides[idx]?.classList.remove('is-active'); slides[Math.min(idx+1, slides.length-1)]?.classList.add('is-active'); }
+  if (e.key === 'ArrowLeft') { slides[idx]?.classList.remove('is-active'); slides[Math.max(idx-1, 0)]?.classList.add('is-active'); }
+});
+</script>
+</body>
+</html>

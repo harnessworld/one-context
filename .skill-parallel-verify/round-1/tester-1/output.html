@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f;
+      --fg: #f0f0f5;
+      --muted: #7a7a8a;
+      --accent-a: #6366f1;
+      --accent-b: #06b6d4;
+    }
+    body {
+      width: 1440px;
+      height: 1080px;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: system-ui, sans-serif;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      padding: 64px 80px;
+    }
+    .orb-1 {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(99,102,241,.15), transparent 70%);
+      top: -150px;
+      right: -100px;
+      border-radius: 50%;
+    }
+    .orb-2 {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(6,182,212,.12), transparent 70%);
+      bottom: -100px;
+      left: -80px;
+      border-radius: 50%;
+    }
+    .orb-3 {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(99,102,241,.08), transparent 70%);
+      top: 50%;
+      left: 40%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      z-index: 0;
+    }
+    .main {
+      display: flex;
+      flex: 1;
+      gap: 60px;
+      position: relative;
+      z-index: 2;
+    }
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+    .badge {
+      font-size: 22px;
+      padding: 8px 24px;
+      background: linear-gradient(135deg, rgba(99,102,241,.2), rgba(6,182,212,.2));
+      border-radius: 32px;
+      color: var(--accent-b);
+      width: fit-content;
+    }
+    .title {
+      font-size: 100px;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -3px;
+      background: linear-gradient(135deg, var(--accent-a) 0%, var(--accent-b) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: 1px;
+    }
+    .desc {
+      font-size: 28px;
+      color: var(--muted);
+      max-width: 700px;
+      line-height: 1.5;
+    }
+    .pills {
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .pill {
+      background: rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .pill-emoji {
+      font-size: 36px;
+    }
+    .pill-content {
+      flex: 1;
+    }
+    .pill-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--accent-b);
+    }
+    .pill-sub {
+      font-size: 24px;
+      color: var(--muted);
+    }
+    .source {
+      position: absolute;
+      bottom: 40px;
+      left: 80px;
+      font-size: 20px;
+      color: rgba(255,255,255,.25);
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
+  <div class="orb-3"></div>
+
+  <div class="main">
+    <div class="hero">
+      <div class="badge">AI Infrastructure</div>
+      <div class="title">AI 基础设施 2026</div>
+      <div class="subtitle">大规模推理引擎架构实践</div>
+      <div class="desc">从 vLLM 到 TensorRT-LLM，深入大规模推理引擎的架构设计与性能优化实践</div>
+    </div>
+    <div class="pills">
+      <div class="pill">
+        <div class="pill-emoji">⚡</div>
+        <div class="pill-content">
+          <div class="pill-title">推理优化</div>
+          <div class="pill-sub">PagedAttention · 连续批处理</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-emoji">🔧</div>
+        <div class="pill-content">
+          <div class="pill-title">引擎架构</div>
+          <div class="pill-sub">KV Cache · 量化 · MoE 路由</div>
+        </div>
+      </div>
+      <div class="pill">
+        <div class="pill-emoji">🚀</div>
+        <div class="pill-content">
+          <div class="pill-title">生产部署</div>
+          <div class="pill-sub">SLO · 故障隔离 · 可观测性</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="source">SOURCE: AI Infrastructure Engineering</div>
+</body>
+</html>

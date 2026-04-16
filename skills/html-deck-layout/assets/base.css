@@ -1,0 +1,69 @@
+/* === Mobile Deck Design Tokens === */
+/* Canvas: 1920×1080, phone landscape, no responsive breakpoints */
+
+:root {
+  /* --- Canvas --- */
+  --slide-w: 1920px;
+  --slide-h: 1080px;
+
+  /* --- Font sizes (hard minimums for phone readability) --- */
+  --fs-hero: 190px;        /* t1: cover hero */
+  --fs-page-title: 88px;   /* t2: page main title */
+  --fs-subtitle: 60px;     /* t3: subtitle / one-line desc */
+  --fs-body: 42px;         /* t4: body — HARD MINIMUM */
+  --fs-caption: 32px;      /* t5: hints, footnotes */
+  --fs-card-title: 52px;   /* card heading */
+  --fs-card-body: 42px;    /* card body text */
+  --fs-stat: 170px;        /* oversized number */
+  --fs-pill: 36px;         /* pill/badge label */
+  --fs-footer: 34px;       /* bottom bar text */
+
+  /* --- Line heights --- */
+  --lh-tight: 1.2;
+  --lh-normal: 1.4;
+  --lh-relaxed: 1.6;
+
+  /* --- Colors (default: tech theme; overridden by theme CSS) --- */
+  --c-bg: #0f172a;
+  --c-surface: #1e293b;
+  --c-surface-2: #334155;
+  --c-text-1: #f1f5f9;
+  --c-text-2: #94a3b8;
+  --c-accent-a: #38bdf8;
+  --c-accent-b: #818cf8;
+  --c-accent-c: #a78bfa;
+  --c-border: rgba(255, 255, 255, 0.08);
+  --c-overlay: rgba(15, 23, 42, 0.6);
+
+  /* --- Spacing --- */
+  --sp-xs: 8px;
+  --sp-sm: 16px;
+  --sp-md: 24px;
+  --sp-lg: 32px;
+  --sp-xl: 48px;
+  --sp-2xl: 64px;
+
+  /* --- Slide padding --- */
+  --slide-pad: 32px 48px;
+  --card-pad: 24px 28px;
+
+  /* --- Border radius --- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* --- Transitions --- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 0.3s;
+  --duration-slow: 0.5s;
+
+  /* --- Card gap --- */
+  --card-gap: 24px;
+}

@@ -1,0 +1,16 @@
+/* Mobile Nature — 自然文化 */
+:root {
+  --c-bg: #f0fdf4;
+  --c-surface: #dcfce7;
+  --c-surface-2: #bbf7d0;
+  --c-text-1: #14532d;
+  --c-text-2: #4d7c0f;
+  --c-accent-a: #6b7a4f;
+  --c-accent-b: #d4a843;
+  --c-accent-c: #4caf72;
+  --c-border: rgba(20, 83, 45, 0.08);
+  --c-overlay: rgba(240, 253, 244, 0.6);
+  --shadow-sm: 0 1px 4px rgba(20, 83, 45, 0.06);
+  --shadow-md: 0 2px 8px rgba(20, 83, 45, 0.1);
+  --shadow-lg: 0 4px 16px rgba(20, 83, 45, 0.14);
+}

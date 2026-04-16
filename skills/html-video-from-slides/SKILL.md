@@ -23,9 +23,9 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 
 幻灯按 **1920×1080** 视口截图。
 
-**版式与防空白（字号、示意图、`fill-deck`、避免半屏空）**：见姊妹文档 **`skills/html-deck-layout/SKILL.md`**。改 `presentation.html` 布局/密度时**先读该文件**，与本文（成片与口播流程）配合使用。
+**版式与防空白（字号、示意图、`fill-deck`、避免半屏空）**：见 **`skills/html-deck-layout/references/spec-cheatsheet.md`**。改 `presentation.html` 布局/密度时**先读该文件**，与本文（成片与口播流程）配合使用。如需从零生成移动端幻灯，使用 `skills/html-deck-layout/SKILL.md`（已升级为生成式 skill）。
 
-**收口页与栏目名**：最后一屏若含 chip、水印或「订阅/三连」旁的栏目标识，须与**实际发布账号名一致**，交付前去掉占位名；双栏页中间分隔条、pill 流程链等排版要点见 **`html-deck-layout/SKILL.md`**。
+**收口页与栏目名**：最后一屏若含 chip、水印或「订阅/三连」旁的栏目标识，须与**实际发布账号名一致**，交付前去掉占位名；双栏页中间分隔条、pill 流程链等排版要点见 **`html-deck-layout/references/spec-cheatsheet.md`**。
 
 ## 制作 presentation.html（核心工作流）
 
@@ -112,8 +112,8 @@ ui();
 
 ### 第五步：验证核心约束
 
-- 每张 slide 画面覆盖率 ≥ 85%（对照 TEMPLATES.md Minimum Fill Table）；**flex / 卡片拉高 / `fill-deck` / 避免「半屏空」** 的落地细则见 **`skills/html-deck-layout/SKILL.md`**（与 base.css 模板流互补）。
-- **TEMPLATES + base.css 路径**：卡片/大图布局按 `TEMPLATES.md`；若文中要求 `space-between`，以 **TEMPLATES / DESIGN-STANDARD** 为准。**自包含 inline deck** 内 `.g-fill` 等勿与 **`html-deck-layout`** 中的反模式冲突（见该文「根因」）。
+- 每张 slide 画面覆盖率 ≥ 85%（对照 TEMPLATES.md Minimum Fill Table）；**flex / 卡片拉高 / `fill-deck` / 避免「半屏空」** 的落地细则见 **`skills/html-deck-layout/references/spec-cheatsheet.md`**（与 base.css 模板流互补）。
+- **TEMPLATES + base.css 路径**：卡片/大图布局按 `TEMPLATES.md`；若文中要求 `space-between`，以 **TEMPLATES / DESIGN-STANDARD** 为准。**自包含 inline deck** 内 `.g-fill` 等勿与 **`html-deck-layout/references/spec-cheatsheet.md`** 中的反模式冲突（见「根因」）。
 - 禁止 `<br>` 空行当间距，禁止内容区用 `position:absolute`
 - 总字数 ≤ 120 汉字/张
 - 相邻 slide 布局不同、图形不重复

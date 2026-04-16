@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>Mobile Deck</title>
+  <link rel="stylesheet" href="assets/base.css">
+  <link rel="stylesheet" href="assets/fonts.css">
+  <link rel="stylesheet" href="assets/mobile-layout.css">
+  <link rel="stylesheet" href="assets/themes/mobile-tech.css">
+</head>
+<body>
+<div id="P">
+
+  <!-- Slide 1: Cover -->
+  <section class="s slide is-active" id="s1">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="emoji-xl">🚀</div>
+        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 12px">你的标题</h1>
+        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 32px">一句话说明</p>
+        <span class="pill">📌 标签</span>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>来源</span>
+      <span>01</span>
+    </div>
+  </section>
+
+  <!-- Slide 2: Content -->
+  <section class="s slide" id="s2">
+    <div class="slide-header">
+      <span class="badge">章节</span>
+      <h2>核心内容</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards grid-2">
+        <div class="g">
+          <div class="emoji-lg">⚡</div>
+          <h3 class="g-title">要点一</h3>
+          <p class="g-body">简要说明</p>
+        </div>
+        <div class="g">
+          <div class="emoji-lg">🔗</div>
+          <h3 class="g-title">要点二</h3>
+          <p class="g-body">简要说明</p>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>章节</span>
+      <span>02</span>
+    </div>
+  </section>
+
+  <!-- Slide 3: Thanks -->
+  <section class="s slide" id="s3">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="emoji-xl">🙏</div>
+        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 16px">感谢观看</h1>
+        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0">欢迎交流</p>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>频道</span>
+      <span>结尾</span>
+    </div>
+  </section>
+
+</div>
+<script>
+// Minimal slide navigation for preview
+document.addEventListener('keydown', e => {
+  const slides = [...document.querySelectorAll('.s.slide')];
+  const idx = slides.findIndex(s => s.classList.contains('is-active'));
+  if (e.key === 'ArrowRight' || e.key === ' ') { slides[idx]?.classList.remove('is-active'); slides[Math.min(idx+1, slides.length-1)]?.classList.add('is-active'); }
+  if (e.key === 'ArrowLeft') { slides[idx]?.classList.remove('is-active'); slides[Math.max(idx-1, 0)]?.classList.add('is-active'); }
+});
+</script>
+</body>
+</html>
