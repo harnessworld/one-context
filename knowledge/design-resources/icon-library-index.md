@@ -40,6 +40,7 @@
 | **Humaaans** | 人物组件库 | CC BY | https://humaaans.com | 流程图人物 |
 | **Open Peeps** | 手绘人物 | CC0 | https://openpeeps.com | 轻松风格 |
 | **Storyset** | 场景插画 | Freepik | https://storyset.com | 商业需署名 |
+| **Alibaba Paper Illustration** | 纸质感插画 | — | `assets/alibaba-paper-illustration.jpg` | 装饰插图、PPT 背景 |
 
 ---
 

@@ -37,6 +37,7 @@ Read these files for context:
 
 @knowledge/README.md
 @knowledge/design-resources/icon-library-index.md
+@knowledge/design-resources/prompt-skillrouter-pipeline-architecture.md
 @knowledge/playbooks/README.md
 @knowledge/playbooks/add-umbrella-feature.md
 @knowledge/playbooks/multi-agent-parallel-development.md
