@@ -1,0 +1,10 @@
+[
+  { "name": "中国软件", "code": "600536", "market": "A", "position": "-", "cost": "-" },
+  { "name": "巨人网络", "code": "002558", "market": "A", "position": "-", "cost": "-" },
+  { "name": "浪潮信息", "code": "000977", "market": "A", "position": "-", "cost": "-" },
+  { "name": "合肥城建", "code": "002208", "market": "A", "position": "-", "cost": "-" },
+  { "name": "江西铜业", "code": "600362", "market": "A", "position": "-", "cost": "-" },
+  { "name": "中国核建", "code": "601611", "market": "A", "position": "-", "cost": "-" },
+  { "name": "TCL中环", "code": "002129", "market": "A", "position": "350", "cost": "33.65", "loss_pct": "-73.97%", "loss_amt": "-8,712" },
+  { "name": "阿里巴巴-W", "code": "9988.HK", "market": "HK", "position": "500", "cost": "HK$135.80", "loss_pct": "-11.65%", "loss_amt": "-7,790" }
+]
