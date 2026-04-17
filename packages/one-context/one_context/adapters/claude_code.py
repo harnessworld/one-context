@@ -16,6 +16,7 @@ from one_context.adapters._rules import (
 )
 from one_context.adapters._shared_rules import GENERATED_HEADER_MD, PROFILE_RULES
 from one_context.agents import resolve_agent_knowledge
+from one_context.skills import SkillMeta
 
 _ADAPTER_NAME = "claude_code"
 
@@ -38,6 +39,7 @@ class ClaudeCodeAdapter(AdapterBase):
 
     def __init__(self) -> None:
         self._top_rules: list[str] = []
+        self._skills: list[SkillMeta] = []
 
     def generate(
         self,
@@ -201,6 +203,32 @@ class ClaudeCodeAdapter(AdapterBase):
 
         return files
 
+    def generate_skills(
+        self,
+        root: Path,
+        skills: list[SkillMeta],
+    ) -> list[GeneratedFile]:
+        """Generate ``.claude/skills/<name>.md`` with ``@`` refs to SKILL.md."""
+        self._skills = list(skills)
+        files: list[GeneratedFile] = []
+
+        for skill in skills:
+            content = "\n".join([
+                GENERATED_HEADER_MD,
+                "",
+                f"# Skill: {skill.name}",
+                "",
+                f"@{skill.source_path}",
+                "",
+            ])
+            files.append(GeneratedFile(
+                rel_path=f".claude/skills/{skill.dir_name}.md",
+                content=content,
+                description=f"Claude Code skill registration for {skill.name}",
+            ))
+
+        return files
+
     def generate_project_artifacts(
         self,
         root: Path,
@@ -266,6 +294,19 @@ class ClaudeCodeAdapter(AdapterBase):
                 lines.append(f"@.claude/agents/{aid}.md")
                 lines.append("")
 
+        if self._skills:
+            lines.extend(
+                [
+                    "## Skills",
+                    "",
+                    "Per-skill context (auto-discovered from `skills/`):",
+                    "",
+                ]
+            )
+            for skill in sorted(self._skills, key=lambda s: s.dir_name):
+                lines.append(f"@.claude/skills/{skill.dir_name}.md")
+                lines.append("")
+
         content = top_block + "\n".join(lines).rstrip() + "\n"
 
         files: list[GeneratedFile] = [
@@ -288,5 +329,6 @@ class ClaudeCodeAdapter(AdapterBase):
 
         # Reset cached top rules after generating artifacts
         self._top_rules = []
+        self._skills = []
 
         return files

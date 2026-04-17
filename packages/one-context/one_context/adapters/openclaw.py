@@ -10,6 +10,7 @@ from one_context.adapters import AdapterBase, GeneratedFile, register
 from one_context.adapters._rules import FieldRule, match_rules
 from one_context.adapters._shared_rules import GENERATED_NOTICE_JSON, PROFILE_RULES
 from one_context.agents import resolve_agent_knowledge
+from one_context.skills import SkillMeta
 
 
 def _collect_instructions(profiles: list[dict[str, Any]]) -> list[str]:
@@ -45,6 +46,9 @@ class OpenClawAdapter(AdapterBase):
     """Generate ``.openclaw/workspace-config.json`` for OpenClaw."""
 
     supports_file_ref = False
+
+    def __init__(self) -> None:
+        self._skills: list[SkillMeta] = []
 
     def generate(
         self,
@@ -161,6 +165,48 @@ class OpenClawAdapter(AdapterBase):
 
         return files
 
+    def generate_skills(
+        self,
+        root: Path,
+        skills: list[SkillMeta],
+    ) -> list[GeneratedFile]:
+        """Generate ``.openclaw/skills/<name>.json`` for each skill."""
+        self._skills = list(skills)
+        files: list[GeneratedFile] = []
+
+        for skill in skills:
+            fm = skill.frontmatter
+
+            config: dict[str, Any] = {
+                "_generated": GENERATED_NOTICE_JSON,
+                "skill_id": skill.dir_name,
+                "name": skill.name,
+                "description": fm.get("description", ""),
+                "source": skill.source_path,
+                "trigger_phrases": fm.get("triggers", []),
+            }
+
+            openclaw_meta = fm.get("openclaw")
+            if openclaw_meta:
+                config["openclaw"] = openclaw_meta
+
+            if fm.get("type"):
+                config["type"] = fm["type"]
+            if fm.get("tags"):
+                config["tags"] = fm["tags"]
+            if fm.get("version"):
+                config["version"] = fm["version"]
+            if fm.get("author"):
+                config["author"] = fm["author"]
+
+            files.append(GeneratedFile(
+                rel_path=f".openclaw/skills/{skill.dir_name}.json",
+                content=json.dumps(config, indent=2, ensure_ascii=False) + "\n",
+                description=f"OpenClaw skill config for {skill.name}",
+            ))
+
+        return files
+
     def generate_project_artifacts(
         self,
         root: Path,
@@ -188,13 +234,21 @@ class OpenClawAdapter(AdapterBase):
                     }
                     for a in sorted(agents, key=lambda x: str(x.get("id", "")))
                 ],
+                "skills": [
+                    {"id": s.dir_name, "path": f".openclaw/skills/{s.dir_name}.json"}
+                    for s in sorted(self._skills, key=lambda s: s.dir_name)
+                ],
             }
         }
         content = json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+
+        # Reset cached skills
+        self._skills = []
+
         return [
             GeneratedFile(
                 rel_path=".openclaw/onecxt-project.json",
                 content=content,
-                description="OpenClaw project manifest (workspace + agent paths)",
+                description="OpenClaw project manifest (workspace + agent + skill paths)",
             ),
         ]

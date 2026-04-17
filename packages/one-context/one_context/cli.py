@@ -387,6 +387,17 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
         adapter = get_adapter(aname)
         if agents:
             all_generated.extend(adapter.generate_agents(root, agents, resolved_profiles))
+
+    # Skills — once per adapt run (auto-discovered from skills/)
+    from one_context.skills import discover_skills
+    discovered_skills = discover_skills(root)
+    if discovered_skills:
+        for aname in adapter_names:
+            adapter = get_adapter(aname)
+            all_generated.extend(adapter.generate_skills(root, discovered_skills))
+
+    for aname in adapter_names:
+        adapter = get_adapter(aname)
         all_generated.extend(adapter.generate_project_artifacts(root, workspace_ids, agents))
 
     # --check mode: compare only, do not write

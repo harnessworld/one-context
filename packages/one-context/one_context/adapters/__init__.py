@@ -81,6 +81,27 @@ class AdapterBase(ABC):
         """
         return []
 
+    def generate_skills(
+        self,
+        root: Path,
+        skills: list[Any],
+    ) -> list[GeneratedFile]:
+        """Produce tool-specific skill registration files.
+
+        Default implementation returns an empty list; adapters override
+        this to emit skill registration files that allow the AI tool to
+        discover and use skills automatically.
+
+        Parameters
+        ----------
+        root:
+            one-context root directory.
+        skills:
+            All parsed ``SkillMeta`` objects from
+            ``one_context.skills.discover_skills(root)``.
+        """
+        return []
+
     def generate_project_artifacts(
         self,
         root: Path,

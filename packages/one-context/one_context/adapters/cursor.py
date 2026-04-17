@@ -15,6 +15,7 @@ from one_context.adapters._rules import (
 )
 from one_context.adapters._shared_rules import GENERATED_HEADER_MD, PROFILE_RULES
 from one_context.agents import resolve_agent_knowledge
+from one_context.skills import SkillMeta, strip_frontmatter
 
 _ADAPTER_NAME = "cursor"
 
@@ -240,5 +241,55 @@ class CursorAdapter(AdapterBase):
                 )
             )
             self._top_rules = []
+
+        return files
+
+    def generate_skills(
+        self,
+        root: Path,
+        skills: list[SkillMeta],
+    ) -> list[GeneratedFile]:
+        """Generate ``.cursor/rules/skill-<name>.mdc`` for each skill.
+
+        Cursor does not support ``@file`` references, so the full
+        SKILL.md body is inlined after the MDC frontmatter.
+        """
+        files: list[GeneratedFile] = []
+
+        for skill in skills:
+            fm = skill.frontmatter
+            description = str(fm.get("description", skill.name)).replace('"', '\\"').replace("\n", " ")[:200]
+
+            fm_lines = [
+                "---",
+                f'description: "Skill: {skill.name} — {description}"',
+                "globs:",
+                "alwaysApply: false",
+                "---",
+            ]
+
+            # Read and inline the SKILL.md body (strip frontmatter)
+            skill_path = root / skill.source_path
+            if skill_path.is_file():
+                full_text = skill_path.read_text(encoding="utf-8")
+                body = strip_frontmatter(full_text)
+            else:
+                body = skill.body
+
+            parts = [
+                "\n".join(fm_lines),
+                "",
+                GENERATED_HEADER_MD,
+                "",
+                f"# Skill: {skill.name}",
+                "",
+                body,
+            ]
+
+            files.append(GeneratedFile(
+                rel_path=f".cursor/rules/skill-{skill.dir_name}.mdc",
+                content="\n".join(parts),
+                description=f"Cursor skill rule for {skill.name}",
+            ))
 
         return files

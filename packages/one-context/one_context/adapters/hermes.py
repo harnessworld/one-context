@@ -28,6 +28,7 @@ from one_context.adapters._rules import (
 )
 from one_context.adapters._shared_rules import GENERATED_HEADER_MD, PROFILE_RULES
 from one_context.agents import resolve_agent_knowledge
+from one_context.skills import SkillMeta, strip_frontmatter
 
 _ADAPTER_NAME = "hermes"
 
@@ -74,6 +75,7 @@ class HermesAdapter(AdapterBase):
         self._top_rules: list[str] = []
         self._workspace_contents: list[str] = []
         self._agent_contents: list[str] = []
+        self._skill_contents: list[str] = []
 
     def generate(
         self,
@@ -226,6 +228,47 @@ class HermesAdapter(AdapterBase):
 
         return files
 
+    def generate_skills(
+        self,
+        root: Path,
+        skills: list[SkillMeta],
+    ) -> list[GeneratedFile]:
+        """Generate ``.hermes/skills/<name>.md`` for each skill.
+
+        Hermes does not support ``@file`` references, so the full
+        SKILL.md body is inlined.  Content is also cached for
+        inclusion in the aggregated ``.hermes.md``.
+        """
+        files: list[GeneratedFile] = []
+
+        for skill in skills:
+            # Read and inline the SKILL.md body (strip frontmatter)
+            skill_path = root / skill.source_path
+            if skill_path.is_file():
+                full_text = skill_path.read_text(encoding="utf-8")
+                body = strip_frontmatter(full_text)
+            else:
+                body = skill.body
+
+            parts = [
+                GENERATED_HEADER_MD,
+                "",
+                f"# Skill: {skill.name}",
+                "",
+                body,
+            ]
+
+            skill_content = "\n".join(parts)
+            self._skill_contents.append(skill_content)
+
+            files.append(GeneratedFile(
+                rel_path=f".hermes/skills/{skill.dir_name}.md",
+                content=skill_content,
+                description=f"Hermes skill config for {skill.name}",
+            ))
+
+        return files
+
     def generate_project_artifacts(
         self,
         root: Path,
@@ -295,6 +338,21 @@ class HermesAdapter(AdapterBase):
             body_parts.extend(filtered)
             body_parts.append("")
 
+        # Skill sections (inline all skill content)
+        for skill_content in self._skill_contents:
+            lines = skill_content.split("\n")
+            filtered = []
+            skip_header = True
+            for line in lines:
+                if skip_header:
+                    if line.startswith("# ") and "Skill:" in line:
+                        skip_header = False
+                    else:
+                        continue
+                filtered.append(line)
+            body_parts.extend(filtered)
+            body_parts.append("")
+
         content = top_block + "\n".join(body_parts).rstrip() + "\n"
 
         files: list[GeneratedFile] = [
@@ -309,5 +367,6 @@ class HermesAdapter(AdapterBase):
         self._top_rules = []
         self._workspace_contents = []
         self._agent_contents = []
+        self._skill_contents = []
 
         return files
