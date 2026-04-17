@@ -1,6 +1,7 @@
 ---
 name: skill-parallel-verify
-description: 并行验证测试 Skill。用于 Skill 交付前的自动化一致性验证——3 个独立测试专家在干净上下文中执行被测 Skill，测试主管判定输出是否语义等价，不一致时自动驱动修复循环。触发关键词：验证skill一致性、并行测试skill、skill交付验证。
+type: quality-assurance
+description: 并行验证测试 Skill。用于 Skill 交付前的自动化一致性验证——3 个独立测试专家在干净上下文中执行被测 Skill，测试主管判定输出是否语义等价，不一致时自动驱动修复循环。与 skill-creator（开发阶段迭代+人工评审）互补，本 Skill 侧重交付前的自动化质量关卡。触发关键词：验证skill一致性、并行测试skill、skill交付验证。
 triggers:
   - 验证skill
   - 测试skill
@@ -14,6 +15,10 @@ tags:
   - skill
   - testing
   - quality
+openclaw:
+  requires:
+    bins: []
+  install: []
 ---
 
 # Skill Parallel Verify

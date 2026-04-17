@@ -2,7 +2,7 @@
 # 复制此模板并填写你的测试配置
 
 # ===== 必填字段 =====
-skill_path: ""           # 被测 Skill 的 SKILL.md 文件路径（如 skills/xxx/SKILL.md）
+skill_path: ""           # 被测 Skill 的 SKILL.md 文件路径（相对项目根目录）
 test_name: ""            # 测试名称
 
 # ===== 可选字段 =====

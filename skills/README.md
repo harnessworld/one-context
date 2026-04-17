@@ -8,6 +8,7 @@
 | [`html-video-from-slides/`](html-video-from-slides/) | HTML 幻灯 + 口播 → MP4；**wav-auto** 仅需单个 WAV + HTML（Whisper 自动对齐）；见 `SKILL.md` |
 | [`html-deck-layout/`](html-deck-layout/) | **Mobile PPT 生成器**（1920×1080）：prompt → 手机横屏幻灯片，6 主题 + 7 布局 + 4 全 deck 模板，自动 fill-deck、≥42px 字号、≥85% 覆盖率；可与 `html-video-from-slides` 联动成片；见 `SKILL.md` |
 | [`html-slides/`](html-slides/) | HTML 演示幻灯生成（从零/PPT转换，12种样式预设）；多语言 README；见 `SKILL.md` |
+| [`fireworks-tech-graph/`](fireworks-tech-graph/) | **技术图表生成**；SVG 架构图/流程图/时序图/UML/ER/网络拓扑等 15+ 图表类型，7 种视觉风格，rsvg-convert 导出 PNG；触发词：画图/架构图/流程图/可视化；见 `SKILL.md` |
 | [`skill-parallel-verify/`](skill-parallel-verify/) | **Skill 交付前并行验证**；5 个测试专家独立执行→测试主管判定语义等价→不一致自动修复循环；见 `SKILL.md` |
 | [`windows-c-drive-cleanup/`](windows-c-drive-cleanup/) | Windows C 盘清理；**授权后** `invoke-c-drive-cleanup.ps1` 白名单自动清理；只读 `survey-c-drive-report.ps1`（五-A 自动 / 五-B 手动）；见 `SKILL.md` |
 
