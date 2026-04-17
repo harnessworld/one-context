@@ -1,7 +1,0 @@
-{
-  "name": "ai-mid-mgmt-video-cover",
-  "private": true,
-  "devDependencies": {
-    "playwright": "^1.49.0"
-  }
-}

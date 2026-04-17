@@ -11,5 +11,6 @@
 | [`fireworks-tech-graph/`](fireworks-tech-graph/) | **技术图表生成**；SVG 架构图/流程图/时序图/UML/ER/网络拓扑等 15+ 图表类型，7 种视觉风格，rsvg-convert 导出 PNG；触发词：画图/架构图/流程图/可视化；见 `SKILL.md` |
 | [`skill-parallel-verify/`](skill-parallel-verify/) | **Skill 交付前并行验证**；5 个测试专家独立执行→测试主管判定语义等价→不一致自动修复循环；见 `SKILL.md` |
 | [`windows-c-drive-cleanup/`](windows-c-drive-cleanup/) | Windows C 盘清理；**授权后** `invoke-c-drive-cleanup.ps1` 白名单自动清理；只读 `survey-c-drive-report.ps1`（五-A 自动 / 五-B 手动）；见 `SKILL.md` |
+| [`project-audit/`](project-audit/) | **项目整理**；审计全量已追踪文件，识别错位/误提交文件，列出清单供确认后执行挪正/排除/清理；触发词：项目整理/审计/清理仓库；见 `SKILL.md` |
 
 各视频选题目录**不应**再复制一套 Node 脚本；应通过 `--project` 指向仅含素材的文件夹。

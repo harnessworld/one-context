@@ -1,0 +1,6 @@
+# Root convenience: PyYAML is enough for ad-hoc scripts.
+# For the `onecxt` CLI, install the package (pulls in PyYAML):
+#   pip install -e ./packages/one-context
+PyYAML>=6.0.1
+
+# CLI (onecxt): pip install -e ./packages/one-context

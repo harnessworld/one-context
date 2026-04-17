@@ -1,8 +1,0 @@
-{
-  "name": "anthropic-agent-harness-cover",
-  "version": "1.0.0",
-  "private": true,
-  "devDependencies": {
-    "playwright": "^1.42.0"
-  }
-}

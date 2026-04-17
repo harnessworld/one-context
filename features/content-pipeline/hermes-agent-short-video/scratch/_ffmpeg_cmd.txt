@@ -1,4 +1,0 @@
-VIDEO=D:\harnessworld\one-context\features\develop\hermes-agent-short-video\production\final_auto.mp4
-ASS=D:\harnessworld\one-context\features\content-pipeline\hermes-agent-short-video\production\tmp\hermes.ass
-OUT=D:\harnessworld\one-context\features\develop\hermes-agent-short-video\production\final_auto_sub.mp4
-ASS_CONTENT_LINE_COUNT=223

@@ -97,3 +97,17 @@ memory/*
 # Hermes (adapt generated, tracked)
 !.hermes/
 !.hermes.md
+
+# Personal Agent config files (not project context)
+HEARTBEAT.md
+IDENTITY.md
+SOUL.md
+USER.md
+TOOLS.md
+canvas-philosophy.md
+
+# Skill parallel verify runtime output
+.skill-parallel-verify/
+
+# Claude Code local settings (personal, not shared)
+.claude/settings.json
