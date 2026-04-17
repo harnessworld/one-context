@@ -1,6 +1,6 @@
 # SkillRouter Pipeline Architecture — 图片还原提示词
 
-> 来源: `alibaba-paper-illustration.jpg`
+> 来源: `assets/alibaba-paper-illustration.jpg`
 > 论文: SkillRouter: Retrieve-and-Rerank Skill Selection for LLM Agents at Scale (arXiv:2603.22455, Alibaba Group, 2026-03)
 
 ## 提示词
