@@ -111,3 +111,5 @@ canvas-philosophy.md
 
 # Claude Code local settings (personal, not shared)
 .claude/settings.json
+# Test screenshots
+tester*-screenshot.png
