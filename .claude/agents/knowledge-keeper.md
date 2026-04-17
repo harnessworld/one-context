@@ -36,8 +36,6 @@ Verification steps are optional — focus on the design and rationale.
 Read these files for context:
 
 @knowledge/README.md
-@knowledge/design-resources/icon-library-index.md
-@knowledge/design-resources/prompt-skillrouter-pipeline-architecture.md
 @knowledge/playbooks/README.md
 @knowledge/playbooks/add-umbrella-feature.md
 @knowledge/playbooks/multi-agent-parallel-development.md
@@ -46,33 +44,15 @@ Read these files for context:
 @knowledge/playbooks/use-microsoft-markitdown.md
 @knowledge/playbooks/worktree-isolated-development.md
 @knowledge/prompts/README.md
+@knowledge/prompts/prompt-keep-fitness-marketing-deck.md
+@knowledge/prompts/prompt-skillrouter-pipeline-architecture.md
 @knowledge/references/README.md
 @knowledge/references/anthropic-managed-agents.md
 @knowledge/references/claudecode-architecture-patterns.md
+@knowledge/references/claudecode-session-management.md
 @knowledge/references/claudecode-source-analysis.md
 @knowledge/references/diagram-demos.md
 @knowledge/references/diagram-design-atoms.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/SKILL.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/references/animations.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/references/authoring-guide.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/references/full-decks.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/references/layouts.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/references/themes.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/course-module/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/dir-key-nav-minimal/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/graphify-dark-graph/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/hermes-cyber-terminal/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/knowledge-arch-blueprint/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/obsidian-claude-gradient/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/pitch-deck/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/product-launch/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/tech-sharing/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/testing-safety-alert/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/weekly-report/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/xhs-pastel-card/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/xhs-post/README.md
-@knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/xhs-white-editorial/README.md
 @knowledge/references/diagram-examples/README.md
 @knowledge/references/diagram-examples/prompt-1-ai-colleague-to-skill-pipeline.md
 @knowledge/references/diagram-examples/prompt-10-hermes-skills-system-learning-agent.md
@@ -87,6 +67,7 @@ Read these files for context:
 @knowledge/references/diagram-examples/prompt-9-hermes-multi-entry-unified-core.md
 @knowledge/references/diagram-examples/prompts.md
 @knowledge/references/gbrain-memory-system.md
+@knowledge/references/icon-library-index.md
 @knowledge/references/karpathy-claudemd-principles.md
 @knowledge/references/microsoft-markitdown.md
 @knowledge/references/openclaw-architecture.md

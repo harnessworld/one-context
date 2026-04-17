@@ -73,6 +73,8 @@ _search*.cjs
 # Agent runtime (local, personal) — keep small project manifest committable
 .openclaw/**
 !.openclaw/onecxt-project.json
+!.openclaw/agents/
+!.openclaw/skills/
 memory/*
 !memory/.gitkeep
 !memory/README.md
@@ -82,4 +84,16 @@ memory/*
 .cursor/rules/
 .claude/agents/
 .claude/adapters/
+.claude/skills/
+!.claude/skills/*.md
 !CLAUDE.md
+
+# External symlinks (point to other repos, not one-context assets)
+.claude/commands/
+
+# Tool runtime (Playwright MCP etc.)
+.playwright-mcp/
+
+# Hermes (adapt generated, tracked)
+!.hermes/
+!.hermes.md

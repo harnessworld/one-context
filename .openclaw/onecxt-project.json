@@ -42,6 +42,7 @@
         "id": "sre",
         "path": ".openclaw/agents/sre.json"
       }
-    ]
+    ],
+    "skills": []
   }
 }
