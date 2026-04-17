@@ -23,6 +23,7 @@
 | ai-mid-mgmt-video             | AI 中视频管理 — 素材与发布工具链                                       | develop  | draft  | `features/develop/ai-mid-mgmt-video/`             | one-context     |
 | hermes-adapter                | Hermes Adapter — one-context 支持 Hermes Agent CLI                     | core     | draft  | `features/core/hermes-adapter/`                   | one-context     |
 | gsd-integration               | GSD 集成 — one-context 上下文注入 GSD 工作流                              | core     | draft  | `features/core/gsd-integration/`                  | one-context     |
+| trend-radar-integration        | TrendRadar 趋势雷达集成 — 热点情报 + MCP + 微信推送                         | integrations | in_progress | `features/integrations/trend-radar/`      | trend-radar    |
 
 
 **Columns**
