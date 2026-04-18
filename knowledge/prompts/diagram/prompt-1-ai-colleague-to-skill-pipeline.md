@@ -1,3 +1,11 @@
+---
+prompt_id: 1
+slug: ai-colleague-to-skill-pipeline
+exemplar_image: images/exemplar-ai-colleague-to-skill-pipeline.png
+tags: [流程图]
+prompt_language: en
+---
+
 # Prompt: exemplar-ai-colleague-to-skill-pipeline
 
 > 100% 视觉还原提示词，对应 `exemplar-ai-colleague-to-skill-pipeline.png`
@@ -115,4 +123,21 @@ VISUAL HIERARCHY SUMMARY
 5. Left input cards + right document cards (equal weight)
 6. Bottom timeline (bold, clear)
 7. Annotations and small labels (smallest, gray)
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：A 单强调色 + 全灰度（teal/cyan #2BADA3 为唯一彩色，其余黑白灰）
+布局骨架：A 多栏流水线（三列左→右：输入同事信息 → 同事蒸馏流程 → 双线抽象 + 装配）
+信息层级：五级标准 + SKILL.md 芯片图标为焦点元素（teal 发光边框）
+连接语言：粗实线=主数据流（teal 4px 有机曲线），手绘风格，颜色全图统一 teal
+元素词汇：圆角矩形卡片=输入信息，折角文档=.md 产物，芯片图标=可执行 Skill，手绘图标=单色线描
+情绪基调：A 手绘草图风（wobbly 线条 + 微旋转 + 纯白背景）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 810×1080px (3:4) 或等比缩放
+- **风格关键词**: hand-drawn, sketch, teal accent, pipeline flow
+- **注意事项**: 手绘风格的线条不规则感是核心特征，不要用完美直线替代

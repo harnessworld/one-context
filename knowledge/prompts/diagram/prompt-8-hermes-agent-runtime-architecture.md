@@ -1,3 +1,11 @@
+---
+prompt_id: 8
+slug: hermes-agent-runtime-architecture
+exemplar_image: images/exemplar-hermes-agent-runtime-architecture.jpg
+tags: [架构图]
+prompt_language: zh
+---
+
 # Prompt: exemplar-hermes-agent-runtime-architecture
 
 > 100% 视觉还原提示词，对应 `exemplar-hermes-agent-runtime-architecture.jpg`。Hermes Agent 对象拆解系列第 01 页。
@@ -206,4 +214,22 @@ VISUAL HIERARCHY SUMMARY
 6. 各层内部模块（灰色边框，浅灰填充，等权重）
 7. 底部 4 个要点总结（编号圆圈 + 灰色文字）
 8. 注释和小号标签（最小，灰色）
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：C 暖冷对比双色（橙色 #E8913A + 蓝/青色 #2B7EB5，深灰 #333 为文字骨架）
+布局骨架：C 分段堆叠（六层水平层级从上到下，左侧层级标签列作为导航）
+信息层级：多级标准 + 焦点元素（Agent Loop 中央模块 = 视觉重心，蓝色边框+内含循环流程图）+ 左侧 6 层标签 = 结构骨架
+连接语言：粗实线=层间主流向（蓝 3-4px 曲线），细实线=模块间关联（灰 1-2px），右侧回路大箭头=闭环（蓝 4px 垂直弧线），橙色仅用于装饰
+元素词汇：圆角矩形=模块，胶囊/药丸=功能标签，循环流程图=Agent Loop 内部，层级标签列=结构导航
+情绪基调：A 手绘草图风 + B 专业蓝图风（手绘感线条 + 分层严谨结构并存）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1080×1440px (3:4) 或等比缩放
+- **风格关键词**: layered architecture, hand-drawn sketch, orange-blue dual accent, feedback loop
+- **注意事项**: 右侧蓝色回路大箭头贯穿全图是核心视觉线索，表达"执行结果从底层回流到 Agent Loop"的闭环；六层结构的等距间隔和左侧标签对齐是布局关键
+- **系列**: Hermes Agent 对象拆解 01/12

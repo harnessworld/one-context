@@ -1,10 +1,16 @@
-# Keep 健身产品营销生态图 — 图片还原提示词
+---
+prompt_id: 12
+slug: keep-fitness-marketing-deck
+exemplar_image: images/exemplar-keep-fitness-marketing-deck.jpg
+tags: [品牌图]
+prompt_language: en
+---
 
-> 来源: `assets/健身产品图.jpg`
-> 类型: 品牌B2B营销产品图 / 运动平台生态展示
-> 适用: 图像生成 AI (DALL-E / Midjourney / Flux / Ideogram)
+# Prompt: exemplar-keep-fitness-marketing-deck
 
-## 提示词
+> 100% 视觉还原提示词，对应 `exemplar-keep-fitness-marketing-deck.jpg`
+>
+> 来源: `assets/健身产品图.jpg` · 类型: 品牌B2B营销产品图 / 运动平台生态展示
 
 ```
 Create a vertical (portrait, approximately 9:16 ratio) dark-themed brand marketing product infographic for a fitness app called "Keep". The image is a single continuous graphic with three stacked horizontal sections, separated by subtle spacing. The overall aesthetic is premium, modern, dark-tech with fitness imagery undertones.
@@ -96,7 +102,7 @@ A large dark table occupying most of this section, with the following structure:
   - Each Ka row has colored dots (red S marker, green, purple) showing timeline placement
   - Very bottom: "Keep 户外大作战 全年美运动品" with colored tier markers
 
-- **Right column:** Vertical text "高 质 乐 潮" (Quality indicators) in light purple text
+- **Right column:** Vertical text "高 品 质 乐 跑" (Quality indicators) in light purple text
 
 ---
 
@@ -146,6 +152,16 @@ Each column structure (top to bottom):
 8. The overall impression is a premium B2B marketing deck for brand partners/advertisers
 9. Vertical format optimized for mobile or presentation display
 10. Typography weight hierarchy: bold headers > medium subtitles > regular body > light annotations
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：D 主题色 + 深色反转带（暗色 #0A0A1A 全底 + 紫色渐变主题色 #7B2FBE→#C084FC + 青绿 #2DD4A0 / 金色 #D4A843 辅助）
+布局骨架：C 分段堆叠（三大 Section 垂直堆叠：生态金字塔 + 年度日历 + 战略愿景）
+信息层级：多级标准 + 焦点元素（金字塔/山形为 Section 1 视觉中心）
+连接语言：曲线标注线=左右注释指向金字塔，网格线=日历结构（#2A2A3E），无明显数据流箭头
+元素词汇：金字塔/山形=层级模型（3D 透视感），日历表格=时间规划，药丸/色点=分类标签，渐变条=品牌色带
+情绪基调：暗色品牌风（premium dark-tech + 紫色主导 + 健身人像底图叠加）
 ```
 
 ## 使用说明

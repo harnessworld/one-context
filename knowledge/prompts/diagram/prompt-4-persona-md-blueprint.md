@@ -1,3 +1,11 @@
+---
+prompt_id: 4
+slug: persona-md-blueprint
+exemplar_image: images/exemplar-persona-md-blueprint.png
+tags: [概念蓝图]
+prompt_language: en
+---
+
 # Prompt: exemplar-persona-md-blueprint
 
 > 100% 视觉还原提示词，对应 `exemplar-persona-md-blueprint.png`
@@ -124,4 +132,21 @@ COLOR PALETTE SUMMARY
 | Connector lines       | #7BA3B8   |
 | Badge fill            | #4A7C9B   |
 | Badge text            | #FFFFFF   |
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：B 同色系分层（steel blue 四级：#2C3E50 → #4A7C9B → #7BA3B8 → #E8F1F6）
+布局骨架：B 中心放射（7 层节点环绕中心 persona.md hub）
+信息层级：七级 T 系统（T1-T7）+ 焦点元素（中心 hub 带内发光）+ 徽章编号（蓝色圆圈 1-7）
+连接语言：粗曲线=核心连接（手绘 2px #7BA3B8→#4A7C9B），细虚线=弱关联（1px #B0C4D0），颜色跟随起点蓝色变体
+元素词汇：圆角矩形卡片=层级节点，药丸徽章=标签，折角文档=文件产物
+情绪基调：B 专业蓝图风（精确圆角 + 冷色多级渐淡 + 严格字体层级）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1200×1800px (2:3) 或等比缩放
+- **风格关键词**: professional blueprint, steel blue, radial hub, hand-drawn connectors
+- **注意事项**: 7 个卫星节点的放射状排列是核心布局，确保中心 hub 的视觉权重最大（边框最粗 + 内发光）

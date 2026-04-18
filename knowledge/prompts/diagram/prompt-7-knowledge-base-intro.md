@@ -1,3 +1,11 @@
+---
+prompt_id: 7
+slug: knowledge-base-intro
+exemplar_image: null
+tags: [系统全貌]
+prompt_language: en
+---
+
 # Prompt: knowledge-base-intro
 
 > 知识库结构介绍信息图，基于 diagram-design-atoms 策略组合生成
@@ -83,7 +91,7 @@ Node positions (clock arrangement):
    - Badge "3" (#3A9A9E), link/bookmark icon
    - Title: "references/"
    - Body: "外部资源索引 · 文章 · 文档 · 仓库"
-   - Small inner pills: "diagram-examples" "source-analysis"
+   - Small inner pills: "diagram-prompts" "source-analysis"
    - Bottom label (T6): "精选索引，非全文"
 
 4. "prompts/" — bottom-right (~68%, ~50%):
@@ -222,3 +230,10 @@ DESIGN ATOMS APPLIED
 元素词汇：圆角矩形=目录，终端块=CLI 命令，药丸=标签，折角文档=文件产物
 情绪基调：专业蓝图风
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1200×1800px (2:3) 或等比缩放
+- **风格关键词**: professional blueprint, teal monochrome, radial map + pipeline + loop
+- **注意事项**: 本图是唯一无 exemplar 参考图的 prompt（exemplar_image: null），生成后需人工校准；三个 Band 分别使用不同布局（放射/流水线/循环），节奏变化是设计亮点

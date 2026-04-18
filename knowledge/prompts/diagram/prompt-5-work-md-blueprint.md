@@ -1,3 +1,11 @@
+---
+prompt_id: 5
+slug: work-md-blueprint
+exemplar_image: images/exemplar-work-md-blueprint.png
+tags: [模块蓝图]
+prompt_language: en
+---
+
 # Prompt: exemplar-work-md-blueprint
 
 > 100% 视觉还原提示词，对应 `exemplar-work-md-blueprint.png`
@@ -103,4 +111,21 @@ ICONS STYLE GUIDE
 - All icons: ~24-32px, single-color charcoal (#2C2C2C) line drawings, 1.5px stroke
 - Minimalist hand-drawn doodle style, occasional soft steel-blue partial fill
 - Quality: polished designer's sketch (Miro/Excalidraw hand-drawn mode), not sloppy
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：特殊组合 — 墨色线描 #2C2C2C + B 同色系分层（blue-gray 四级：#7A9BB5 → #B0C4D8 → #D6E4F0 + 暖沙色 #E8DFD0）
+布局骨架：B 中心放射（6 模块环绕中心 work.md hub）
+信息层级：四级标准（标题 28-32px → 段头 20-22px → 正文 13-15px → 注释 11px）+ 焦点元素（中心工作蓝图 hub）
+连接语言：手绘直线=模块连接（炭灰 1.5px），虚线箭头=弱关联，全图统一炭灰色
+元素词汇：圆角矩形=模块，云朵气泡=旁白注释（暖沙色填充），纸张纹理背景=手绘感
+情绪基调：A 手绘草图风（墨水涂鸦 + 微黄纸张 #F4F1EC + wobbly 线条 + 无阴影无渐变）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1200×1600px (3:4) 或等比缩放
+- **风格关键词**: hand-drawn doodle, ink sketch, off-white paper, blue-gray modules
+- **注意事项**: 与 prompt-4 (persona.md) 是姊妹图，保持手绘线描风格统一但色调区分（persona=冷蓝图，work=暖墨水纸）；无阴影无渐变是本图核心特征

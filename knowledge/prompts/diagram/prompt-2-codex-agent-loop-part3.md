@@ -1,3 +1,11 @@
+---
+prompt_id: 2
+slug: codex-agent-loop-part3-sse-tool-flow
+exemplar_image: images/exemplar-codex-agent-loop-part3-sse-tool-flow.png
+tags: [技术解析(循环)]
+prompt_language: en
+---
+
 # Prompt: exemplar-codex-agent-loop-part3-sse-tool-flow
 
 > 100% 视觉还原提示词，对应 `exemplar-codex-agent-loop-part3-sse-tool-flow.png`
@@ -179,7 +187,7 @@ BOTTOM NAVIGATION BAR (占画面底部 ~5%)
   4. "4. 性能优化" — white text, regular
 
 ═══════════════════════════════════════
-VISUAL FLOW & COMPOSITION
+VISUAL HIERARCHY SUMMARY
 ═══════════════════════════════════════
 - Section 1 (SSE): left-to-right fan-out arrow pattern — dynamic data streaming feel
 - Section 2 (Continuity): triangular A→B→C node layout — cyclic memory pattern
@@ -187,4 +195,21 @@ VISUAL FLOW & COMPOSITION
 - Purple gradient wavy arrows in Section 1 vs straight/angular arrows in Section 3 create visual contrast
 - Dark terminal blocks (#1E1E2E) provide strong contrast against white background
 - Lavender banner (#F0E6F6) in Section 2 provides a gentle color break
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：A 单强调色 + 全灰度（deep purple #5B2D8E 为主色，辅以暗色终端块形成对比）
+布局骨架：C 分段堆叠（三段：SSE 实时流 + 思维连续性 + Tool Call Loop）+ D 闭环循环（Section 3 四步矩形循环）
+信息层级：五级标准 + 底部导航栏高亮当前页（Part 3/4）
+连接语言：粗波浪渐变线=主数据流（purple→magenta 3-4px），手绘曲线，圆形字母节点=流程步骤
+元素词汇：终端代码块=CLI/代码输出，圆形字母节点(A/B/C)=流程步骤，药丸徽章=触发动作，薰衣草横幅=段落分隔
+情绪基调：C 技术架构风（精确线条 + 暗色代码块强对比 + 紫色科技感）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1080×1440px (3:4) 或等比缩放
+- **风格关键词**: technical diagram, purple/magenta accent, wavy arrows, dark terminal blocks
+- **注意事项**: 三个 Section 的视觉节奏很重要 — Section 1 扇形扩散、Section 2 三角循环、Section 3 矩形闭环，不要统一成同一种布局

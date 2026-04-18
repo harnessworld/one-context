@@ -1,3 +1,11 @@
+---
+prompt_id: 6
+slug: work-persona-incident-flow
+exemplar_image: images/exemplar-work-persona-incident-flow.png
+tags: [协作编排]
+prompt_language: en
+---
+
 # Prompt: exemplar-work-persona-incident-flow
 
 > 100% 视觉还原提示词，对应 `exemplar-work-persona-incident-flow.png`
@@ -119,4 +127,21 @@ SPACING & COLOR SUMMARY
 - Band 3: 57%–79%, white
 - Band 4: 79%–100%, white
 - Overall: airy, spacious, teal + gray + white, single yellow ⚠ as only warm accent
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：A 单强调色 + 全灰度（teal #1A7A7A 为唯一彩色，仅一处黄色 ⚠ 作暖色点缀）
+布局骨架：C 分段堆叠（四横带）+ A 多栏流水线（Band 2 三列时序图）
+信息层级：多级标准 + 焦点元素（Band 2 三阶段时序图为视觉重心）
+连接语言：粗实线=主流向（teal 2-3px 曲线），细虚线=注释（灰 1px），抛物线弧=跨区域流向（teal 2px）
+元素词汇：圆角矩形=阶段卡片，横幅条=阶段头部（teal/gray 填充白字），对比并排卡片=效果对比
+情绪基调：D 协同流程风（干净平直 + 极淡底色分区 + 清爽无衬线）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 900×1200px (3:4) 或等比缩放
+- **风格关键词**: collaborative flow, teal accent, three-phase sequence, clean flat design
+- **注意事项**: Band 4 的对比面板是全图落点 — 左侧"纯 Work"灰色边框 vs 右侧"Work + Persona"teal 边框，对比效果决定说服力

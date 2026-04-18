@@ -1,3 +1,11 @@
+---
+prompt_id: 11
+slug: hermes-agent-security-runtime-gates
+exemplar_image: images/exemplar-hermes-agent-security-runtime-gates.jpg
+tags: [安全流程]
+prompt_language: zh
+---
+
 # Prompt: exemplar-hermes-agent-security-runtime-gates
 
 > 100% 视觉还原提示词，对应 `exemplar-hermes-agent-security-runtime-gates.jpg`。Hermes Agent 对象拆解系列第12页。
@@ -218,4 +226,22 @@ VISUAL HIERARCHY SUMMARY
 7. 底部三列总结横幅 — 收尾总结层
 8. 各阶段底部灰色注释文字 — 最低层级，细节补充
 9. 右下角页码和 logo — 品牌标识，不抢视觉
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：A 单强调色 + 全灰度（墨绿 #4A6741 为主色）+ 黄色高亮卡片（#FFF3C4）作为补充注解色
+布局骨架：A 多栏流水线（五阶段从左到右串行关卡：外部输入 → ①身份 → ②注入扫描 → ③行为控制 → ④隔离 → 执行核心）
+信息层级：编号徽章（绿色圆圈 ①②③④）+ 焦点元素（底部红色标语"安全不是一堵墙，而是一串门"）
+连接语言：粗实线=主流程（墨绿 3-4px），灰色=未过滤输入（表示不信任），虚线=标注指向（灰 1px）
+元素词汇：人物剪影=威胁来源，盾牌=防护，黄色卡片=设计亮点/代价注解，深色护照图标=安全凭证
+情绪基调：A 手绘草图风（wobbly 边框 + 纯白背景 + 手绘图标）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1080×1440px (3:4) 或等比缩放
+- **风格关键词**: hand-drawn sketch, olive green, security gates, left-to-right pipeline
+- **注意事项**: 左侧黑客人物剪影是威胁可视化的关键元素；五阶段从左到右的串行结构传达"逐层过滤"概念；底部红色标语是全图总结性视觉锚点
+- **系列**: Hermes Agent 对象拆解 12/12

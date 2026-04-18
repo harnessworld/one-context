@@ -1,3 +1,11 @@
+---
+prompt_id: 9
+slug: hermes-multi-entry-unified-core
+exemplar_image: images/exemplar-hermes-multi-entry-unified-core.jpg
+tags: [多入口]
+prompt_language: zh
+---
+
 # Prompt: exemplar-hermes-multi-entry-unified-core
 
 > 100% 视觉还原提示词，对应 `exemplar-hermes-multi-entry-unified-core.jpg`。Hermes Agent 对象拆解系列第 02 页。
@@ -187,4 +195,22 @@ VISUAL HIERARCHY SUMMARY
 7. 左侧大弧线箭头（贯通全图的视觉引导线）
 8. 右侧设计亮点/代价注解（最小层级，灰色小字）
 9. 页脚 "Hermes Agent 对象拆解 / 02"（最小）
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：A 单强调色 + 全灰度（深蓝 #3B6FB5 为主色，辅以青绿 #2BADA3 仅用于右侧注解图标）
+布局骨架：A 多栏流水线（漏斗结构：五入口 → 适配层 → 核心 AIAgent → 返回层）
+信息层级：编号徽章（蓝色圆圈 1-5）+ 焦点元素（AIAgent 核心大框 = 最大框体，视觉重心）
+连接语言：粗实线=主流向（蓝 3-4px 曲线），左侧大弧线=贯通流（蓝 4px），细曲线=注解指向（灰 1.5px）
+元素词汇：圆角矩形卡片=入口模块，胶囊=功能标签，终端窗口=CLI 入口图标，蓝色步骤胶囊=核心流程
+情绪基调：A 手绘草图风（wobbly 边框 + 暖纸张底色 #FAFAF7 + 手绘图标）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1080×1440px (3:4) 或等比缩放
+- **风格关键词**: funnel flow, hand-drawn sketch, blue accent, unified core
+- **注意事项**: 左侧贯通全图的蓝色弧线箭头是"五入一出"漏斗结构的视觉强化；5 张入口卡片内的手绘图标（终端窗口、聊天气泡、编辑器窗口等）是区分度关键
+- **系列**: Hermes Agent 对象拆解 02/12

@@ -4,7 +4,7 @@
 用于指导 AI 作图时"做什么决策"，而非"抄什么参数"。
 
 > 使用方式：先选每个维度的策略组合，再让 AI 自行推导具体配色、字号、间距。
-> 参考来源：`knowledge/references/diagram-examples/prompt-1 ~ prompt-11`
+> 参考来源：`knowledge/prompts/diagram/prompt-1 ~ prompt-11`
 
 ---
 

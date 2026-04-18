@@ -1,3 +1,11 @@
+---
+prompt_id: 3
+slug: codex-agent-loop-part4-cache-compression
+exemplar_image: images/exemplar-codex-agent-loop-part4-cache-compression.png
+tags: [技术解析(对比)]
+prompt_language: en
+---
+
 # Prompt: exemplar-codex-agent-loop-part4-cache-compression
 
 > 100% 视觉还原提示词，对应 `exemplar-codex-agent-loop-part4-cache-compression.png`
@@ -165,4 +173,21 @@ VISUAL HIERARCHY
 6. Orange-highlighted nav item (current page indicator)
 7. Yellow warning box (urgency callout)
 8. Green STATIC ZONE vs red DYNAMIC ZONE (semantic color coding)
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：C 暖冷对比双色（橙色 #E87A3A 主调 + 红 #CC3333/绿 #4CAF50 语义对比）+ D 主题色+深色反转带（ZDR 深色条带 #2C2C2C）
+布局骨架：C 分段堆叠（四段垂直：Caching → Config → Compaction → ZDR）+ E 对比并排（Section 2 错误 vs 正确做法）
+信息层级：五级标准 + 徽章编号（橙色圆圈 1-4）+ 焦点元素（红/绿曲线对比图 + 乐高积木）
+连接语言：中等直线箭头=步骤流转（灰/橙 2px），颜色跟随语义（红=错误，绿=正确，橙=流程）
+元素词汇：坐标图=性能对比，乐高积木=可拼装模块（比喻性），终端块=代码，警告框=注意事项，深色条带=安全/合规
+情绪基调：C 技术架构风 + 教学图鉴感（严肃数据 + 趣味乐高隐喻并存）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1280×1714px 或等比缩放
+- **风格关键词**: warm orange, technical infographic, Lego metaphor, data visualization
+- **注意事项**: 乐高积木的 3D 感（顶部圆柱凸起 + 侧面阴影）是视觉记忆点，不要简化为纯色矩形；ZDR 深色条带的反转效果是节奏变化关键

@@ -1,3 +1,11 @@
+---
+prompt_id: 10
+slug: hermes-skills-system-learning-agent
+exemplar_image: images/exemplar-hermes-skills-system-learning-agent.jpg
+tags: [知识沉淀]
+prompt_language: zh
+---
+
 # Prompt: exemplar-hermes-skills-system-learning-agent
 
 > 100% 视觉还原提示词，对应 `exemplar-hermes-skills-system-learning-agent.jpg`。Hermes Agent 对象拆解系列第 09 页。
@@ -164,4 +172,22 @@ VISUAL HIERARCHY SUMMARY
 5. 三列总结卡片（底部，清晰收尾）
 6. 各流程步骤节点（中等权重）
 7. 注释和小标签（最小，灰色）
+
+═══════════════════════════════════════
+DESIGN ATOMS APPLIED
+═══════════════════════════════════════
+色彩策略：多色辅助 — teal #1A8A7D（主流程）+ amber #D4883A（高亮卡片）+ olive green #6B8E3D（生长/树图标），暖纸张底色
+布局骨架：A 多栏流水线（第一次做成 → 经验提炼 → 下一次任务）+ D 闭环循环（沉淀 → 复用螺旋上升）
+信息层级：编号徽章（teal 1-3）+ 焦点元素（Skill 库书架 = 最大插图元素，暖棕色调）
+连接语言：粗实线=主流程（teal 3px 曲线），虚线=补充说明（灰 1px），实心大箭头=按需加载（teal 填充 40px 宽，内含白色文字）
+元素词汇：书架/文件柜=知识库（比喻性，暖木质调），文件图标=skill.md，表单列表=注册流程，树=生长隐喻
+情绪基调：A 手绘草图风（暖纸张 #F8F5F0 + 手绘抖动线条 + 书架木质纹理）
 ```
+
+## 使用说明
+
+- **适用工具**: Claude Artifacts (SVG/HTML), DALL-E 3, Midjourney v6+
+- **推荐尺寸**: 1080×1440px (3:4) 或等比缩放
+- **风格关键词**: hand-drawn sketch, warm parchment, bookshelf metaphor, growth cycle
+- **注意事项**: Skill 库书架是全图视觉锚点（最大插图元素），棕色/暖木质纹理手绘风格是区分于其他 prompt 的关键特征；「按需加载」teal 大实心箭头是视觉引导线
+- **系列**: Hermes Agent 对象拆解 09/12
