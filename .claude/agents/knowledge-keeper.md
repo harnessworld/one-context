@@ -78,6 +78,7 @@ Read these files for context:
 @knowledge/references/karpathy-claudemd-principles.md
 @knowledge/references/microsoft-markitdown.md
 @knowledge/references/openclaw-architecture.md
+@knowledge/references/trend-radar-guide.md
 @knowledge/standards/README.md
 @knowledge/standards/agent-framework.md
 @knowledge/standards/agent-friendly-testing.md

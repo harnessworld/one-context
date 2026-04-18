@@ -905,6 +905,10 @@ repos:
     id: arch-diagram-gen
     alias: archdiag
     description: Claude AI skill for generating dark-themed system architecture diagrams (HTML/SVG).
+  - url: https://github.com/sansan0/TrendRadar
+    category: integrations
+    id: trend-radar
+    description: 趋势雷达 — 多平台热点聚合 + MCP AI分析 + 企微/微信/飞书推送（33k+ stars）。
 
 <!-- source: meta/workspaces.yaml -->
 

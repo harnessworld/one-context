@@ -809,11 +809,18 @@ When adding a playbook, update the Available table above.
 5. 随进度补充 `tech_design.md`、`test_report.md`、`mr_report.md`、`deliver.md`；不需要时可暂不创建非 `spec` 文件，但索引与 spec 应保持同步。
 6. 需求结束或搁置时，更新 `INDEX.md` 的 `status`，必要时在 `spec.md` 中注明归档原因。
 
+## 常见错误
+
+- 忘记更新 `INDEX.md`，导致 feature 目录存在但索引缺失。
+- `spec.md` 未填写「实现落点」一节，后续 Dev agent 无法定位实现仓库。
+- 直接在子仓库内创建 issue，而非在 `features/` 下记录跨仓需求。
+
 ## 检查
 
 - [ ] `spec.md` 含有效 `primary_repo_id` 或明确说明为何暂无仓库
 - [ ] `INDEX.md` 与目录路径一致
 - [ ] 敏感信息未写入 `test_report.md` / `mr_report.md`
+- [ ] feature 目录名与 `INDEX.md` 中的 `id` 一致
 
 <!-- source: knowledge/playbooks/multi-agent-parallel-development.md -->
 # Playbook: 多 Agent 并行开发
@@ -1532,6 +1539,7 @@ features/
 | ai-mid-mgmt-video             | AI 中视频管理 — 素材与发布工具链                                       | develop  | draft  | `features/develop/ai-mid-mgmt-video/`             | one-context     |
 | hermes-adapter                | Hermes Adapter — one-context 支持 Hermes Agent CLI                     | core     | draft  | `features/core/hermes-adapter/`                   | one-context     |
 | gsd-integration               | GSD 集成 — one-context 上下文注入 GSD 工作流                              | core     | draft  | `features/core/gsd-integration/`                  | one-context     |
+| trend-radar-integration        | TrendRadar 趋势雷达集成 — 热点情报 + MCP + 微信推送                         | integrations | in_progress | `features/integrations/trend-radar/`      | trend-radar    |
 
 
 **Columns**
