@@ -83,23 +83,24 @@ git diff HEAD --unified=0 -- $(git diff --name-only HEAD)
 for f in $(git ls-files --others --exclude-standard); do echo "=== $f ==="; cat "$f"; done
 ```
 
-**敏感关键词列表**：
+**敏感关键词来源**：`.onecxt/sensitive-words.yaml`
 
-| 关键词 | 类别 | 说明 |
-|--------|------|------|
-| `ant` | 公司标识 | 蚂蚁集团关联词（大小写不敏感） |
-| `蚂蚁` | 公司标识 | 蚂蚁集团中文名 |
-| `支付宝` | 产品标识 | 支付宝产品名 |
-| `Alipay` | 产品标识 | 支付宝英文名 |
-| `Ant Group` | 公司标识 | 蚂蚁集团英文名 |
-| `Alibaba` | 公司标识 | 阿里巴巴关联词 |
-| `阿里` | 公司标识 | 阿里巴巴中文名 |
-| `蚂蚁金服` | 公司标识 | 蚂蚁集团曾用名 |
-| `网商银行` | 产品标识 | 网商银行产品名 |
+敏感词列表从项目本地配置文件 `.onecxt/sensitive-words.yaml` 读取，该文件不纳入版本控制（已在 `.gitignore` 中排除），每个团队/个人可自行维护。
 
-**注意**：
-- 匹配时需排除合理上下文（如路径中包含 `ant` 的 UI 属性名 `ant-design`、`.gitignore`、`package.json` 中的依赖声明等非敏感引用）
-- 大小写不敏感匹配
+**文件格式**：
+
+```yaml
+words:
+  - keyword: example-敏感词
+    category: 类别标签
+    note: 简要说明
+```
+
+**缺省行为**：若 `.onecxt/sensitive-words.yaml` 不存在或 `words` 为空，Step 2 直接放行，不执行敏感词扫描。
+
+**扫描规则**：
+- 逐条读取 `words` 中的 `keyword`，对变更内容进行大小写不敏感匹配
+- 匹配时需排除合理上下文（如路径中包含 `ant` 的 UI 属性名 `ant-design`、`.gitignore`、`package.json` 中的依赖声明等非敏感引用），排除规则参见各 `note` 字段
 - 对每个命中，输出 **文件路径:行号:命中内容**
 
 **告警流程**：

@@ -33,79 +33,6 @@ Verification steps are optional — focus on the design and rationale.
 
 ## Knowledge
 
-<!-- source: knowledge/README.md -->
-# Knowledge
-
-This directory is the canonical, tool-neutral knowledge layer for `one-context`.
-
-Its purpose is to store guidance once, then let different AI tools consume or adapt that guidance without rewriting the same intent in multiple vendor-specific formats.
-
-## Principles
-
-- Keep core guidance human-readable.
-- Keep canonical meaning independent from any single editor or AI tool.
-- Treat provider-specific config as an adapter output, not the source of truth.
-- Prefer reusable standards, playbooks, and prompt fragments over duplicated rules.
-
-## Layout
-
-| Directory | Purpose |
-|-----------|---------|
-| `standards/` | Normative conventions — engineering policies, schema definitions, interface contracts |
-| `playbooks/` | Step-by-step operating procedures for common tasks |
-| `prompts/` | Reusable text prompt and context fragments for AI tooling |
-| `references/` | Analytical documents and curated external indexes (architecture analysis, design references, example collections) |
-| `tools/` | Tool-related reference docs (CLI usage, configuration, integration notes) |
-
-Umbrella-level feature specs (not sub-repo issues) live at repo root **`features/`** — see `features/README.md` and playbook `playbooks/add-umbrella-feature.md`.
-
-Executable, tool-agnostic pipelines (Node scripts, single CLI entry) live at repo root **`skills/`** — see `skills/README.md`.
-
-## Classification guide
-
-| Question | Goes in |
-|----------|---------|
-| "What is the rule / policy / schema?" | `standards/` |
-| "How do I do X step by step?" | `playbooks/` |
-| "What reusable prompt can I inject?" | `prompts/` |
-| "How does system Y work? What articles exist?" | `references/` |
-| "How do I use tool Z's CLI?" | `tools/` |
-
-## Language policy
-
-- **README files**: English (stable index, tool-consumable).
-- **Content files**: author's choice (Chinese or English). Title format: `English Name — 中文副标题` for Chinese documents, to keep directory indexes scannable.
-- **No vendor / platform lock-in**: avoid hard-coding specific platforms (e.g. "语雀") in titles or descriptions; use generic terms (e.g. "PlantUML-compatible platforms").
-
-## Adapter Model
-
-1. Canonical guidance is written here.
-2. Workspace and profile metadata decide what guidance applies.
-3. Tool adapters convert the relevant guidance into formats understood by Cursor, Claude Code, Codex, OpenClaw, or future tools.
-
-This keeps `knowledge/` stable even when tools change.
-
-<!-- source: knowledge/playbooks/README.md -->
-# Playbooks
-
-Step-by-step operating procedures for common tasks.
-
-## Available
-
-| Playbook | Purpose |
-|----------|---------|
-| `add-umbrella-feature.md` | 新增伞仓级需求到 `features/` — 索引、目录、spec、进度跟踪全流程 |
-| `use-microsoft-markitdown.md` | 使用 Microsoft MarkItDown：环境、安装、CLI、Python、MCP、Docker、排障 |
-
-## Planned (not yet written)
-
-- Onboarding a new repository
-- Preparing a release workspace
-- Reviewing a cross-repo change
-- Generating AI-ready context for a task
-
-When adding a playbook, update the Available table above.
-
 <!-- source: knowledge/playbooks/add-umbrella-feature.md -->
 ﻿# Playbook: 新增伞仓级需求（`features/`）
 
@@ -271,6 +198,27 @@ When adding a playbook, update the Available table above.
 - [ ] 全部通过 = 代码正确，无需人工解读输出
 - [ ] 核心失败路径有对应测试
 - [ ] 测试不依赖网络 / 外部服务
+
+<!-- source: knowledge/playbooks/README.md -->
+# Playbooks
+
+Step-by-step operating procedures for common tasks.
+
+## Available
+
+| Playbook | Purpose |
+|----------|---------|
+| `add-umbrella-feature.md` | 新增伞仓级需求到 `features/` — 索引、目录、spec、进度跟踪全流程 |
+| `use-microsoft-markitdown.md` | 使用 Microsoft MarkItDown：环境、安装、CLI、Python、MCP、Docker、排障 |
+
+## Planned (not yet written)
+
+- Onboarding a new repository
+- Preparing a release workspace
+- Reviewing a cross-repo change
+- Generating AI-ready context for a task
+
+When adding a playbook, update the Available table above.
 
 <!-- source: knowledge/playbooks/sre-release-process.md -->
 # Playbook: SRE 发布流程
@@ -571,18 +519,6 @@ git worktree add ../agent-2-work feat/agent-2-task
 - [ ] worktree 分支名称与任务对应，避免无名分支
 - [ ] 合并前已通过 CI / 本地测试
 - [ ] 合并后及时清理 worktree，避免残留
-
-<!-- source: knowledge/prompts/README.md -->
-# Prompts
-
-All prompt and context fragments for AI tooling live under [diagram/](diagram/README.md).
-
-These describe reusable intent, not vendor-specific syntax. Adapters translate them into tool-native formats.
-
-## How to find the right prompt
-
-- **代码生成技术图表**（架构图、流程图、序列图）→ [diagram/](diagram/) README 场景一
-- **文生图**（信息图、概念图、科普长图、品牌图、论文插图）→ [diagram/](diagram/) README 场景二 → [ROUTING.md](diagram/ROUTING.md)
 
 <!-- source: knowledge/prompts/design-atoms.md -->
 # Diagram Design Atoms
@@ -988,151 +924,6 @@ These describe reusable intent, not vendor-specific syntax. Adapters translate t
 2. **每个维度只选一个主策略**——避免风格冲突
 3. **具体值让 AI 自己推导**——你定方向，它定参数
 4. **内容描述只写"是什么"**——不写"长什么样"
-
-<!-- source: knowledge/prompts/diagram/README.md -->
-# Diagram Prompts — 画图提示词知识库
-
-画图有两种场景，从这里找不同的参考：
-
-## 场景一：技术图表（代码生成）
-
-用 fireworks-tech-graph 等 skill 生成 SVG/PNG 架构图、流程图、序列图。
-
-→ 走这条路：**布局决策 + 图表语法模板**
-
-1. **选布局** → 读 [design-atoms.md](design-atoms.md) 的"二、布局骨架"和"四、连接语言"，决定用什么结构
-2. **选风格** → 读 [design-atoms.md](design-atoms.md) 的"六、情绪基调"，决定图表气质
-3. **抄模板** → 从 [demos.md](demos.md) 找对应图表类型的 PlantUML/Mermaid/Graphviz 语法模板，填入内容
-
-## 场景二：文生图（AI 绘图）
-
-用 Claude / DALL-E / Midjourney 等生成像素级信息图、概念图、科普长图。
-
-→ 走这条路：**内容标签路由 → 参考模板 → 改内容不改骨架**
-
-1. **提取内容标签** → 从用户描述中识别"画什么"（架构图/流程图/蓝图/安全流程…）
-2. **查路由表** → 在 [ROUTING.md](ROUTING.md) 中用标签匹配推荐的 prompt-N
-3. **参考模板** → 打开对应 prompt-N，改内容，保持视觉风格
-4. **对照参考图** → [images/](images/) 目录的 exemplar-*.png/jpg 是该提示词的最终效果图，用于校准
-5. **微调视觉** → 如需调整配色/布局细节，再查 [design-atoms.md](design-atoms.md)
-
-### 三种入口
-
-| 入口 | 路由方式 |
-|------|---------|
-| 用户用自然语言描述 | 从描述提取内容标签 → 查 ROUTING.md |
-| 用户提供本目录 exemplar 图 | images/ 目录文件名直接对应 prompt-N（编号一致） |
-| 用户提供外部参考图 | skill 读图 → 生成内容标签 → 查 ROUTING.md |
-
-## 文件索引
-
-| 文件 | 场景一 | 场景二 | 用途 |
-|------|:------:|:------:|------|
-| [ROUTING.md](ROUTING.md) | | ★ | 内容标签路由表 — "画什么"→ 推荐哪个 prompt |
-| [demos.md](demos.md) | ★ | | PlantUML / Mermaid / Graphviz 可复制模板 |
-| [design-atoms.md](design-atoms.md) | ★ | ★(微调时) | 视觉策略参考 — 色彩、布局、层级的可选维度 |
-| [prompts.md](prompts.md) | | ★ | 色系/风格速查表 |
-| prompt-1 ~ prompt-21 | | ★ | 100% 视觉还原提示词 |
-| [images/](images/) | | ★ | 参考图片（exemplar-*.png/jpg） |
-
-## 提示词与色系对照
-
-| # | 主题 | 色系 | 风格 | 参考图 |
-|---|------|------|------|--------|
-| 1 | AI 同事蒸馏为 Skill | teal/cyan | 手绘草图 | `exemplar-ai-colleague-to-skill-pipeline.png` |
-| 2 | Codex Agent Loop — SSE 工具流 | purple/magenta | 技术架构 | `exemplar-codex-agent-loop-part3-sse-tool-flow.png` |
-| 3 | Codex Agent Loop — 缓存压缩 | orange/warm | 技术信息图 | `exemplar-codex-agent-loop-part4-cache-compression.png` |
-| 4 | persona.md 分层蓝图 | steel blue | 蓝图放射 | `exemplar-persona-md-blueprint.png` |
-| 5 | work.md 六模块蓝图 | blue-gray ink | 手绘蓝图 | `exemplar-work-md-blueprint.png` |
-| 6 | 故障场景编排流程 | teal/gray | 协同流程 | `exemplar-work-persona-incident-flow.png` |
-| 7 | knowledge/ 知识库结构 | teal/cyan monochrome | 专业蓝图 | *(AI-generated)* |
-| 8 | Hermes Agent 运行时架构 | orange/blue/gray | 科普拆解 | `exemplar-hermes-agent-runtime-architecture.jpg` |
-| 9 | Hermes 多入口统一核心 | teal/blue | 科普拆解 | `exemplar-hermes-multi-entry-unified-core.jpg` |
-| 10 | Hermes Skills 系统学习 | teal/warm wood | 科普拆解 | `exemplar-hermes-skills-system-learning-agent.jpg` |
-| 11 | Hermes Agent 安全门禁 | green/yellow | 科普拆解 | `exemplar-hermes-agent-security-runtime-gates.jpg` |
-| 12 | Keep 健身产品营销生态图 | purple/gold | 暗色品牌 | `exemplar-keep-fitness-marketing-deck.jpg` |
-| 13 | SkillRouter 论文管道架构 | pastel/soft blue | 扁平学术 | `exemplar-skillrouter-pipeline-architecture.jpg` |
-| 14 | 企业级 AI 基建全景图 | orange/blue/gray | 环形全景 | `exemplar-enterprise-ai-infra-panorama.jpg` |
-| 15 | 提示词与工作流编排 | orange/blue/gray | 科普拆解 | `exemplar-prompt-workflow-orchestration.jpg` |
-| 16 | 知识库与检索增强 | orange/blue/gray | 科普拆解 | `exemplar-knowledge-base-rag.jpg` |
-| 17 | 工具调用与业务系统集成 | orange/blue/gray | 科普拆解 | `exemplar-tool-call-business-integration.jpg` |
-| 18 | 上下文、记忆与状态管理 | black/white/gray | 科普拆解 | `exemplar-context-memory-state-management.jpg` |
-| 19 | 评测、观测与反馈闭环 | orange/blue/gray | 科普拆解 | `exemplar-eval-observability-feedback-loop.jpg` |
-| 20 | 安全、权限与治理 | orange/blue/gray | 科普拆解 | `exemplar-security-permission-governance.jpg` |
-| 21 | 部署、性能、成本与资产管理 | orange/blue/gray | 科普拆解 | `exemplar-deploy-performance-cost-mgmt.jpg` |
-
-<!-- source: knowledge/prompts/diagram/ROUTING.md -->
-# Diagram Routing — 内容标签路由表
-
-用户说"画一个 xx 图"时，用内容标签匹配到推荐提示词。
-
-## 路由规则
-
-1. 从用户描述中提取内容标签（可多选）
-2. 查下表找到推荐的 prompt-N
-3. 打开对应 prompt-N 作为参考模板，改内容不改视觉骨架
-4. 如果匹配到多个 prompt，优先选第一个；用户提到"参考风格"时再切换
-
-## 标签路由表
-
-| 内容标签 | 推荐 prompt | 理由 |
-|---------|-----------|------|
-| 架构图/运行时架构 | prompt-8 | 分层架构+侧标签布局，适合多层级组件拆解 |
-| 流程图/转化流程/蒸馏 | prompt-1 | 多栏流水线，左→右单向流动，手绘亲切实感 |
-| 概念蓝图/层级模型 | prompt-4 | 中心放射，围绕核心概念展开多维度 |
-| 模块蓝图/能力模型 | prompt-5 | 中心放射，展示模块组合与分岗使用 |
-| 安全流程/门禁/审核链 | prompt-11 | 串行关卡，从外到内逐层过滤 |
-| 协作编排/多角色流程 | prompt-6 | 多栏+对比并排，展示角色切换与输出差异 |
-| 系统全貌/目录结构 | prompt-7 | 中心放射+流水线+循环，一张图讲清全貌 |
-| 多入口/网关/API 聚合 | prompt-9 | 漏斗汇聚，多→一→多 |
-| 知识沉淀/学习回路/Skill 库 | prompt-10 | 生长循环，首次→沉淀→复用螺旋上升 |
-| 技术解析/实时流/Agent Loop | prompt-2 | 分段堆叠+闭环循环，适合循环机制+数据流 |
-| 技术解析/缓存/压缩/对比 | prompt-3 | 分段堆叠+对比并排，适合 before/after 对比机制 |
-| 品牌图/营销/生态图 | prompt-12 | 暗色品牌风，三段堆叠+紫渐变，适合产品生态展示 |
-| 论文插图/管道架构 | prompt-13 | 扁平学术风，三栏流水线+柔和配色，适合论文 Figure |
-| AI基建全景/总览/模块全貌 | prompt-14 | 环形放射布局，8模块围绕中心，适合企业AI整体规划展示 |
-| Prompt编排/工作流/任务链路 | prompt-15 | 编排引擎中心+输入输出两翼，适合工作流引擎设计 |
-| RAG/知识库/检索增强/文档处理 | prompt-16 | 流水线+检索引擎双层结构，适合RAG架构讲解 |
-| 工具调用/业务集成/Agent执行 | prompt-17 | Agent Runtime中心循环+风险分级，适合工具调用架构 |
-| 上下文/记忆/状态管理/会话 | prompt-18 | 三种记忆并列+Agent Core+状态机，适合记忆系统设计 |
-| 评测/观测/反馈闭环/Trace | prompt-19 | 大型环形闭环，围绕Production Runtime，适合质量体系 |
-| 安全/权限/治理/合规/审计 | prompt-20 | 三层串行（输入检查→Runtime→输出检查），适合安全治理 |
-| 部署/性能/成本/资产/版本管理 | prompt-21 | 多区域环绕中央平台，适合运维/MLOps体系设计 |
-| 时序图/序列图 | *(走场景一)* | 用 demos.md 的 PlantUML/Mermaid 模板 |
-
-## 标签提取指南
-
-从用户描述中常见的关键词映射：
-
-| 用户说的 | 提取标签 |
-|---------|---------|
-| 架构、运行时、Runtime、分层、组件 | 架构图 |
-| 流程、转化、蒸馏、管道、Pipeline | 流程图 |
-| 蓝图、概念、模型、维度、放射 | 概念蓝图 |
-| 模块、能力、组合、分岗 | 模块蓝图 |
-| 安全、门禁、审核、关卡、防火墙 | 安全流程 |
-| 协作、编排、多角色、Persona+Work | 协作编排 |
-| 全貌、目录、结构介绍、概览 | 系统全貌 |
-| 多入口、网关、聚合、殊途同归 | 多入口 |
-| 沉淀、学习、Skill库、积累、复用 | 知识沉淀 |
-| 实时流、SSE、循环、Agent Loop | 技术解析(循环) |
-| 缓存、压缩、对比、before/after | 技术解析(对比) |
-| 信息图、品牌、营销、生态、B2B、产品图 | 品牌图 |
-| 论文、paper、插图、Figure、学术、pipeline 架构 | 论文插图 |
-| 全景、基建、AI基建、模块总览、企业AI | AI基建全景 |
-| Prompt编排、工作流、任务链、Workflow、编排引擎 | Prompt编排 |
-| RAG、知识库、检索增强、Embedding、Chunking、文档处理 | RAG/知识库 |
-| 工具调用、Tool Calling、业务集成、Agent执行、API调用 | 工具调用 |
-| 上下文、记忆、Memory、状态管理、会话、Session | 上下文/记忆 |
-| 评测、Eval、观测、Trace、反馈闭环、Observability | 评测/观测 |
-| 安全、权限、治理、Governance、合规、审计、护栏 | 安全/治理 |
-| 部署、性能、成本、资产管理、版本、MLOps、运维 | 部署/成本 |
-
-## 扩展说明
-
-- 新增 prompt 时，在此表追加对应标签行
-- 一个 prompt 可以对应多个标签（如 prompt-7 同时覆盖"系统全貌"和"目录结构"）
-- 如果用户的需求不匹配任何标签，走 design-atoms.md 从零选视觉策略
 
 <!-- source: knowledge/prompts/diagram/prompt-1-ai-colleague-to-skill-pipeline.md -->
 ---
@@ -4676,36 +4467,214 @@ DESIGN ATOMS APPLIED
 - **注意事项**: 左侧贯通全图的蓝色弧线箭头是"五入一出"漏斗结构的视觉强化；5 张入口卡片内的手绘图标（终端窗口、聊天气泡、编辑器窗口等）是区分度关键
 - **系列**: Hermes Agent 对象拆解 02/12
 
-<!-- source: knowledge/references/README.md -->
-# References
+<!-- source: knowledge/prompts/diagram/README.md -->
+# Diagram Prompts — 画图提示词知识库
 
-Curated indexes of external resources and analytical documents: articles, documentation, open-source analysis, and design references.
+画图有两种场景，从这里找不同的参考：
 
-## Files
+## 场景一：技术图表（代码生成）
 
-| File | Description |
-|------|-------------|
-| `claudecode-source-analysis.md` | Claude Code 源码解析与架构分析资料索引 |
-| `claudecode-architecture-patterns.md` | Claude Code 架构设计模式与最佳实践 — 从权威文章提炼的可复用模式 |
-| `openclaw-architecture.md` | OpenClaw 源码架构解析 — 开源 AI 智能体平台架构模式与 agent 建设指导 |
-| `microsoft-markitdown.md` | Microsoft MarkItDown — 开源文件/Office 转 Markdown（常被误称 MakeItDown） |
-| `karpathy-claudemd-principles.md` | Karpathy 编程原则 → CLAUDE.md — 本项目 agent 规则的溯源参考 |
-| `anthropic-managed-agents.md` | Anthropic Managed Agents & Trustworthy Agents — Agent 脑手分离架构 + 信任框架（官方博客一手资料） |
-| `claudecode-session-management.md` | Claude Code 会话管理与 1M 上下文实操指南 — 官方博文提炼的决策框架 |
-| `icon-library-index.md` | 开源图标库索引 — 图标选型指南与对比 |
+用 fireworks-tech-graph 等 skill 生成 SVG/PNG 架构图、流程图、序列图。
 
-## What belongs here
+→ 走这条路：**布局决策 + 图表语法模板**
 
-- Source-code analysis and architecture walkthroughs
-- External article/book indexes with summaries
-- Design references (visual, interaction, information architecture)
-- Example collections and templates
+1. **选布局** → 读 [design-atoms.md](design-atoms.md) 的"二、布局骨架"和"四、连接语言"，决定用什么结构
+2. **选风格** → 读 [design-atoms.md](design-atoms.md) 的"六、情绪基调"，决定图表气质
+3. **抄模板** → 从 [demos.md](demos.md) 找对应图表类型的 PlantUML/Mermaid/Graphviz 语法模板，填入内容
 
-## What does NOT belong here
+## 场景二：文生图（AI 绘图）
 
-- Normative conventions and policies → `standards/`
-- Step-by-step procedures → `playbooks/`
-- Reusable text prompts for AI tooling → `prompts/`
+用 Claude / DALL-E / Midjourney 等生成像素级信息图、概念图、科普长图。
+
+→ 走这条路：**内容标签路由 → 参考模板 → 改内容不改骨架**
+
+1. **提取内容标签** → 从用户描述中识别"画什么"（架构图/流程图/蓝图/安全流程…）
+2. **查路由表** → 在 [ROUTING.md](ROUTING.md) 中用标签匹配推荐的 prompt-N
+3. **参考模板** → 打开对应 prompt-N，改内容，保持视觉风格
+4. **对照参考图** → [images/](images/) 目录的 exemplar-*.png/jpg 是该提示词的最终效果图，用于校准
+5. **微调视觉** → 如需调整配色/布局细节，再查 [design-atoms.md](design-atoms.md)
+
+### 三种入口
+
+| 入口 | 路由方式 |
+|------|---------|
+| 用户用自然语言描述 | 从描述提取内容标签 → 查 ROUTING.md |
+| 用户提供本目录 exemplar 图 | images/ 目录文件名直接对应 prompt-N（编号一致） |
+| 用户提供外部参考图 | skill 读图 → 生成内容标签 → 查 ROUTING.md |
+
+## 文件索引
+
+| 文件 | 场景一 | 场景二 | 用途 |
+|------|:------:|:------:|------|
+| [ROUTING.md](ROUTING.md) | | ★ | 内容标签路由表 — "画什么"→ 推荐哪个 prompt |
+| [demos.md](demos.md) | ★ | | PlantUML / Mermaid / Graphviz 可复制模板 |
+| [design-atoms.md](design-atoms.md) | ★ | ★(微调时) | 视觉策略参考 — 色彩、布局、层级的可选维度 |
+| [prompts.md](prompts.md) | | ★ | 色系/风格速查表 |
+| prompt-1 ~ prompt-21 | | ★ | 100% 视觉还原提示词 |
+| [images/](images/) | | ★ | 参考图片（exemplar-*.png/jpg） |
+
+## 提示词与色系对照
+
+| # | 主题 | 色系 | 风格 | 参考图 |
+|---|------|------|------|--------|
+| 1 | AI 同事蒸馏为 Skill | teal/cyan | 手绘草图 | `exemplar-ai-colleague-to-skill-pipeline.png` |
+| 2 | Codex Agent Loop — SSE 工具流 | purple/magenta | 技术架构 | `exemplar-codex-agent-loop-part3-sse-tool-flow.png` |
+| 3 | Codex Agent Loop — 缓存压缩 | orange/warm | 技术信息图 | `exemplar-codex-agent-loop-part4-cache-compression.png` |
+| 4 | persona.md 分层蓝图 | steel blue | 蓝图放射 | `exemplar-persona-md-blueprint.png` |
+| 5 | work.md 六模块蓝图 | blue-gray ink | 手绘蓝图 | `exemplar-work-md-blueprint.png` |
+| 6 | 故障场景编排流程 | teal/gray | 协同流程 | `exemplar-work-persona-incident-flow.png` |
+| 7 | knowledge/ 知识库结构 | teal/cyan monochrome | 专业蓝图 | *(AI-generated)* |
+| 8 | Hermes Agent 运行时架构 | orange/blue/gray | 科普拆解 | `exemplar-hermes-agent-runtime-architecture.jpg` |
+| 9 | Hermes 多入口统一核心 | teal/blue | 科普拆解 | `exemplar-hermes-multi-entry-unified-core.jpg` |
+| 10 | Hermes Skills 系统学习 | teal/warm wood | 科普拆解 | `exemplar-hermes-skills-system-learning-agent.jpg` |
+| 11 | Hermes Agent 安全门禁 | green/yellow | 科普拆解 | `exemplar-hermes-agent-security-runtime-gates.jpg` |
+| 12 | Keep 健身产品营销生态图 | purple/gold | 暗色品牌 | `exemplar-keep-fitness-marketing-deck.jpg` |
+| 13 | SkillRouter 论文管道架构 | pastel/soft blue | 扁平学术 | `exemplar-skillrouter-pipeline-architecture.jpg` |
+| 14 | 企业级 AI 基建全景图 | orange/blue/gray | 环形全景 | `exemplar-enterprise-ai-infra-panorama.jpg` |
+| 15 | 提示词与工作流编排 | orange/blue/gray | 科普拆解 | `exemplar-prompt-workflow-orchestration.jpg` |
+| 16 | 知识库与检索增强 | orange/blue/gray | 科普拆解 | `exemplar-knowledge-base-rag.jpg` |
+| 17 | 工具调用与业务系统集成 | orange/blue/gray | 科普拆解 | `exemplar-tool-call-business-integration.jpg` |
+| 18 | 上下文、记忆与状态管理 | black/white/gray | 科普拆解 | `exemplar-context-memory-state-management.jpg` |
+| 19 | 评测、观测与反馈闭环 | orange/blue/gray | 科普拆解 | `exemplar-eval-observability-feedback-loop.jpg` |
+| 20 | 安全、权限与治理 | orange/blue/gray | 科普拆解 | `exemplar-security-permission-governance.jpg` |
+| 21 | 部署、性能、成本与资产管理 | orange/blue/gray | 科普拆解 | `exemplar-deploy-performance-cost-mgmt.jpg` |
+
+<!-- source: knowledge/prompts/diagram/ROUTING.md -->
+# Diagram Routing — 内容标签路由表
+
+用户说"画一个 xx 图"时，用内容标签匹配到推荐提示词。
+
+## 路由规则
+
+1. 从用户描述中提取内容标签（可多选）
+2. 查下表找到推荐的 prompt-N
+3. 打开对应 prompt-N 作为参考模板，改内容不改视觉骨架
+4. 如果匹配到多个 prompt，优先选第一个；用户提到"参考风格"时再切换
+
+## 标签路由表
+
+| 内容标签 | 推荐 prompt | 理由 |
+|---------|-----------|------|
+| 架构图/运行时架构 | prompt-8 | 分层架构+侧标签布局，适合多层级组件拆解 |
+| 流程图/转化流程/蒸馏 | prompt-1 | 多栏流水线，左→右单向流动，手绘亲切实感 |
+| 概念蓝图/层级模型 | prompt-4 | 中心放射，围绕核心概念展开多维度 |
+| 模块蓝图/能力模型 | prompt-5 | 中心放射，展示模块组合与分岗使用 |
+| 安全流程/门禁/审核链 | prompt-11 | 串行关卡，从外到内逐层过滤 |
+| 协作编排/多角色流程 | prompt-6 | 多栏+对比并排，展示角色切换与输出差异 |
+| 系统全貌/目录结构 | prompt-7 | 中心放射+流水线+循环，一张图讲清全貌 |
+| 多入口/网关/API 聚合 | prompt-9 | 漏斗汇聚，多→一→多 |
+| 知识沉淀/学习回路/Skill 库 | prompt-10 | 生长循环，首次→沉淀→复用螺旋上升 |
+| 技术解析/实时流/Agent Loop | prompt-2 | 分段堆叠+闭环循环，适合循环机制+数据流 |
+| 技术解析/缓存/压缩/对比 | prompt-3 | 分段堆叠+对比并排，适合 before/after 对比机制 |
+| 品牌图/营销/生态图 | prompt-12 | 暗色品牌风，三段堆叠+紫渐变，适合产品生态展示 |
+| 论文插图/管道架构 | prompt-13 | 扁平学术风，三栏流水线+柔和配色，适合论文 Figure |
+| AI基建全景/总览/模块全貌 | prompt-14 | 环形放射布局，8模块围绕中心，适合企业AI整体规划展示 |
+| Prompt编排/工作流/任务链路 | prompt-15 | 编排引擎中心+输入输出两翼，适合工作流引擎设计 |
+| RAG/知识库/检索增强/文档处理 | prompt-16 | 流水线+检索引擎双层结构，适合RAG架构讲解 |
+| 工具调用/业务集成/Agent执行 | prompt-17 | Agent Runtime中心循环+风险分级，适合工具调用架构 |
+| 上下文/记忆/状态管理/会话 | prompt-18 | 三种记忆并列+Agent Core+状态机，适合记忆系统设计 |
+| 评测/观测/反馈闭环/Trace | prompt-19 | 大型环形闭环，围绕Production Runtime，适合质量体系 |
+| 安全/权限/治理/合规/审计 | prompt-20 | 三层串行（输入检查→Runtime→输出检查），适合安全治理 |
+| 部署/性能/成本/资产/版本管理 | prompt-21 | 多区域环绕中央平台，适合运维/MLOps体系设计 |
+| 时序图/序列图 | *(走场景一)* | 用 demos.md 的 PlantUML/Mermaid 模板 |
+
+## 标签提取指南
+
+从用户描述中常见的关键词映射：
+
+| 用户说的 | 提取标签 |
+|---------|---------|
+| 架构、运行时、Runtime、分层、组件 | 架构图 |
+| 流程、转化、蒸馏、管道、Pipeline | 流程图 |
+| 蓝图、概念、模型、维度、放射 | 概念蓝图 |
+| 模块、能力、组合、分岗 | 模块蓝图 |
+| 安全、门禁、审核、关卡、防火墙 | 安全流程 |
+| 协作、编排、多角色、Persona+Work | 协作编排 |
+| 全貌、目录、结构介绍、概览 | 系统全貌 |
+| 多入口、网关、聚合、殊途同归 | 多入口 |
+| 沉淀、学习、Skill库、积累、复用 | 知识沉淀 |
+| 实时流、SSE、循环、Agent Loop | 技术解析(循环) |
+| 缓存、压缩、对比、before/after | 技术解析(对比) |
+| 信息图、品牌、营销、生态、B2B、产品图 | 品牌图 |
+| 论文、paper、插图、Figure、学术、pipeline 架构 | 论文插图 |
+| 全景、基建、AI基建、模块总览、企业AI | AI基建全景 |
+| Prompt编排、工作流、任务链、Workflow、编排引擎 | Prompt编排 |
+| RAG、知识库、检索增强、Embedding、Chunking、文档处理 | RAG/知识库 |
+| 工具调用、Tool Calling、业务集成、Agent执行、API调用 | 工具调用 |
+| 上下文、记忆、Memory、状态管理、会话、Session | 上下文/记忆 |
+| 评测、Eval、观测、Trace、反馈闭环、Observability | 评测/观测 |
+| 安全、权限、治理、Governance、合规、审计、护栏 | 安全/治理 |
+| 部署、性能、成本、资产管理、版本、MLOps、运维 | 部署/成本 |
+
+## 扩展说明
+
+- 新增 prompt 时，在此表追加对应标签行
+- 一个 prompt 可以对应多个标签（如 prompt-7 同时覆盖"系统全貌"和"目录结构"）
+- 如果用户的需求不匹配任何标签，走 design-atoms.md 从零选视觉策略
+
+<!-- source: knowledge/prompts/README.md -->
+# Prompts
+
+All prompt and context fragments for AI tooling live under [diagram/](diagram/README.md).
+
+These describe reusable intent, not vendor-specific syntax. Adapters translate them into tool-native formats.
+
+## How to find the right prompt
+
+- **代码生成技术图表**（架构图、流程图、序列图）→ [diagram/](diagram/) README 场景一
+- **文生图**（信息图、概念图、科普长图、品牌图、论文插图）→ [diagram/](diagram/) README 场景二 → [ROUTING.md](diagram/ROUTING.md)
+
+<!-- source: knowledge/README.md -->
+# Knowledge
+
+This directory is the canonical, tool-neutral knowledge layer for `one-context`.
+
+Its purpose is to store guidance once, then let different AI tools consume or adapt that guidance without rewriting the same intent in multiple vendor-specific formats.
+
+## Principles
+
+- Keep core guidance human-readable.
+- Keep canonical meaning independent from any single editor or AI tool.
+- Treat provider-specific config as an adapter output, not the source of truth.
+- Prefer reusable standards, playbooks, and prompt fragments over duplicated rules.
+
+## Layout
+
+| Directory | Purpose |
+|-----------|---------|
+| `standards/` | Normative conventions — engineering policies, schema definitions, interface contracts |
+| `playbooks/` | Step-by-step operating procedures for common tasks |
+| `prompts/` | Reusable text prompt and context fragments for AI tooling |
+| `references/` | Analytical documents and curated external indexes (architecture analysis, design references, example collections) |
+| `tools/` | Tool-related reference docs (CLI usage, configuration, integration notes) |
+
+Umbrella-level feature specs (not sub-repo issues) live at repo root **`features/`** — see `features/README.md` and playbook `playbooks/add-umbrella-feature.md`.
+
+Executable, tool-agnostic pipelines (Node scripts, single CLI entry) live at repo root **`skills/`** — see `skills/README.md`.
+
+## Classification guide
+
+| Question | Goes in |
+|----------|---------|
+| "What is the rule / policy / schema?" | `standards/` |
+| "How do I do X step by step?" | `playbooks/` |
+| "What reusable prompt can I inject?" | `prompts/` |
+| "How does system Y work? What articles exist?" | `references/` |
+| "How do I use tool Z's CLI?" | `tools/` |
+
+## Language policy
+
+- **README files**: English (stable index, tool-consumable).
+- **Content files**: author's choice (Chinese or English). Title format: `English Name — 中文副标题` for Chinese documents, to keep directory indexes scannable.
+- **No vendor / platform lock-in**: avoid hard-coding specific platforms (e.g. "语雀") in titles or descriptions; use generic terms (e.g. "PlantUML-compatible platforms").
+
+## Adapter Model
+
+1. Canonical guidance is written here.
+2. Workspace and profile metadata decide what guidance applies.
+3. Tool adapters convert the relevant guidance into formats understood by Cursor, Claude Code, Codex, OpenClaw, or future tools.
+
+This keeps `knowledge/` stable even when tools change.
 
 <!-- source: knowledge/references/anthropic-managed-agents.md -->
 # Anthropic Managed Agents & Trustworthy Agents
@@ -5316,6 +5285,1155 @@ Claude Code 拥有 **100 万 token** 上下文窗口，包含：系统提示、�
 | 36 | learn-claude-code（14.4k star） | https://github.com/anthropics/courses （待确认具体仓库地址） | Agent Loop 最小可行实现、v1_basic_agent.py |
 
 > **注意**：本索引中的链接来自 AI 搜索引擎汇总，部分 URL（尤其知乎长 ID、CSDN adg 链接）可能已失效。使用前建议验证链接有效性。
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/README.md -->
+# html-ppt — HTML PPT Studio
+
+> A world-class AgentSkill for producing professional HTML presentations in
+> **36 themes**, **14 full-deck templates**, **31 page layouts**, and
+> **47 animations** (27 CSS + 20 canvas FX) — all pure static HTML/CSS/JS, no
+> build step.
+
+**Author:** lewis &lt;sudolewis@gmail.com&gt;
+**License:** MIT
+
+![html-ppt — cover with live previews](docs/readme/hero.gif)
+
+> One command installs **36 themes × 20 canvas FX × 31 layouts × 14 full decks = 101 PPT skills**. Every preview above is a live iframe of a real template file rendering inside the deck — no screenshots, no mock-ups.
+
+## Install (one command)
+
+```bash
+npx skills add https://github.com/lewislulu/html-ppt-skill
+```
+
+That registers the skill with your agent runtime. After install, any agent
+that supports AgentSkills can author presentations by asking things like:
+
+> "做一份 8 页的技术分享 slides，用 cyberpunk 主题"
+> "turn this outline into a pitch deck"
+> "做一个小红书图文，9 张，白底柔和风"
+
+## What's in the box
+
+| | Count | Where |
+|---|---|---|
+| 🎨 **Themes** | **36** | `assets/themes/*.css` |
+| 📑 **Full-deck templates** | **14** | `templates/full-decks/<name>/` |
+| 🧩 **Single-page layouts** | **31** | `templates/single-page/*.html` |
+| ✨ **CSS animations** | **27** | `assets/animations/animations.css` |
+| 💥 **Canvas FX animations** | **20** | `assets/animations/fx/*.js` |
+| 🖼️ **Showcase decks** | 4 | `templates/*-showcase.html` |
+| 📸 **Verification screenshots** | 56 | `scripts/verify-output/` |
+
+### 36 Themes
+
+`minimal-white`, `editorial-serif`, `soft-pastel`, `sharp-mono`, `arctic-cool`,
+`sunset-warm`, `catppuccin-latte`, `catppuccin-mocha`, `dracula`, `tokyo-night`,
+`nord`, `solarized-light`, `gruvbox-dark`, `rose-pine`, `neo-brutalism`,
+`glassmorphism`, `bauhaus`, `swiss-grid`, `terminal-green`, `xiaohongshu-white`,
+`rainbow-gradient`, `aurora`, `blueprint`, `memphis-pop`, `cyberpunk-neon`,
+`y2k-chrome`, `retro-tv`, `japanese-minimal`, `vaporwave`, `midcentury`,
+`corporate-clean`, `academic-paper`, `news-broadcast`, `pitch-deck-vc`,
+`magazine-bold`, `engineering-whiteprint`.
+
+![36 themes · 8 of them](docs/readme/themes.png)
+
+Each is a pure CSS-tokens file — swap one `<link>` to reskin the entire deck.
+Browse them all in `templates/theme-showcase.html` (each slide rendered in an
+isolated iframe so theme ≠ theme is visually guaranteed).
+
+![14 full-deck templates](docs/readme/templates.png)
+
+### 14 Full-deck templates
+
+Eight extracted from real-world decks, six generic scenario scaffolds:
+
+**Extracted looks**
+- `xhs-white-editorial` — 小红书白底杂志风
+- `graphify-dark-graph` — 暗底 + 力导向知识图谱
+- `knowledge-arch-blueprint` — 蓝图 / 架构图风
+- `hermes-cyber-terminal` — 终端 cyberpunk
+- `obsidian-claude-gradient` — 紫色渐变卡
+- `testing-safety-alert` — 红 / 琥珀警示风
+- `xhs-pastel-card` — 柔和马卡龙图文
+- `dir-key-nav-minimal` — 方向键极简
+
+**Scenario decks**
+- `pitch-deck`, `product-launch`, `tech-sharing`, `weekly-report`,
+  `xhs-post` (9-slide 3:4), `course-module`
+
+Each is a self-contained folder with scoped `.tpl-<name>` CSS so multiple
+decks can be previewed side-by-side without collisions. Browse the full
+gallery in `templates/full-decks-index.html`.
+
+![31 single-page layouts](docs/readme/layouts.png)
+
+### 31 Single-page layouts
+
+cover · toc · section-divider · bullets · two-column · three-column ·
+big-quote · stat-highlight · kpi-grid · table · code · diff · terminal ·
+flow-diagram · timeline · roadmap · mindmap · comparison · pros-cons ·
+todo-checklist · gantt · image-hero · image-grid · chart-bar · chart-line ·
+chart-pie · chart-radar · arch-diagram · process-steps · cta · thanks
+
+Every layout ships with realistic demo data so you can drop it into a deck
+and immediately see it render.
+
+![31 layouts auto-cycling through real template files](docs/readme/layouts-live.gif)
+
+*The big iframe is loading `templates/single-page/<name>.html` directly and cycling through all 31 layouts every 2.8 seconds.*
+
+![47 animations — 27 CSS + 20 canvas FX](docs/readme/animations.png)
+
+### 27 CSS animations + 20 Canvas FX
+
+**CSS (lightweight)** — directional fades, `rise-in`, `zoom-pop`, `blur-in`,
+`glitch-in`, `typewriter`, `neon-glow`, `shimmer-sweep`, `gradient-flow`,
+`stagger-list`, `counter-up`, `path-draw`, `morph-shape`, `parallax-tilt`,
+`card-flip-3d`, `cube-rotate-3d`, `page-turn-3d`, `perspective-zoom`,
+`marquee-scroll`, `kenburns`, `ripple-reveal`, `spotlight`, …
+
+**Canvas FX (cinematic)** — `particle-burst`, `confetti-cannon`, `firework`,
+`starfield`, `matrix-rain`, `knowledge-graph` (force-directed physics),
+`neural-net` (signal pulses), `constellation`, `orbit-ring`, `galaxy-swirl`,
+`word-cascade`, `letter-explode`, `chain-react`, `magnetic-field`,
+`data-stream`, `gradient-blob`, `sparkle-trail`, `shockwave`,
+`typewriter-multi`, `counter-explosion`. Each is a real hand-rolled canvas
+module auto-initialised on slide enter via `fx-runtime.js`.
+
+## Quick start (manual, after install or git clone)
+
+```bash
+# Scaffold a new deck from the base template
+./scripts/new-deck.sh my-talk
+
+# Browse everything
+open templates/theme-showcase.html         # all 36 themes (iframe-isolated)
+open templates/layout-showcase.html        # all 31 layouts
+open templates/animation-showcase.html     # all 47 animations
+open templates/full-decks-index.html       # all 14 full decks
+
+# Render any template to PNG via headless Chrome
+./scripts/render.sh templates/theme-showcase.html
+./scripts/render.sh examples/my-talk/index.html 12
+```
+
+## Keyboard cheat sheet
+
+```
+← → Space PgUp PgDn Home End   navigate
+F                               fullscreen
+S                               speaker notes overlay
+O                               slide overview grid
+T                               cycle themes
+A                               cycle a demo animation on current slide
+#/N (URL)                       deep-link to slide N
+```
+
+## Project structure
+
+```
+html-ppt-skill/
+├── SKILL.md                      agent-facing dispatcher
+├── README.md                     this file
+├── references/                   detailed catalogs
+│   ├── themes.md                 36 themes with when-to-use
+│   ├── layouts.md                31 layout types
+│   ├── animations.md             27 CSS + 20 FX catalog
+│   ├── full-decks.md             14 full-deck templates
+│   └── authoring-guide.md        full workflow
+├── assets/
+│   ├── base.css                  shared tokens + primitives
+│   ├── fonts.css                 webfont imports
+│   ├── runtime.js                keyboard + presenter + overview
+│   ├── themes/*.css              36 theme token files
+│   └── animations/
+│       ├── animations.css        27 named CSS animations
+│       ├── fx-runtime.js         auto-init [data-fx] on slide enter
+│       └── fx/*.js               20 canvas FX modules
+├── templates/
+│   ├── deck.html                 minimal starter
+│   ├── theme-showcase.html       iframe-isolated theme tour
+│   ├── layout-showcase.html      all 31 layouts
+│   ├── animation-showcase.html   47 animation slides
+│   ├── full-decks-index.html     14-deck gallery
+│   ├── full-decks/<name>/        14 scoped multi-slide decks
+│   └── single-page/*.html        31 layout files with demo data
+├── scripts/
+│   ├── new-deck.sh               scaffold
+│   ├── render.sh                 headless Chrome → PNG
+│   └── verify-output/            56 self-test screenshots
+└── examples/demo-deck/           complete working deck
+```
+
+## Philosophy
+
+- **Token-driven design system.** All color, radius, shadow, font decisions
+  live in `assets/base.css` + the current theme file. Change one variable,
+  the whole deck reflows tastefully.
+- **Iframe isolation for previews.** Theme / layout / full-deck showcases all
+  use `<iframe>` per slide so each preview is a real, independent render.
+- **Zero build.** Pure static HTML/CSS/JS. CDN only for webfonts, highlight.js
+  and chart.js (optional).
+- **Senior-designer defaults.** Opinionated type scale, spacing rhythm,
+  gradients and card treatments — no "Corporate PowerPoint 2006" vibes.
+- **Chinese + English first-class.** Noto Sans SC / Noto Serif SC pre-imported.
+
+## License
+
+MIT © 2026 lewis &lt;sudolewis@gmail.com&gt;.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/references/animations.md -->
+# Animations catalog
+
+All animations live in `assets/animations/animations.css`. Apply them by
+adding `class="anim-<name>"` OR `data-anim="<name>"` to any element
+(`runtime.js` re-triggers `data-anim` elements whenever a slide becomes
+active, so you get the entry effect every time you navigate onto the slide).
+
+Open `templates/animation-showcase.html` to browse all of them — one slide
+per animation, auto-playing on slide enter. Press **A** on any slide to cycle
+a random animation on the current page.
+
+## Directional fades
+
+| name | effect | use for |
+|---|---|---|
+| `fade-up` | Translate from +32 px, fade. | Default for paragraph + card entry. |
+| `fade-down` | Translate from -32 px, fade. | Headers / banners / callouts. |
+| `fade-left` | Translate from -40 px. | Left column in a two-column layout. |
+| `fade-right` | Translate from +40 px. | Right column in a two-column layout. |
+
+## Dramatic entries
+
+| name | effect | use for |
+|---|---|---|
+| `rise-in` | +60 px rise + blur-off. | Slide titles, hero headlines. |
+| `drop-in` | -60 px drop + slight scale. | Banners, alert bars. |
+| `zoom-pop` | Scale 0.6 → 1.04 → 1. | Buttons, stat numbers, CTAs. |
+| `blur-in` | 18 px blur clears. | Cover page reveal. |
+| `glitch-in` | Clip-path steps + jitter. | Tech / cyber / error states. |
+
+## Text effects
+
+| name | effect | use for |
+|---|---|---|
+| `typewriter` | Monospace-like type reveal. | One-liners, slogans. |
+| `neon-glow` | Cyclic text-shadow pulse. | Terminal-green / dracula themes. |
+| `shimmer-sweep` | White sheen passes across. | Metallic buttons, premium cards. |
+| `gradient-flow` | Infinite horizontal gradient slide. | Brand wordmarks. |
+
+## Lists & numbers
+
+| name | effect | use for |
+|---|---|---|
+| `stagger-list` | Children rise-in one-by-one. | Any `<ul>` or `.grid`. |
+| `counter-up` | Number ticks 0 → target. | KPI, stat-highlight pages. |
+
+Counter markup:
+```html
+<span class="counter" data-to="1248">0</span>
+```
+
+## SVG / geometry
+
+| name | effect | use for |
+|---|---|---|
+| `path-draw` | Strokes draw themselves. | Lines, arrows, diagrams. |
+| `morph-shape` | Path `d` morph. | Background shapes. |
+
+Put `class="anim-path-draw"` on `<svg>`; every path/line/circle inside gets drawn.
+
+## 3D & perspective
+
+| name | effect | use for |
+|---|---|---|
+| `parallax-tilt` | Hover → 3D tilt. | Hero cards, product shots. |
+| `card-flip-3d` | Y-axis 90° flip. | Before/after reveal. |
+| `cube-rotate-3d` | Rotate in from a cube side. | Section dividers. |
+| `page-turn-3d` | Left-hinge page turn. | Editorial / story flows. |
+| `perspective-zoom` | Pull from -400 Z. | Cover openings. |
+
+## Ambient / continuous
+
+| name | effect | use for |
+|---|---|---|
+| `marquee-scroll` | Infinite horizontal loop. | Client logo strips. |
+| `kenburns` | 14 s slow zoom on images. | Hero backgrounds. |
+| `confetti-burst` | Pseudo-element sparkle burst. | Thanks / win pages. |
+| `spotlight` | Circular clip-path reveal. | Big reveal moments. |
+| `ripple-reveal` | Corner-origin ripple reveal. | Section transitions. |
+
+## Respecting motion preferences
+
+All animations are disabled automatically when
+`prefers-reduced-motion: reduce` is set. Do not override this.
+
+## Tips
+
+- Prefer `data-anim="..."` over `class="anim-..."` so that the runtime
+  re-triggers the animation whenever the slide becomes active.
+- Use at most 1-2 distinct animation types on a single slide. Mixing 5 looks
+  messy.
+- Stagger lists + a single hero entry = clean rhythm.
+- For counter-up, pair with `stat-highlight.html` or `kpi-grid.html`.
+
+## FX (canvas)
+
+CSS animations are fire-and-forget entry effects. **FX** are live, continuously
+running canvas/DOM effects that start when their slide becomes active and stop
+when it leaves. They are loaded by `assets/animations/fx-runtime.js`, which
+dynamically pulls every module under `assets/animations/fx/*.js` and watches
+`.slide.is-active` to run lifecycle.
+
+Add to any page:
+```html
+<script src="../assets/animations/fx-runtime.js"></script>
+```
+
+Then drop one of these into any slide:
+```html
+<div data-fx="particle-burst" style="width:100%;height:360px;"></div>
+```
+
+The container just needs a size — the FX auto-sizes a canvas to fit with
+`ResizeObserver` + DPR correction. Colors read your theme (`--accent`,
+`--accent-2`, `--ok`, `--warn`, `--danger`).
+
+| name | effect | use case | trigger |
+|---|---|---|---|
+| `particle-burst` | Particles explode from center, gravity + fade, re-bursts every 2.5s. | Reveal moments, stat pages. | `<div data-fx="particle-burst">` |
+| `confetti-cannon` | Colored rotating rects arcing from both bottom corners. | Thank you / success pages. | `<div data-fx="confetti-cannon">` |
+| `firework` | Rockets from bottom explode into colored sparks, continuous. | Celebration, launch slides. | `<div data-fx="firework">` |
+| `starfield` | 3D perspective starfield flying outward. | Sci-fi / deep space backgrounds. | `<div data-fx="starfield">` |
+| `matrix-rain` | Falling green katakana + hex columns. | Cyber / security / data theme. | `<div data-fx="matrix-rain">` |
+| `knowledge-graph` | Force-directed graph, 28 labeled nodes, ~50 edges, live physics. | Knowledge / RAG / graph slides. | `<div data-fx="knowledge-graph">` |
+| `neural-net` | 4-6-6-3 feedforward net with pulses traveling along edges. | ML / model architecture slides. | `<div data-fx="neural-net">` |
+| `constellation` | Drifting points, linked when within 150 px, opacity by distance. | Ambient hero backgrounds. | `<div data-fx="constellation">` |
+| `orbit-ring` | 5 concentric rings with dots at different speeds, radial glow. | System / planet / layered concepts. | `<div data-fx="orbit-ring">` |
+| `galaxy-swirl` | Logarithmic spiral of ~800 particles, slow rotation. | Cover pages, intros. | `<div data-fx="galaxy-swirl">` |
+| `word-cascade` | Words fall from top, pile up at bottom. | Vocabulary / concept cloud slides. | `<div data-fx="word-cascade">` |
+| `letter-explode` | Heading letters fly in from random directions, loops every ~4.5s. | Big titles, hero text. | `<div data-fx="letter-explode" data-fx-text-value="EXPLODE">` |
+| `chain-react` | 8 circles with a domino pulse wave traveling across. | Pipeline / sequential flow. | `<div data-fx="chain-react">` |
+| `magnetic-field` | Particles travel bezier/sin curves leaving trails. | Energy / flow / abstract. | `<div data-fx="magnetic-field">` |
+| `data-stream` | Rows of scrolling hex/binary text, cyberpunk. | Data, API, security. | `<div data-fx="data-stream">` |
+| `gradient-blob` | 4 drifting blurred radial gradients (additive). | Soft hero backgrounds. | `<div data-fx="gradient-blob">` |
+| `sparkle-trail` | Pointer-driven sparkle emitter (auto-wiggles if idle). | Interactive reveal, hover canvases. | `<div data-fx="sparkle-trail">` |
+| `shockwave` | Expanding rings from center on loop. | Impact, launch, alert. | `<div data-fx="shockwave">` |
+| `typewriter-multi` | 3 lines typing concurrently with blinking block cursors (DOM). | Terminal, agent boot log. | `<div data-fx="typewriter-multi" data-fx-line1="> boot...">` |
+| `counter-explosion` | Number counts 0 → target, bursts particles, resets after 4s. | KPI reveal, record highs. | `<div data-fx="counter-explosion" data-fx-to="2400">` |
+
+FX tips:
+- One FX per slide is almost always enough. Mix with regular CSS `data-anim`
+  effects for layered polish.
+- The container needs an explicit size (height) — the canvas fills 100%.
+- Every module respects theme custom properties. Set `--accent` / `--accent-2`
+  on the slide or element to recolor on the fly.
+- Lifecycle is automatic: entering a slide starts the FX, leaving stops it and
+  frees the canvas. You can also call `window.__hpxReinit(el)` manually.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/references/authoring-guide.md -->
+# Authoring guide
+
+How to turn a user request ("make me a deck about X") into a finished
+html-ppt deck. Follow these steps in order.
+
+## 1. Understand the deck
+
+Before touching files, clarify:
+
+1. **Audience** — engineers? designers? executives? consumers?
+2. **Length** — 5 min lightning? 20 min share? 45 min talk?
+3. **Language** — Chinese, English, bilingual? (Noto Sans SC is preloaded.)
+4. **Format** — on-screen live, PDF export, 小红书图文?
+5. **Tone** — clinical / playful / editorial / cyber?
+
+The audience + tone map to a theme; the length maps to slide count; the
+format maps to runtime features (live → notes + T-cycle; PDF → page-break
+CSS, already handled in `base.css`).
+
+## 2. Pick a theme
+
+Use `references/themes.md`. When in doubt:
+
+- **Engineers** → `catppuccin-mocha` / `tokyo-night` / `dracula`.
+- **Designers / product** → `editorial-serif` / `aurora` / `soft-pastel`.
+- **Execs** → `minimal-white` / `arctic-cool` / `swiss-grid`.
+- **Consumers** → `xiaohongshu-white` / `sunset-warm` / `soft-pastel`.
+- **Cyber / CLI / infra** → `terminal-green` / `blueprint` / `gruvbox-dark`.
+- **Pitch / bold** → `neo-brutalism` / `sharp-mono` / `bauhaus`.
+- **Launch / product reveal** → `glassmorphism` / `aurora`.
+
+Wire the theme as `<link id="theme-link" href="../assets/themes/NAME.css">`
+and list 3-5 alternatives in `data-themes` so the user can press T to audition.
+
+## 3. Outline the deck
+
+A solid 20-minute deck is usually:
+
+```
+cover → toc → section-divider #1 → [2-4 body pages] →
+section-divider #2 → [2-4 body pages] → section-divider #3 →
+[2-4 body pages] → cta → thanks
+```
+
+Pick 1 layout per page from `references/layouts.md`. Don't repeat the same
+layout twice in a row.
+
+## 4. Scaffold the deck
+
+```bash
+./scripts/new-deck.sh my-talk
+```
+
+This copies `templates/deck.html` into `examples/my-talk/index.html` with
+paths rewritten. Add/remove `<section class="slide">` blocks to match your
+outline.
+
+## 5. Author each slide
+
+For each outline item:
+
+1. Open the matching single-page layout, e.g. `templates/single-page/kpi-grid.html`.
+2. Copy the `<section class="slide">…</section>` block.
+3. Paste into your deck.
+4. Replace demo data with real data. Keep the class structure intact.
+5. Set `data-title="..."` (used by the Overview grid).
+6. Add `<div class="notes">…</div>` with speaker notes.
+
+## 6. Add animations sparingly
+
+Rules of thumb:
+
+- Cover/title: `rise-in` or `blur-in`.
+- Body content: `fade-up` for the hero element, `stagger-list` for grids/lists.
+- Stat pages: `counter-up`.
+- Section dividers: `perspective-zoom` or `cube-rotate-3d`.
+- Closer: `confetti-burst` on the "Thanks" text.
+
+Pick **one** accent animation per slide. Everything else should be calm.
+
+## 7. Chinese + English decks
+
+- Fonts are already imported in `fonts.css` (Noto Sans SC + Noto Serif SC).
+- Use `lang="zh-CN"` on `<html>`.
+- For bilingual titles, stack lines: `<h1 class="h1">主标题<br><span class="dim">English subtitle</span></h1>`.
+- Keep English subtitles in a lighter weight (300) and dim color to avoid
+  visual competition.
+
+## 8. Review in-browser
+
+```bash
+open examples/my-talk/index.html
+```
+
+Walk through every slide with ← →. Press:
+
+- **O** — overview grid; catch any layout clipping.
+- **T** — cycle themes; make sure nothing looks broken in any theme.
+- **S** — open speaker notes; verify every slide has notes.
+
+## 9. Export to PNG
+
+```bash
+# single slide
+./scripts/render.sh examples/my-talk/index.html
+
+# all slides (autodetect count by looking for .slide sections)
+./scripts/render.sh examples/my-talk/index.html all
+
+# explicit slide count + output dir
+./scripts/render.sh examples/my-talk/index.html 12 out/my-talk-png
+```
+
+Output is 1920×1080 by default. Change in `render.sh` if the user wants 3:4
+for 小红书图文 (1242×1660).
+
+## 10. What to NOT do
+
+- Don't hand-author from a blank file.
+- Don't use raw hex colors in slide markup. Use tokens.
+- Don't load heavy animation frameworks. Everything should stay within the
+  CSS/JS that already ships.
+- Don't add more than one new template file unless a genuinely new layout
+  type is needed. Prefer composition.
+- Don't delete slides from the showcase decks.
+
+## Troubleshooting
+
+- **Theme doesn't switch with T**: check `data-themes` on `<body>` and
+  `data-theme-base` pointing to the themes directory relative to the HTML
+  file.
+- **Fonts fall back**: make sure `fonts.css` is linked before the theme.
+- **Chart.js colors wrong**: charts read CSS vars in JS; make sure they run
+  after the DOM is ready (`addEventListener('DOMContentLoaded', …)`).
+- **PNG too small**: bump `--window-size` in `scripts/render.sh`.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/references/full-decks.md -->
+# Full-Deck Templates
+
+Self-contained multi-slide HTML decks under `templates/full-decks/<name>/`. Each folder contains:
+
+- `index.html` — complete multi-slide deck (cover / section / content / code / chart or diagram / CTA / thanks, 7+ slides)
+- `style.css` — scoped with `.tpl-<name>` class prefix so multiple templates can coexist
+- `README.md` — short rationale, inspiration, and use guidance
+
+All templates pull the shared `assets/fonts.css`, `assets/base.css`, and `assets/runtime.js` from the skill root. Navigate with `← →` / `space`, use `F` for fullscreen, `O` for overview.
+
+Use these when you want a coherent, opinionated look for an entire deck — not a mix-and-match of layouts. Each template is visually distinctive enough to be identified at a glance.
+
+---
+
+## 1. xhs-white-editorial — 白底杂志风
+
+- **Source inspiration:** `20260409 升级版知识库/小红书图文/v2-白底版/slide_01_cover.html` + `20260412-AI测试与安全/html/xhs-ai-testing-safety-v2.html`
+- **Key visual traits:** pure-white background, top 10-color rainbow bar, 80-110px display headlines, purple→blue→green→orange→pink gradient text, macaron soft-card set (soft-purple/pink/blue/green/orange), black-on-white `.focus` pills, hero quote box.
+- **When to use:** dual-purpose XHS image + horizontal deck; dense text with strong emphasis; Chinese-first audience.
+- **Path:** `templates/full-decks/xhs-white-editorial/index.html`
+
+## 2. graphify-dark-graph — 暗底知识图谱
+
+- **Source inspiration:** `20260413-graphify/ppt/graphify.html`
+- **Key visual traits:** `#06060c→#0e1020` deep-night gradient, drifting blur orbs, SVG force-directed graph overlay on cover, rainbow-shift gradient headlines, JetBrains Mono command-line glow, glass-morphism cards (warm/blue/green/purple/danger). Accent palette: amber `#e8a87c`, mint `#7ed3a4`, mist-blue `#7eb8da`, lilac `#b8a4d6`.
+- **When to use:** dev-tool / CLI / knowledge-graph / data-viz launches; live-demo decks that want an "AI-native + sci-fi + warm" vibe.
+- **Path:** `templates/full-decks/graphify-dark-graph/index.html`
+
+## 3. knowledge-arch-blueprint — 奶油蓝图架构
+
+- **Source inspiration:** `20260405-Karpathy-知识库/20260405 架构图v2.html`
+- **Key visual traits:** cream paper `#F0EAE0` base, single rust accent `#B5392A`, 48px blueprint grid mask, hard 2px black border cards, pipeline step-boxes with one hero raised, right-side rust insight callout, Playfair serif big numbers, SVG dashed feedback-loop arrows. Zero gradients, zero soft shadows.
+- **When to use:** system architecture diagrams, data-flow maps, engineering white-papers; you want a serious, printable, README-friendly feel.
+- **Path:** `templates/full-decks/knowledge-arch-blueprint/index.html`
+
+## 4. hermes-cyber-terminal — 暗终端 honest-review
+
+- **Source inspiration:** `20260414-hermes-agent/ppt/hermes-record.html` + `hermes-vs-openclaw.html`
+- **Key visual traits:** `#0a0c10` black, 56px cyber grid + CRT vignette + scanlines, window traffic-light chrome, `$ prompt` command-line headlines, mint-green `#7ed3a4` glow big text, JetBrains Mono throughout, stroke-only bar charts, blinking cursor, amber/green/red tag hierarchy, dark code box.
+- **When to use:** reviews of CLI / agent / dev tools with trace, diff, and benchmarks; when you want the "honest technical reviewer" voice.
+- **Path:** `templates/full-decks/hermes-cyber-terminal/index.html`
+
+## 5. obsidian-claude-gradient — GitHub 暗紫渐变
+
+- **Source inspiration:** `20260406-obsidian-claude/slides.html`
+- **Key visual traits:** GitHub-dark `#0d1117`, purple+blue radial ambient plus 60px masked grid, center-aligned layout, purple pill tags, three-stop gradient text `#a855f7→#60a5fa→#34d399`, GitHub-ish code palette (`#010409` bg + purple/blue/orange/green tokens), purple-left-border highlight block.
+- **When to use:** developer workflow / MCP / Agent / dev-tool tutorials; feels like GitHub Blog / Linear Changelog; config + steps heavy content.
+- **Path:** `templates/full-decks/obsidian-claude-gradient/index.html`
+
+## 6. testing-safety-alert — 红琥珀警示
+
+- **Source inspiration:** `20260412-AI测试与安全/html/xhs-ai-testing-safety-v2.html`
+- **Key visual traits:** top and bottom 45° red-black hazard stripes, red strike-through negation headlines, L1/L2/L3 green/amber/red tier cards, alert-box with circular status dot, policy-yaml code block with red left border and `bad` keyword highlighting, red/green checklist, Q1 incident stacked bar chart.
+- **When to use:** safety / risk / incident post-mortem / red-team / pre-launch AI review / policy-as-code; when the audience needs to feel "this is serious, don't skim".
+- **Path:** `templates/full-decks/testing-safety-alert/index.html`
+
+## 7. xhs-pastel-card — 柔和马卡龙慢生活
+
+- **Source inspiration:** `20260412-obsidian-skills/html/xhs-obsidian-skills.html` + pastel patterns shared with `20260409` v2-白底版
+- **Key visual traits:** cream `#fef8f1` base, three soft blurred blobs, Playfair italic serif display headlines mixed with sans body, full-color 28px rounded macaron cards (peach / mint / sky / lilac / lemon / rose), italic Playfair `01-04` numerals, SVG donut chart, chip+page topbar.
+- **When to use:** lifestyle / personal-growth / slow-living / emotional content; when you want a "magazine, handmade, not-so-techy" feel; themes like rest, pause, softness.
+- **Path:** `templates/full-decks/xhs-pastel-card/index.html`
+
+## 8. dir-key-nav-minimal — 方向键 8 色极简
+
+- **Source inspiration:** `20260405-Karpathy-知识库/20260405 演示幻灯片【方向键版】.html`
+- **Key visual traits:** 8 slides each on its own mono background (indigo / cream / crimson / emerald / slate / violet / white / charcoal), each with its own accent color, 160px display headline + 4px stubby accent line divider, arrow `→` prefixed Mono list, bottom-left `← →` kbd hint plus bottom-right page label, huge breathing negative space.
+- **When to use:** keynote-style minimalist talk where you have something to say and not much to show; one idea per slide; talks / launches / public presentations.
+- **Path:** `templates/full-decks/dir-key-nav-minimal/index.html`
+
+---
+
+## Scenario decks (generic, reusable)
+
+These are not extracted from a single source — they are generic scaffolds for the most common presentation jobs. Each is visually distinctive and content-rich out of the box.
+
+| # | Name | Slides | Feel | When to use |
+|---|---|---|---|---|
+| 9  | `pitch-deck`       | 10 | White + blue→purple gradient, YC/VC vibe, big numbers, traction chart | Fundraising, startup pitch, investor meeting |
+| 10 | `product-launch`   | 8  | Dark hero + light content, warm orange→peach, feature cards, pricing tiers, CTA | Announcing a product, launch keynote |
+| 11 | `tech-sharing`     | 8  | GitHub-dark, JetBrains Mono, terminal code blocks, agenda + Q&A | 技术分享, internal tech talk, conference talk |
+| 12 | `weekly-report`    | 7  | Corporate clarity, 8-cell KPI grid, shipped list, 8-week bar chart, next-week table | 周报, team status update, business review |
+| 13 | `xhs-post`         | 9  | **3:4 @ 810×1080**, warm pastel, dashed sticker cards, page dots | 小红书 图文 post, Instagram carousel |
+| 14 | `course-module`    | 7  | Warm paper + Playfair serif, persistent left sidebar of learning objectives, MCQ self-check | 教学模块, online course, workshop module |
+
+Each folder: `index.html`, scoped `style.css` (prefixed `.tpl-<name>`), `README.md`. The `xhs-post` template overrides the default `.slide` box to fixed `810×1080` for 3:4 portrait.
+
+---
+
+## Authoring notes
+
+- Every template scopes its CSS under `.tpl-<name>` so two or more templates can load on the same page without collisions.
+- Swap demo content, but keep the structural classes — they are what gives each template its identity.
+- The shared runtime (`assets/runtime.js`) provides keyboard nav, fullscreen, overview grid, theme cycling — you don't need to add any JS.
+- Charts are hand-rolled SVG (no CDN dependency). Feel free to replace with chart.js / echarts if you need interactive data.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/references/layouts.md -->
+# Layouts catalog
+
+Every layout lives in `templates/single-page/<name>.html` as a fully
+functional standalone page with realistic demo data. Open any file directly
+in Chrome to see it working.
+
+To compose a new deck: open the file, copy the `<section class="slide">…</section>`
+block (or multiple blocks) into your deck HTML, and replace the demo data.
+Shared CSS (base, theme, animations) is already wired by `deck.html`.
+
+## Openers & transitions
+
+| file | purpose |
+|---|---|
+| `cover.html` | Deck cover. Kicker + huge title + lede + pill row. |
+| `toc.html` | Table of contents. 2×3 grid of numbered cards. |
+| `section-divider.html` | Big numbered section break (02 · Theme). |
+
+## Text-centric
+
+| file | purpose |
+|---|---|
+| `bullets.html` | Classic bullet list with card-wrapped items. |
+| `two-column.html` | Concept + example side by side. |
+| `three-column.html` | Three equal pillars with icons. |
+| `big-quote.html` | Full-bleed pull quote in editorial-serif style. |
+
+## Numbers & data
+
+| file | purpose |
+|---|---|
+| `stat-highlight.html` | One giant number + subtitle (uses `.counter` animation). |
+| `kpi-grid.html` | 4 KPIs in a row with up/down deltas. |
+| `table.html` | Data table with hover rows, right-aligned numerics. |
+| `chart-bar.html` | Chart.js bar chart, theme-aware colors. |
+| `chart-line.html` | Chart.js dual-line chart with filled area. |
+| `chart-pie.html` | Chart.js doughnut + takeaways card. |
+| `chart-radar.html` | Chart.js radar comparing 2 products on 6 axes. |
+
+## Code & terminal
+
+| file | purpose |
+|---|---|
+| `code.html` | Syntax-highlighted code via highlight.js (JS example). |
+| `diff.html` | Hand-rolled +/- diff view. |
+| `terminal.html` | Terminal window mock with traffic-light header. |
+
+## Diagrams & flows
+
+| file | purpose |
+|---|---|
+| `flow-diagram.html` | 5-node pipeline with arrows and one highlighted node. |
+| `arch-diagram.html` | 3-tier architecture grid. |
+| `process-steps.html` | 4 numbered steps in cards. |
+| `mindmap.html` | Radial mindmap with SVG path-draw animation. |
+
+## Plans & comparisons
+
+| file | purpose |
+|---|---|
+| `timeline.html` | 5-point horizontal timeline with dots. |
+| `roadmap.html` | 4-column NOW / NEXT / LATER / VISION. |
+| `gantt.html` | 12-week gantt chart with 5 parallel tracks. |
+| `comparison.html` | Before vs After two-panel card. |
+| `pros-cons.html` | Pros and cons two-card layout. |
+| `todo-checklist.html` | Checklist with checked/unchecked states. |
+
+## Visuals
+
+| file | purpose |
+|---|---|
+| `image-hero.html` | Full-bleed hero with Ken Burns gradient background. |
+| `image-grid.html` | 7-cell bento grid with gradient placeholders. |
+
+## Closers
+
+| file | purpose |
+|---|---|
+| `cta.html` | Call-to-action with big gradient headline + buttons. |
+| `thanks.html` | Final "Thanks" page with confetti burst. |
+
+## Picking a layout
+
+- **Opener**: `cover.html`, often followed by `toc.html`.
+- **Section break**: `section-divider.html` before every major section.
+- **Core content**: `bullets.html`, `two-column.html`, `three-column.html`.
+- **Show numbers**: `stat-highlight.html` (single) or `kpi-grid.html` (4-up).
+- **Show plot**: `chart-bar.html` / `chart-line.html` / `chart-pie.html` / `chart-radar.html`.
+- **Show a diff or change**: `comparison.html`, `diff.html`, `pros-cons.html`.
+- **Show a plan**: `timeline.html`, `roadmap.html`, `gantt.html`, `process-steps.html`.
+- **Show architecture**: `arch-diagram.html`, `flow-diagram.html`, `mindmap.html`.
+- **Code / demo**: `code.html`, `terminal.html`.
+- **Closer**: `cta.html` → `thanks.html`.
+
+## Naming / structure conventions
+
+- Each slide is `<section class="slide" data-title="...">`.
+- Header pills: `<p class="kicker">…</p>`, eyebrow: `<p class="eyebrow">…</p>`.
+- Titles: `<h1 class="h1">…</h1>` / `<h2 class="h2">…</h2>`.
+- Lede: `<p class="lede">…</p>`.
+- Cards: `<div class="card">…</div>` (variants: `card-soft`, `card-outline`, `card-accent`).
+- Grids: `.grid.g2`, `.grid.g3`, `.grid.g4`.
+- Notes: `<div class="notes">…</div>` per slide.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/references/themes.md -->
+# Themes catalog
+
+Every theme is a short CSS file in `assets/themes/` that overrides tokens
+defined in `assets/base.css`. Switch themes by changing the `href` of
+`<link id="theme-link">` or by pressing **T** if the deck has a
+`data-themes="a,b,c"` attribute on `<body>` or `<html>`.
+
+All themes define the same variables: `--bg`, `--bg-soft`, `--surface`,
+`--surface-2`, `--border`, `--text-1/2/3`, `--accent`, `--accent-2/3`,
+`--good`, `--warn`, `--bad`, `--grad`, `--grad-soft`, `--radius*`, `--shadow*`,
+`--font-sans`, `--font-display`.
+
+## Light & calm
+
+| name | description | when to use |
+|---|---|---|
+| `minimal-white` | 极简白，克制高级。Inter，强文字层级，极低阴影。 | 内部汇报、一对一技术评审、不抢内容的严肃话题 |
+| `editorial-serif` | 杂志风 Playfair 衬线 + 奶油底。 | 品牌故事、文字密度大的长文演讲 |
+| `soft-pastel` | 柔和马卡龙三色渐变。 | 产品发布、面向消费者、轻松话题 |
+| `xiaohongshu-white` | 小红书白底 + 暖红 accent + 衬线标题。 | 小红书图文、生活/美学类内容 |
+| `solarized-light` | 经典低眩光配色。 | 长时间观看的工作坊、教学 |
+| `catppuccin-latte` | catppuccin 浅色。 | 开发者、极客友好的技术分享 |
+
+## Bold & statement
+
+| name | description | when to use |
+|---|---|---|
+| `sharp-mono` | 纯黑白 + Archivo Black + 硬阴影。 | 宣言类、极具冲击力的视觉 |
+| `neo-brutalism` | 厚描边、硬阴影、明黄 accent。 | 创业路演、敢说敢做的调性 |
+| `bauhaus` | 几何 + 红黄蓝原色。 | 设计 talk、艺术史/产品美学主题 |
+| `swiss-grid` | 瑞士网格 + Helvetica 感 + 12 栏底纹。 | 严肃排版、设计行业 |
+| `memphis-pop` | 孟菲斯波普背景点 + 大字标题。 | 年轻、潮流、品牌合作 |
+
+## Cool & dark
+
+| name | description | when to use |
+|---|---|---|
+| `catppuccin-mocha` | catppuccin 深。 | 开发者内部分享、长时间观看 |
+| `dracula` | 经典 Dracula 紫红主色。 | 代码密集的技术分享 |
+| `tokyo-night` | Tokyo Night 蓝夜。 | 偏冷技术分享、基础设施 |
+| `nord` | 北欧清冷蓝白。 | 基础设施、云产品 |
+| `gruvbox-dark` | 温暖复古深色。 | Terminal / vim / *nix 社群 |
+| `rose-pine` | 玫瑰松，柔和暗色。 | 设计+开发交界、审美向技术 |
+| `arctic-cool` | 蓝/青/石板灰 浅色版。 | 商业分析、金融、冷静理性 |
+
+## Warm & vibrant
+
+| name | description | when to use |
+|---|---|---|
+| `sunset-warm` | 橘 / 珊瑚 / 琥珀三色渐变。 | 生活方式、奖项颁发、情绪正向 |
+
+## Effect-heavy
+
+| name | description | when to use |
+|---|---|---|
+| `glassmorphism` | 毛玻璃 + 多色光斑背景。 | Apple 式发布会、产品特性展示 |
+| `aurora` | 极光渐变 + blur + saturate。 | 封面 / CTA / 结语页 |
+| `rainbow-gradient` | 白底 + 彩虹流动渐变 accent。 | 欢乐向、节日、庆祝页 |
+| `blueprint` | 蓝图工程 + 网格底纹 + 蒙太奇字体。 | 系统架构、工程蓝图 |
+| `terminal-green` | 绿屏终端 + 等宽 + 发光文字。 | CLI/black-hat/复古朋克 |
+
+## v2 additions
+
+### Light & professional
+
+| name | description | when to use |
+|---|---|---|
+| `corporate-clean` | 纯白 + 海军蓝 accent + Inter + 保守边框。 | 董事会汇报、B2B 销售、金融保险 |
+| `pitch-deck-vc` | YC 风白底 + 蓝紫渐变 accent + 大留白。 | 融资路演、种子轮、VC meeting |
+| `academic-paper` | 论文白 + 衬线正文 + 黑墨 + 蓝链接。 | 学术报告、研究分享、会议论文 |
+| `japanese-minimal` | 象牙白 + 朱红 accent + 极大留白 + Noto Serif。 | 品牌升级、匠人故事、禅意叙事 |
+| `engineering-whiteprint` | 白底 + 坐标纸网格 + 海军墨线 + 等宽字。 | 系统设计、API 文档、架构白皮书 |
+
+### Bold & editorial
+
+| name | description | when to use |
+|---|---|---|
+| `magazine-bold` | 奶油底 + 超大 Playfair 衬线 + 橙色 spot。 | 专栏文章、封面故事、品牌月刊 |
+| `news-broadcast` | 白底 + 红色竖条 + Oswald 大写 + 硬阴影。 | 突发新闻、发布通稿、数据播报 |
+| `midcentury` | 奶油底 + 芥末/青/焦橙 + 锐利几何。 | 设计史、家居美学、复古品牌 |
+| `retro-tv` | 暖奶油 + CRT 扫描线 + 琥珀橙 accent。 | 怀旧叙事、八零九零年代主题 |
+
+### Effect-heavy / dramatic
+
+| name | description | when to use |
+|---|---|---|
+| `cyberpunk-neon` | 纯黑 + 霓虹粉青黄 + 发光 + JetBrains Mono。 | 黑客、地下文化、赛博 talk |
+| `vaporwave` | 深紫 + 粉红青蓝渐变 + 晕染光斑。 | 音乐、潮流艺术、A E S T H E T I C |
+| `y2k-chrome` | 银铬渐变 + 彩虹 accent + 大圆角 + Space Grotesk。 | 千禧怀旧、时尚品牌、Gen-Z |
+
+## How to apply
+
+```html
+<link rel="stylesheet" id="theme-link" href="../assets/themes/aurora.css">
+```
+
+Or enable `T`-cycling by listing themes on the body:
+
+```html
+<body data-themes="minimal-white,aurora,catppuccin-mocha" data-theme-base="../assets/themes/">
+```
+
+## How to extend
+
+Copy an existing theme, rename it, and override only the variables you want to
+change. Keep each theme under ~200 lines. Prefer adjusting tokens to adding
+new selectors.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/SKILL.md -->
+---
+name: html-ppt
+description: HTML PPT Studio — author professional static HTML presentations in many styles, layouts, and animations, all driven by templates. Use when the user asks for a presentation, PPT, slides, keynote, deck, slideshow, "幻灯片", "演讲稿", "做一份 PPT", "做一份 slides", a reveal-style HTML deck, a 小红书 图文, or any kind of multi-slide pitch/report/sharing document that should look tasteful and be usable with keyboard navigation. Triggers include keywords like "presentation", "ppt", "slides", "deck", "keynote", "reveal", "slideshow", "幻灯片", "演讲稿", "分享稿", "小红书图文", "talk slides", "pitch deck", "tech sharing", "technical presentation".
+---
+
+# html-ppt — HTML PPT Studio
+
+Author professional HTML presentations as static files. One theme file = one
+look. One layout file = one page type. One animation class = one entry effect.
+All pages share a token-based design system in `assets/base.css`.
+
+## Install
+
+```bash
+npx skills add https://github.com/lewislulu/html-ppt-skill
+```
+
+One command, no build. Pure static HTML/CSS/JS with only CDN webfonts.
+
+## What the skill gives you
+
+- **36 themes** (`assets/themes/*.css`) — minimal-white, editorial-serif, soft-pastel, sharp-mono, arctic-cool, sunset-warm, catppuccin-latte/mocha, dracula, tokyo-night, nord, solarized-light, gruvbox-dark, rose-pine, neo-brutalism, glassmorphism, bauhaus, swiss-grid, terminal-green, xiaohongshu-white, rainbow-gradient, aurora, blueprint, memphis-pop, cyberpunk-neon, y2k-chrome, retro-tv, japanese-minimal, vaporwave, midcentury, corporate-clean, academic-paper, news-broadcast, pitch-deck-vc, magazine-bold, engineering-whiteprint
+- **14 full-deck templates** (`templates/full-decks/<name>/`) — complete multi-slide decks with scoped `.tpl-<name>` CSS. 8 extracted from real-world decks (xhs-white-editorial, graphify-dark-graph, knowledge-arch-blueprint, hermes-cyber-terminal, obsidian-claude-gradient, testing-safety-alert, xhs-pastel-card, dir-key-nav-minimal), 6 scenario scaffolds (pitch-deck, product-launch, tech-sharing, weekly-report, xhs-post 3:4, course-module)
+- **31 layouts** (`templates/single-page/*.html`) with realistic demo data
+- **27 CSS animations** (`assets/animations/animations.css`) via `data-anim`
+- **20 canvas FX animations** (`assets/animations/fx/*.js`) via `data-fx` — particle-burst, confetti-cannon, firework, starfield, matrix-rain, knowledge-graph (force-directed), neural-net (pulses), constellation, orbit-ring, galaxy-swirl, word-cascade, letter-explode, chain-react, magnetic-field, data-stream, gradient-blob, sparkle-trail, shockwave, typewriter-multi, counter-explosion
+- **Keyboard runtime** (`assets/runtime.js`) — arrows, T (theme), A (anim), F/S/O
+- **FX runtime** (`assets/animations/fx-runtime.js`) — auto-inits `[data-fx]` on slide enter, cleans up on leave
+- **Showcase decks** for themes / layouts / animations / full-decks gallery
+- **Headless Chrome render script** for PNG export
+
+## When to use
+
+Use when the user asks for any kind of slide-based output or wants to turn
+text/notes into a presentable deck. Prefer this over building from scratch.
+
+## Before you author anything — ALWAYS ask or recommend
+
+**Do not start writing slides until you understand three things.** Either ask
+the user directly, or — if they already handed you rich content — propose a
+tasteful default and confirm.
+
+1. **Content & audience.** What's the deck about, how many slides, who's
+   watching (engineers / execs / 小红书读者 / 学生 / VC)?
+2. **Style / theme.** Which of the 36 themes fits? If unsure, recommend 2-3
+   candidates based on tone:
+   - Business / investor pitch → `pitch-deck-vc`, `corporate-clean`, `swiss-grid`
+   - Tech sharing / engineering → `tokyo-night`, `dracula`, `catppuccin-mocha`,
+     `terminal-green`, `blueprint`
+   - 小红书图文 → `xiaohongshu-white`, `soft-pastel`, `rainbow-gradient`,
+     `magazine-bold`
+   - Academic / report → `academic-paper`, `editorial-serif`, `minimal-white`
+   - Edgy / cyber / launch → `cyberpunk-neon`, `vaporwave`, `y2k-chrome`,
+     `neo-brutalism`
+3. **Starting point.** One of the 14 full-deck templates, or scratch? Point
+   to the closest `templates/full-decks/<name>/` and ask if it fits. If the
+   user's content suggests something obvious (e.g. "我要做产品发布会" →
+   `product-launch`), propose it confidently instead of asking blindly.
+
+A good opening message looks like:
+
+> 我可以给你做这份 PPT！先确认三件事：
+> 1. 大致内容 / 页数 / 观众是谁？
+> 2. 风格偏好？我建议从这 3 个主题里选一个：`tokyo-night`（技术分享默认好看）、`xiaohongshu-white`（小红书风）、`corporate-clean`（正式汇报）。
+> 3. 要不要用我现成的 `tech-sharing` 全 deck 模板打底？
+
+Only after those are clear, scaffold the deck and start writing.
+
+## Quick start
+
+1. **Scaffold a new deck.** From the repo root:
+   ```bash
+   ./scripts/new-deck.sh my-talk
+   open examples/my-talk/index.html
+   ```
+2. **Pick a theme.** Open the deck and press `T` to cycle. Or hard-code it:
+   ```html
+   <link rel="stylesheet" id="theme-link" href="../assets/themes/aurora.css">
+   ```
+   Catalog in [references/themes.md](references/themes.md).
+3. **Pick layouts.** Copy `<section class="slide">...</section>` blocks out of
+   files in `templates/single-page/` into your deck. Replace the demo data.
+   Catalog in [references/layouts.md](references/layouts.md).
+4. **Add animations.** Put `data-anim="fade-up"` (or `class="anim-fade-up"`) on
+   any element. On `<ul>`/grids, use `anim-stagger-list` for sequenced reveals.
+   For canvas FX, use `<div data-fx="knowledge-graph">...</div>` and include
+   `<script src="../assets/animations/fx-runtime.js"></script>`.
+   Catalog in [references/animations.md](references/animations.md).
+5. **Use a full-deck template.** Copy `templates/full-decks/<name>/` into
+   `examples/my-talk/` as a starting point. Each folder is self-contained with
+   scoped CSS. Catalog in [references/full-decks.md](references/full-decks.md)
+   and gallery at `templates/full-decks-index.html`.
+6. **Render to PNG.**
+   ```bash
+   ./scripts/render.sh templates/theme-showcase.html       # one shot
+   ./scripts/render.sh examples/my-talk/index.html 12      # 12 slides
+   ```
+
+## Authoring rules (important)
+
+- **Always start from a template.** Don't author slides from scratch — copy the
+  closest layout from `templates/single-page/` first, then replace content.
+- **Use tokens, not literal colors.** Every color, radius, shadow should come
+  from CSS variables defined in `assets/base.css` and overridden by a theme.
+  Good: `color: var(--text-1)`. Bad: `color: #111`.
+- **Don't invent new layout files.** Prefer composing existing ones. Only add
+  a new `templates/single-page/*.html` if none of the 30 fit.
+- **Respect chrome slots.** `.deck-header`, `.deck-footer`, `.slide-number`
+  and the progress bar are provided by `assets/base.css` + `runtime.js`.
+- **Keyboard-first.** Always include `<script src="../assets/runtime.js"></script>`
+  so the deck supports ← → / T / A / F / S / O / hash deep-links.
+- **One `.slide` per logical page.** `runtime.js` makes `.slide.is-active`
+  visible; all others are hidden.
+- **Supply notes.** Wrap speaker notes in `<div class="notes">…</div>` inside
+  each slide. Press S to open the overlay.
+
+## Writing guide
+
+See [references/authoring-guide.md](references/authoring-guide.md) for a
+step-by-step walkthrough: file structure, naming, how to transform an outline
+into a deck, how to choose layouts and themes per audience, how to do a
+Chinese + English deck, and how to export.
+
+## Catalogs (load when needed)
+
+- [references/themes.md](references/themes.md) — all 36 themes with when-to-use.
+- [references/layouts.md](references/layouts.md) — all 31 layout types.
+- [references/animations.md](references/animations.md) — 27 CSS + 20 canvas FX animations.
+- [references/full-decks.md](references/full-decks.md) — all 14 full-deck templates.
+- [references/authoring-guide.md](references/authoring-guide.md) — full workflow.
+
+## File structure
+
+```
+html-ppt/
+├── SKILL.md                 (this file)
+├── references/              (detailed catalogs, load as needed)
+├── assets/
+│   ├── base.css             (tokens + primitives — do not edit per deck)
+│   ├── fonts.css            (webfont imports)
+│   ├── runtime.js           (keyboard + presenter + overview + theme cycle)
+│   ├── themes/*.css         (36 token overrides, one per theme)
+│   └── animations/
+│       ├── animations.css   (27 named CSS entry animations)
+│       ├── fx-runtime.js    (auto-init [data-fx] on slide enter)
+│       └── fx/*.js          (20 canvas FX modules: particles/graph/fireworks…)
+├── templates/
+│   ├── deck.html                  (minimal 6-slide starter)
+│   ├── theme-showcase.html        (36 slides, iframe-isolated per theme)
+│   ├── layout-showcase.html       (iframe tour of all 31 layouts)
+│   ├── animation-showcase.html    (20 FX + 27 CSS animation slides)
+│   ├── full-decks-index.html      (gallery of all 14 full-deck templates)
+│   ├── full-decks/<name>/         (14 scoped multi-slide deck templates)
+│   └── single-page/*.html         (31 layout files with demo data)
+├── scripts/
+│   ├── new-deck.sh                (scaffold a deck from deck.html)
+│   └── render.sh                  (headless Chrome → PNG)
+└── examples/demo-deck/            (complete working deck)
+```
+
+## Rendering to PNG
+
+`scripts/render.sh` wraps headless Chrome at
+`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. For multi-slide
+capture, runtime.js exposes `#/N` deep-links, and render.sh iterates 1..N.
+
+```bash
+./scripts/render.sh templates/single-page/kpi-grid.html        # single page
+./scripts/render.sh examples/demo-deck/index.html 8 out-dir    # 8 slides, custom dir
+```
+
+## Keyboard cheat sheet
+
+```
+←  →  Space  PgUp  PgDn  Home  End    navigate
+F                                       fullscreen
+S                                       speaker notes overlay
+O                                       slide overview grid
+T                                       cycle themes (reads data-themes attr)
+A                                       cycle demo animation on current slide
+#/N in URL                              deep-link to slide N
+```
+
+## License & author
+
+MIT. Copyright (c) 2026 lewis &lt;sudolewis@gmail.com&gt;.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/course-module/README.md -->
+# course-module · 教学模块
+
+7-slide teaching module: cover (title + meta), objectives, core concept, worked example, exercise, check-your-understanding (MCQ), summary.
+
+Academic but friendly look: warm off-white paper, Playfair Display display type, a green/terracotta accent pair. A persistent **left sidebar** on content slides lists the module's learning objectives and checks them off as you progress — students always know where they are.
+
+**Use when:** online course modules, lecture handouts, onboarding curricula, workshop units.
+**Feel:** a good textbook opened to a chapter — structured, quiet, encouraging.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/dir-key-nav-minimal/README.md -->
+# dir-key-nav-minimal
+
+8 张幻灯片，每张一个纯色/渐变 mono-background（indigo / cream / crimson / emerald / slate / violet / white / charcoal）。灵感直接来自 `20260405 演示幻灯片【方向键版】.html` —— 八个 `t-*` 主题类，每张幻灯一个背景，方向键切换，极简 editorial 气质。
+
+**Visual traits:** 每张独立背景色 + 单一 accent、巨大 160px 标题无副图、4px 短粗 accent line divider、arrow-prefixed mono list、左下 `← →` 键盘提示 + 右下 page label、全屏 breathing negative space、JetBrains Mono 做数字 / 代码 / 键盘 hint、每个背景有自己的 `.dk-accent` 色。
+
+**Use when:** 有话要说、没太多图、希望用排版节奏推进观众注意力；keynote 式的极简讲稿；每张幻灯只讲一件事；公开分享 / keynote / 演讲稿。
+
+**Source inspiration:** `20260405-Karpathy-知识库/20260405 演示幻灯片【方向键版】.html`.
+
+**Path:** `templates/full-decks/dir-key-nav-minimal/index.html`
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/graphify-dark-graph/README.md -->
+# graphify-dark-graph
+
+Deep-night 暗底 + 力导向知识图谱覆盖层 + 温暖玻璃拟态卡片。灵感来自 `20260413-graphify/ppt/graphify.html` 的 `#06060c` 渐变底、飘移 orb 光晕、glass 卡片（warm/blue/green/purple 五变体）和 rainbow-text 标题。
+
+**Visual traits:** `#06060c → #0e1020` 斜向渐变、三颗 400-520px blur orb 慢飘动、cover SVG 力导向图谱作为背景、rainbow shift 渐变标题、JetBrains Mono 的 `.cmd-glow` 命令行、玻璃拟态卡片带顶部高光和微妙内阴影、温暖色系 accent (#e8a87c 琥珀 / #7ed3a4 薄荷 / #7eb8da 雾蓝 / #b8a4d6 丁香).
+
+**Use when:** 介绍一个开发者工具、命令行产品、知识图谱 / 数据可视化相关项目；你希望现场演示时视觉有「AI native + 科技感 + 温度」。
+
+**Source inspiration:** `20260413-graphify/ppt/graphify.html`.
+
+**Path:** `templates/full-decks/graphify-dark-graph/index.html`
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/hermes-cyber-terminal/README.md -->
+# hermes-cyber-terminal
+
+黑底 (`#0a0c10`) + 终端 chrome + 扫描线 + 薄荷绿 glow 大字 + JetBrains Mono 全文打字机感。灵感来自 `20260414-hermes-agent/ppt/hermes-record.html` 的 `codebox #15151b` 深色代码盒和 `hermes-vs-openclaw.html` 的实测对比气质 —— 把两者合成一份「honest cyber review」。
+
+**Visual traits:** 56px cyber 网格 + CRT vignette + 半透明 scanlines 叠层、窗口 traffic-light chrome、`$ prompt` 开头的 command-line 标题、薄荷绿 text-shadow glow `#7ed3a4`、monospace 全局、虚拟 bar chart 用 stroke-only 呈现、blinking cursor、amber/green/red 分级标签。
+
+**Use when:** 评测一个开发者工具 / CLI / agent，展示跑分数据、trace、diff；想要即刻给出「技术人 honest review」的视觉语气；适合长 trace / long code 的场景。
+
+**Source inspiration:** `20260414-hermes-agent/ppt/hermes-record.html` + `hermes-vs-openclaw.html`.
+
+**Path:** `templates/full-decks/hermes-cyber-terminal/index.html`
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/knowledge-arch-blueprint/README.md -->
+# knowledge-arch-blueprint
+
+奶油纸 (`#F0EAE0`) 底 + 锈红 (`#B5392A`) 单一 accent + 硬黑描边卡片 + 虚线反馈回路箭头。灵感来自 `20260405 架构图v2.html` —— 那是一张真正的「技术白皮书架构图」，像建筑蓝图。
+
+**Visual traits:** 暖米色纸底、微弱 48px 网格做 blueprint 感、硬朗 2px 黑边卡片、pipeline step-box 一字排开配 hero box 凸起、右上 insight 红色 callout、大小写 kicker 2.5-4px 字距、SVG 反馈回路虚线 + 箭头、Playfair 大字号衬线数据、无渐变无阴影极度克制。
+
+**Use when:** 讲系统架构、数据流向、流程拆解；你想让内容看起来像一份正经技术白皮书而不是营销贴；需要严肃感、印刷感、可直接截图塞进 README。
+
+**Source inspiration:** `20260405-Karpathy-知识库/20260405 架构图v2.html`.
+
+**Path:** `templates/full-decks/knowledge-arch-blueprint/index.html`
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/obsidian-claude-gradient/README.md -->
+# obsidian-claude-gradient
+
+GitHub-dark (`#0d1117`) + 紫色 ambient radial + 60px 遮罩网格 + 紫→蓝→绿渐变文字。灵感来自 `20260406-obsidian-claude/slides.html` 的 `--accent #7c3aed`、`.cbg` 双 radial cover、`.cgrid` 60px 遮罩网格以及 `.g` 三停渐变。
+
+**Visual traits:** 深灰蓝底 + 紫蓝 radial 晕染 + 暗网格遮罩、居中对齐的标题/正文、圆角紫色 pill tag、linear `#a855f7→#60a5fa→#34d399` 渐变字、GitHub-ish 代码色 (`#010409` 背景 + 紫/蓝/橙/绿 token)、紫色左边框 highlight 块、简洁 step 列表。
+
+**Use when:** 讲一个开发者友好的工作流、MCP / Agent / Dev tool 教程；你希望气质接近 GitHub Blog / Linear Changelog；内容以配置文件 + 步骤为主。
+
+**Source inspiration:** `20260406-obsidian-claude/slides.html`.
+
+**Path:** `templates/full-decks/obsidian-claude-gradient/index.html`
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/pitch-deck/README.md -->
+# pitch-deck
+
+Classic 10-slide YC/VC seed pitch: cover, problem, solution, product, market, business model, traction, team, ask, thanks.
+
+Clean white background, bold blue→purple gradient accent, oversized headlines and big numbers — the look investors expect when they skim 40 decks a day.
+
+**Use when:** pitching a fundraise, office hours, or a "state of the company" update. Swap copy, keep structure.
+**Feel:** confident, data-forward, founder-friendly.
+**Brand color:** override `--grad` in `style.css` to re-skin.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/product-launch/README.md -->
+# product-launch
+
+8-slide consumer product announcement deck: hero cover, "introducing" moment, three feature slides, how-it-works, pricing tiers, and a closing testimonial + pre-order CTA.
+
+Mixes dark hero slides (for show-off moments) with light slides (for details and pricing). Warm orange→peach gradient accent feels confident and human; easy to re-skin for any brand.
+
+**Use when:** launching a product, announcing a v2, internal all-hands reveals, press kit decks.
+**Feel:** Apple-event-on-a-budget — confident, tactile, uncluttered.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/tech-sharing/README.md -->
+# tech-sharing · 技术分享
+
+8-slide engineering talk deck: cover (topic + speaker), agenda, context, two deep-dive slides, a code example, takeaways, Q&A.
+
+Dark GitHub-ish palette (`#0d1117`) with JetBrains Mono accents and syntax-highlighted terminal blocks. Built to be screenshotted and shared on an internal wiki or Twitter.
+
+**Use when:** tech-sharing Fridays, brown-bag talks, lunch & learns, conference submissions.
+**Feel:** GitHub README meets a good conference talk — dark, monospaced, dense but readable.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/testing-safety-alert/README.md -->
+# testing-safety-alert
+
+白底 + 红琥珀警示色 + 条纹危险边 + 大红 strike 和 pill。灵感来自 `20260412-AI测试与安全/xhs-ai-testing-safety-v2.html` 的 `.focus` 黑底白字块、hero quote box 和高对比 black-on-white 气质 —— 但把语气推到「警示 / 风控 / 事故报告」层级。
+
+**Visual traits:** 顶部 45° 红黑斜条纹警示带、底部副条纹、`strike-through` 红色斜切的否定大字、L1/L2/L3 三档色卡 (绿/琥珀/红)、圆形前置指示灯 alert-box、policy-yaml 深色代码块带红色左边框 + `bad` 关键词高亮、红/绿复选框 checklist、Q1 事故柱状图。
+
+**Use when:** 讲安全 / 风控 / 事故复盘 / 红队测试 / AI 上线前评估 / policy as code；你需要让观众立刻感到「这事严肃，别马虎」。
+
+**Source inspiration:** `20260412-AI测试与安全/html/xhs-ai-testing-safety-v2.html`.
+
+**Path:** `templates/full-decks/testing-safety-alert/index.html`
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/weekly-report/README.md -->
+# weekly-report · 周报
+
+7-slide team weekly report: cover (week range), KPI grid, shipped items, a metric trend chart, blockers, next-week plan, thanks.
+
+Corporate-clarity palette: near-white background, blue→teal accent, ruled dividers and tiny mono tags (`FEAT`, `FIX`, `EXP`, `INFRA`). Data-dense, readable at a glance, and easy to skim in a standup.
+
+**Use when:** team weekly readouts, squad reviews, skip-level updates, cross-team "what shipped this week" mails.
+**Feel:** Linear changelog meets a McKinsey KPI deck — serious, measured, actionable.
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/xhs-pastel-card/README.md -->
+# xhs-pastel-card
+
+暖奶油 `#fef8f1` 底 + 模糊彩色 blob + Playfair italic 衬线大字 + 整色马卡龙卡片（桃 / 薄荷 / 天 / 丁香 / 柠檬 / 玫瑰）。共性提取自 `20260412-obsidian-skills/html/xhs-obsidian-skills.html` 的 `soft-purple/pink/blue/green/orange/teal` 软色卡系统，以及 `20260409 v2-白底版` 的胶囊 chip 顶部条。
+
+**Visual traits:** 三颗柔光 blob 作背景、顶部 chip+page 组合、Playfair italic 做 accent 词（em / rose / mint）、整色圆角 28px 大卡片、italic Playfair 序号 01-04、donut SVG 图、小 divider 条 + 渐变、衬线正文做标题 / sans 做正文混排。
+
+**Use when:** 生活方式 / 个人成长 / 轻内容 / 情感向的小红书贴或个人演讲；你想要一种「不那么科技感、偏杂志偏手作」的气质；适合讲「慢」「休息」「温柔」主题。
+
+**Source inspiration:** `20260412-obsidian-skills/html/xhs-obsidian-skills.html` + `20260409` v2-白底版（共性 pastel 系统）。
+
+**Path:** `templates/full-decks/xhs-pastel-card/index.html`
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/xhs-post/README.md -->
+# xhs-post · 小红书 9 图
+
+小红书 3:4 图文格式，9 张图（810 × 1080）。结构：封面 → hook → 痛点 → aha moment → 步骤 1-3 → 效果 → CTA 关注。
+
+手写便签 + 贴纸 + 圆角硬阴影的 MUJI/风格，暖米色背景 + 粉橘黄柔和渐变。每页右上角有 `N / 9` 页码贴纸，最后一页有话题 tag。
+
+**适用场景：** 小红书 / 微博九宫格 / 公众号图文首图 / 抖音图文卡片。
+**使用方式：** 每张 `.slide` 直接截图导出即可，保持 810×1080 比例。按 → 依次浏览。
+**Feel:** 手帐、贴纸、闺蜜跟你分享干货的 vibe。
+
+<!-- source: knowledge/references/diagram-examples/.agents/skills/html-ppt/templates/full-decks/xhs-white-editorial/README.md -->
+# xhs-white-editorial
+
+白底杂志风、强调重点块、macaron soft-card 分组。灵感来自 `20260409 升级版知识库/小红书图文/v2-白底版/slide_01_cover.html` 的顶部彩虹条 + 大字标题，以及 `20260412-AI测试与安全/xhs-ai-testing-safety-v2.html` 的 `.focus` 黑底白字强重点和 macaron 软色卡片系统。
+
+**Visual traits:** 纯白背景、顶部 10 色彩虹条、巨型 80-110px 标题配轻微负字距、渐变 brand 文字（紫→蓝→绿→橙→粉）、macaron 软色卡（soft-purple / pink / blue / green / orange）、胶囊 tag + dot、黑底 `.focus` 强调框、hero quote box 带淡阴影。
+
+**Use when:** 你需要一份能当小红书图文、也能当横屏 deck 用的白底内容帖；文字多、重点密集、需要一眼抓住关键词；面向中文读者为主。
+
+**Source inspiration:** `20260409` xhs v2 白底封面 + `20260412` AI 测试与安全 v2。
+
+**Path:** `templates/full-decks/xhs-white-editorial/index.html`
 
 <!-- source: knowledge/references/gbrain-memory-system.md -->
 # GBrain — AI Agent 长期记忆系统
@@ -5984,6 +7102,37 @@ OpenClaw 的架构并非银弹。理解它**适合什么、不适合什么**，�
 8. ~~DM Pairing 安全模型~~：我们不面向开放消息渠道，不需要配对码验证
 9. ~~单用户 Session 模型~~：我们需要多 Agent 共享状态，而非单用户会话隔离
 
+<!-- source: knowledge/references/README.md -->
+# References
+
+Curated indexes of external resources and analytical documents: articles, documentation, open-source analysis, and design references.
+
+## Files
+
+| File | Description |
+|------|-------------|
+| `claudecode-source-analysis.md` | Claude Code 源码解析与架构分析资料索引 |
+| `claudecode-architecture-patterns.md` | Claude Code 架构设计模式与最佳实践 — 从权威文章提炼的可复用模式 |
+| `openclaw-architecture.md` | OpenClaw 源码架构解析 — 开源 AI 智能体平台架构模式与 agent 建设指导 |
+| `microsoft-markitdown.md` | Microsoft MarkItDown — 开源文件/Office 转 Markdown（常被误称 MakeItDown） |
+| `karpathy-claudemd-principles.md` | Karpathy 编程原则 → CLAUDE.md — 本项目 agent 规则的溯源参考 |
+| `anthropic-managed-agents.md` | Anthropic Managed Agents & Trustworthy Agents — Agent 脑手分离架构 + 信任框架（官方博客一手资料） |
+| `claudecode-session-management.md` | Claude Code 会话管理与 1M 上下文实操指南 — 官方博文提炼的决策框架 |
+| `icon-library-index.md` | 开源图标库索引 — 图标选型指南与对比 |
+
+## What belongs here
+
+- Source-code analysis and architecture walkthroughs
+- External article/book indexes with summaries
+- Design references (visual, interaction, information architecture)
+- Example collections and templates
+
+## What does NOT belong here
+
+- Normative conventions and policies → `standards/`
+- Step-by-step procedures → `playbooks/`
+- Reusable text prompts for AI tooling → `prompts/`
+
 <!-- source: knowledge/references/trend-radar-guide.md -->
 # TrendRadar 趋势雷达 — 使用指南
 
@@ -6097,33 +7246,6 @@ docker run -p 8765:8765 wantcat/trendradar --mcp
 - [TrendRadar GitHub Pages](https://sansan0.github.io/TrendRadar)
 - [newsnow API](https://github.com/ourongxing/newsnow)
 - `features/integrations/trend-radar/spec.md` — one-context 集成规范
-
-<!-- source: knowledge/standards/README.md -->
-# Standards
-
-Tool-neutral engineering conventions and policies for `one-context`.
-
-## Files
-
-| File | Scope |
-|------|-------|
-| `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
-| `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
-
-## What belongs here
-
-- Coding conventions and repository layout policies
-- Documentation standards and testing expectations
-- Safety, write-boundary, and data-handling policies
-- Schema definitions and interface contracts
-
-## What does NOT belong here
-
-- Architecture analysis or source-code walkthroughs → `references/`
-- Diagram samples and visual design guides → `references/`
-- Step-by-step operating procedures → `playbooks/`
-
-Add links to new standards in the table above when creating a file.
 
 <!-- source: knowledge/standards/agent-framework.md -->
 # Agent Framework — 智能体框架规范
@@ -6840,6 +7962,33 @@ This strategy requires:
 - Not all problems have an oracle (e.g., no reference exists when innovating from scratch)
 - Oracle and test implementation interfaces must be compatible, otherwise mixing is impossible
 - Interaction bugs (requiring multiple files/modules combined to appear) need delta debugging or other additional methods
+
+<!-- source: knowledge/standards/README.md -->
+# Standards
+
+Tool-neutral engineering conventions and policies for `one-context`.
+
+## Files
+
+| File | Scope |
+|------|-------|
+| `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
+| `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
+
+## What belongs here
+
+- Coding conventions and repository layout policies
+- Documentation standards and testing expectations
+- Safety, write-boundary, and data-handling policies
+- Schema definitions and interface contracts
+
+## What does NOT belong here
+
+- Architecture analysis or source-code walkthroughs → `references/`
+- Diagram samples and visual design guides → `references/`
+- Step-by-step operating procedures → `playbooks/`
+
+Add links to new standards in the table above when creating a file.
 
 <!-- source: knowledge/tools/README.md -->
 # Tools

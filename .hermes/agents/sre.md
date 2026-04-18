@@ -36,27 +36,6 @@ Include verification steps (e.g. test commands) after making changes.
 
 ## Knowledge
 
-<!-- source: knowledge/playbooks/README.md -->
-# Playbooks
-
-Step-by-step operating procedures for common tasks.
-
-## Available
-
-| Playbook | Purpose |
-|----------|---------|
-| `add-umbrella-feature.md` | 新增伞仓级需求到 `features/` — 索引、目录、spec、进度跟踪全流程 |
-| `use-microsoft-markitdown.md` | 使用 Microsoft MarkItDown：环境、安装、CLI、Python、MCP、Docker、排障 |
-
-## Planned (not yet written)
-
-- Onboarding a new repository
-- Preparing a release workspace
-- Reviewing a cross-repo change
-- Generating AI-ready context for a task
-
-When adding a playbook, update the Available table above.
-
 <!-- source: knowledge/playbooks/add-umbrella-feature.md -->
 ﻿# Playbook: 新增伞仓级需求（`features/`）
 
@@ -222,6 +201,27 @@ When adding a playbook, update the Available table above.
 - [ ] 全部通过 = 代码正确，无需人工解读输出
 - [ ] 核心失败路径有对应测试
 - [ ] 测试不依赖网络 / 外部服务
+
+<!-- source: knowledge/playbooks/README.md -->
+# Playbooks
+
+Step-by-step operating procedures for common tasks.
+
+## Available
+
+| Playbook | Purpose |
+|----------|---------|
+| `add-umbrella-feature.md` | 新增伞仓级需求到 `features/` — 索引、目录、spec、进度跟踪全流程 |
+| `use-microsoft-markitdown.md` | 使用 Microsoft MarkItDown：环境、安装、CLI、Python、MCP、Docker、排障 |
+
+## Planned (not yet written)
+
+- Onboarding a new repository
+- Preparing a release workspace
+- Reviewing a cross-repo change
+- Generating AI-ready context for a task
+
+When adding a playbook, update the Available table above.
 
 <!-- source: knowledge/playbooks/sre-release-process.md -->
 # Playbook: SRE 发布流程

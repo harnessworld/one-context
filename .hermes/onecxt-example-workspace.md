@@ -26,33 +26,6 @@ Include verification steps (e.g. test commands) after making changes.
 
 ## Knowledge
 
-<!-- source: knowledge/standards/README.md -->
-# Standards
-
-Tool-neutral engineering conventions and policies for `one-context`.
-
-## Files
-
-| File | Scope |
-|------|-------|
-| `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
-| `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
-
-## What belongs here
-
-- Coding conventions and repository layout policies
-- Documentation standards and testing expectations
-- Safety, write-boundary, and data-handling policies
-- Schema definitions and interface contracts
-
-## What does NOT belong here
-
-- Architecture analysis or source-code walkthroughs → `references/`
-- Diagram samples and visual design guides → `references/`
-- Step-by-step operating procedures → `playbooks/`
-
-Add links to new standards in the table above when creating a file.
-
 <!-- source: knowledge/standards/agent-framework.md -->
 # Agent Framework — 智能体框架规范
 
@@ -769,26 +742,32 @@ This strategy requires:
 - Oracle and test implementation interfaces must be compatible, otherwise mixing is impossible
 - Interaction bugs (requiring multiple files/modules combined to appear) need delta debugging or other additional methods
 
-<!-- source: knowledge/playbooks/README.md -->
-# Playbooks
+<!-- source: knowledge/standards/README.md -->
+# Standards
 
-Step-by-step operating procedures for common tasks.
+Tool-neutral engineering conventions and policies for `one-context`.
 
-## Available
+## Files
 
-| Playbook | Purpose |
-|----------|---------|
-| `add-umbrella-feature.md` | 新增伞仓级需求到 `features/` — 索引、目录、spec、进度跟踪全流程 |
-| `use-microsoft-markitdown.md` | 使用 Microsoft MarkItDown：环境、安装、CLI、Python、MCP、Docker、排障 |
+| File | Scope |
+|------|-------|
+| `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
+| `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
 
-## Planned (not yet written)
+## What belongs here
 
-- Onboarding a new repository
-- Preparing a release workspace
-- Reviewing a cross-repo change
-- Generating AI-ready context for a task
+- Coding conventions and repository layout policies
+- Documentation standards and testing expectations
+- Safety, write-boundary, and data-handling policies
+- Schema definitions and interface contracts
 
-When adding a playbook, update the Available table above.
+## What does NOT belong here
+
+- Architecture analysis or source-code walkthroughs → `references/`
+- Diagram samples and visual design guides → `references/`
+- Step-by-step operating procedures → `playbooks/`
+
+Add links to new standards in the table above when creating a file.
 
 <!-- source: knowledge/playbooks/add-umbrella-feature.md -->
 ﻿# Playbook: 新增伞仓级需求（`features/`）
@@ -955,6 +934,27 @@ When adding a playbook, update the Available table above.
 - [ ] 全部通过 = 代码正确，无需人工解读输出
 - [ ] 核心失败路径有对应测试
 - [ ] 测试不依赖网络 / 外部服务
+
+<!-- source: knowledge/playbooks/README.md -->
+# Playbooks
+
+Step-by-step operating procedures for common tasks.
+
+## Available
+
+| Playbook | Purpose |
+|----------|---------|
+| `add-umbrella-feature.md` | 新增伞仓级需求到 `features/` — 索引、目录、spec、进度跟踪全流程 |
+| `use-microsoft-markitdown.md` | 使用 Microsoft MarkItDown：环境、安装、CLI、Python、MCP、Docker、排障 |
+
+## Planned (not yet written)
+
+- Onboarding a new repository
+- Preparing a release workspace
+- Reviewing a cross-repo change
+- Generating AI-ready context for a task
+
+When adding a playbook, update the Available table above.
 
 <!-- source: knowledge/playbooks/sre-release-process.md -->
 # Playbook: SRE 发布流程
