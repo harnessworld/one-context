@@ -109,6 +109,9 @@ canvas-philosophy.md
 # Skill parallel verify runtime output
 .skill-parallel-verify/
 
+# Local one-context config (sensitive word lists, etc.)
+.onecxt/sensitive-words.yaml
+
 # Claude Code local settings (personal, not shared)
 .claude/settings.json
 # Test screenshots
