@@ -93,7 +93,7 @@ A good opening message:
 - [ ] fill-deck on all content pages (除 Cover/Thanks)
 - [ ] Body text ≥42px, card title ≥52px
 - [ ] Coverage ≥85%, ≤120 chars/page
-- [ ] SVG 内文字 viewBox 坐标下 ≥18px
+- [ ] SVG 内文字 viewBox 坐标下 ≥24px（标注/副文字），关键文字 ≥28px
 - [ ] 每页 ≤3 info blocks
 - [ ] Layout variety: ≥3 types total, no 3+ consecutive same
 - [ ] **≥2 pages with card-diagram + inline SVG** (not just emoji!)
@@ -132,7 +132,7 @@ These are **non-negotiable**. Violating any rule means the output is rejected.
 | Chars/page | **≤120 汉字** | Slide = skeleton, detail via voiceover |
 | Info blocks/page | **≤3** | Title + cards count |
 | Layout variety | **≥2–3 types/deck** | No 3+ same in a row |
-| SVG text (viewBox) | **≥18px** | In viewBox coordinates |
+| SVG text (viewBox) | **≥24px**（标注），**≥28px**（关键文字） | In viewBox coordinates; 18px on phone is unreadable |
 
 ## 7 layouts — quick reference
 
