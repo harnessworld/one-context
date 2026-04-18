@@ -1,8 +1,9 @@
 # Karpathy 编程原则 → CLAUDE.md — 溯源参考
 
 > 来源：[Andrej Karpathy 的编程经验被做成了 CLAUDE.md](https://mp.weixin.qq.com/s/85onPibogScWkEyfs1l3sQ) · 仓库 [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)
-
-**记录日期**：2026-04-12
+> 作者：Andrej Karpathy / forrestchang（整理）
+> 发布日期：2026-04
+> 收录日期：2026-04-12
 
 ---
 

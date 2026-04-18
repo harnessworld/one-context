@@ -1,10 +1,13 @@
 # MarkItDown (Microsoft) — 开源文档转 Markdown 工具
 
+> 来源：[microsoft/markitdown](https://github.com/microsoft/markitdown) · PyPI [`markitdown`](https://pypi.org/project/markitdown/)
+> 作者：Microsoft AutoGen Team
+> 发布日期：2024
+> 收录日期：2026-04-12
+>
 > 口语或检索里常被说成「MakeItDown」；**正式项目名与 PyPI 包名为 [MarkItDown](https://github.com/microsoft/markitdown)**（mark-it-down）。
 
-**权威入口**：[microsoft/markitdown](https://github.com/microsoft/markitdown) · PyPI [`markitdown`](https://pypi.org/project/markitdown/) · 许可证 **MIT** · 维护方标注为 **AutoGen Team**（见仓库 README 徽章）。
-
-**更新日期**：2026-04-12
+**权威入口**：[microsoft/markitdown](https://github.com/microsoft/markitdown) · 许可证 **MIT** · 维护方标注为 **AutoGen Team**（见仓库 README 徽章）。
 
 **怎么用（分步操作）**：见 `knowledge/playbooks/use-microsoft-markitdown.md`（虚拟环境、安装选型、CLI、Python API、MCP、Docker、排障）。
 

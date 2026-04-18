@@ -1,10 +1,11 @@
 # GBrain — AI Agent 长期记忆系统
 
-**权威入口**：[garrytan/gbrain](https://github.com/garrytan/gbrain) · 许可证 **MIT** · 作者 **Garry Tan (Y Combinator 总裁)** · Stars **6.9k+**
+> 来源：[garrytan/gbrain](https://github.com/garrytan/gbrain) / 微信公众号文章《GBrain：AI Agent 的外置永久大脑》
+> 作者：Garry Tan (Y Combinator 总裁)
+> 发布日期：2026-04
+> 收录日期：2026-04-13
 
-**更新日期**：2026-04-13
-
-**来源**：微信公众号文章《GBrain：AI Agent 的外置永久大脑》
+**权威入口**：[garrytan/gbrain](https://github.com/garrytan/gbrain) · 许可证 **MIT** · Stars **6.9k+**
 
 ---
 

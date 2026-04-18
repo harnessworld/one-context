@@ -1,13 +1,11 @@
 # Anthropic Managed Agents & Trustworthy Agents
 
+> 来源：[Managed Agents: Decoupling the Brain from the Hands](https://www.anthropic.com/engineering/managed-agents) / [Trustworthy Agents in Practice](https://www.anthropic.com/research/trustworthy-agents)
+> 作者：Anthropic Engineering
+> 发布日期：2025 / 2026-04-09
+> 收录日期：2026-04-12
+
 两篇互补的 Anthropic 官方博客：一篇讲 Agent 架构拆分（怎么造），一篇讲 Agent 信任框架（怎么管）。合在一起是当前最完整的 Agent 基础设施设计参考。
-
-## Source
-
-- **Managed Agents: Decoupling the Brain from the Hands** (2025)
-  https://www.anthropic.com/engineering/managed-agents
-- **Trustworthy Agents in Practice** (2026-04-09)
-  https://www.anthropic.com/research/trustworthy-agents
 
 ## Part 1: Managed Agents — 脑手分离
 

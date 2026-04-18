@@ -1,9 +1,11 @@
 # Claude Code Architecture Patterns — 架构设计模式与最佳实践
 
-> 从 30+ 篇权威文章中提炼的 Claude Code 核心架构要素和可复用设计模式。
+> 来源：从 30+ 篇权威文章中提炼，索引见 [claudecode-source-analysis.md](./claudecode-source-analysis.md)
+> 作者：one-context 项目组（基于 Anthropic 官方资料整理）
+> 发布日期：2026-04-02
+> 收录日期：2026-04-02
+>
 > 目的：为后续 agent 框架建设提供设计参考。
-> 来源索引：[knowledge/references/claudecode-source-analysis.md](../references/claudecode-source-analysis.md)
-> 更新日期：2026-04-02
 
 ---
 
