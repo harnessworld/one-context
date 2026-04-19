@@ -1,9 +1,17 @@
 # cover-design 冒烟测试
 skill_path: "skills/cover-design/SKILL.md"
-test_name: "cover-design 科技风格冒烟测试"
-acceptance_criteria: "生成的 HTML 为单一自包含文件，包含一个封面设计，使用科技风格预设（深色背景+渐变/光效），横版 1440×1080 比例，包含标题、副标题和装饰元素"
+test_name: "cover-design CONFIG驱动模板冒烟测试"
+acceptance_criteria: "生成的 HTML 为单一自包含文件，使用 CONFIG 驱动模板，竖版 1080×1920 比例，包含标题、副标题、装饰图形和主题色系统"
 
 test_cases:
   - id: tc-1
-    prompt: "帮我设计一个科技风格的封面，标题是「AI 基础设施 2026」，副标题是「大规模推理引擎架构实践」"
-    description: "测试科技风格封面生成能力"
+    prompt: "帮我设计一个科技风格的封面，标题是「AI 基础设施 2026」，副标题是「大规模推理引擎架构实践」，使用tech主题"
+    description: "测试科技主题封面生成，验证CONFIG驱动"
+
+  - id: tc-2
+    prompt: "设计一个增长主题的封面，标题「突破\n瓶颈」，第1行高亮，使用火箭装饰图案"
+    description: "测试growth主题 + accentLine + decoSVG组合"
+
+  - id: tc-3
+    prompt: "设计封面，关闭噪点纹理，使用中心向外的遮罩方向，金融主题"
+    description: "测试noiseEnabled=false + overlayDirection=center-out + finance主题"

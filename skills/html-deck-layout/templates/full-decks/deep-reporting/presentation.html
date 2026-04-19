@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>短视频式汇报范式——用内容创作思路重塑职场汇报</title>
+
+  <!-- CSS 加载顺序: base.css → fonts.css → mobile-layout.css → shell-layout.css → mobile-deep-blue.css → style.css -->
+  <style>
+/* === base.css === */
+:root {
+  --slide-w: 1920px;
+  --slide-h: 1080px;
+  --fs-hero: 190px;
+  --fs-page-title: 88px;
+  --fs-subtitle: 60px;
+  --fs-body: 42px;
+  --fs-caption: 32px;
+  --fs-card-title: 52px;
+  --fs-card-body: 42px;
+  --fs-stat: 170px;
+  --fs-pill: 36px;
+  --fs-footer: 34px;
+  --lh-tight: 1.2;
+  --lh-normal: 1.4;
+  --lh-relaxed: 1.6;
+  --c-bg: #0f172a;
+  --c-surface: #1e293b;
+  --c-surface-2: #334155;
+  --c-text-1: #f1f5f9;
+  --c-text-2: #94a3b8;
+  --c-accent-a: #38bdf8;
+  --c-accent-b: #818cf8;
+  --c-accent-c: #a78bfa;
+  --c-accent-d: #ff6b9d;
+  --c-accent-e: #ffd93d;
+  --c-border: rgba(255, 255, 255, 0.08);
+  --c-overlay: rgba(15, 23, 42, 0.6);
+  --sp-xs: 8px;
+  --sp-sm: 16px;
+  --sp-md: 24px;
+  --sp-lg: 32px;
+  --sp-xl: 48px;
+  --sp-2xl: 64px;
+  --slide-pad: 32px 48px;
+  --card-pad: 24px 28px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-full: 9999px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-normal: 0.3s;
+  --duration-slow: 0.5s;
+  --card-gap: 24px;
+}
+  </style>
+  <style>
+/* === fonts.css === */
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+  </style>
+  <style>
+/* === mobile-layout.css === */
+#P {
+  width: var(--slide-w);
+  height: var(--slide-h);
+  overflow: hidden;
+  position: relative;
+  background: var(--c-bg);
+  font-family: var(--font-sans);
+  color: var(--c-text-1);
+}
+.s.slide {
+  width: 100%;
+  height: 100%;
+  display: none;
+  flex-direction: column;
+  padding: var(--slide-pad);
+  box-sizing: border-box;
+  position: relative;
+}
+.s.slide.is-active { display: flex; }
+.slide-header { flex-shrink: 0; margin-bottom: var(--sp-md); }
+.slide-header .badge { display: inline-block; font-size: var(--fs-pill); padding: 4px 16px; border-radius: var(--r-full); background: var(--c-accent-a); color: var(--c-bg); font-weight: 600; margin-bottom: var(--sp-sm); }
+.slide-header h2 { font-size: var(--fs-page-title); font-weight: 700; line-height: var(--lh-tight); margin: 0; }
+.col.slide-main { flex: 1; min-height: 0; flex-direction: column; display: flex; }
+.slide-main.fill-deck { flex: 1; min-height: 0; flex-direction: column; }
+.slide-main.fill-deck .slide-cards { flex: 1 1 0; min-height: 0; align-items: stretch; display: flex; gap: var(--card-gap); }
+.slide-main.fill-deck .slide-cards > .g { align-self: stretch; height: 100%; min-height: 0; }
+.g { background: var(--c-surface); border-radius: var(--r-md); padding: var(--card-pad); display: flex; flex-direction: column; box-shadow: var(--shadow-sm); border: 1px solid var(--c-border); }
+.g .g-title { font-size: var(--fs-card-title); font-weight: 600; margin: 0 0 var(--sp-sm) 0; flex-shrink: 0; }
+.g .g-body { font-size: var(--fs-card-body); line-height: var(--lh-normal); margin: 0; flex-shrink: 0; }
+.card-diagram { flex: 1; min-height: 240px; margin-top: var(--sp-md); }
+.card-diagram svg { width: 100%; height: 100%; }
+.slide-main.v-center { justify-content: center; align-items: center; }
+.slide-footer { flex-shrink: 0; margin-top: var(--sp-md); padding-top: var(--sp-sm); border-top: 1px solid var(--c-border); font-size: var(--fs-footer); color: var(--c-text-2); display: flex; justify-content: space-between; }
+.stat-value { font-size: var(--fs-stat); font-weight: 800; line-height: 1; color: var(--c-accent-a); }
+.stat-label { font-size: var(--fs-body); color: var(--c-text-2); margin-top: var(--sp-xs); }
+.pill { display: inline-block; font-size: var(--fs-pill); padding: 6px 18px; border-radius: var(--r-full); background: var(--c-surface-2); color: var(--c-text-1); font-weight: 500; }
+.divider-h { height: 2px; background: linear-gradient(90deg, transparent, var(--c-border), transparent); margin: var(--sp-md) 0; }
+.divider-v { width: 2px; background: rgba(255, 255, 255, 0.1); margin: 0 var(--sp-md); align-self: stretch; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--card-gap); }
+.grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: var(--card-gap); }
+.split { display: flex; gap: var(--card-gap); }
+.split > * { flex: 1 1 0; min-width: 0; }
+.process-flow { display: flex; align-items: center; gap: var(--sp-md); flex: 1; min-height: 0; }
+.process-flow .step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.process-flow .arrow { font-size: var(--fs-body); color: var(--c-accent-a); flex-shrink: 0; }
+.emoji-lg { font-size: 64px; line-height: 1; }
+.emoji-xl { font-size: 96px; line-height: 1; }
+.wa {}
+  </style>
+  <style>
+/* === shell-layout.css === */
+:root {
+  --shell-title-gradient: linear-gradient(135deg, #ffffff 0%, var(--c-accent-a) 30%, #ffffff 55%, var(--c-accent-b) 80%, #ffffff 100%);
+  --shell-accent-gradient: linear-gradient(90deg, var(--c-accent-a), var(--c-accent-b), var(--c-accent-c));
+  --shell-dot-gradient: linear-gradient(135deg, var(--c-accent-a), var(--c-accent-b));
+  --shell-glow-color-a: rgba(101, 167, 255, 0.12);
+  --shell-glow-color-b: rgba(154, 123, 255, 0.06);
+  --shell-surface: rgba(4, 11, 22, 0.62);
+  --shell-border: rgba(255, 255, 255, 0.10);
+  --shell-radius: 34px;
+  --shell-padding: 28px 34px 20px;
+  --shell-hero-right-bg: linear-gradient(145deg, #0f1f3c 0%, #18315e 42%, #162850 70%, #0b1830 100%);
+  --shell-hero-right-border-inner: rgba(255, 255, 255, 0.08);
+  --shell-hero-right-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+  --shell-card-bg: rgba(10, 20, 38, 0.90);
+  --shell-card-glow: radial-gradient(circle at top left, rgba(101, 167, 255, 0.06), transparent 28%);
+  --shell-card-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  --shell-ordinal-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  --shell-hashtag-gradient: linear-gradient(135deg, rgba(101, 167, 255, 0.2), rgba(154, 123, 255, 0.15));
+  --shell-hashtag-border: rgba(101, 167, 255, 0.3);
+}
+.slide-shell {
+  flex: 1; min-height: 0; border-radius: var(--shell-radius); overflow: hidden;
+  border: 1px solid var(--shell-border);
+  background: var(--shell-card-glow), var(--shell-card-surface), var(--shell-surface);
+  backdrop-filter: blur(22px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), var(--shadow-lg);
+  padding: var(--shell-padding); display: flex; flex-direction: column;
+}
+.slide-shell--fullbleed { padding: 0; border: none; background: transparent; box-shadow: none; backdrop-filter: none; }
+.slide-topline { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-shrink: 0; }
+.eyebrow { font-size: 24px; letter-spacing: 0.20em; text-transform: uppercase; color: var(--c-accent-a); font-weight: 900; text-shadow: 0 0 20px var(--shell-glow-color-a); }
+.page-no { font-size: 24px; color: var(--c-text-2); font-weight: 700; display: flex; align-items: center; gap: 12px; }
+.page-no::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--shell-dot-gradient); box-shadow: 0 0 12px var(--shell-glow-color-a); }
+.hero-glow { position: absolute; top: -60px; left: -80px; width: 520px; height: 440px; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, var(--shell-glow-color-a), var(--shell-glow-color-b) 40%, transparent 72%); filter: blur(40px); z-index: 0; }
+.hero-glow-right { position: absolute; top: -60px; right: -80px; width: 520px; height: 440px; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, var(--shell-glow-color-b), var(--shell-glow-color-a) 40%, transparent 72%); filter: blur(40px); z-index: 0; }
+.hero-glow-center { position: absolute; top: 50%; left: 50%; width: 600px; height: 500px; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, var(--shell-glow-color-a), var(--shell-glow-color-b) 40%, transparent 72%); filter: blur(50px); z-index: 0; transform: translate(-50%, -50%); }
+.hero-glow ~ *, .hero-glow-right ~ *, .hero-glow-center ~ * { position: relative; z-index: 1; }
+.hero-ordinal { font-size: 100px; font-weight: 980; letter-spacing: -0.06em; line-height: 1; background: var(--shell-ordinal-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: -12px; user-select: none; pointer-events: none; }
+.hero-accent-bar { width: 120px; height: 6px; border-radius: 3px; background: var(--shell-accent-gradient); margin-top: 24px; box-shadow: 0 0 28px var(--shell-glow-color-a), 0 0 60px var(--shell-glow-color-b); }
+.hero-title { font-size: 120px; line-height: 0.96; font-weight: 980; letter-spacing: -0.06em; margin: 0 0 20px; background: var(--shell-title-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 14px 40px rgba(0,0,0,0.34)); }
+.hero-sub { font-size: 42px; line-height: 1.34; color: var(--c-text-2); max-width: 860px; margin: 0 0 24px; font-weight: 500; }
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; height: 100%; }
+.hero-left { padding: 14px 4px 14px 6px; display: flex; flex-direction: column; justify-content: center; position: relative; }
+.hero-right { border-radius: 30px; overflow: hidden; position: relative; background: var(--shell-hero-right-bg); border: 1px solid var(--shell-border); box-shadow: var(--shadow-lg); display: flex; align-items: center; justify-content: center; }
+.hero-right::before { content: ""; position: absolute; inset: 24px; border-radius: 24px; border: 1px solid var(--shell-hero-right-border-inner); pointer-events: none; }
+.hero-right::after { content: ""; position: absolute; inset: 0; background: var(--shell-hero-right-overlay); pointer-events: none; }
+.slide-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%; }
+.grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; height: 100%; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; height: 100%; }
+.g, .panel { background: var(--shell-card-glow), var(--shell-card-surface), var(--shell-card-bg); border: 1px solid var(--shell-border); border-radius: 26px; box-shadow: var(--shadow-md); padding: 26px 28px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.hashtag { display: inline-flex; align-items: center; padding: 10px 20px; background: var(--shell-hashtag-gradient); border: 1px solid var(--shell-hashtag-border); border-radius: 8px; font-size: 28px; font-weight: 800; color: var(--c-accent-a); }
+.hashtag::before { content: "#"; margin-right: 4px; }
+.notif-card { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border-radius: 20px; padding: 24px 28px; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; gap: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.notif-icon { width: 64px; height: 64px; border-radius: 18px; background: linear-gradient(135deg, var(--c-accent-a), var(--c-accent-b)); display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+.label-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center; font-size: 24px; color: var(--c-text-2); flex-shrink: 0; }
+.footer-strong { color: var(--c-text-1); font-weight: 900; }
+.nav-zone-left, .nav-zone-right { position: fixed; top: 0; width: 18vw; height: 100vh; z-index: 9999; cursor: pointer; background: transparent; }
+.nav-zone-left { left: 0; }
+.nav-zone-right { right: 0; }
+#navigation-hint { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,0.42); letter-spacing: 0.12em; text-transform: uppercase; pointer-events: none; z-index: 10000; }
+  </style>
+  <style>
+/* === mobile-deep-blue.css === */
+:root {
+  --c-bg: #07111f;
+  --c-surface: rgba(11, 24, 44, 0.86);
+  --c-surface-2: rgba(25, 46, 77, 0.86);
+  --c-text-1: #f5f8ff;
+  --c-text-2: #9fb4d3;
+  --c-accent-a: #65a7ff;
+  --c-accent-b: #9a7bff;
+  --c-accent-c: #35d0ff;
+  --c-accent-d: #ff6b9d;
+  --c-accent-e: #ffd93d;
+  --c-border: rgba(255, 255, 255, 0.10);
+  --c-overlay: rgba(7, 17, 31, 0.6);
+  --shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 18px 40px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 28px 90px rgba(0, 0, 0, 0.40);
+  --shell-title-gradient: linear-gradient(135deg, #ffffff 0%, #cfe3ff 30%, #ffffff 55%, #a8c8ff 80%, #ffffff 100%);
+  --shell-accent-gradient: linear-gradient(90deg, #65a7ff, #9a7bff, #35d0ff);
+  --shell-dot-gradient: linear-gradient(135deg, #65a7ff, #9a7bff);
+  --shell-glow-color-a: rgba(101, 167, 255, 0.12);
+  --shell-glow-color-b: rgba(154, 123, 255, 0.06);
+  --shell-surface: rgba(4, 11, 22, 0.62);
+  --shell-border: rgba(255, 255, 255, 0.10);
+  --shell-radius: 34px;
+  --shell-padding: 28px 34px 20px;
+  --shell-hero-right-bg: linear-gradient(145deg, #0f1f3c 0%, #18315e 42%, #162850 70%, #0b1830 100%);
+  --shell-hero-right-border-inner: rgba(255, 255, 255, 0.08);
+  --shell-hero-right-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+  --shell-card-bg: rgba(10, 20, 38, 0.90);
+  --shell-card-glow: radial-gradient(circle at top left, rgba(101, 167, 255, 0.06), transparent 28%);
+  --shell-card-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  --shell-ordinal-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  --shell-hashtag-gradient: linear-gradient(135deg, rgba(101, 167, 255, 0.2), rgba(154, 123, 255, 0.15));
+  --shell-hashtag-border: rgba(101, 167, 255, 0.3);
+}
+  </style>
+  <style>
+/* === style.css (deep-reporting scoped overrides) === */
+.tpl-deep-reporting .s.slide {
+  padding: 40px 56px 32px;
+  background: transparent;
+}
+  </style>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; width: 100%; height: 100%; overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(53,208,255,0.14), transparent 22%),
+        radial-gradient(circle at 84% 18%, rgba(154,123,255,0.16), transparent 26%),
+        linear-gradient(145deg, #02060d 0%, #081221 34%, #0a1630 68%, #07111f 100%);
+      font-family: var(--font-sans), system-ui, sans-serif;
+      color: var(--c-text-1);
+    }
+    body { display: flex; justify-content: center; align-items: center; padding: 24px; }
+    #P {
+      background:
+        radial-gradient(circle at 16% 10%, rgba(101,167,255,0.12), transparent 22%),
+        radial-gradient(circle at 82% 22%, rgba(154,123,255,0.16), transparent 24%),
+        linear-gradient(145deg, #030812 0%, #081323 32%, #0a1730 62%, #08111f 100%);
+      box-shadow: 0 36px 120px rgba(0,0,0,0.48);
+    }
+    #P::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 96px 96px; pointer-events: none; opacity: 0.35;
+    }
+    #P::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div class="nav-zone-left" data-nav="prev"></div>
+<div class="nav-zone-right" data-nav="next"></div>
+<div id="P" class="tpl-deep-reporting">
+
+  <!-- ==================== Slide 1: Cover ==================== -->
+  <section class="s slide is-active" id="slide-1">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">HOOK</div><div class="page-no">01 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">01</div>
+            <h1 class="hero-title">短视频式汇报范式</h1>
+            <p class="hero-sub">用内容创作思路重塑职场汇报</p>
+            <div class="hero-accent-bar"></div>
+            <div class="label-row" style="margin-top:24px;">
+              <span class="hashtag">内容创作</span>
+              <span class="hashtag">职场汇报</span>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="coverGrad1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#9a7bff"/></linearGradient>
+                <linearGradient id="coverGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#35d0ff"/><stop offset="100%" stop-color="#65a7ff"/></linearGradient>
+                <filter id="coverGlow"><feGaussianBlur stdDeviation="20" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <rect x="310" y="80" width="280" height="560" rx="36" fill="rgba(101,167,255,0.08)" stroke="url(#coverGrad1)" stroke-width="3"/>
+              <rect x="330" y="130" width="240" height="420" rx="8" fill="rgba(101,167,255,0.06)"/>
+              <rect x="340" y="140" width="220" height="30" rx="4" fill="rgba(101,167,255,0.15)"/>
+              <text x="450" y="162" text-anchor="middle" font-size="18" fill="rgba(255,255,255,0.5)" font-weight="700">汇报进行中</text>
+              <rect x="340" y="180" width="220" height="4" rx="2" fill="rgba(255,255,255,0.1)"/>
+              <rect x="340" y="180" width="132" height="4" rx="2" fill="url(#coverGrad2)"/>
+              <rect x="350" y="200" width="200" height="80" rx="10" fill="rgba(101,167,255,0.1)" stroke="rgba(101,167,255,0.25)" stroke-width="1"/>
+              <text x="450" y="248" text-anchor="middle" font-size="26" fill="rgba(255,255,255,0.6)" font-weight="800">HOOK</text>
+              <rect x="350" y="295" width="200" height="80" rx="10" fill="rgba(154,123,255,0.1)" stroke="rgba(154,123,255,0.25)" stroke-width="1"/>
+              <text x="450" y="343" text-anchor="middle" font-size="26" fill="rgba(255,255,255,0.6)" font-weight="800">SHIFT</text>
+              <rect x="350" y="390" width="200" height="80" rx="10" fill="rgba(53,208,255,0.1)" stroke="rgba(53,208,255,0.25)" stroke-width="1"/>
+              <text x="450" y="438" text-anchor="middle" font-size="26" fill="rgba(255,255,255,0.6)" font-weight="800">METHOD</text>
+              <circle cx="390" cy="510" r="16" fill="rgba(255,107,157,0.2)" stroke="rgba(255,107,157,0.4)" stroke-width="1.5"/>
+              <circle cx="450" cy="510" r="16" fill="rgba(101,167,255,0.2)" stroke="rgba(101,167,255,0.4)" stroke-width="1.5"/>
+              <circle cx="510" cy="510" r="16" fill="rgba(255,217,61,0.2)" stroke="rgba(255,217,61,0.4)" stroke-width="1.5"/>
+              <text x="110" y="430" font-size="24" fill="rgba(255,255,255,0.4)" font-weight="700">PPT</text>
+              <text x="660" y="300" font-size="24" fill="rgba(53,208,255,0.5)" font-weight="700">Short Video</text>
+              <path d="M640 310 Q620 350, 590 380" stroke="rgba(53,208,255,0.3)" stroke-width="2" fill="none" stroke-dasharray="4,4"/>
+              <circle cx="200" cy="200" r="4" fill="rgba(101,167,255,0.6)" filter="url(#coverGlow)"/>
+              <circle cx="750" cy="550" r="4" fill="rgba(154,123,255,0.6)" filter="url(#coverGlow)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Opening</span><span class="footer-strong">像做内容一样做汇报</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 2: Pain Point ==================== -->
+  <section class="s slide" id="slide-2">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">PAIN</div><div class="page-no">02 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">02</div>
+            <h1 class="hero-title" style="font-size:110px;">注意力枯竭</h1>
+            <p class="hero-sub">传统汇报三大困境<br>密集文字 · 线性叙事 · 零互动</p>
+            <div class="hero-accent-bar"></div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <line x1="100" y1="680" x2="820" y2="680" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+              <line x1="100" y1="680" x2="100" y2="100" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+              <text x="40" y="110" font-size="28" fill="#9fb4d3">注意力</text>
+              <text x="790" y="720" font-size="28" fill="#9fb4d3">时间</text>
+              <text x="100" y="720" font-size="22" fill="rgba(255,255,255,0.35)">0min</text>
+              <text x="300" y="720" font-size="22" fill="rgba(255,255,255,0.35)">5min</text>
+              <text x="500" y="720" font-size="22" fill="rgba(255,255,255,0.35)">10min</text>
+              <text x="700" y="720" font-size="22" fill="rgba(255,255,255,0.35)">20min</text>
+              <defs><linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#ff6b9d"/></linearGradient></defs>
+              <path d="M100 150 Q 250 160, 350 280 T 600 440 T 820 650" fill="none" stroke="url(#lineGrad)" stroke-width="10" stroke-linecap="round"/>
+              <circle cx="250" cy="168" r="10" fill="#65a7ff" opacity="0.8"/>
+              <text x="250" y="140" text-anchor="middle" font-size="24" fill="#65a7ff" font-weight="800">开场即巅峰</text>
+              <circle cx="500" cy="360" r="10" fill="#ff6b9d" opacity="0.8"/>
+              <text x="500" y="332" text-anchor="middle" font-size="24" fill="#ff6b9d" font-weight="800">兴趣断崖</text>
+              <rect x="120" y="140" width="80" height="36" rx="8" fill="rgba(101,167,255,0.15)" stroke="rgba(101,167,255,0.3)" stroke-width="1"/>
+              <text x="160" y="166" text-anchor="middle" font-size="20" fill="var(--c-accent-a)">文字</text>
+              <rect x="360" y="260" width="80" height="36" rx="8" fill="rgba(255,107,157,0.15)" stroke="rgba(255,107,157,0.3)" stroke-width="1"/>
+              <text x="400" y="286" text-anchor="middle" font-size="20" fill="var(--c-accent-d)">线性</text>
+              <rect x="620" y="440" width="80" height="36" rx="8" fill="rgba(154,123,255,0.15)" stroke="rgba(154,123,255,0.3)" stroke-width="1"/>
+              <text x="660" y="466" text-anchor="middle" font-size="20" fill="var(--c-accent-b)">零互动</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Diagnosis</span><span class="footer-strong">听众在第三分钟就离开了</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 3: Mindset Shift ==================== -->
+  <section class="s slide" id="slide-3">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">SHIFT</div><div class="page-no">03 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:flex-start; padding-top:30px;">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">03</div>
+            <div style="font-size:36px; color:var(--c-accent-d); font-weight:900; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">PARADIGM SHIFT</div>
+            <h1 class="hero-title" style="font-size:96px;">范式迁移</h1>
+            <p class="hero-sub">从"写文档"到"做内容"</p>
+            <div class="hero-accent-bar"></div>
+            <div style="display:flex; gap:14px; margin-top:28px;">
+              <div style="padding:16px 22px; border-radius:14px; background:rgba(255,107,157,0.15); border:1px solid rgba(255,107,157,0.3); flex:1;">
+                <div style="font-size:26px; color:var(--c-accent-d); font-weight:900;">旧思维</div>
+                <div style="font-size:22px; color:#b8cae6; margin-top:6px;">信息堆砌 · 完整覆盖</div>
+              </div>
+              <div style="padding:16px 22px; border-radius:14px; background:rgba(101,167,255,0.15); border:1px solid rgba(101,167,255,0.3); flex:1;">
+                <div style="font-size:26px; color:var(--c-accent-a); font-weight:900;">新思维</div>
+                <div style="font-size:22px; color:#b8cae6; margin-top:6px;">内容编排 · 价值牵引</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <rect x="60" y="80" width="360" height="600" rx="28" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+              <text x="240" y="130" text-anchor="middle" font-size="32" fill="rgba(255,255,255,0.5)" font-weight="900">BEFORE</text>
+              <rect x="90" y="160" width="300" height="60" rx="10" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+              <text x="240" y="200" text-anchor="middle" font-size="24" fill="rgba(255,255,255,0.4)">段落一：背景描述...</text>
+              <rect x="90" y="240" width="300" height="60" rx="10" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+              <text x="240" y="280" text-anchor="middle" font-size="24" fill="rgba(255,255,255,0.4)">段落二：详细展开...</text>
+              <rect x="90" y="320" width="300" height="60" rx="10" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+              <text x="240" y="360" text-anchor="middle" font-size="24" fill="rgba(255,255,255,0.4)">段落三：更多内容...</text>
+              <rect x="480" y="80" width="360" height="600" rx="28" fill="rgba(101,167,255,0.06)" stroke="rgba(101,167,255,0.25)" stroke-width="2"/>
+              <text x="660" y="130" text-anchor="middle" font-size="32" fill="var(--c-accent-a)" font-weight="900">AFTER</text>
+              <rect x="510" y="160" width="300" height="70" rx="12" fill="rgba(255,107,157,0.15)" stroke="rgba(255,107,157,0.4)" stroke-width="1.5"/>
+              <text x="660" y="205" text-anchor="middle" font-size="26" fill="var(--c-accent-d)" font-weight="900">Hook · 3秒抓住</text>
+              <rect x="510" y="250" width="300" height="70" rx="12" fill="rgba(101,167,255,0.15)" stroke="rgba(101,167,255,0.4)" stroke-width="1.5"/>
+              <text x="660" y="295" text-anchor="middle" font-size="26" fill="var(--c-accent-a)" font-weight="900">Story · 故事流转</text>
+              <rect x="510" y="340" width="300" height="70" rx="12" fill="rgba(154,123,255,0.15)" stroke="rgba(154,123,255,0.4)" stroke-width="1.5"/>
+              <text x="660" y="385" text-anchor="middle" font-size="26" fill="var(--c-accent-b)" font-weight="900">Data · 一图胜千言</text>
+              <rect x="510" y="430" width="300" height="70" rx="12" fill="rgba(53,208,255,0.15)" stroke="rgba(53,208,255,0.4)" stroke-width="1.5"/>
+              <text x="660" y="475" text-anchor="middle" font-size="26" fill="var(--c-accent-c)" font-weight="900">CTA · 行动号召</text>
+              <path d="M430 380 L460 380 L470 370 M470 390 L460 380" fill="none" stroke="var(--c-accent-a)" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Paradigm Shift</span><span class="footer-strong">汇报不是文档，是内容产品</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 4: Principles ==================== -->
+  <section class="s slide" id="slide-4">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">CORE</div><div class="page-no">04 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:center; padding-top:10px;">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">04</div>
+            <h1 class="hero-title" style="font-size:104px;">四大原则</h1>
+            <p class="hero-sub">内容创作的底层逻辑</p>
+            <div class="hero-accent-bar"></div>
+            <div style="display:flex; flex-direction:column; gap:14px; margin-top:28px;">
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--c-accent-d);box-shadow:0 0 16px rgba(255,107,157,0.5);flex-shrink:0;"></div>
+                <span style="font-size:30px;color:#b2c6e3;">Hook优先 · 三秒定生死</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--c-accent-a);box-shadow:0 0 16px rgba(101,167,255,0.5);flex-shrink:0;"></div>
+                <span style="font-size:30px;color:#b2c6e3;">节奏感 · 张弛有度</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--c-accent-b);box-shadow:0 0 16px rgba(154,123,255,0.5);flex-shrink:0;"></div>
+                <span style="font-size:30px;color:#b2c6e3;">视觉叙事 · 一图胜千言</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--c-accent-c);box-shadow:0 0 16px rgba(53,208,255,0.5);flex-shrink:0;"></div>
+                <span style="font-size:30px;color:#b2c6e3;">一屏一意 · 少即是多</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="c1g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff6b9d"/><stop offset="100%" stop-color="#ff8fab"/></linearGradient>
+                <linearGradient id="c2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#8fc4ff"/></linearGradient>
+                <linearGradient id="c3g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9a7bff"/><stop offset="100%" stop-color="#b8a8ff"/></linearGradient>
+                <linearGradient id="c4g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#35d0ff"/><stop offset="100%" stop-color="#6de0ff"/></linearGradient>
+              </defs>
+              <rect x="40" y="60" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(255,107,157,0.3)" stroke-width="2"/>
+              <rect x="40" y="60" width="380" height="8" rx="4" fill="url(#c1g)"/>
+              <text x="72" y="148" font-size="72" fill="#ff6b9d" font-weight="980" opacity="0.35">01</text>
+              <text x="160" y="148" font-size="42" fill="white" font-weight="900">Hook优先</text>
+              <text x="72" y="200" font-size="28" fill="#b8cae6">开场3秒决定生死</text>
+              <rect x="480" y="80" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(101,167,255,0.3)" stroke-width="2"/>
+              <rect x="480" y="80" width="380" height="8" rx="4" fill="url(#c2g)"/>
+              <text x="512" y="168" font-size="72" fill="#65a7ff" font-weight="980" opacity="0.35">02</text>
+              <text x="600" y="168" font-size="42" fill="white" font-weight="900">节奏感</text>
+              <text x="512" y="220" font-size="28" fill="#b8cae6">张弛有度不拖不赶</text>
+              <rect x="40" y="400" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(154,123,255,0.3)" stroke-width="2"/>
+              <rect x="40" y="400" width="380" height="8" rx="4" fill="url(#c3g)"/>
+              <text x="72" y="488" font-size="72" fill="#9a7bff" font-weight="980" opacity="0.35">03</text>
+              <text x="160" y="488" font-size="42" fill="white" font-weight="900">视觉叙事</text>
+              <text x="72" y="540" font-size="28" fill="#b8cae6">一图胜千言取代堆砌</text>
+              <rect x="480" y="420" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(53,208,255,0.3)" stroke-width="2"/>
+              <rect x="480" y="420" width="380" height="8" rx="4" fill="url(#c4g)"/>
+              <text x="512" y="508" font-size="72" fill="#35d0ff" font-weight="980" opacity="0.35">04</text>
+              <text x="600" y="508" font-size="42" fill="white" font-weight="900">一屏一意</text>
+              <text x="512" y="560" font-size="28" fill="#b8cae6">少即是多聚焦单点</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Core Formula</span><span class="footer-strong">好汇报 = 好内容</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 5: Method / Pipeline ==================== -->
+  <section class="s slide" id="slide-5">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">METHOD</div><div class="page-no">05 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">05</div>
+            <h1 class="hero-title" style="font-size:104px;">创作流水线</h1>
+            <p class="hero-sub">四步法把汇报变成内容产品<br>钩子 → 骨架 → 分镜 → 打磨</p>
+            <div class="hero-accent-bar"></div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="seg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff6b9d"/><stop offset="100%" stop-color="#ff8fab"/></linearGradient>
+                <linearGradient id="seg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9a7bff"/><stop offset="100%" stop-color="#b8a8ff"/></linearGradient>
+                <linearGradient id="seg3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#8fc4ff"/></linearGradient>
+                <linearGradient id="seg4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#35d0ff"/><stop offset="100%" stop-color="#6de0ff"/></linearGradient>
+              </defs>
+              <rect x="80" y="160" width="170" height="40" rx="8" fill="url(#seg1)" opacity="0.9"/>
+              <text x="165" y="188" text-anchor="middle" font-size="22" fill="white" font-weight="900">Hook 钩子</text>
+              <rect x="270" y="160" width="170" height="40" rx="8" fill="url(#seg2)" opacity="0.9"/>
+              <text x="355" y="188" text-anchor="middle" font-size="22" fill="white" font-weight="900">Frame 骨架</text>
+              <rect x="460" y="160" width="170" height="40" rx="8" fill="url(#seg3)" opacity="0.9"/>
+              <text x="545" y="188" text-anchor="middle" font-size="22" fill="white" font-weight="900">Scene 分镜</text>
+              <rect x="650" y="160" width="170" height="40" rx="8" fill="url(#seg4)" opacity="0.9"/>
+              <text x="735" y="188" text-anchor="middle" font-size="22" fill="white" font-weight="900">Polish 打磨</text>
+              <rect x="40" y="260" width="180" height="200" rx="14" fill="rgba(255,107,157,0.1)" stroke="rgba(255,107,157,0.3)" stroke-width="1.5"/>
+              <text x="130" y="300" text-anchor="middle" font-size="28" fill="#ff6b9d" font-weight="900">01</text>
+              <text x="130" y="340" text-anchor="middle" font-size="24" fill="white" font-weight="800">钩子</text>
+              <text x="130" y="376" text-anchor="middle" font-size="20" fill="#b8cae6">反直觉数据</text>
+              <text x="130" y="404" text-anchor="middle" font-size="20" fill="#b8cae6">悬念提问</text>
+              <text x="130" y="432" text-anchor="middle" font-size="20" fill="#b8cae6">场景代入</text>
+              <rect x="240" y="260" width="180" height="200" rx="14" fill="rgba(154,123,255,0.1)" stroke="rgba(154,123,255,0.3)" stroke-width="1.5"/>
+              <text x="330" y="300" text-anchor="middle" font-size="28" fill="#9a7bff" font-weight="900">02</text>
+              <text x="330" y="340" text-anchor="middle" font-size="24" fill="white" font-weight="800">骨架</text>
+              <text x="330" y="376" text-anchor="middle" font-size="20" fill="#b8cae6">核心论点</text>
+              <text x="330" y="404" text-anchor="middle" font-size="20" fill="#b8cae6">逻辑链路</text>
+              <text x="330" y="432" text-anchor="middle" font-size="20" fill="#b8cae6">三段式</text>
+              <rect x="440" y="260" width="180" height="200" rx="14" fill="rgba(101,167,255,0.1)" stroke="rgba(101,167,255,0.3)" stroke-width="1.5"/>
+              <text x="530" y="300" text-anchor="middle" font-size="28" fill="#65a7ff" font-weight="900">03</text>
+              <text x="530" y="340" text-anchor="middle" font-size="24" fill="white" font-weight="800">分镜</text>
+              <text x="530" y="376" text-anchor="middle" font-size="20" fill="#b8cae6">视觉配图</text>
+              <text x="530" y="404" text-anchor="middle" font-size="20" fill="#b8cae6">节奏设计</text>
+              <text x="530" y="432" text-anchor="middle" font-size="20" fill="#b8cae6">过渡衔接</text>
+              <rect x="640" y="260" width="180" height="200" rx="14" fill="rgba(53,208,255,0.1)" stroke="rgba(53,208,255,0.3)" stroke-width="1.5"/>
+              <text x="730" y="300" text-anchor="middle" font-size="28" fill="#35d0ff" font-weight="900">04</text>
+              <text x="730" y="340" text-anchor="middle" font-size="24" fill="white" font-weight="800">打磨</text>
+              <text x="730" y="376" text-anchor="middle" font-size="20" fill="#b8cae6">删减冗余</text>
+              <text x="730" y="404" text-anchor="middle" font-size="20" fill="#b8cae6">强化记忆点</text>
+              <text x="730" y="432" text-anchor="middle" font-size="20" fill="#b8cae6">彩排计时</text>
+              <rect x="200" y="510" width="500" height="60" rx="14" fill="rgba(101,167,255,0.08)" stroke="rgba(101,167,255,0.2)" stroke-width="1"/>
+              <text x="450" y="550" text-anchor="middle" font-size="28" fill="var(--c-accent-a)" font-weight="800">产出: 一份"刷得下去"的汇报</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Pattern</span><span class="footer-strong">流程化保证下限，灵感决定上限</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 6: Tactics ==================== -->
+  <section class="s slide" id="slide-6">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">TACTICS</div><div class="page-no">06 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">06</div>
+            <h1 class="hero-title" style="font-size:96px;">开头三秒</h1>
+            <p class="hero-sub">决定听众是否继续的关键时刻<br>三秒定生死，七秒建信任</p>
+            <div class="hero-accent-bar"></div>
+            <div class="label-row" style="margin-top:24px;">
+              <span class="hashtag">反直觉</span>
+              <span class="hashtag">数据锚定</span>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <rect x="100" y="60" width="700" height="640" rx="36" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+              <text x="450" y="120" text-anchor="middle" font-size="32" fill="rgba(255,255,255,0.5)" font-weight="900">3秒钩子策略</text>
+              <line x1="160" y1="180" x2="740" y2="180" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+              <circle cx="200" cy="180" r="12" fill="#ff6b9d"/><text x="200" y="220" text-anchor="middle" font-size="22" fill="#ff6b9d" font-weight="800">0s</text>
+              <circle cx="450" cy="180" r="12" fill="#65a7ff"/><text x="450" y="220" text-anchor="middle" font-size="22" fill="#65a7ff" font-weight="800">1.5s</text>
+              <circle cx="700" cy="180" r="12" fill="#35d0ff"/><text x="700" y="220" text-anchor="middle" font-size="22" fill="#35d0ff" font-weight="800">3s</text>
+              <rect x="140" y="260" width="280" height="120" rx="16" fill="rgba(255,107,157,0.12)" stroke="rgba(255,107,157,0.3)" stroke-width="1"/>
+              <text x="280" y="300" text-anchor="middle" font-size="28" fill="white" font-weight="800">反直觉提问</text>
+              <text x="280" y="340" text-anchor="middle" font-size="22" fill="#b8cae6">"汇报失败率有多少？"</text>
+              <rect x="480" y="260" width="280" height="120" rx="16" fill="rgba(154,123,255,0.12)" stroke="rgba(154,123,255,0.3)" stroke-width="1"/>
+              <text x="620" y="300" text-anchor="middle" font-size="28" fill="white" font-weight="800">数据锚定</text>
+              <text x="620" y="340" text-anchor="middle" font-size="22" fill="#b8cae6">"73%汇报5分钟内失焦"</text>
+              <rect x="140" y="420" width="620" height="80" rx="14" fill="rgba(53,208,255,0.08)" stroke="rgba(53,208,255,0.2)" stroke-width="1"/>
+              <text x="450" y="470" text-anchor="middle" font-size="28" fill="var(--c-accent-c)" font-weight="800">核心: 制造信息差 + 好奇心缺口</text>
+              <rect x="140" y="540" width="280" height="80" rx="14" fill="rgba(255,107,157,0.08)" stroke="rgba(255,107,157,0.2)" stroke-width="1"/>
+              <text x="280" y="570" text-anchor="middle" font-size="26" fill="var(--c-accent-d)" font-weight="800">无钩子</text>
+              <text x="280" y="604" text-anchor="middle" font-size="28" fill="rgba(255,255,255,0.6)">73% 跑掉</text>
+              <rect x="480" y="540" width="280" height="80" rx="14" fill="rgba(101,167,255,0.08)" stroke="rgba(101,167,255,0.2)" stroke-width="1"/>
+              <text x="620" y="570" text-anchor="middle" font-size="26" fill="var(--c-accent-a)" font-weight="800">有钩子</text>
+              <text x="620" y="604" text-anchor="middle" font-size="28" fill="rgba(255,255,255,0.6)">89% 留下</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Tactics</span><span class="footer-strong">没有钩子的汇报就是噪音</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 7: Evidence ==================== -->
+  <section class="s slide" id="slide-7">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">EVIDENCE</div><div class="page-no">07 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">07</div>
+            <h1 class="hero-title" style="font-size:96px;">数据佐证</h1>
+            <p class="hero-sub">短视频式汇报的成效验证</p>
+            <div class="hero-accent-bar"></div>
+          </div>
+          <div class="hero-right" style="padding:20px;">
+            <div style="display:flex;flex-direction:column;gap:16px;height:100%;justify-content:center;">
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,var(--c-accent-d),#ff8fab);">1</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">注意力留存 x2.4</div>
+                  <div style="font-size:28px;color:var(--c-text-2);">短视频式 vs 传统PPT</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:var(--c-accent-d);border-color:var(--c-accent-d);">TOP</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,var(--c-accent-a),#8fc4ff);">2</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">决策效率 +68%</div>
+                  <div style="font-size:28px;color:var(--c-text-2);">关键信息一屏呈现</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;">效率</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,var(--c-accent-b),#b8a8ff);">3</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">汇报时长 -42%</div>
+                  <div style="font-size:28px;color:var(--c-text-2);">精炼内容，拒绝注水</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:var(--c-accent-b);border-color:var(--c-accent-b);">精简</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,var(--c-accent-c),#6de0ff);">4</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">共识达成 +55%</div>
+                  <div style="font-size:28px;color:var(--c-text-2);">视觉化降低理解偏差</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:var(--c-accent-c);border-color:var(--c-accent-c);">共识</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Evidence</span><span class="footer-strong">数据不撒谎，方法有效</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 8: Cases ==================== -->
+  <section class="s slide" id="slide-8">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">CASES</div><div class="page-no">08 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:center;">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">08</div>
+            <h1 class="hero-title" style="font-size:104px;">实战案例</h1>
+            <p class="hero-sub">同一内容，不同表达<br>效果天差地别</p>
+            <div class="hero-accent-bar"></div>
+            <div style="margin-top:28px; display:flex; flex-direction:column; gap:14px;">
+              <div style="padding:18px 22px; border-radius:16px; background:linear-gradient(135deg, rgba(255,107,157,0.12), rgba(154,123,255,0.08)); border-left:5px solid var(--c-accent-d);">
+                <div style="font-size:30px; font-weight:900; color:white;">Case A · 季度汇报</div>
+                <div style="font-size:24px; color:var(--c-text-2); margin-top:4px;">30页PPT → 9页内容式</div>
+              </div>
+              <div style="padding:18px 22px; border-radius:16px; background:linear-gradient(135deg, rgba(53,208,255,0.12), rgba(101,167,255,0.08)); border-left:5px solid var(--c-accent-c);">
+                <div style="font-size:30px; font-weight:900; color:white;">Case B · 项目提案</div>
+                <div style="font-size:24px; color:var(--c-text-2); margin-top:4px;">文字堆砌 → 视觉叙事</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <rect x="40" y="40" width="400" height="340" rx="24" fill="rgba(10,20,38,0.95)" stroke="rgba(255,107,157,0.25)" stroke-width="2"/>
+              <rect x="40" y="40" width="400" height="10" rx="5" fill="var(--c-accent-d)"/>
+              <text x="60" y="100" font-size="34" fill="white" font-weight="900">CASE A</text>
+              <text x="60" y="140" font-size="24" fill="var(--c-text-2)">季度经营汇报</text>
+              <line x1="80" y1="165" x2="400" y2="165" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              <text x="80" y="200" font-size="24" fill="var(--c-accent-d)">传统: 30页 · 45分钟</text>
+              <text x="80" y="240" font-size="24" fill="var(--c-accent-a)">改版: 9页 · 12分钟</text>
+              <rect x="80" y="270" width="300" height="80" rx="14" fill="rgba(101,167,255,0.1)" stroke="rgba(101,167,255,0.3)" stroke-width="1"/>
+              <text x="230" y="320" text-anchor="middle" font-size="32" fill="var(--c-accent-a)" font-weight="900">效率 x3.7</text>
+              <rect x="460" y="380" width="400" height="340" rx="24" fill="rgba(10,20,38,0.95)" stroke="rgba(53,208,255,0.25)" stroke-width="2"/>
+              <rect x="460" y="380" width="400" height="10" rx="5" fill="var(--c-accent-c)"/>
+              <text x="480" y="440" font-size="34" fill="white" font-weight="900">CASE B</text>
+              <text x="480" y="480" font-size="24" fill="var(--c-text-2)">项目提案汇报</text>
+              <line x1="500" y1="505" x2="820" y2="505" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+              <text x="500" y="540" font-size="24" fill="var(--c-accent-d)">传统: 密集文字 · 2次被打断</text>
+              <text x="500" y="580" font-size="24" fill="var(--c-accent-c)">改版: 图解叙事 · 一次通过</text>
+              <rect x="500" y="610" width="300" height="80" rx="14" fill="rgba(53,208,255,0.1)" stroke="rgba(53,208,255,0.3)" stroke-width="1"/>
+              <text x="650" y="660" text-anchor="middle" font-size="32" fill="var(--c-accent-c)" font-weight="900">通过率 +82%</text>
+              <rect x="290" y="310" width="320" height="50" rx="14" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+              <text x="450" y="344" text-anchor="middle" font-size="26" fill="white" font-weight="900">同一套思维方法</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Real Cases</span><span class="footer-strong">同一内容，不同表达，效果天差地别</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 9: Closing — Full-bleed SVG ==================== -->
+  <section class="s slide" id="slide-9">
+    <div class="slide-shell slide-shell--fullbleed">
+      <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;position:absolute;inset:0;">
+        <defs>
+          <radialGradient id="burst" cx="50%" cy="42%" r="50%">
+            <stop offset="0%" stop-color="rgba(101,167,255,0.22)"/>
+            <stop offset="30%" stop-color="rgba(154,123,255,0.10)"/>
+            <stop offset="60%" stop-color="rgba(53,208,255,0.03)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <linearGradient id="quoteGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="25%" stop-color="#cfe3ff"/>
+            <stop offset="50%" stop-color="#9a7bff"/>
+            <stop offset="75%" stop-color="#65a7ff"/>
+            <stop offset="100%" stop-color="#35d0ff"/>
+          </linearGradient>
+          <linearGradient id="longBar" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff6b9d"/>
+            <stop offset="25%" stop-color="#9a7bff"/>
+            <stop offset="50%" stop-color="#65a7ff"/>
+            <stop offset="75%" stop-color="#35d0ff"/>
+            <stop offset="100%" stop-color="#65a7ff"/>
+          </linearGradient>
+          <linearGradient id="p1g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(255,107,157,0.25)"/><stop offset="100%" stop-color="rgba(255,107,157,0.05)"/></linearGradient>
+          <linearGradient id="p2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(101,167,255,0.25)"/><stop offset="100%" stop-color="rgba(101,167,255,0.05)"/></linearGradient>
+          <linearGradient id="p3g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(154,123,255,0.25)"/><stop offset="100%" stop-color="rgba(154,123,255,0.05)"/></linearGradient>
+          <linearGradient id="p4g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(53,208,255,0.25)"/><stop offset="100%" stop-color="rgba(53,208,255,0.05)"/></linearGradient>
+          <filter id="bigGlow"><feGaussianBlur stdDeviation="40" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="softGlow"><feGaussianBlur stdDeviation="16" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect width="1920" height="1080" fill="#050d1a"/>
+        <rect width="1920" height="1080" fill="url(#burst)"/>
+        <linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(101,167,255,0.12)"/><stop offset="100%" stop-color="transparent"/></linearGradient>
+        <polygon points="960,400 140,0 300,0" fill="url(#rayGrad)" opacity="0.6"/>
+        <polygon points="960,400 1620,0 1780,0" fill="url(#rayGrad)" opacity="0.5"/>
+        <circle cx="260" cy="200" r="150" fill="none" stroke="rgba(101,167,255,0.06)" stroke-width="2"/>
+        <circle cx="1660" cy="880" r="190" fill="none" stroke="rgba(154,123,255,0.05)" stroke-width="2"/>
+        <circle cx="120" cy="520" r="4" fill="rgba(101,167,255,0.6)" filter="url(#softGlow)"/>
+        <circle cx="1800" cy="260" r="4" fill="rgba(154,123,255,0.6)" filter="url(#softGlow)"/>
+        <text x="80" y="1060" font-size="24" fill="rgba(255,255,255,0.3)" font-weight="700">09 / 09</text>
+        <text x="1840" y="1060" text-anchor="end" font-size="24" fill="rgba(255,255,255,0.3)" font-weight="700" letter-spacing="0.2em">FIN</text>
+        <text x="960" y="370" text-anchor="middle" font-size="120" font-weight="980" fill="rgba(101,167,255,0.10)" filter="url(#bigGlow)" letter-spacing="-0.04em">让每一页汇报</text>
+        <text x="960" y="520" text-anchor="middle" font-size="120" font-weight="980" fill="rgba(154,123,255,0.10)" filter="url(#bigGlow)" letter-spacing="-0.04em">像刷短视频一样</text>
+        <text x="960" y="620" text-anchor="middle" font-size="80" font-weight="980" fill="rgba(53,208,255,0.10)" filter="url(#bigGlow)" letter-spacing="-0.04em">让人停不下来</text>
+        <text x="960" y="370" text-anchor="middle" font-size="120" font-weight="980" fill="url(#quoteGrad)" letter-spacing="-0.04em">让每一页汇报</text>
+        <text x="960" y="520" text-anchor="middle" font-size="120" font-weight="980" fill="url(#quoteGrad)" letter-spacing="-0.04em">像刷短视频一样</text>
+        <text x="960" y="620" text-anchor="middle" font-size="80" font-weight="980" fill="url(#quoteGrad)" letter-spacing="-0.04em">让人停不下来</text>
+        <rect x="300" y="666" width="1320" height="6" rx="3" fill="url(#longBar)"/>
+        <circle cx="300" cy="669" r="8" fill="#ff6b9d" filter="url(#softGlow)"/>
+        <circle cx="1620" cy="669" r="8" fill="#65a7ff" filter="url(#softGlow)"/>
+        <text x="960" y="730" text-anchor="middle" font-size="38" fill="#9fb4d3" font-weight="400" letter-spacing="0.06em">短视频式汇报范式 · 内容创作重塑职场表达</text>
+        <g transform="translate(200, 790)"><rect width="340" height="110" rx="20" fill="url(#p1g)" stroke="rgba(255,107,157,0.35)" stroke-width="1.5"/><rect width="340" height="7" rx="3.5" fill="#ff6b9d"/><text x="170" y="52" text-anchor="middle" font-size="36" fill="#ff6b9d" font-weight="900"># Hook优先</text><text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">三秒定生死</text></g>
+        <g transform="translate(580, 790)"><rect width="340" height="110" rx="20" fill="url(#p2g)" stroke="rgba(101,167,255,0.35)" stroke-width="1.5"/><rect width="340" height="7" rx="3.5" fill="#65a7ff"/><text x="170" y="52" text-anchor="middle" font-size="36" fill="#65a7ff" font-weight="900"># 节奏感</text><text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">张弛有度</text></g>
+        <g transform="translate(960, 790)"><rect width="340" height="110" rx="20" fill="url(#p3g)" stroke="rgba(154,123,255,0.35)" stroke-width="1.5"/><rect width="340" height="7" rx="3.5" fill="#9a7bff"/><text x="170" y="52" text-anchor="middle" font-size="36" fill="#9a7bff" font-weight="900"># 视觉叙事</text><text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">一图胜千言</text></g>
+        <g transform="translate(1340, 790)"><rect width="340" height="110" rx="20" fill="url(#p4g)" stroke="rgba(53,208,255,0.35)" stroke-width="1.5"/><rect width="340" height="7" rx="3.5" fill="#35d0ff"/><text x="170" y="52" text-anchor="middle" font-size="36" fill="#35d0ff" font-weight="900"># 一屏一意</text><text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">少即是多</text></g>
+        <line x1="300" y1="1030" x2="1620" y2="1030" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <text x="960" y="1020" text-anchor="middle" font-size="20" fill="rgba(255,255,255,0.22)" letter-spacing="0.3em">SHORT VIDEO REPORTING PARADIGM</text>
+      </svg>
+    </div>
+  </section>
+
+</div>
+<div id="navigation-hint">Use ← → Space PgUp PgDn Home End</div>
+<script>
+(() => {
+  const slides = Array.from(document.querySelectorAll('.s.slide'));
+  const prevZone = document.querySelector('[data-nav="prev"]');
+  const nextZone = document.querySelector('[data-nav="next"]');
+  let index = Math.max(0, slides.findIndex(s => s.classList.contains('is-active')));
+  function render() {
+    slides.forEach((slide, i) => slide.classList.toggle('is-active', i === index));
+    const id = slides[index]?.id || `slide-${index + 1}`;
+    try { if (location.hash !== `#${id}`) history.replaceState(null, "", `#${id}`); } catch (_) {}
+  }
+  function go(nextIndex) { index = Math.max(0, Math.min(nextIndex, slides.length - 1)); render(); }
+  function next() { go(index + 1); }
+  function prev() { go(index - 1); }
+  window.nextSlide = next;
+  window.prevSlide = prev;
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { e.preventDefault(); go(0); }
+    else if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+  }, { passive: false });
+  [nextZone, prevZone].forEach(zone => {
+    if (!zone) return;
+    zone.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (zone.dataset.nav === 'next') next(); else prev(); });
+  });
+  window.addEventListener('hashchange', () => {
+    const hash = location.hash.slice(1);
+    const idx = slides.findIndex(s => s.id === hash);
+    if (idx >= 0) { index = idx; render(); }
+  });
+  const initialHash = location.hash.slice(1);
+  const initialIdx = slides.findIndex(s => s.id === initialHash);
+  if (initialIdx >= 0) index = initialIdx;
+  render();
+})();
+</script>
+</body>
+</html>

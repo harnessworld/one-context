@@ -1,10 +1,10 @@
 # Cover Design Skill
 
-> 独立封面设计规范。确保不同项目封面风格一致、可复用、易维护。
+> CONFIG 驱动的独立封面模板。每期只改一个 JS 对象，一键切换主题色系、装饰图形、噪点强度。
 
 ## 适用场景
 
-- 视频封面（短视频平台）
+- 视频封面（短视频平台：抖音/小红书/B站）
 - 文章头图
 - 演示文稿首页
 - 任何需要视觉冲击力的单页设计
@@ -14,125 +14,141 @@
 | 版式 | 尺寸 | 用途 |
 |------|------|------|
 | 竖版 | **1080 × 1920** | 短视频封面（抖音/小红书/B站） |
-| 横版 | **1440 × 1080** | 文章头图/B站横屏/公众号封面 |
 
 ## 核心原则
 
 ### 1. 信息优先级
 ```
-主标题（必须） > 副标题（推荐） > 说明文字（可选） > 装饰元素
+主标题（必须） > 副标题（推荐） > 标签（推荐） > 装饰元素
 ```
 
 ### 2. 视觉层次
-- **Hero 区**：占画布 50-70%，主视觉焦点
-- **信息区**：占 20-30%，补充说明
-- **装饰区**：占 10-20%，品牌/来源
+- **Hero 区**：画布中央偏上，主标题 + 副标题 + 分割线
+- **品牌栏**：顶部，tagline + 品牌名 + 头像
+- **底部栏**：关键词标签 + 水印
 
 ### 3. 字号下限（手机屏幕友好）
 
-| 元素 | 竖版最小 | 横版最小 |
-|------|---------|---------|
-| 主标题 | 140px | 100px |
-| 副标题 | 60px | 44px |
-| 说明文字 | 36px | 28px |
-| Pill 标题 | 40px | 32px |
-| Pill 副说明 | 32px | 24px |
+| 元素 | 竖版最小 |
+|------|---------|
+| 主标题 | 82px（长标题）~ 200px（短标题），按每行最大 CJK 视觉宽度自动适配 |
+| 副标题 | 48px |
+| 标签 | 26px |
+| 底部关键词 | 27px |
+
+**自适应字号算法**：CJK 字符计 1 宽度，ASCII 字符计 0.55 宽度 → 取最长行宽度 → 映射到字号档位。这确保多行标题中即使总字数多，只要单行不长，字号依然够大。
+
+| 最长行宽度 | 字号 | letter-spacing |
+|-----------|------|---------------|
+| ≤4 | 200px | -4px |
+| ≤5 | 180px | -4px |
+| ≤6 | 155px | -2px |
+| ≤7 | 130px | -1px |
+| ≤9 | 110px | 0 |
+| ≤11 | 95px | 0 |
+| >11 | 82px | 0 |
 
 ### 4. 留白控制
-- Hero 区上下留白：60-100px
-- 信息区左右边距：48-64px
-- 底部来源行：距底 32px
+- Content 区上下留白：200px / 280px
+- 品牌栏顶部边距：76px
+- 底部栏距底：60px
 
 ---
 
-## 组件库
+## CONFIG 配置
 
-详见 `ELEMENTS.md`，包含：
+在 HTML 文件顶部 `<script>` 中定义 `CONFIG` 对象：
 
-| 组件 | 用途 |
-|------|------|
-| Hero 标题 | 主标题样式（渐变/纯色/描边） |
-| 进化条 | 展示流程/演进（可选） |
-| Pill 卡 | 3-4 个并列信息块 |
-| 来源行 | 底部品牌/来源声明 |
-| 装饰元素 | 光晕/水印/几何图形 |
+```javascript
+const CONFIG = {
+    // ── 内容 ──
+    headline:    "主标题\n第二行",    // 主标题，\n 换行，建议 ≤6字/行
+    accentLine:  1,                   // 第几行用强调色（0=不高亮，1=第1行，2=第2行）
+    subline:     "副标题说明文字",
+    tag:         "2026 · 标签",
+    bgImage:     "",                  // 背景图路径，空则用纯 CSS 渐变
+    avatarImage: "",                  // 头像路径，空则用 avatarEmoji
+    avatarEmoji: "🐶",               // 无头像时的 emoji
+    brandName:   "品牌名",
+    tagline:     "Slogan/频道定位",
+    footerItems: ["关键词1", "关键词2"],
+    watermark:   "水印文字",
 
----
+    // ── 主题 ──
+    theme:       "tech",              // danger | growth | tech | finance
 
-## 风格预设
+    // ── 装饰图形 ──
+    decoSVG:     "",                  // 内联 SVG 字符串，空则使用默认手机图案
+    decoRotate:  -11,                 // 装饰图形旋转角度(deg)
+    decoOpacity: 0.82,                // 装饰图形透明度
+    decoScale:   1,                   // 装饰图形缩放
 
-详见 `PRESETS.md`，提供 3 种开箱即用风格：
+    // ── 遮罩渐变方向 ──
+    overlayDirection: "to-bottom",    // to-bottom | to-top | center-out | to-left | to-right
 
-| 风格 | 特点 | 适用场景 |
+    // ── 噪点 ──
+    noiseEnabled: true,               // 开关
+    noiseOpacity: 0.05,               // 强度（0~1）
+};
+```
+
+### CONFIG 字段详解
+
+| 字段 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `headline` | string | 必填 | 主标题，`\n` 换行，建议每行 ≤6 字 |
+| `accentLine` | number | 0 | 哪行用主题色渐变高亮（0=无，1=第1行，2=第2行） |
+| `subline` | string | 必填 | 副标题 |
+| `tag` | string | 必填 | 小标签文字 |
+| `bgImage` | string | `""` | 背景图路径，空则用主题 CSS 渐变 |
+| `avatarImage` | string | `""` | 头像图片路径，空则显示 avatarEmoji |
+| `avatarEmoji` | string | `"🐶"` | 头像区无图片时的 emoji 显示 |
+| `brandName` | string | 必填 | 右上角品牌名 |
+| `tagline` | string | 必填 | 左上角标语/频道定位 |
+| `footerItems` | string[] | `[]` | 底部关键词列表，带主题色圆点 |
+| `watermark` | string | 必填 | 右下角水印文字 |
+| `theme` | string | `"tech"` | 主题色系，见 PRESETS.md |
+| `decoSVG` | string | `""` | 内联 SVG 字符串，空则使用默认手机图案，见 ELEMENTS.md |
+| `decoRotate` | number | `-11` | 装饰图形旋转角度(deg) |
+| `decoOpacity` | number | `0.82` | 装饰图形透明度 |
+| `decoScale` | number | `1` | 装饰图形缩放 |
+| `overlayDirection` | string | `"to-bottom"` | 遮罩渐变方向 |
+| `noiseEnabled` | boolean | `true` | 噪点纹理开关 |
+| `noiseOpacity` | number | `0.05` | 噪点强度（0~1） |
+
+### 遮罩方向说明
+
+| 值 | 效果 | 适用场景 |
 |------|------|----------|
-| **简约型** | 大标题 + 微装饰 | 通用、知识分享 |
-| **科技型** | 渐变 + 光晕 + 几何 | 技术、数据类 |
-| **数据型** | 大数字 + 对比 | 业绩、报告、总结 |
+| `to-bottom` | 上暗→中亮→下暗 | 默认，适合标题在中上部的封面 |
+| `to-top` | 上亮→中过渡→下暗 | 标题在下方时使用 |
+| `center-out` | 中心亮→四周暗 | 标题居中，圆形聚焦 |
+| `to-left` | 右亮→左暗 | 装饰图形在右侧时 |
+| `to-right` | 左亮→右暗 | 装饰图形在左侧时 |
 
 ---
 
 ## 工作流程
 
-### Step 1: 选择风格
+### Step 1: 选择主题
 ```
-用户描述内容类型 → 匹配预设风格 → 或混搭组合
-```
-
-### Step 2: 组装组件
-```
-1. 确定 Hero 内容（标题 + 副标题）
-2. 选择下方组件（进化条 / Pill 卡 / 二选一或组合）
-3. 添加装饰元素
+内容类型 → 匹配主题色系（见 PRESETS.md）
 ```
 
-### Step 3: 输出文件
+### Step 2: 选择装饰图形
 ```
-竖版: cover.html → cover.png (1080×1920)
-横版: cover_h.html → cover_h.png (1440×1080)
+内容主题 → 选择装饰 SVG（见 ELEMENTS.md），或使用默认手机图案
+```
+
+### Step 3: 填写 CONFIG
+```
+复制 template.html → 重命名为 cover.html → 修改顶部的 CONFIG 对象
 ```
 
 ### Step 4: 截图生成
 ```bash
 # 使用 Playwright 截图
 node cli.js cover --project <素材目录>
-node cli.js cover --project <素材目录> --horizontal
-```
-
----
-
-## CONFIG 配置
-
-在 HTML 文件顶部定义 `CONFIG` 对象：
-
-```javascript
-const CONFIG = {
-  // 必填
-  title: '主标题',
-  subtitle: '副标题',
-
-  // 可选
-  badge: '标签文字',           // 左上角 chip
-  description: '1-2 句说明',   // 标题下方
-
-  // 进化条（可选）
-  evolution: [
-    { emoji: '🌱', label: '创意' },
-    { emoji: '📝', label: '脚本' },
-    { emoji: '🎬', label: '成片' },
-  ],
-
-  // Pill 卡（可选）
-  pills: [
-    { emoji: '⏱', title: '5分钟', subtitle: '视频时长' },
-    { emoji: '🎯', title: '3个要点', subtitle: '核心内容' },
-  ],
-
-  // 来源
-  source: '来源说明',
-
-  // 主题
-  theme: 'minimal', // minimal | tech | data
-};
 ```
 
 ---
@@ -143,11 +159,9 @@ const CONFIG = {
 
 ```
 production/
-├── cover.html          # 竖版封面源文件
-├── cover_h.html        # 横版封面源文件
+├── cover.html          # 从 template.html 复制，填好 CONFIG
 └── videos/
-    ├── cover.png       # 竖版输出
-    └── cover_h.png     # 横版输出
+    └── cover.png       # 竖版输出 (1080×1920)
 ```
 
 ---
@@ -163,6 +177,6 @@ production/
 
 ## 相关文件
 
-- `PRESETS.md` — 风格预设模板
-- `ELEMENTS.md` — 组件代码库
-- `base.css` — 封面专用 CSS（基础样式）
+- `template.html` — CONFIG 驱动封面模板
+- `PRESETS.md` — 4 套主题色系说明
+- `ELEMENTS.md` — 装饰 SVG 图库与自定义指南

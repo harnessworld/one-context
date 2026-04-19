@@ -1,0 +1,22 @@
+# skill-parallel-verify test-case v1
+# 验证 html-deck-layout 的 shell-layout 功能（deep-reporting 模板 + mobile-deep-blue 主题）
+
+skill_path: "skills/html-deck-layout/SKILL.md"
+test_name: "html-deck-layout Shell Layout 一致性验证"
+acceptance_criteria: |
+  1. 使用 deep-reporting 模板（shell 布局）打底
+  2. 使用 mobile-deep-blue 主题
+  3. 每页都使用 slide-shell 包裹，hero-right 包含 SVG
+  4. page-no 格式为 NN / MM，hero-ordinal 与 page-no NN 部分一致
+  5. hero-title 字号 >= 96px
+  6. eyebrow 为大写英文标签
+  7. 终页使用 full-bleed SVG（slide-shell--fullbleed）
+  8. footer 使用 .footer 类名（非 .slide-footer）
+  9. CSS 加载顺序：base.css → fonts.css → mobile-layout.css → shell-layout.css → mobile-deep-blue.css → style.css
+  10. 产出完整自包含 HTML，可在浏览器打开
+description: "验证 html-deck-layout skill 的 shell-layout 新功能是否能让 AI 稳定生成视觉一致的汇报类 deck"
+
+test_cases:
+  - id: tc-1
+    prompt: "帮我做一个商务汇报PPT，主题是短视频式汇报范式——用内容创作思路重塑职场汇报，9页，深蓝风格"
+    description: "测试 shell 布局（deep-reporting 模板）生成汇报类 deck 的稳定性和一致性"

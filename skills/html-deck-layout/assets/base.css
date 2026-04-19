@@ -32,6 +32,8 @@
   --c-accent-a: #38bdf8;
   --c-accent-b: #818cf8;
   --c-accent-c: #a78bfa;
+  --c-accent-d: #ff6b9d;      /* warm pink — alerts, highlights */
+  --c-accent-e: #ffd93d;      /* amber/gold — warnings, attention */
   --c-border: rgba(255, 255, 255, 0.08);
   --c-overlay: rgba(15, 23, 42, 0.6);
 
