@@ -16,6 +16,7 @@ const {
   DEFAULT_SUBTITLE_STYLE,
 } = require('./ass_colours');
 const { prepareSrtForBurn, suggestCharsPerLine } = require('./srt_postprocess');
+const { resolvePath } = require('./path_resolver');
 
 const FPS = 60;
 const VIDEO_BITRATE = '8M';
@@ -47,8 +48,8 @@ function getMediaDuration(filePath) {
  */
 async function run(projectRoot, skillDir, options = {}) {
   void skillDir;
-  const HTML_FILE = path.join(projectRoot, 'presentation.html');
-  const CONFIG_FILE = path.join(projectRoot, 'wav-durations.json');
+  const HTML_FILE = resolvePath(projectRoot, 'slides', 'presentation.html');
+  const CONFIG_FILE = resolvePath(projectRoot, 'timing', 'wav-durations.json');
   const TEMP_DIR = path.join(projectRoot, 'tmp');
 
   let cfg = options.cfg;

@@ -152,7 +152,7 @@ node cli.js wav-auto --project "path\to\你的素材目录"
    - **CPU 环境注意**：`medium` / `large` 模型在纯 CPU 上可能卡死，建议用 **`small`** 或 **`base`** 模型。
 3. **ffmpeg**：静音降级分支需要可执行 **`ffmpeg`**；未装时 Node 侧会通过 `ffmpeg-static` 注入 **`FFMPEG_PATH`** 给对齐脚本（与 `wav-auto` 主流程一致）。
 4. **字幕与稳定性（wav-auto）**：
-   - **Whisper 初稿始终落盘**：只要未指定外部 `srtFile`，每次对齐都会在项目根生成 **`sub.srt`**（与 `burnSubtitles` 无关），便于先校对再决定是否烧录。
+   - **Whisper 初稿始终落盘**：只要未指定外部 `srtFile`，每次对齐都会在 `production/subtitles/` 生成 **`sub.srt`**（与 `burnSubtitles` 无关），便于先校对再决定是否烧录。
    - **超长无字幕 → 自动二次转写**：整段 Whisper 仍可能在时间轴上留下大片无字幕区间（与 30s chunk、解码策略有关，未必仅靠调高 `noSpeechThreshold` 即可消除）。`align_wav_slides.py` 默认对**超过 `maxSubtitleGapSec`** 的缺口 **用 ffmpeg 切出对应 WAV 片段再跑一遍 Whisper** 并合并回 `seg_list`（可用 `fillSrtGaps: false` 或 `--no-fill-srt-gaps` 关闭；`maxGapFillSec` 对应 `--max-gap-fill-sec` 限制超长静音不切）。
    - **no_speech 过滤（易漏清晰人声）**：faster-whisper 与 OpenAI Whisper 一致：若某音频块的 **`no_speech_prob` 大于 `no_speech_threshold`，会整段跳过不输出字幕**（不是 VAD）。库默认阈值为 **0.6**，片头/垫乐旁白常被误判，出现「第 8 秒起明明很清晰却整段无字」。本 skill **默认改为 `noSpeechThreshold`: 0.85**（仅在 `video-input.json` 未显式传 `--no-speech-threshold` 时由 `align_wav_slides.py` 生效）：**阈值越高，越不容易误跳过**。仍漏时可继续提高到 **0.9**，或设 **`"noSpeechThreshold": null`** 关闭此项过滤（静音段可能多出幻听字幕，需自行审校）。若需与旧行为一致可设 **`0.6`**。
    - **VAD 默认关闭**：`video-input.json` 中 **`"vadFilter": true`** 才启用 faster-whisper 内置 VAD。此前默认开启时，容易把**轻声、气口、片头口播**判成非语音，造成 **SRT 中间出现十几秒～几十秒无字幕**，而音频仍在播放。环境噪声极大且口播很清晰时，可试开 `vadFilter`，否则保持 **false**（默认）。
@@ -214,7 +214,7 @@ node path/to/one-context/skills/html-video-from-slides/cli.js wav-auto --project
 | wav | `wav-durations.json` 内 `outputFile` | `<素材>/tmp/` |
 | wav-auto | `final_auto.mp4`（`video-input.json` 可改） | 同上 + 技能目录 `.cache/`（可删） |
 
-说明：`<素材>` 一般为 `…/production/`。中间帧、分段音视频、`concat.txt` 等均写入 **`tmp/`**，可整夹删除；勿把成片唯一信源只放在 `tmp/`。
+说明：`<素材>` 为 `…/production/`（遵循 `features/_template/content-production/` 标准布局）。中间帧、分段音视频、`concat.txt` 等均写入 **`production/tmp/`**，可整夹删除；勿把成片唯一信源只放在 `tmp/`。
 
 ## 故障排除
 
@@ -266,7 +266,7 @@ node cli.js cover --project <素材目录> --horizontal
 
 ### 发布素材（全平台通用格式）
 
-建议在素材目录增加 **`05-publish-kit.md`**，格式：
+建议在素材目录增加 `production/content/05-publish-kit.md`，格式：
 
 ```
 标题：……
@@ -276,4 +276,4 @@ node cli.js cover --project <素材目录> --horizontal
 话题：#话题1 #话题2 …
 ```
 
-示例：`features/develop/claude-caveman-mode/production/05-publish-kit.md`
+示例：`features/content-pipeline/short-video-reporting-paradigm/production/content/05-publish-kit.md`

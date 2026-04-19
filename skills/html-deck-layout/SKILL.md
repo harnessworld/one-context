@@ -402,6 +402,14 @@ Layout spec is shared: [references/spec-cheatsheet.md](references/spec-cheatshee
 `srt-to-deck` is a sibling skill that shares this skill's entire visual system (themes, layouts, SVG, fill-deck rules). It adds SRT parsing + topic segmentation + automatic layout matching on top.
 The output is the same format (presentation.html with `go(n)`) and is compatible with html-video-from-slides.
 
+## 产出物路径
+
+遵循 `features/_template/content-production/` 标准布局：
+
+| 产出物 | 写入路径 |
+|--------|----------|
+| `presentation.html` | `<feature>/production/slides/presentation.html` |
+
 ## File structure
 
 ```
