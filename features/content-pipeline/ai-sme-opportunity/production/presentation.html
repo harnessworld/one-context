@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1">
+<title>AI 时代 · 中小企业的机会</title>
+<style>
+/* 强毛玻璃：更高 blur / saturate、双层霜面、底衬网格（继续加强可再提 --glass-blur） */
+:root {
+  --bg: #03080f;
+  --glass-blur: 56px;
+  --glass-sat: 220%;
+  --glass-bg: rgba(255,255,255,0.10);
+  --glass-border: rgba(255,255,255,0.32);
+  --glass-inset: inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -1px 0 rgba(0,0,0,0.12);
+  --glass-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 4px 24px rgba(79,156,249,0.08), inset 0 0 0 1px rgba(255,255,255,0.08);
+  --accent: #4f9cf9; --accent2: #a78bfa; --accent3: #34d399; --accent4: #fb923c;
+  --danger: #f87171; --purple: #c084fc; --sky: #38bdf8;
+  --text: #e8edf5; --muted: rgba(148,163,184,0.75); --cream: #f1f5f9;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Noto Sans SC','Microsoft YaHei',sans-serif; overflow: hidden; user-select: none; }
+#P { position: fixed; top: 0; left: 0; width: 1920px; height: 1080px; }
+.s { display: none; position: absolute; inset: 0; overflow: hidden; }
+.s.on { display: flex; flex-direction: column; }
+#prog { position: fixed; top: 0; left: 0; height: 4px; background: linear-gradient(90deg,var(--accent),var(--accent2)); z-index: 200; transition: width 0.4s; }
+#pn { position: fixed; bottom: 28px; right: 48px; font-size: 22px; color: rgba(255,255,255,0.3); z-index: 200; letter-spacing: 2px; }
+.bg { position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 90% 55% at 15% 8%, rgba(79,156,249,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 45% at 85% 90%, rgba(167,139,250,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 45%, rgba(52,211,153,0.06) 0%, transparent 65%),
+    var(--bg);
+}
+.bg::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.62;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, black 15%, transparent 75%);
+}
+.g {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(165deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 38%, rgba(255,255,255,0.02) 100%),
+    linear-gradient(90deg, rgba(79,156,249,0.06) 0%, transparent 45%, rgba(167,139,250,0.05) 100%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  box-shadow: var(--glass-inset), var(--glass-shadow);
+  overflow: hidden;
+}
+/* 霜面微粒感（无图依赖） */
+.g::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  opacity: 0.4;
+  background-image:
+    repeating-linear-gradient(105deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 120% 80% at 12% 0%, rgba(255,255,255,0.14), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 100% 100%, rgba(56,189,248,0.06), transparent 45%);
+  mix-blend-mode: overlay;
+}
+.g::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  background: linear-gradient(128deg, rgba(255,255,255,0.28) 0%, transparent 38%, rgba(255,255,255,0.06) 62%, transparent 100%);
+  opacity: 0.55;
+}
+.g > * { position: relative; z-index: 1; }
+.col { display: flex; flex-direction: column; }
+.row { display: flex; flex-direction: row; }
+.f1 { flex: 1; }
+.z3 { z-index: 3; }
+.chip {
+  display: inline-block; padding: 6px 24px; border-radius: 100px; font-size: 22px; font-weight: 700; letter-spacing: 1px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.26);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+}
+.ch-rd { color: #f87171; border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.08); }
+.ch-hi { color: #60a5fa; border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.08); }
+.ch-b { color: #a78bfa; border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); }
+.ch-gn { color: #34d399; border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.08); }
+.ch-or { color: #fb923c; border-color: rgba(251,146,60,0.3); background: rgba(251,146,60,0.08); }
+.ch-g { color: #4ade80; border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.08); }
+.ch-sk { color: #38bdf8; border-color: rgba(56,189,248,0.3); background: rgba(56,189,248,0.08); }
+.ch-purple { color: #c084fc; border-color: rgba(192,132,252,0.3); background: rgba(192,132,252,0.08); }
+.orb { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(60px); }
+.hr { height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2), transparent); border-radius: 2px; opacity: 0.6; }
+.grad { background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.grad3 { background: linear-gradient(135deg, var(--accent) 0%, var(--accent3) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.footer { display: flex; justify-content: center; align-items: center; padding: 14px; font-size: 20px; color: rgba(255,255,255,0.18); letter-spacing: 4px; }
+.s.on .g { animation: fu 0.5s ease both; }
+.s.on .chip { animation: fi 0.4s ease both; }
+.s.on .grad, .s.on .grad3 { animation: fi 0.6s ease both; }
+.s.on > .row, .s.on > .col { animation: fu 0.5s ease both; }
+@keyframes fu { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fi { from { opacity: 0; } to { opacity: 1; } }
+.wa { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+.pg { font-size: 28px; color: rgba(255,255,255,0.28); font-weight: 700; }
+/* 主列：自上而下紧凑堆叠。默认不要让 .slide-cards flex:1 + 卡 align-self:flex-start，否则行拉高而卡不跟高，会在卡下方露空。要竖向铺满请用 .fill-deck */
+.slide-main { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-start; gap: 10px; }
+.slide-cards { display: flex; flex-direction: row; align-items: flex-start; gap: 16px; min-width: 0; flex: 0 1 auto; }
+.slide-cards.f1 { min-height: 0; align-items: flex-start; }
+/* 防止交叉轴 stretch（.row 默认 stretch）把卡撑出「中空」 */
+.slide-main .slide-cards > .g { align-self: flex-start !important; height: auto; max-height: none; }
+.slide-stack { display: flex; flex-direction: column; align-items: stretch; gap: 12px; min-height: 0; flex: 0 1 auto; }
+.slide-stack.f1 { justify-content: flex-start; }
+.g-fill { display: flex; flex-direction: column; gap: 14px; flex: 1 1 0; min-width: 0; justify-content: flex-start; }
+.slide-foot { flex-shrink: 0; margin-top: 0; }
+/* 短版式：主列在画布高度内垂直居中（仅适合「不想改卡内结构」的页） */
+.slide-main.v-center { justify-content: center; gap: 12px; }
+/* 铺满竖向：卡片区 flex:1，两卡 stretch 等高；空白吃进卡内，而不是露网格底 */
+.slide-main.fill-deck { justify-content: flex-start; gap: 12px; }
+.slide-main.fill-deck .slide-cards {
+  flex: 1 1 0;
+  min-height: 0;
+  align-items: stretch;
+  align-self: stretch;
+}
+.slide-main.fill-deck .slide-cards > .g {
+  align-self: stretch !important;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+}
+
+/* s11「AI Native」三卡：全局 .g 的 overflow:hidden 会裁掉大字/渐变字下沿，此处放开并略增底内边距 */
+#s11 .slide-stack > .g.g-fill {
+  overflow: visible;
+  padding-bottom: 20px;
+}
+
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div id="P">
+<div class="s slide on" id="s0">
+<div class="wa">欢迎收听豆包AI博客 人工智能快速发展 机会更多在中小企业 打工族刚毕业职场建议</div>
+<div class="bg"></div>
+<div class="orb" style="width:800px;height:800px;background:radial-gradient(circle,rgba(79,156,249,0.08),transparent 70%);top:-200px;left:-200px"></div>
+<div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(167,139,250,0.07),transparent 70%);bottom:-150px;right:-100px"></div>
+
+  <div class="row" style="flex:1;align-items:center;justify-content:center;gap:32px;padding:0 80px">
+    <div class="col" style="flex:1;align-items:center;text-align:center;gap:20px">
+      <div class="chip ch-sk" style="font-size:24px;padding:8px 30px">豆包 AI 博客</div>
+      <div style="font-size:188px;font-weight:900;line-height:.9;letter-spacing:-6px" class="grad">中小企业</div>
+      <div style="font-size:100px;font-weight:900;line-height:.9;letter-spacing:-3px;color:var(--cream)">AI 浪潮下</div>
+      <div style="font-size:72px;font-weight:700;color:var(--muted);margin-top:10px;letter-spacing:2px">组织与个人的机会</div>
+    </div>
+  </div>
+  <div class="row" style="padding:28px 80px;gap:20px">
+    <div class="g" style="flex:1;padding:22px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="font-size:42px;margin-bottom:6px">🔥</div>
+      <div style="font-size:36px;font-weight:800;color:#f87171">大厂困境</div>
+      <div style="font-size:28px;color:var(--muted)">组织复杂与内耗</div>
+    </div>
+    <div class="g" style="flex:1;padding:22px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="font-size:42px;margin-bottom:6px">🌱</div>
+      <div style="font-size:36px;font-weight:800;color:#34d399">中小厂崛起</div>
+      <div style="font-size:28px;color:var(--muted)">快迭代与嵌入业务</div>
+    </div>
+    <div class="g" style="flex:1;padding:22px 28px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <div style="font-size:42px;margin-bottom:6px">🧭</div>
+      <div style="font-size:36px;font-weight:800;color:#38bdf8">个人选择</div>
+      <div style="font-size:28px;color:var(--muted)">职业规划新思路</div>
+    </div>
+  </div>
+  <div class="footer">内容型播客 · 观点仅供参考</div>
+
+</div>
+<div class="s slide" id="s1">
+<div class="wa">第一部分大厂困境 大公司搞AI项目复杂组织架构 预训练链后训练链测评不同部门 协作难推进抢主导权</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(248,113,113,0.07),transparent 70%);top:-80px;right:-60px"></div>
+
+  <div class="col" style="flex:1;gap:0;padding:40px 72px 28px;min-height:0">
+    <div class="col" style="gap:10px;margin-bottom:20px;flex-shrink:0">
+      <div class="chip ch-rd">Part 1 · 大厂困境</div>
+      <div class="hr" style="width:180px"></div>
+      <div style="font-size:80px;font-weight:900;line-height:1.05" class="grad">AI 项目被「切碎」</div>
+    </div>
+    <div class="row" style="flex:1;gap:28px;align-items:stretch;min-height:0">
+      <div class="col f1" style="justify-content:center;gap:20px;min-height:0">
+        <div style="font-size:38px;color:var(--muted);line-height:1.65">
+          预训练链、后训练链与测评<strong style="color:var(--cream)">分属不同部门</strong>，大家都要抢主导权，协作推进特别难。<br><br>
+          <strong style="color:var(--cream)">组织复杂 → 接口多 → 决策慢</strong>
+        </div>
+        <div class="g" style="padding:20px 24px;border-left:3px solid var(--danger)">
+          <div style="font-size:28px;font-weight:800;color:#f87171;margin-bottom:6px">一句话</div>
+          <div style="font-size:30px;color:var(--muted);line-height:1.55">碎片化的责任边界，让「端到端交付」在大厂格外吃力。</div>
+        </div>
+      </div>
+      <div class="f1 col" style="align-self:stretch;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;padding:0 0 8px">
+        <svg viewBox="0 0 520 548" preserveAspectRatio="xMidYMid meet" style="flex:0 1 auto;max-width:100%;max-height:100%;width:auto;height:auto;display:block">
+          <g transform="translate(260 268) scale(1 0.82) translate(-260 -268)">
+          <ellipse cx="260" cy="100" rx="200" ry="85" fill="rgba(167,139,250,0.07)" stroke="rgba(167,139,250,0.35)" stroke-width="2"/>
+          <text x="260" y="88" text-anchor="middle" fill="#c084fc" font-size="24" font-weight="900">🔥 预训练链</text>
+          <text x="260" y="128" text-anchor="middle" fill="rgba(148,163,184,0.6)" font-size="16">独立预算与 Owner</text>
+          <path d="M260 185 L260 230" stroke="rgba(167,139,250,0.4)" stroke-width="2" stroke-dasharray="6 4"/>
+          <ellipse cx="260" cy="310" rx="200" ry="85" fill="rgba(56,189,248,0.07)" stroke="rgba(56,189,248,0.35)" stroke-width="2"/>
+          <text x="260" y="298" text-anchor="middle" fill="#38bdf8" font-size="24" font-weight="900">⚡ 后训练链</text>
+          <text x="260" y="338" text-anchor="middle" fill="rgba(148,163,184,0.6)" font-size="16">另一套里程碑</text>
+          <path d="M260 395 L260 440" stroke="rgba(56,189,248,0.4)" stroke-width="2" stroke-dasharray="6 4"/>
+          <ellipse cx="260" cy="515" rx="200" ry="78" fill="rgba(52,211,153,0.07)" stroke="rgba(52,211,153,0.35)" stroke-width="2"/>
+          <text x="260" y="503" text-anchor="middle" fill="#34d399" font-size="24" font-weight="900">📊 测评与效果</text>
+          <text x="260" y="540" text-anchor="middle" fill="rgba(148,163,184,0.6)" font-size="16">指标口径常不一致</text>
+          <path d="M60 515 C-60 515 -60 100 60 100" fill="none" stroke="rgba(248,113,113,0.3)" stroke-width="2" stroke-dasharray="6 4"/>
+          <text x="10" y="300" fill="rgba(248,113,113,0.6)" font-size="14" transform="rotate(-90 10 300)">抢主导权</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s2">
+<div class="wa">内部赛马 争抢算力数据人才 重复建设 资源内耗 经历没花在正地方</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(251,146,60,0.07),transparent 70%);top:-60px;left:-60px"></div>
+
+  <div class="col" style="flex:1;gap:0;padding:48px 80px 36px">
+    <div class="col" style="gap:10px;margin-bottom:28px">
+      <div class="chip ch-or">Part 1 · 大厂困境</div>
+      <div class="hr" style="width:180px;background:linear-gradient(90deg,#fb923c,#fbbf24,transparent)"></div>
+      <div style="font-size:86px;font-weight:900;line-height:1.05" class="grad">内部赛马与资源内耗</div>
+    </div>
+    <div class="row f1" style="gap:28px;align-items:center">
+      <div class="col f1" style="gap:20px">
+        <div class="g" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+          <div style="font-size:64px;line-height:1;flex-shrink:0">🐎</div>
+          <div>
+            <div style="font-size:40px;font-weight:900;color:#fb923c;margin-bottom:10px">多团队争抢同一批资源</div>
+            <div style="font-size:34px;color:var(--muted);line-height:1.65">算力、数据、人才——大家都在内部抢，<strong style="color:var(--cream)">经历没花在正地方</strong>。</div>
+          </div>
+        </div>
+        <div class="g" style="padding:32px 36px;display:flex;align-items:flex-start;gap:22px">
+          <div style="font-size:64px;line-height:1;flex-shrink:0">🔁</div>
+          <div>
+            <div style="font-size:40px;font-weight:900;color:#fb923c;margin-bottom:10px">重复建设大量存在</div>
+            <div style="font-size:34px;color:var(--muted);line-height:1.65">各团队独立做同类模型优化，缺乏横向共享，<strong style="color:var(--cream)">效率低下</strong>。</div>
+          </div>
+        </div>
+        <div class="g" style="padding:24px 36px;border-left:3px solid #fb923c">
+          <div style="font-size:30px;font-weight:800;color:#fb923c;margin-bottom:6px">核心问题</div>
+          <div style="font-size:32px;color:var(--muted)">大厂资源不是「稀缺」，是「没有用到正确的地方」</div>
+        </div>
+      </div>
+      <div class="f1 col" style="justify-content:center;align-items:center">
+        <svg viewBox="0 0 400 400" style="width:100%">
+          <circle cx="200" cy="200" r="160" fill="rgba(251,146,60,0.04)" stroke="rgba(251,146,60,0.15)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <circle cx="200" cy="200" r="100" fill="rgba(251,146,60,0.05)" stroke="rgba(251,146,60,0.25)" stroke-width="1.5"/>
+          <circle cx="200" cy="200" r="40" fill="rgba(251,146,60,0.15)" stroke="rgba(251,146,60,0.6)" stroke-width="2"/>
+          <text x="200" y="195" text-anchor="middle" fill="#fb923c" font-size="18" font-weight="900">算力</text>
+          <text x="200" y="218" text-anchor="middle" fill="#fb923c" font-size="18" font-weight="900">资源</text>
+          <circle cx="200" cy="70" r="28" fill="rgba(248,113,113,0.12)" stroke="#f87171" stroke-width="1.5"/>
+          <text x="200" y="76" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">A团队</text>
+          <circle cx="330" cy="200" r="28" fill="rgba(167,139,250,0.12)" stroke="#c084fc" stroke-width="1.5"/>
+          <text x="330" y="206" text-anchor="middle" fill="#c084fc" font-size="14" font-weight="700">B团队</text>
+          <circle cx="200" cy="330" r="28" fill="rgba(56,189,248,0.12)" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="200" y="336" text-anchor="middle" fill="#38bdf8" font-size="14" font-weight="700">C团队</text>
+          <path d="M200 92 L200 172 M302 200 L228 200 M200 308 L200 228" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="4 3"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s3">
+<div class="wa">架构一条一条折腾 核心人才就会走 技术积累断档 士气消磨 创新步伐被拖慢</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(248,113,113,0.06),transparent 70%);bottom:-80px;right:-40px"></div>
+<div class="orb" style="width:420px;height:420px;background:radial-gradient(circle,rgba(251,146,60,0.05),transparent 70%);top:12%;left:-8%;pointer-events:none"></div>
+
+  <div class="col slide-main fill-deck" style="padding:20px 48px 14px">
+    <div class="row" style="align-items:flex-end;gap:18px;margin-bottom:8px;flex-shrink:0">
+      <div class="chip ch-rd">组织震荡</div>
+      <div style="font-size:72px;font-weight:900;line-height:1.03;flex:1;letter-spacing:-2px" class="grad">频繁调整，伤的是「人」与「积累」</div>
+      <div class="pg">4 / 14</div>
+    </div>
+    <div class="row slide-cards" style="gap:14px">
+      <div class="g f1 g-fill" style="padding:18px 20px 20px;display:flex;flex-direction:column;min-height:0">
+        <div style="flex-shrink:0;display:flex;align-items:center;gap:12px">
+          <div style="font-size:58px;line-height:1">🚶</div>
+          <div style="font-size:52px;font-weight:900;color:#f87171;line-height:1.08;letter-spacing:-1px">核心人才流失</div>
+        </div>
+        <div style="flex-shrink:0;margin-top:10px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:42px;color:var(--muted);line-height:1.45">
+            频繁折腾，<strong style="color:var(--cream)">核心人走</strong>，知识与上下文断档，<strong style="color:var(--cream)">接手更贵</strong>。
+          </div>
+          <div style="font-size:40px;color:var(--muted);line-height:1.45;opacity:0.97">
+            只靠口头、文档跟不上，等于每次重组都在<strong style="color:var(--cream)">从零开始</strong>。
+          </div>
+        </div>
+        <div style="flex:1;min-height:260px;margin-top:12px;border-radius:20px;overflow:hidden;background:rgba(2,6,14,0.45);border:1px solid rgba(248,113,113,0.28);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06)">
+          <svg viewBox="0 0 800 340" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs>
+              <linearGradient id="s3g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#f87171" stop-opacity="0.45"/><stop offset="100%" stop-color="#fb923c" stop-opacity="0.12"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="800" height="340" fill="url(#s3g1)"/>
+            <text x="400" y="44" text-anchor="middle" fill="#fecaca" font-size="26" font-weight="900">架构频繁重组 · 关键路径失稳</text>
+            <rect x="56" y="72" width="168" height="64" rx="14" fill="rgba(248,113,113,0.14)" stroke="#f87171" stroke-width="2"/>
+            <text x="140" y="114" text-anchor="middle" fill="#fecaca" font-size="28" font-weight="900">A</text>
+            <path d="M224 104 L296 104" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-dasharray="8 6"/>
+            <rect x="296" y="72" width="168" height="64" rx="14" fill="rgba(167,139,250,0.12)" stroke="#c084fc" stroke-width="2"/>
+            <text x="380" y="114" text-anchor="middle" fill="#f5e1ff" font-size="28" font-weight="900">B</text>
+            <path d="M464 104 L536 104" stroke="rgba(255,255,255,0.35)" stroke-width="2.5" stroke-dasharray="8 6"/>
+            <rect x="536" y="72" width="208" height="64" rx="14" fill="rgba(56,189,248,0.12)" stroke="#38bdf8" stroke-width="2"/>
+            <text x="640" y="114" text-anchor="middle" fill="#bae6fd" font-size="28" font-weight="900">C</text>
+            <circle cx="140" cy="210" r="46" fill="rgba(248,113,113,0.2)" stroke="#f87171" stroke-width="2.5"/>
+            <text x="140" y="222" text-anchor="middle" fill="#fff1f2" font-size="30" font-weight="900">人</text>
+            <path d="M186 210 Q400 280 710 188" fill="none" stroke="#f87171" stroke-width="4" stroke-dasharray="10 8" stroke-linecap="round"/>
+            <polygon points="710,188 698,178 698,198" fill="#fca5a5"/>
+            <text x="400" y="262" text-anchor="middle" fill="#cbd5e1" font-size="22" font-weight="800">关键路径知识随人走</text>
+            <rect x="48" y="286" width="704" height="44" rx="14" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.14)"/>
+            <text x="400" y="316" text-anchor="middle" fill="#e2e8f0" font-size="22" font-weight="800">文档滞后 → 隐性资产一遍遍清零</text>
+          </svg>
+        </div>
+        <div style="flex-shrink:0;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.16);font-size:38px;color:rgba(148,163,184,0.98);line-height:1.42">
+          <span style="color:#f87171;font-weight:900">要点</span>：文档跟不上节奏，「隐性资产」就一遍遍清零。
+        </div>
+      </div>
+      <div class="g f1 g-fill" style="padding:18px 20px 20px;display:flex;flex-direction:column;min-height:0">
+        <div style="flex-shrink:0;display:flex;align-items:center;gap:12px">
+          <div style="font-size:58px;line-height:1">📉</div>
+          <div style="font-size:52px;font-weight:900;color:#fb923c;line-height:1.08;letter-spacing:-1px">士气与创新受挫</div>
+        </div>
+        <div style="flex-shrink:0;margin-top:10px;display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:42px;color:var(--muted);line-height:1.45">
+            <strong style="color:var(--cream)">试错意愿下降</strong>；创新要靠心理安全，不是更密的汇报线。
+          </div>
+          <div style="font-size:40px;color:var(--muted);line-height:1.45;opacity:0.97">
+            「活下来」压过「试出来」，<strong style="color:var(--cream)">短期 KPI</strong> 挤掉长周期探索。
+          </div>
+        </div>
+        <div style="flex:1;min-height:260px;margin-top:12px;border-radius:20px;overflow:hidden;background:rgba(2,6,14,0.45);border:1px solid rgba(251,146,60,0.32);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06)">
+          <svg viewBox="0 0 800 340" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs>
+              <linearGradient id="s3g2" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stop-color="#fb923c" stop-opacity="0.38"/><stop offset="100%" stop-color="#34d399" stop-opacity="0.12"/>
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="800" height="340" fill="url(#s3g2)"/>
+            <text x="400" y="44" text-anchor="middle" fill="#ffedd5" font-size="26" font-weight="900">心理安全下降 · 会议堆满</text>
+            <rect x="80" y="68" width="640" height="72" rx="16" fill="rgba(251,146,60,0.14)" stroke="rgba(251,146,60,0.45)" stroke-width="2"/>
+            <text x="400" y="116" text-anchor="middle" fill="#fed7aa" font-size="26" font-weight="900">周会 / 对齐 / 汇报占满日历</text>
+            <path d="M80 168 L720 168" stroke="rgba(255,255,255,0.22)" stroke-width="2"/>
+            <polyline points="90,248 180,210 260,228 360,185 460,200 560,150 700,128" fill="none" stroke="#fb923c" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="90" cy="248" r="9" fill="#94a3b8"/><circle cx="260" cy="228" r="9" fill="#94a3b8"/><circle cx="460" cy="200" r="9" fill="#94a3b8"/><circle cx="700" cy="128" r="10" fill="#f87171"/>
+            <text x="400" y="292" text-anchor="middle" fill="#cbd5e1" font-size="22" font-weight="800">探索被短期交付压扁</text>
+            <rect x="80" y="306" width="640" height="26" rx="10" fill="rgba(15,23,42,0.72)" stroke="rgba(255,255,255,0.12)"/>
+            <text x="400" y="325" text-anchor="middle" fill="#e2e8f0" font-size="20" font-weight="800">KPI 优先 → 创新退成口号</text>
+          </svg>
+        </div>
+        <div style="flex-shrink:0;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.16);font-size:38px;color:rgba(148,163,184,0.98);line-height:1.42">
+          <span style="color:#fb923c;font-weight:900">要点</span>：议程一开满，创新就从优先级变成口号。
+        </div>
+      </div>
+    </div>
+    <div class="g slide-foot" style="padding:16px 26px">
+      <div style="font-size:36px;color:var(--muted);line-height:1.48;text-align:center">
+        <strong style="color:var(--cream)">组织自检</strong>：「关键路径知识」是否写成可交接资产？团队是否有稳定<strong style="color:#38bdf8">验收口径</strong>？
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s4">
+<div class="wa">中小厂崛起 业务专家和AI工程师一个小组 针对实际痛点 两个礼拜想法变可用 周期</div>
+<div class="bg"></div>
+<div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(52,211,153,0.08),transparent 70%);top:-120px;left:-80px"></div>
+<div class="orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(79,156,249,0.06),transparent 70%);bottom:-60px;right:-40px"></div>
+
+  <div class="col" style="flex:1;gap:0;padding:40px 72px 28px;min-height:0">
+    <div class="col" style="gap:8px;margin-bottom:18px">
+      <div class="chip ch-gn">Part 2 · 中小厂优势</div>
+      <div class="hr" style="background:linear-gradient(90deg,#34d399,#4f9cf9,transparent)"></div>
+      <div style="font-size:78px;font-weight:900;line-height:1.05" class="grad3">组织结构天然适配 AI</div>
+    </div>
+    <div class="row f1" style="gap:18px;align-items:stretch;min-height:0">
+      <div class="col f1" style="justify-content:flex-start;gap:12px;min-height:0">
+        <div class="g" style="padding:20px 24px;display:flex;flex-direction:column;justify-content:flex-start">
+          <div style="font-size:26px;color:var(--accent3);font-weight:700;margin-bottom:8px;letter-spacing:1px">🔗 小团队 = 低接口成本</div>
+          <div style="font-size:31px;color:var(--muted);line-height:1.55">业务专家和 AI 工程师可以<strong style="color:var(--cream)">同组协作</strong>，接口少、对齐快，不必跨部门排队。</div>
+        </div>
+        <div class="g" style="padding:20px 24px;display:flex;flex-direction:column;justify-content:flex-start">
+          <div style="font-size:26px;color:var(--accent3);font-weight:700;margin-bottom:8px;letter-spacing:1px">⚡ 快迭代 = 两周出成果</div>
+          <div style="font-size:31px;color:var(--muted);line-height:1.55">「想法到可用」<strong style="color:var(--cream)">两周</strong>级节奏更常见；对比大厂长排期，更容易做闭环验证。</div>
+        </div>
+        <div class="g" style="padding:20px 24px;display:flex;flex-direction:column;justify-content:flex-start">
+          <div style="font-size:26px;color:var(--accent3);font-weight:700;margin-bottom:8px;letter-spacing:1px">💡 嵌入业务 = 真实价值</div>
+          <div style="font-size:31px;color:var(--muted);line-height:1.55">AI 能<strong style="color:var(--cream)">直接嵌入核心业务流</strong>：质检、客服、运营环节，而不是只做边缘试点。</div>
+        </div>
+      </div>
+      <div class="f1 col" style="justify-content:center;align-items:center;min-height:0;overflow:hidden">
+        <svg viewBox="0 0 480 420" style="width:100%;max-height:100%;height:auto">
+          <rect x="150" y="20" rx="16" width="180" height="60" fill="rgba(79,156,249,0.12)" stroke="rgba(79,156,249,0.4)" stroke-width="1.5"/>
+          <text x="240" y="60" text-anchor="middle" fill="#60a5fa" font-size="18" font-weight="900">🎯 业务专家</text>
+          <rect x="30" y="170" rx="16" width="180" height="60" fill="rgba(52,211,153,0.12)" stroke="rgba(52,211,153,0.4)" stroke-width="1.5"/>
+          <text x="120" y="210" text-anchor="middle" fill="#34d399" font-size="18" font-weight="900">🤖 AI 工程师</text>
+          <rect x="270" y="170" rx="16" width="180" height="60" fill="rgba(167,139,250,0.12)" stroke="rgba(167,139,250,0.4)" stroke-width="1.5"/>
+          <text x="360" y="210" text-anchor="middle" fill="#c084fc" font-size="18" font-weight="900">🚀 快速上线</text>
+          <rect x="150" y="320" rx="16" width="180" height="60" fill="rgba(251,146,60,0.12)" stroke="rgba(251,146,60,0.4)" stroke-width="1.5"/>
+          <text x="240" y="360" text-anchor="middle" fill="#fb923c" font-size="18" font-weight="900">💼 嵌入业务</text>
+          <path d="M210 80 L120 170 M270 80 L360 170 M240 230 L240 320" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s5">
+<div class="wa">落地场景策略 最快见到效果 制造企业先质检 一周次品率下降 快赢案例 痛点价值矩阵 微创新实验室 案例归档全公司共享</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(52,211,153,0.07),transparent 70%);top:-60px;right:-40px"></div>
+
+  <div class="col" style="flex:1;gap:0;padding:48px 80px 36px">
+    <div class="row" style="align-items:center;gap:20px;margin-bottom:28px;flex-shrink:0">
+      <div class="chip ch-b">场景策略</div>
+      <div style="font-size:62px;font-weight:900;line-height:1;flex:1" class="grad">先打「快赢」，再扩散</div>
+      <div style="font-size:28px;color:var(--muted);flex-shrink:0">痛点矩阵 · 微创新实验室</div>
+    </div>
+    <div class="row f1" style="gap:24px">
+      <div class="g f1" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:14px">
+        <div style="font-size:28px;color:var(--muted);letter-spacing:2px;font-weight:700;margin-bottom:8px">质检场景（示例）</div>
+        <div style="font-size:140px;font-weight:900;line-height:1;background:linear-gradient(135deg,#4f9cf9,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">7 天</div>
+        <div style="font-size:38px;color:var(--muted);font-weight:700">看见次品率变化</div>
+        <div style="height:1px;width:70%;background:linear-gradient(90deg,transparent,rgba(148,163,184,.25),transparent);margin:8px 0"></div>
+        <div style="font-size:32px;color:var(--muted);text-align:center;line-height:1.6">制造类企业常从 <strong style="color:var(--cream)">视觉质检</strong> 切入，最快建立信心。</div>
+      </div>
+      <div class="g f1" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:14px">
+        <div style="font-size:28px;color:var(--muted);letter-spacing:2px;font-weight:700;margin-bottom:8px">组织机制</div>
+        <div style="font-size:140px;font-weight:900;line-height:1;background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">1+</div>
+        <div style="font-size:38px;color:var(--muted);font-weight:700">套可复用打法</div>
+        <div style="height:1px;width:70%;background:linear-gradient(90deg,transparent,rgba(148,163,184,.25),transparent);margin:8px 0"></div>
+        <div style="font-size:32px;color:var(--muted);text-align:center;line-height:1.6"><strong style="color:var(--cream)">痛点价值矩阵</strong> 选题；微创新实验室试点子；<strong style="color:var(--cream)">案例归档共享</strong>，扩展至多环节。</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s6">
+<div class="wa">落地路径 具体做法 痛点价值矩阵 选题 微创新实验室 试点 案例归档 共享扩展</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(56,189,248,0.07),transparent 70%);top:-60px;left:-60px"></div>
+<div class="orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(167,139,250,0.06),transparent 70%);bottom:-40px;right:-40px"></div>
+
+  <div class="col" style="flex:1;gap:0;padding:48px 80px 36px">
+    <div class="col" style="gap:10px;margin-bottom:28px">
+      <div class="chip ch-hi">中小厂落地路径</div>
+      <div class="hr"></div>
+      <div style="font-size:86px;font-weight:900;line-height:1.05" class="grad">从想法到验证，最快两周</div>
+    </div>
+    <div class="row f1" style="gap:20px;align-items:stretch;min-width:0">
+      <div class="col f1" style="justify-content:center;gap:16px;min-width:0">
+        <div class="g" style="padding:28px 32px">
+          <div style="font-size:28px;color:var(--accent);font-weight:700;margin-bottom:10px">🗺️ 找痛点</div>
+          <div style="font-size:34px;color:var(--muted);line-height:1.6">用「痛点价值矩阵」找<strong style="color:var(--cream)">高频+可量化</strong>的切入点。</div>
+        </div>
+        <div style="display:flex;align-items:center;padding:0 16px">
+          <div style="width:3px;height:40px;background:linear-gradient(var(--accent),var(--accent2));margin:0 auto;border-radius:2px"></div>
+        </div>
+        <div class="g" style="padding:28px 32px">
+          <div style="font-size:28px;color:var(--accent2);font-weight:700;margin-bottom:10px">🧪 小规模验证</div>
+          <div style="font-size:34px;color:var(--muted);line-height:1.6">微创新实验室，两周内出<strong style="color:var(--cream)">可量化的成果</strong>。</div>
+        </div>
+        <div style="display:flex;align-items:center;padding:0 16px">
+          <div style="width:3px;height:40px;background:linear-gradient(var(--accent2),var(--accent3));margin:0 auto;border-radius:2px"></div>
+        </div>
+        <div class="g" style="padding:28px 32px">
+          <div style="font-size:28px;color:var(--accent3);font-weight:700;margin-bottom:10px">📦 归档与扩展</div>
+          <div style="font-size:34px;color:var(--muted);line-height:1.6">成功案例归档，全公司<strong style="color:var(--cream)">复用</strong>，扩大战果。</div>
+        </div>
+      </div>
+      <div class="f1 col" style="justify-content:center;align-items:center;min-width:0;overflow:hidden">
+        <svg viewBox="0 0 620 500" preserveAspectRatio="xMidYMid meet" style="width:100%;max-width:100%;height:auto;display:block" aria-hidden="true">
+          <rect x="60" y="40" width="360" height="80" rx="18" fill="rgba(79,156,249,0.1)" stroke="rgba(79,156,249,0.4)" stroke-width="1.5"/>
+          <text x="240" y="88" text-anchor="middle" fill="#60a5fa" font-size="22" font-weight="900">① 找痛点（痛点价值矩阵）</text>
+          <path d="M240 120 L240 160" stroke="rgba(79,156,249,0.4)" stroke-width="2" stroke-dasharray="5 4"/>
+          <polygon points="240,160 228,140 252,140" fill="rgba(79,156,249,0.4)"/>
+          <rect x="60" y="160" width="360" height="80" rx="18" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.4)" stroke-width="1.5"/>
+          <text x="240" y="208" text-anchor="middle" fill="#c084fc" font-size="22" font-weight="900">② 微创新实验室（两周验证）</text>
+          <path d="M240 240 L240 280" stroke="rgba(167,139,250,0.4)" stroke-width="2" stroke-dasharray="5 4"/>
+          <polygon points="240,280 228,260 252,260" fill="rgba(167,139,250,0.4)"/>
+          <rect x="60" y="280" width="360" height="80" rx="18" fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.4)" stroke-width="1.5"/>
+          <text x="240" y="328" text-anchor="middle" fill="#34d399" font-size="22" font-weight="900">③ 案例归档 → 全公司共享</text>
+          <path d="M420 320 L450 320 L450 360" stroke="rgba(52,211,153,0.4)" stroke-width="2" stroke-dasharray="5 4"/>
+          <rect x="450" y="360" width="160" height="80" rx="18" fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.4)" stroke-width="1.5"/>
+          <text x="530" y="408" text-anchor="middle" fill="#34d399" font-size="18" font-weight="700">规模化</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s7">
+<div class="wa">第三部分个人选择 AI时代职业规划转变 过去盯大厂镀金培训体系 现在大厂裁员光环</div>
+<div class="bg"></div>
+<div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(56,189,248,0.06),transparent 70%);top:-100px;right:-80px"></div>
+<div class="orb" style="width:380px;height:380px;background:radial-gradient(circle,rgba(167,139,250,0.06),transparent 70%);bottom:8%;left:-6%;pointer-events:none"></div>
+
+  <div class="col slide-main fill-deck" style="padding:20px 44px 14px">
+    <div class="col" style="gap:4px;margin-bottom:8px;flex-shrink:0">
+      <div class="chip ch-sk">Part 3 · 个人选择</div>
+      <div class="hr" style="background:linear-gradient(90deg,#38bdf8,#a78bfa,transparent)"></div>
+      <div style="font-size:76px;font-weight:900;line-height:1.02;letter-spacing:-2px" class="grad">职业路径怎么选</div>
+      <div style="font-size:38px;color:var(--muted);margin-top:2px;line-height:1.35">过去盯大厂镀金 · 现在裁员让光环褪色</div>
+    </div>
+    <div class="row slide-cards" style="gap:12px">
+      <div class="g f1 g-fill" style="padding:14px 16px 16px;background:rgba(248,113,113,0.06);display:flex;flex-direction:column;min-height:0;border-color:rgba(248,113,113,0.35)">
+        <div style="flex-shrink:0">
+          <div style="font-size:30px;color:var(--muted);font-weight:800;letter-spacing:1px">📈 变了</div>
+          <div style="font-size:40px;font-weight:900;color:#f87171;line-height:1.12;margin-top:4px">大厂裁员潮 · 镀金失效</div>
+        </div>
+        <div style="flex-shrink:0;margin-top:8px;font-size:34px;color:var(--muted);line-height:1.4">
+          「背书」在降温；简历上<strong style="color:var(--cream)">可验证交付</strong>比 Title 硬。
+        </div>
+        <div style="flex:1;min-height:200px;margin-top:10px;border-radius:16px;overflow:hidden;background:rgba(2,6,14,0.5);border:1px solid rgba(248,113,113,0.28)">
+          <svg viewBox="0 0 420 260" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s7g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f87171" stop-opacity="0.35"/><stop offset="100%" stop-color="#1e293b" stop-opacity="0.9"/></linearGradient></defs>
+            <rect width="420" height="260" fill="url(#s7g1)"/>
+            <text x="210" y="36" text-anchor="middle" fill="#fecaca" font-size="20" font-weight="900">Title 光环 ↓ · 交付证明 ↑</text>
+            <rect x="72" y="58" width="88" height="110" rx="12" fill="rgba(248,113,113,0.2)" stroke="#f87171" stroke-width="2"/>
+            <text x="116" y="118" text-anchor="middle" fill="#fecaca" font-size="22" font-weight="900">Title</text>
+            <text x="116" y="152" text-anchor="middle" fill="#fca5a5" font-size="16" font-weight="800">降温</text>
+            <rect x="260" y="78" width="88" height="130" rx="12" fill="rgba(52,211,153,0.18)" stroke="#34d399" stroke-width="2"/>
+            <text x="304" y="132" text-anchor="middle" fill="#d1fae5" font-size="22" font-weight="900">交付</text>
+            <text x="304" y="168" text-anchor="middle" fill="#6ee7b7" font-size="16" font-weight="800">可量化</text>
+            <path d="M160 118 L248 132" stroke="rgba(255,255,255,0.35)" stroke-width="2" stroke-dasharray="6 5"/>
+            <polygon points="248,132 238,126 238,138" fill="rgba(255,255,255,0.5)"/>
+            <rect x="48" y="198" width="324" height="44" rx="12" fill="rgba(15,23,42,0.75)" stroke="rgba(255,255,255,0.12)"/>
+            <text x="210" y="228" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="800">招聘叙事：从「抬头」转向「证据」</text>
+          </svg>
+        </div>
+        <div style="flex-shrink:0;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.14);font-size:32px;color:rgba(148,163,184,0.98);line-height:1.38">
+          面试常问：独立闭环过什么？<strong style="color:var(--cream)">指标</strong>是什么？
+        </div>
+      </div>
+      <div class="g f1 g-fill" style="padding:14px 16px 16px;background:rgba(52,211,153,0.07);display:flex;flex-direction:column;min-height:0;border-color:rgba(52,211,153,0.35)">
+        <div style="flex-shrink:0">
+          <div style="font-size:30px;color:var(--muted);font-weight:800;letter-spacing:1px">✅ 没变</div>
+          <div style="font-size:40px;font-weight:900;color:#34d399;line-height:1.12;margin-top:4px">能做事 · 永远有市场</div>
+        </div>
+        <div style="flex-shrink:0;margin-top:8px;font-size:34px;color:var(--muted);line-height:1.4">
+          能写清需求、推上线、量化结果的人稀缺；AI 让执行更<strong style="color:var(--cream)">便宜</strong>，判断力更<strong style="color:var(--cream)">贵</strong>。
+        </div>
+        <div style="flex:1;min-height:200px;margin-top:10px;border-radius:16px;overflow:hidden;background:rgba(2,6,14,0.5);border:1px solid rgba(52,211,153,0.28)">
+          <svg viewBox="0 0 420 260" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s7g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#34d399" stop-opacity="0.3"/><stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/></linearGradient></defs>
+            <rect width="420" height="260" fill="url(#s7g2)"/>
+            <text x="210" y="34" text-anchor="middle" fill="#d1fae5" font-size="20" font-weight="900">可迁移 ≠ 工牌颜色</text>
+            <rect x="56" y="58" width="130" height="150" rx="16" fill="rgba(52,211,153,0.12)" stroke="#34d399" stroke-width="2"/>
+            <text x="121" y="100" text-anchor="middle" fill="#a7f3d0" font-size="18" font-weight="900">拆解</text>
+            <text x="121" y="132" text-anchor="middle" fill="#a7f3d0" font-size="18" font-weight="900">协作</text>
+            <text x="121" y="164" text-anchor="middle" fill="#a7f3d0" font-size="18" font-weight="900">量化</text>
+            <text x="121" y="198" text-anchor="middle" fill="#6ee7b7" font-size="15" font-weight="800">跨公司可用</text>
+            <rect x="234" y="96" width="130" height="112" rx="16" fill="rgba(148,163,184,0.1)" stroke="rgba(148,163,184,0.35)"/>
+            <text x="299" y="140" text-anchor="middle" fill="#cbd5e1" font-size="20" font-weight="900">工牌</text>
+            <text x="299" y="174" text-anchor="middle" fill="#94a3b8" font-size="15" font-weight="800">易过期</text>
+            <path d="M186 118 L234 140" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+            <polygon points="234,140 224,134 224,146" fill="rgba(255,255,255,0.45)"/>
+          </svg>
+        </div>
+        <div style="flex-shrink:0;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.14);font-size:32px;color:rgba(148,163,184,0.98);line-height:1.38">
+          可迁移：<strong style="color:var(--cream)">拆解与协作</strong>，不是工牌颜色。
+        </div>
+      </div>
+      <div class="g f1 g-fill" style="padding:14px 16px 16px;background:rgba(79,156,249,0.12);display:flex;flex-direction:column;min-height:0;border-color:rgba(79,156,249,0.38)">
+        <div style="flex-shrink:0">
+          <div style="font-size:30px;color:var(--muted);font-weight:800;letter-spacing:1px">🎯 建议</div>
+          <div style="font-size:40px;font-weight:900;color:#4f9cf9;line-height:1.12;margin-top:4px">优先能积累经验的坑</div>
+        </div>
+        <div style="flex-shrink:0;margin-top:8px;font-size:34px;color:var(--muted);line-height:1.4">
+          优先<strong style="color:var(--cream)">离业务与数据近</strong>；能写进作品集的经历，比光环保值。
+        </div>
+        <div style="flex:1;min-height:200px;margin-top:10px;border-radius:16px;overflow:hidden;background:rgba(2,6,14,0.5);border:1px solid rgba(79,156,249,0.3)">
+          <svg viewBox="0 0 420 260" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s7g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4f9cf9" stop-opacity="0.35"/><stop offset="100%" stop-color="#a78bfa" stop-opacity="0.12"/></linearGradient></defs>
+            <rect width="420" height="260" fill="url(#s7g3)"/>
+            <circle cx="210" cy="118" r="62" fill="none" stroke="rgba(79,156,249,0.45)" stroke-width="3"/>
+            <circle cx="210" cy="118" r="40" fill="none" stroke="rgba(167,139,250,0.55)" stroke-width="3"/>
+            <circle cx="210" cy="118" r="16" fill="rgba(79,156,249,0.35)" stroke="#93c5fd" stroke-width="2"/>
+            <text x="210" y="124" text-anchor="middle" fill="#e0f2fe" font-size="18" font-weight="900">岗位</text>
+            <rect x="52" y="188" width="316" height="52" rx="14" fill="rgba(15,23,42,0.75)" stroke="rgba(255,255,255,0.12)"/>
+            <text x="210" y="214" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="800">6 个月窗口：能否做出可演示增量？</text>
+            <text x="210" y="236" text-anchor="middle" fill="#94a3b8" font-size="14" font-weight="800">作品集 &gt; 头衔</text>
+          </svg>
+        </div>
+        <div style="flex-shrink:0;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.14);font-size:32px;color:rgba(148,163,184,0.98);line-height:1.38">
+          用 <strong style="color:var(--cream)">6 个月</strong>看：能交付可演示增量吗？
+        </div>
+      </div>
+    </div>
+    <div class="g slide-foot" style="padding:14px 22px">
+      <div style="font-size:36px;color:var(--muted);line-height:1.45;text-align:center">
+        <strong style="color:var(--cream)">一句话</strong>：先看能否留下<strong style="color:var(--cream)">作品与数据</strong>，再看 Title；<strong style="color:#a78bfa">可验证</strong>比光环保值。
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s8">
+<div class="wa">应届生技术背景深耕算法机器学习 不强技术背景AI应用开发数据标注内容创作积累项目经验 有编程基础AI工程化MLOps 无技术背景有行业经验行业加AI AI产品经理 AI运营 管理提升管理决策能力</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,0.06),transparent 70%);top:-60px;left:-40px"></div>
+<div class="orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(52,211,153,0.05),transparent 70%);bottom:-40px;right:-40px"></div>
+<div class="orb" style="width:320px;height:320px;background:radial-gradient(circle,rgba(79,156,249,0.06),transparent 70%);top:40%;right:8%;pointer-events:none"></div>
+
+  <div class="col slide-main fill-deck" style="padding:18px 44px 12px">
+    <div class="row" style="align-items:center;gap:16px;margin-bottom:6px;flex-shrink:0">
+      <div class="chip ch-b">路径选择</div>
+      <div style="font-size:64px;font-weight:900;line-height:1.03;flex:1;letter-spacing:-1px" class="grad">4 类人的 AI 转型路径</div>
+    </div>
+    <div class="col slide-stack" style="gap:10px;min-height:0;flex:1">
+    <div class="row slide-cards" style="gap:10px;align-items:stretch">
+      <div class="g f1 g-fill" style="padding:14px 14px 16px;display:flex;flex-direction:column;min-height:0">
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          <div style="font-size:44px;line-height:1;flex-shrink:0">🎓</div>
+          <div style="font-size:34px;font-weight:900;color:#c084fc;line-height:1.12">应届生 · 技术向</div>
+        </div>
+        <div style="font-size:30px;color:var(--muted);line-height:1.38;margin-top:6px;flex-shrink:0">啃基础；论文 · 开源 · 赛 = 硬通货。</div>
+        <div style="flex:1;min-height:220px;margin-top:10px;border-radius:14px;overflow:hidden;background:rgba(2,6,14,0.55);border:1px solid rgba(192,132,252,0.35)">
+          <svg viewBox="0 0 440 240" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s8p1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c084fc" stop-opacity="0.35"/><stop offset="100%" stop-color="#1e1b4b" stop-opacity="0.9"/></linearGradient></defs>
+            <rect width="440" height="240" fill="url(#s8p1)"/>
+            <text x="220" y="30" text-anchor="middle" fill="#f5e1ff" font-size="18" font-weight="900">可复现 · 可比 · 可引用</text>
+            <rect x="48" y="52" width="100" height="56" rx="10" fill="rgba(192,132,252,0.2)" stroke="#d8b4fe" stroke-width="1.5"/>
+            <text x="98" y="88" text-anchor="middle" fill="#faf5ff" font-size="17" font-weight="900">论文</text>
+            <rect x="170" y="52" width="100" height="56" rx="10" fill="rgba(192,132,252,0.2)" stroke="#d8b4fe" stroke-width="1.5"/>
+            <text x="220" y="88" text-anchor="middle" fill="#faf5ff" font-size="17" font-weight="900">开源</text>
+            <rect x="292" y="52" width="100" height="56" rx="10" fill="rgba(192,132,252,0.2)" stroke="#d8b4fe" stroke-width="1.5"/>
+            <text x="342" y="88" text-anchor="middle" fill="#faf5ff" font-size="17" font-weight="900">赛</text>
+            <path d="M98 120 L220 148 L342 120" stroke="rgba(255,255,255,0.25)" stroke-width="2" fill="none"/>
+            <text x="220" y="178" text-anchor="middle" fill="#e9d5ff" font-size="17" font-weight="800">基础深度 = 护城河</text>
+            <rect x="40" y="196" width="360" height="32" rx="10" fill="rgba(15,23,42,0.75)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="220" y="218" text-anchor="middle" fill="#cbd5e1" font-size="14" font-weight="800">实验日志齐 · 别人能复跑</text>
+          </svg>
+        </div>
+        <div style="font-size:28px;color:rgba(148,163,184,0.98);line-height:1.35;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px;margin-top:8px;flex-shrink:0">侧重：<strong style="color:#e9d5ff">基础</strong> · <strong style="color:#e9d5ff">可复现</strong></div>
+      </div>
+      <div class="g f1 g-fill" style="padding:14px 14px 16px;display:flex;flex-direction:column;min-height:0">
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          <div style="font-size:44px;line-height:1;flex-shrink:0">🧩</div>
+          <div style="font-size:34px;font-weight:900;color:#38bdf8;line-height:1.12">应届生 · 应用向</div>
+        </div>
+        <div style="font-size:30px;color:var(--muted);line-height:1.38;margin-top:6px;flex-shrink:0">先上车再补票；作品集看迭代与贴业务。</div>
+        <div style="flex:1;min-height:220px;margin-top:10px;border-radius:14px;overflow:hidden;background:rgba(2,6,14,0.55);border:1px solid rgba(56,189,248,0.35)">
+          <svg viewBox="0 0 440 240" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s8p2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/><stop offset="100%" stop-color="#0c4a6e" stop-opacity="0.85"/></linearGradient></defs>
+            <rect width="440" height="240" fill="url(#s8p2)"/>
+            <text x="220" y="32" text-anchor="middle" fill="#e0f2fe" font-size="18" font-weight="900">交付闭环 &gt; 完美准备</text>
+            <rect x="60" y="56" width="320" height="52" rx="14" fill="rgba(56,189,248,0.15)" stroke="#7dd3fc" stroke-width="2"/>
+            <text x="220" y="90" text-anchor="middle" fill="#bae6fd" font-size="18" font-weight="900">岗位：应用 / 标注 / 内容</text>
+            <path d="M100 128 L340 128" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="8 6"/>
+            <polygon points="220,108 220,148 250,128" fill="#38bdf8"/>
+            <text x="220" y="168" text-anchor="middle" fill="#e0f2fe" font-size="16" font-weight="800">v1 → v2 → 用户声</text>
+            <rect x="48" y="188" width="344" height="40" rx="10" fill="rgba(15,23,42,0.75)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="220" y="214" text-anchor="middle" fill="#cbd5e1" font-size="14" font-weight="800">作品集 = 迭代记录 + 业务结果</text>
+          </svg>
+        </div>
+        <div style="font-size:28px;color:rgba(148,163,184,0.98);line-height:1.35;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px;margin-top:8px;flex-shrink:0">侧重：<strong style="color:#bae6fd">交付频率</strong> · <strong style="color:#bae6fd">用户反馈</strong></div>
+      </div>
+    </div>
+    <div class="row slide-cards" style="gap:10px;align-items:stretch">
+      <div class="g f1 g-fill" style="padding:14px 14px 16px;display:flex;flex-direction:column;min-height:0">
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          <div style="font-size:44px;line-height:1;flex-shrink:0">⚙️</div>
+          <div style="font-size:34px;font-weight:900;color:#34d399;line-height:1.12">职场人 · 工程化</div>
+        </div>
+        <div style="font-size:30px;color:var(--muted);line-height:1.38;margin-top:6px;flex-shrink:0">工程化 / MLOps：上线 · 监控 · 回滚 比跑分重要。</div>
+        <div style="flex:1;min-height:220px;margin-top:10px;border-radius:14px;overflow:hidden;background:rgba(2,6,14,0.55);border:1px solid rgba(52,211,153,0.35)">
+          <svg viewBox="0 0 440 240" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s8p3" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stop-color="#34d399" stop-opacity="0.35"/><stop offset="100%" stop-color="#064e3b" stop-opacity="0.85"/></linearGradient></defs>
+            <rect width="440" height="240" fill="url(#s8p3)"/>
+            <text x="220" y="30" text-anchor="middle" fill="#d1fae5" font-size="18" font-weight="900">线上真实 &gt; 离线榜单</text>
+            <rect x="36" y="52" width="86" height="44" rx="10" fill="rgba(52,211,153,0.18)" stroke="#6ee7b7" stroke-width="1.5"/>
+            <text x="79" y="80" text-anchor="middle" fill="#ecfdf5" font-size="15" font-weight="900">代码</text>
+            <path d="M122 74 L158 74" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+            <rect x="158" y="52" width="86" height="44" rx="10" fill="rgba(52,211,153,0.18)" stroke="#6ee7b7" stroke-width="1.5"/>
+            <text x="201" y="80" text-anchor="middle" fill="#ecfdf5" font-size="15" font-weight="900">服务</text>
+            <path d="M244 74 L280 74" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+            <rect x="280" y="52" width="86" height="44" rx="10" fill="rgba(52,211,153,0.18)" stroke="#6ee7b7" stroke-width="1.5"/>
+            <text x="323" y="80" text-anchor="middle" fill="#ecfdf5" font-size="15" font-weight="900">上线</text>
+            <path d="M366 74 L402 74" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+            <rect x="378" y="52" width="46" height="44" rx="10" fill="rgba(248,113,113,0.2)" stroke="#fca5a5" stroke-width="1.5"/>
+            <text x="401" y="80" text-anchor="middle" fill="#fecaca" font-size="14" font-weight="900">监</text>
+            <text x="220" y="130" text-anchor="middle" fill="#a7f3d0" font-size="16" font-weight="800">回滚路径 · 灰度 · SLA</text>
+            <rect x="40" y="150" width="360" height="72" rx="12" fill="rgba(15,23,42,0.75)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="220" y="178" text-anchor="middle" fill="#e2e8f0" font-size="15" font-weight="800">可观测性：日志 / 指标 / 告警</text>
+            <text x="220" y="204" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="800">成本可控 · 故障可追</text>
+          </svg>
+        </div>
+        <div style="font-size:28px;color:rgba(148,163,184,0.98);line-height:1.35;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px;margin-top:8px;flex-shrink:0">侧重：<strong style="color:#a7f3d0">SLA</strong> · <strong style="color:#a7f3d0">成本</strong> · <strong style="color:#a7f3d0">可观测</strong></div>
+      </div>
+      <div class="g f1 g-fill" style="padding:14px 14px 16px;display:flex;flex-direction:column;min-height:0">
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+          <div style="font-size:44px;line-height:1;flex-shrink:0">🏭</div>
+          <div style="font-size:34px;font-weight:900;color:#fb923c;line-height:1.12">职场人 · 行业 + AI</div>
+        </div>
+        <div style="font-size:30px;color:var(--muted);line-height:1.38;margin-top:6px;flex-shrink:0">懂场景、叠 AI；流程画清，变更才可控。</div>
+        <div style="flex:1;min-height:220px;margin-top:10px;border-radius:14px;overflow:hidden;background:rgba(2,6,14,0.55);border:1px solid rgba(251,146,60,0.35)">
+          <svg viewBox="0 0 440 240" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s8p4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fb923c" stop-opacity="0.35"/><stop offset="100%" stop-color="#431407" stop-opacity="0.85"/></linearGradient></defs>
+            <rect width="440" height="240" fill="url(#s8p4)"/>
+            <text x="220" y="30" text-anchor="middle" fill="#ffedd5" font-size="18" font-weight="900">行业语境 × AI 能力</text>
+            <rect x="52" y="54" width="96" height="48" rx="10" fill="rgba(251,146,60,0.15)" stroke="#fdba74" stroke-width="1.5"/>
+            <text x="100" y="84" text-anchor="middle" fill="#fed7aa" font-size="15" font-weight="900">产品</text>
+            <rect x="172" y="54" width="96" height="48" rx="10" fill="rgba(251,146,60,0.15)" stroke="#fdba74" stroke-width="1.5"/>
+            <text x="220" y="84" text-anchor="middle" fill="#fed7aa" font-size="15" font-weight="900">运营</text>
+            <rect x="292" y="54" width="96" height="48" rx="10" fill="rgba(251,146,60,0.15)" stroke="#fdba74" stroke-width="1.5"/>
+            <text x="340" y="84" text-anchor="middle" fill="#fed7aa" font-size="15" font-weight="900">管理</text>
+            <circle cx="220" cy="138" r="36" fill="rgba(79,156,249,0.25)" stroke="#93c5fd" stroke-width="2"/>
+            <text x="220" y="146" text-anchor="middle" fill="#e0f2fe" font-size="16" font-weight="900">AI</text>
+            <path d="M100 78 L196 118 M340 78 L244 118 M220 174 L220 190" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+            <rect x="48" y="188" width="344" height="40" rx="10" fill="rgba(15,23,42,0.75)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="220" y="214" text-anchor="middle" fill="#cbd5e1" font-size="14" font-weight="800">流程图 = 对齐 · 验收 · 变更记录</text>
+          </svg>
+        </div>
+        <div style="font-size:28px;color:rgba(148,163,184,0.98);line-height:1.35;border-top:1px solid rgba(255,255,255,0.12);padding-top:8px;margin-top:8px;flex-shrink:0">侧重：<strong style="color:#fed7aa">业务 KPI</strong> · <strong style="color:#fed7aa">变更管理</strong></div>
+      </div>
+    </div>
+    </div>
+    <div class="g slide-foot" style="padding:12px 20px">
+      <div style="font-size:32px;color:var(--muted);line-height:1.42;text-align:center">共性：先回答「<strong style="color:var(--cream)">谁用 · 省多少 · 错得起吗</strong>」，再选技术栈。</div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s9">
+<div class="wa">风险警惕 讲故事没有实际产品 业务单一管理混乱频繁招人裁员 多留心眼 根据年龄学</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(251,146,60,0.07),transparent 70%);top:-60px;right:-60px"></div>
+
+  <div class="col" style="flex:1;gap:0;padding:40px 72px 28px;min-height:0">
+    <div class="col" style="gap:8px;margin-bottom:18px">
+      <div class="chip ch-or">⚠️ 风险警惕</div>
+      <div class="hr" style="background:linear-gradient(90deg,#fb923c,#fbbf24,transparent)"></div>
+      <div style="font-size:78px;font-weight:900;line-height:1.05" class="grad">中小厂也有坑，绕着走</div>
+    </div>
+    <div class="row f1" style="gap:16px;align-items:stretch;min-height:0">
+      <div class="col f1" style="justify-content:flex-start;gap:10px;min-height:0">
+        <div class="g" style="padding:20px 26px;display:flex;align-items:flex-start;gap:16px;border-left:3px solid #fb923c">
+          <div style="font-size:44px;line-height:1;flex-shrink:0">🎭</div>
+          <div>
+            <div style="font-size:32px;font-weight:800;color:#fb923c;margin-bottom:6px;line-height:1.2">只讲故事，没有实际产品</div>
+            <div style="font-size:28px;color:var(--muted);line-height:1.55">警惕 AI 概念包装大于实质，看<strong style="color:var(--cream)">有没有可演示的产品</strong>；尽调时多问「谁在用、付不付费」。</div>
+          </div>
+        </div>
+        <div class="g" style="padding:20px 26px;display:flex;align-items:flex-start;gap:16px;border-left:3px solid #f87171">
+          <div style="font-size:44px;line-height:1;flex-shrink:0">📉</div>
+          <div>
+            <div style="font-size:32px;font-weight:800;color:#f87171;margin-bottom:6px;line-height:1.2">业务单一 + 管理混乱</div>
+            <div style="font-size:28px;color:var(--muted);line-height:1.55"><strong style="color:var(--cream)">频繁招人又裁员</strong>说明业务本身不稳定；别只看薪资，要看现金流与复购。</div>
+          </div>
+        </div>
+        <div class="g" style="padding:20px 26px;display:flex;align-items:flex-start;gap:16px;border-left:3px solid #fbbf24">
+          <div style="font-size:44px;line-height:1;flex-shrink:0">💡</div>
+          <div>
+            <div style="font-size:32px;font-weight:800;color:#fbbf24;margin-bottom:6px;line-height:1.2">多留心眼，根据年龄选赛道</div>
+            <div style="font-size:28px;color:var(--muted);line-height:1.55">不同年龄对风险的承受能力不同，<strong style="color:var(--cream)">想清楚再跳</strong>；可先兼职/顾问试水。</div>
+          </div>
+        </div>
+      </div>
+      <div class="f1 col" style="justify-content:center;align-items:center;min-height:0;overflow:hidden">
+        <svg viewBox="0 0 420 420" style="width:100%;max-height:100%;max-width:100%;height:auto">
+          <circle cx="210" cy="210" r="180" fill="rgba(251,146,60,0.04)" stroke="rgba(251,146,60,0.2)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <circle cx="210" cy="210" r="120" fill="rgba(248,113,113,0.05)" stroke="rgba(248,113,113,0.25)" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <circle cx="210" cy="210" r="60" fill="rgba(251,146,60,0.1)" stroke="rgba(251,146,60,0.5)" stroke-width="2"/>
+          <text x="210" y="200" text-anchor="middle" fill="#fb923c" font-size="20" font-weight="900">选对</text>
+          <text x="210" y="228" text-anchor="middle" fill="#fb923c" font-size="20" font-weight="900">坑少</text>
+          <text x="210" y="70" text-anchor="middle" fill="#fb923c" font-size="14" font-weight="700">🎭讲故事</text>
+          <text x="340" y="220" text-anchor="middle" fill="#f87171" font-size="14" font-weight="700">📉业务单一</text>
+          <text x="210" y="380" text-anchor="middle" fill="#fbbf24" font-size="14" font-weight="700">💡管理混乱</text>
+          <text x="80" y="220" text-anchor="middle" fill="rgba(148,163,184,0.6)" font-size="14">频繁裁员</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s10">
+<div class="wa">大厂资源和影响力 中小厂灵活嵌入业务 各有优劣关键看能不能做事</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(52,211,153,0.06),transparent 70%);top:-60px;left:-40px"></div>
+<div class="orb" style="width:360px;height:360px;background:radial-gradient(circle,rgba(79,156,249,0.07),transparent 70%);bottom:10%;right:5%;pointer-events:none"></div>
+
+  <div class="col slide-main fill-deck" style="padding:18px 44px 12px">
+    <div class="col" style="gap:4px;margin-bottom:8px;flex-shrink:0">
+      <div class="chip ch-gn">核心结论</div>
+      <div class="hr" style="background:linear-gradient(90deg,#34d399,#4f9cf9,transparent)"></div>
+      <div style="font-size:64px;font-weight:900;line-height:1.02" class="grad3">AI 时代的机会在哪里</div>
+    </div>
+    <div class="row slide-cards" style="gap:12px">
+      <div class="g f1 g-fill" style="padding:14px 16px 16px;display:flex;flex-direction:column;min-height:0;text-align:left">
+        <div style="font-size:28px;color:var(--muted);font-weight:800">大厂</div>
+        <div style="font-size:52px;line-height:1;margin:6px 0">🏢</div>
+        <div style="font-size:36px;font-weight:900;color:#f87171;line-height:1.2">资源多 · 内耗大</div>
+        <div style="font-size:30px;color:var(--muted);line-height:1.38;margin-top:6px">要会在复杂协作里<strong style="color:var(--cream)">拿资源、推决策</strong>。</div>
+        <div style="flex:1;min-height:200px;margin-top:10px;border-radius:16px;overflow:hidden;background:rgba(2,6,14,0.5);border:1px solid rgba(248,113,113,0.3)">
+          <svg viewBox="0 0 520 220" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s10svg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f87171" stop-opacity="0.3"/><stop offset="100%" stop-color="#1e293b" stop-opacity="0.95"/></linearGradient></defs>
+            <rect width="520" height="220" fill="url(#s10svg1)"/>
+            <text x="260" y="28" text-anchor="middle" fill="#fecaca" font-size="17" font-weight="900">平台级 · 多接口 · 长链路</text>
+            <rect x="40" y="48" width="110" height="44" rx="10" fill="rgba(248,113,113,0.15)" stroke="#fca5a5" stroke-width="1.5"/><text x="95" y="76" text-anchor="middle" fill="#fee2e2" font-size="14" font-weight="800">业务</text>
+            <rect x="170" y="48" width="110" height="44" rx="10" fill="rgba(248,113,113,0.15)" stroke="#fca5a5" stroke-width="1.5"/><text x="225" y="76" text-anchor="middle" fill="#fee2e2" font-size="14" font-weight="800">中台</text>
+            <rect x="300" y="48" width="110" height="44" rx="10" fill="rgba(248,113,113,0.15)" stroke="#fca5a5" stroke-width="1.5"/><text x="355" y="76" text-anchor="middle" fill="#fee2e2" font-size="14" font-weight="800">数据</text>
+            <rect x="430" y="48" width="50" height="44" rx="10" fill="rgba(248,113,113,0.2)" stroke="#f87171" stroke-width="1.5"/><text x="455" y="76" text-anchor="middle" fill="#fff" font-size="13" font-weight="900">AI</text>
+            <path d="M95 92 L95 120 M225 92 L225 120 M355 92 L355 120" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+            <text x="260" y="148" text-anchor="middle" fill="#cbd5e1" font-size="15" font-weight="800">端到端慢 · 贡献易被稀释</text>
+            <rect x="36" y="168" width="448" height="40" rx="10" fill="rgba(15,23,42,0.75)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="260" y="194" text-anchor="middle" fill="#fca5a5" font-size="14" font-weight="800">主动争<strong>可量化产出</strong>与可见里程碑</text>
+          </svg>
+        </div>
+        <div style="font-size:26px;color:rgba(248,113,113,0.95);line-height:1.35;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px">风险：接口多、周期长 → <strong style="color:var(--cream)">用指标说话</strong>。</div>
+      </div>
+      <div class="g f1 g-fill" style="padding:14px 16px 16px;display:flex;flex-direction:column;min-height:0;text-align:left;background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.35)">
+        <div style="font-size:28px;color:var(--muted);font-weight:800">中小厂</div>
+        <div style="font-size:52px;line-height:1;margin:6px 0">🌱</div>
+        <div style="font-size:36px;font-weight:900;color:#34d399;line-height:1.2">贴业务 · 迭代快</div>
+        <div style="font-size:30px;color:var(--muted);line-height:1.38;margin-top:6px">适合<strong style="color:var(--cream)">亲手闭环</strong>、用结果换信任。</div>
+        <div style="flex:1;min-height:200px;margin-top:10px;border-radius:16px;overflow:hidden;background:rgba(2,6,14,0.5);border:1px solid rgba(52,211,153,0.35)">
+          <svg viewBox="0 0 520 220" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s10svg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#34d399" stop-opacity="0.35"/><stop offset="100%" stop-color="#064e3b" stop-opacity="0.9"/></linearGradient></defs>
+            <rect width="520" height="220" fill="url(#s10svg2)"/>
+            <text x="260" y="28" text-anchor="middle" fill="#d1fae5" font-size="17" font-weight="900">一线反馈 → 模型 → 指标</text>
+            <circle cx="120" cy="110" r="36" fill="rgba(52,211,153,0.2)" stroke="#6ee7b7" stroke-width="2"/><text x="120" y="116" text-anchor="middle" fill="#ecfdf5" font-size="14" font-weight="900">业务</text>
+            <path d="M156 110 L200 110" stroke="rgba(255,255,255,0.35)" stroke-width="2"/><polygon points="200,110 188,104 188,116" fill="#a7f3d0"/>
+            <rect x="200" y="82" width="120" height="56" rx="12" fill="rgba(52,211,153,0.2)" stroke="#34d399" stroke-width="2"/>
+            <text x="260" y="118" text-anchor="middle" fill="#ecfdf5" font-size="15" font-weight="900">AI 嵌入</text>
+            <path d="M320 110 L364 110" stroke="rgba(255,255,255,0.35)" stroke-width="2"/><polygon points="364,110 352,104 352,116" fill="#a7f3d0"/>
+            <circle cx="400" cy="110" r="36" fill="rgba(52,211,153,0.2)" stroke="#6ee7b7" stroke-width="2"/><text x="400" y="116" text-anchor="middle" fill="#ecfdf5" font-size="14" font-weight="900">复盘</text>
+            <rect x="36" y="168" width="448" height="40" rx="10" fill="rgba(15,23,42,0.75)" stroke="rgba(255,255,255,0.1)"/>
+            <text x="260" y="194" text-anchor="middle" fill="#6ee7b7" font-size="14" font-weight="800">里程碑写清 · 边界写清 · 保护自己</text>
+          </svg>
+        </div>
+        <div style="font-size:26px;color:rgba(52,211,153,0.95);line-height:1.35;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px;margin-top:8px">风险：资源薄 → <strong style="color:var(--cream)">书面里程碑</strong>。</div>
+      </div>
+    </div>
+    <div class="g slide-foot" style="padding:14px 22px">
+      <div style="font-size:32px;color:var(--muted);line-height:1.45;text-align:center">
+        不问大/小，问：<strong style="color:var(--cream)">可迁移</strong> · <strong style="color:#38bdf8">作品与数据</strong> · <strong style="color:#a78bfa">失败成本</strong>。
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s11">
+<div class="wa">AI Native 职场人 识别力 判断力 持续学习 跨界整合</div>
+<div class="bg"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(79,156,249,0.06),transparent 70%);top:-60px;left:-40px"></div>
+<div class="orb" style="width:400px;height:400px;background:radial-gradient(circle,rgba(167,139,250,0.05),transparent 70%);bottom:-40px;right:-40px"></div>
+<div class="orb" style="width:300px;height:300px;background:radial-gradient(circle,rgba(52,211,153,0.06),transparent 70%);top:35%;right:12%;pointer-events:none"></div>
+
+  <div class="col slide-main fill-deck" style="padding:14px 36px 10px">
+    <div class="col" style="gap:2px;margin-bottom:6px;flex-shrink:0">
+      <div class="chip ch-hi">AI 时代的新逻辑</div>
+      <div class="hr"></div>
+      <div style="font-size:72px;font-weight:900;line-height:1;letter-spacing:-2px" class="grad">未来 AI Native 职场人</div>
+    </div>
+    <div class="col slide-stack" style="gap:10px;min-height:0;flex:1">
+      <!-- ① 标签契约：无 SVG，大号 pill + 箭头 -->
+      <div class="g g-fill" style="padding:14px 18px 16px;display:flex;flex-direction:column;min-height:0">
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
+          <div style="font-size:48px;line-height:1">🔍</div>
+          <div style="font-size:40px;color:var(--accent);font-weight:900;line-height:1.1">识别 &gt; 机械执行</div>
+        </div>
+        <div style="font-size:34px;color:var(--muted);line-height:1.35;margin-top:6px;flex-shrink:0">价值在<strong style="color:var(--cream)">问题 · 约束 · 验收</strong>——你写清「什么叫对」。</div>
+        <div style="flex:1;min-height:200px;margin-top:10px;border-radius:18px;padding:20px 18px;display:flex;flex-direction:column;justify-content:center;gap:16px;background:linear-gradient(165deg,rgba(79,156,249,0.18) 0%,rgba(15,23,42,0.85) 55%);border:1px solid rgba(96,165,250,0.4);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06)">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px 16px;row-gap:14px">
+            <span style="font-size:42px;font-weight:900;padding:14px 26px;border-radius:999px;border:2px solid #60a5fa;background:rgba(79,156,249,0.2);color:#e0f2fe">输入</span>
+            <span style="font-size:46px;font-weight:900;color:rgba(255,255,255,0.38)">→</span>
+            <span style="font-size:42px;font-weight:900;padding:14px 26px;border-radius:999px;border:2px solid #38bdf8;background:rgba(56,189,248,0.15);color:#e0f2fe">输出</span>
+            <span style="font-size:46px;font-weight:900;color:rgba(255,255,255,0.38)">→</span>
+            <span style="font-size:42px;font-weight:900;padding:14px 26px;border-radius:999px;border:2px solid #f87171;background:rgba(248,113,113,0.12);color:#fecaca">失败模式</span>
+            <span style="font-size:46px;font-weight:900;color:rgba(255,255,255,0.38)">+</span>
+            <span style="font-size:38px;font-weight:900;padding:14px 24px;border-radius:14px;border:2px dashed rgba(148,163,184,0.6);color:#cbd5e1">样例回归</span>
+          </div>
+          <div style="font-size:34px;font-weight:800;text-align:center;color:var(--cream);line-height:1.32">模型只加速试错；<span style="color:#93c5fd">验收标准</span>必须你定</div>
+        </div>
+      </div>
+      <!-- ② 巨型数字节奏：条纹底 + 三柱，无框图 SVG -->
+      <div class="g g-fill" style="padding:14px 18px 16px;display:flex;flex-direction:column;min-height:0">
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
+          <div style="font-size:48px;line-height:1">🔄</div>
+          <div style="font-size:40px;color:var(--accent2);font-weight:900;line-height:1.1">学习是常态</div>
+        </div>
+        <div style="font-size:34px;color:var(--muted);line-height:1.35;margin-top:6px;flex-shrink:0">别囤课：<strong style="color:var(--cream)">小实验 + 周复盘</strong> 才攒得下能力。</div>
+        <div style="flex:1;min-height:200px;margin-top:10px;border-radius:18px;overflow:visible;display:flex;align-items:stretch;justify-content:space-between;gap:12px;padding:18px 20px 26px;background:repeating-linear-gradient(105deg,rgba(167,139,250,0.07) 0 32px,transparent 32px 64px),linear-gradient(180deg,rgba(76,29,149,0.25),rgba(15,23,42,0.92));border:1px solid rgba(192,132,252,0.35)">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:0;padding:4px 0 8px">
+            <div style="font-size:80px;font-weight:900;line-height:1.2;padding:6px 0 12px;display:block;background:linear-gradient(180deg,#f5e1ff,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">1h</div>
+            <div style="font-size:30px;font-weight:800;color:#e9d5ff;line-height:1.35;padding-bottom:2px">试新工具</div>
+          </div>
+          <div style="width:2px;align-self:stretch;background:linear-gradient(180deg,transparent,rgba(255,255,255,0.25),transparent)"></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:0;padding:4px 0 8px">
+            <div style="font-size:80px;font-weight:900;line-height:1.2;padding:6px 0 12px;display:block;background:linear-gradient(180deg,#fef3c7,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">1页</div>
+            <div style="font-size:30px;font-weight:800;color:#fde68a;line-height:1.35;padding-bottom:2px">复盘笔记</div>
+          </div>
+          <div style="width:2px;align-self:stretch;background:linear-gradient(180deg,transparent,rgba(255,255,255,0.25),transparent)"></div>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:0;padding:4px 0 8px">
+            <div style="font-size:80px;font-weight:900;line-height:1.2;padding:6px 0 12px;display:block;background:linear-gradient(180deg,#d1fae5,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">∞</div>
+            <div style="font-size:30px;font-weight:800;color:#a7f3d0;line-height:1.35;padding-bottom:2px">小步迭代</div>
+          </div>
+        </div>
+      </div>
+      <!-- ③ 双栏对撞 + 中间竖条：无流程框 -->
+      <div class="g g-fill" style="padding:14px 18px 16px;display:flex;flex-direction:column;min-height:0">
+        <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
+          <div style="font-size:48px;line-height:1">🤝</div>
+          <div style="font-size:40px;color:var(--accent3);font-weight:900;line-height:1.1">行业 × AI</div>
+        </div>
+        <div style="font-size:34px;color:var(--muted);line-height:1.35;margin-top:6px;flex-shrink:0">稀缺的是 <strong style="color:var(--cream)">翻译与整合</strong>，不是单会提示词或单会业务。</div>
+        <div style="flex:1;min-height:200px;margin-top:10px;border-radius:18px;overflow:visible;display:flex;flex-direction:row;align-items:stretch;gap:0;border:1px solid rgba(52,211,153,0.35)">
+          <div style="flex:1 1 38%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 20px 24px;background:linear-gradient(135deg,rgba(52,211,153,0.22),rgba(15,23,42,0.6))">
+            <div style="font-size:44px;font-weight:900;color:#d1fae5;line-height:1.35;text-align:center;padding:4px 0 2px">业务<br>语境</div>
+            <div style="font-size:28px;color:rgba(167,243,208,0.9);margin-top:12px;text-align:center;line-height:1.45;padding-bottom:4px">指标 · 成本 · 风险</div>
+          </div>
+          <div style="flex:0 0 84px;max-width:92px;display:flex;align-items:center;justify-content:center;padding:16px 10px 20px;background:linear-gradient(180deg,rgba(15,23,42,0.95),rgba(51,65,85,0.88),rgba(15,23,42,0.95));border-left:1px solid rgba(255,255,255,0.14);border-right:1px solid rgba(255,255,255,0.14)">
+            <div style="font-size:38px;font-weight:900;color:rgba(226,232,240,0.92);line-height:1.35;text-align:center;letter-spacing:0.2em;padding:6px 2px 10px">对齐</div>
+          </div>
+          <div style="flex:1 1 38%;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 20px 24px;background:linear-gradient(225deg,rgba(79,156,249,0.22),rgba(15,23,42,0.6))">
+            <div style="font-size:44px;font-weight:900;color:#e0f2fe;line-height:1.35;text-align:center;padding:4px 0 2px">模型<br>边界</div>
+            <div style="font-size:28px;color:rgba(186,230,253,0.9);margin-top:12px;text-align:center;line-height:1.45;padding-bottom:4px">数据 · 评测 · 回滚</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="g slide-foot" style="padding:14px 22px">
+      <div style="font-size:36px;color:var(--muted);line-height:1.4;text-align:center"><span style="color:#60a5fa">识别</span> → <span style="color:#c084fc">节奏</span> → <span style="color:#34d399">整合</span> · <strong style="color:var(--cream)">你对错负责</strong>，AI 只加速</div>
+    </div>
+  </div>
+
+</div>
+<div class="s slide" id="s12">
+<div class="wa">今天聊了大厂中小厂做AI不同情况 职业路径建议 放下大厂滤镜 最适合自己成长环境最重要 感谢收听下期再见</div>
+<div class="bg"></div>
+<div class="orb" style="width:700px;height:700px;background:radial-gradient(circle,rgba(52,211,153,0.07),transparent 70%);top:-180px;right:-100px"></div>
+<div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,0.06),transparent 70%);bottom:-80px;left:-60px"></div>
+
+  <div class="col slide-main fill-deck" style="padding:16px 40px 10px">
+    <div class="col" style="align-items:center;text-align:center;gap:6px;flex-shrink:0">
+      <div class="chip ch-g" style="font-size:22px;padding:6px 26px">总结</div>
+      <div style="font-size:88px;font-weight:900;line-height:1;letter-spacing:-3px;background:linear-gradient(135deg,#4f9cf9,#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">放下滤镜</div>
+      <div style="font-size:36px;font-weight:800;color:var(--cream);line-height:1.2">找最适合自己的成长环境</div>
+      <div style="font-size:30px;color:var(--muted);line-height:1.42;margin-top:4px;max-width:1100px">
+        大/小厂无绝对优劣；看<strong style="color:var(--cream)">能否学成、能否做成</strong>——用<strong style="color:var(--cream)">可验证交付</strong>定义资产。
+      </div>
+    </div>
+    <div class="row slide-cards" style="gap:12px;margin-top:10px;flex:1;min-height:0;align-items:stretch">
+      <div class="g f1 g-fill" style="padding:14px 16px;display:flex;flex-direction:column;min-height:0;text-align:left">
+        <div style="font-size:30px;font-weight:900;color:#60a5fa">今日三条</div>
+        <div style="font-size:28px;color:var(--muted);line-height:1.4;margin-top:6px">① 组织复杂切碎交付 ② 中小厂易闭环 ③ 作品可演示</div>
+        <div style="flex:1;min-height:180px;margin-top:10px;border-radius:16px;overflow:hidden;background:rgba(2,6,14,0.55);border:1px solid rgba(96,165,250,0.35)">
+          <svg viewBox="0 0 560 200" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s12a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#60a5fa" stop-opacity="0.25"/><stop offset="100%" stop-color="#0f172a"/></linearGradient></defs>
+            <rect width="560" height="200" fill="url(#s12a)"/>
+            <text x="280" y="30" text-anchor="middle" fill="#bfdbfe" font-size="16" font-weight="900">组织复杂度 vs 端到端</text>
+            <rect x="40" y="52" width="140" height="56" rx="12" fill="rgba(248,113,113,0.15)" stroke="#f87171"/><text x="110" y="88" text-anchor="middle" fill="#fecaca" font-size="14" font-weight="800">多接口</text>
+            <text x="210" y="88" fill="#94a3b8" font-size="18" font-weight="900">→</text>
+            <rect x="240" y="52" width="140" height="56" rx="12" fill="rgba(251,146,60,0.15)" stroke="#fb923c"/><text x="310" y="88" text-anchor="middle" fill="#ffedd5" font-size="14" font-weight="800">难闭环</text>
+            <text x="410" y="88" fill="#94a3b8" font-size="18" font-weight="900">→</text>
+            <rect x="440" y="52" width="80" height="56" rx="12" fill="rgba(52,211,153,0.2)" stroke="#34d399"/><text x="480" y="88" text-anchor="middle" fill="#d1fae5" font-size="13" font-weight="900">作品</text>
+            <text x="280" y="150" text-anchor="middle" fill="#cbd5e1" font-size="14" font-weight="800">用样例与指标证明你能端到端</text>
+          </svg>
+        </div>
+      </div>
+      <div class="g f1 g-fill" style="padding:14px 16px;display:flex;flex-direction:column;min-height:0;text-align:left;background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.35)">
+        <div style="font-size:30px;font-weight:900;color:#34d399">行动清单</div>
+        <div style="font-size:28px;color:var(--muted);line-height:1.4;margin-top:6px">痛点 → <strong style="color:var(--cream)">两周验证</strong> → 归档；面试带<strong style="color:var(--cream)">指标 + 样例</strong>。</div>
+        <div style="flex:1;min-height:180px;margin-top:10px;border-radius:16px;overflow:hidden;background:rgba(2,6,14,0.55);border:1px solid rgba(52,211,153,0.35)">
+          <svg viewBox="0 0 560 200" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs><linearGradient id="s12b" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#34d399" stop-opacity="0.3"/><stop offset="100%" stop-color="#064e3b"/></linearGradient></defs>
+            <rect width="560" height="200" fill="url(#s12b)"/>
+            <text x="280" y="30" text-anchor="middle" fill="#d1fae5" font-size="16" font-weight="900">两周微循环</text>
+            <circle cx="120" cy="110" r="32" fill="rgba(52,211,153,0.2)" stroke="#6ee7b7" stroke-width="2"/><text x="120" y="116" text-anchor="middle" fill="#ecfdf5" font-size="13" font-weight="900">找痛点</text>
+            <path d="M152 110 L240 110" stroke="#94a3b8" stroke-width="2"/><polygon points="240,110 228,104 228,116" fill="#94a3b8"/>
+            <circle cx="280" cy="110" r="32" fill="rgba(52,211,153,0.2)" stroke="#6ee7b7" stroke-width="2"/><text x="280" y="116" text-anchor="middle" fill="#ecfdf5" font-size="13" font-weight="900">验证</text>
+            <path d="M312 110 L400 110" stroke="#94a3b8" stroke-width="2"/><polygon points="400,110 388,104 388,116" fill="#94a3b8"/>
+            <circle cx="440" cy="110" r="32" fill="rgba(52,211,153,0.25)" stroke="#34d399" stroke-width="2"/><text x="440" y="116" text-anchor="middle" fill="#ecfdf5" font-size="13" font-weight="900">归档</text>
+            <text x="280" y="172" text-anchor="middle" fill="#a7f3d0" font-size="14" font-weight="800">可复用模板 = 下一份工作的证据</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="row slide-foot" style="margin-top:10px;gap:8px;flex-wrap:wrap;justify-content:center;width:100%;flex-shrink:0">
+      <div class="g" style="padding:10px 18px;font-size:26px;color:var(--muted)">持续学习</div>
+      <div class="g" style="padding:10px 18px;font-size:26px;color:var(--muted)">可验证交付</div>
+      <div class="g" style="padding:10px 18px;font-size:26px;color:var(--muted)">场景与数据</div>
+      <div class="g" style="padding:10px 18px;font-size:26px;color:var(--muted)">风险意识</div>
+    </div>
+  </div>
+  <div class="row" style="padding:12px 48px 12px;gap:12px;flex-shrink:0">
+    <div class="g" style="flex:1;padding:18px 36px;display:flex;align-items:center;gap:16px">
+      <div style="font-size:32px;font-weight:800;color:#60a5fa">📋</div>
+      <div>
+        <div style="font-size:30px;font-weight:800;color:#60a5fa">观点备忘</div>
+        <div style="font-size:26px;color:var(--muted)">非投资建议</div>
+      </div>
+    </div>
+    <div class="g" style="flex:1;padding:18px 36px;display:flex;align-items:center;gap:16px">
+      <div style="font-size:32px;font-weight:800;color:#38bdf8">🚀</div>
+      <div>
+        <div style="font-size:30px;font-weight:800;color:#38bdf8">一键三连</div>
+        <div style="font-size:26px;color:var(--muted)">订阅不迷路</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">感谢收听 · 咱们下期再见</div>
+
+
+<!-- s13 -->
+<div class="s slide" id="s13">
+<div class="wa">感谢收听下期再见订阅点赞支持</div>
+<div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 50%, rgba(79,156,249,0.07) 0%, transparent 60%),#060d1a"></div>
+<div style="position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(79,156,249,0.08),transparent 70%);top:-200px;left:-100px;border-radius:50%;filter:blur(80px);pointer-events:none"></div>
+<div style="position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(52,211,153,0.06),transparent 70%);bottom:-100px;right:-80px;border-radius:50%;filter:blur(80px);pointer-events:none"></div>
+<div style="flex:1;align-items:center;justify-content:center;text-align:center;display:flex;flex-direction:column;gap:24px;padding:80px">
+<div style="font-size:180px;line-height:1">🎙️</div>
+<div style="display:inline-block;padding:8px 32px;border-radius:100px;font-size:22px;font-weight:700;letter-spacing:1px;background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.25);color:#38bdf8">豆包 AI 博客</div>
+<div style="font-size:80px;font-weight:900;color:#f1f5f9;letter-spacing:4px;margin-top:12px">感谢收听</div>
+<div style="font-size:36px;color:rgba(148,163,184,0.75);max-width:900px;line-height:1.8;margin-top:8px">
+如果内容对你有帮助，欢迎<strong style="color:#f1f5f9">订阅 + 一键三连</strong>。<br>咱们下期再见！
+</div>
+<div style="display:flex;gap:20px;margin-top:24px">
+<div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:16px 36px"><div style="font-size:28px;font-weight:800;color:#60a5fa">👍 点赞</div></div>
+<div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:16px 36px"><div style="font-size:28px;font-weight:800;color:#34d399">⭐ 收藏</div></div>
+<div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:16px 36px"><div style="font-size:28px;font-weight:800;color:#c084fc">↗️ 转发</div></div>
+</div>
+</div>
+</div>
+</div>
+<div id="pn"></div>
+<script>
+(function(){
+var PW=1920,PH=1080;
+function fit(){var el=document.getElementById('P'),r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;el.style.transform='scale('+r+')';el.style.transformOrigin='0 0';el.style.left=x+'px';el.style.top=y+'px'}
+window.addEventListener('resize',fit);fit();
+var slides=document.querySelectorAll('.slide'),total=slides.length,cur=0;
+function ui(){document.getElementById('pn').textContent=(cur+1)+' / '+total;var b=document.getElementById('prog');if(b)b.style.width=(cur/(total-1)*100)+'%'}
+function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('on');cur=i;slides[cur].classList.add('on');ui()}
+window.go=go;window.goTo=go;
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1)}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}});
+document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1)});
+ui();
+})();
+</script>
+</body>
+</html>

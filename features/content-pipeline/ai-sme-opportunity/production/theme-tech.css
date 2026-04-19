@@ -1,0 +1,81 @@
+/*
+ * theme-tech.css — 深空蓝紫玻璃态主题
+ *
+ * 视觉：深蓝黑底 + 蓝/紫/青渐变 + 强玻璃拟态 + 光晕
+ * 适用：架构、系统设计、工程类、AI/技术话题
+ * 参考：anthropic-agent-harness-video 产品级产出
+ */
+
+:root{
+  /* ── 背景 ── */
+  --bg:#030712;
+  --bg-pattern:
+    radial-gradient(ellipse 80% 60% at 50% 0%,rgba(30,58,138,0.35),transparent),
+    radial-gradient(ellipse 70% 50% at 50% 100%,rgba(88,28,135,0.25),transparent);
+
+  /* ── 主色调 ── */
+  --accent-a:#818CF8;       /* indigo-400 主强调 */
+  --accent-al:#38BDF8;      /* sky-400 渐变中段 */
+  --accent-b:#34D399;       /* emerald-400 次强调 */
+  --accent-c:#F0C14A;       /* amber 黄金第三色 */
+
+  /* ── 语义色 ── */
+  --sky:#38BDF8;
+  --green:#34D399;
+  --danger:#F87171;
+  --purple:#A78BFA;
+  --warn:#FDE68A;
+
+  /* ── 文字 ── */
+  --cream:#e2e8f0;
+  --muted:#94a3b8;
+  --dim:#64748B;
+
+  /* ── 卡片 ── */
+  --card:rgba(15,23,42,0.55);
+  --bdr:rgba(255,255,255,0.08);
+  --glass-blur:24px;
+
+  /* ── 字体 ── */
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans SC','PingFang SC',system-ui,sans-serif;
+
+  /* ── Chip 主题色 ── */
+  --tag-bg-a:rgba(129,140,248,0.12);--tag-bdr-a:rgba(129,140,248,0.35);
+  --tag-bg-b:rgba(52,211,153,0.12);--tag-bdr-b:rgba(52,211,153,0.35);
+  --tag-bg-c:rgba(240,193,74,0.12);--tag-bdr-c:rgba(240,193,74,0.35);
+  --tag-bg-sk:rgba(56,189,248,0.12);--tag-bdr-sk:rgba(56,189,248,0.35);
+  --tag-bg-rd:rgba(248,113,113,0.12);--tag-bdr-rd:rgba(248,113,113,0.35);
+  --tag-bg-gn:rgba(52,211,153,0.12);--tag-bdr-gn:rgba(52,211,153,0.35);
+  --tag-bg-purple:rgba(139,92,246,0.12);--tag-bdr-purple:rgba(139,92,246,0.35);
+
+  /* ── 渐变文字 ── */
+  --grad-hero:linear-gradient(135deg,#818CF8 0%,#38BDF8 40%,#34D399 70%,#F0C14A 100%);
+  --grad-stat:linear-gradient(135deg,var(--accent-a),var(--accent-al),var(--accent-b));
+
+  /* ── Orb 辉光色 ── */
+  --orb-a:radial-gradient(circle,rgba(129,140,248,0.10),transparent 70%);
+  --orb-b:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%);
+  --orb-c:radial-gradient(circle,rgba(139,92,246,0.08),transparent 70%);
+  --orb-d:radial-gradient(circle,rgba(16,185,129,0.07),transparent 70%);
+
+  /* ── 水印透明度 ── */
+  --wm-opacity:0.02;
+}
+
+/* 背景纹理 */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background:var(--bg-pattern,var(--bg));
+  pointer-events:none
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);
+  background-size:60px 60px;
+  pointer-events:none
+}
+
+/* 主题装饰水印 — 用 emoji 代替 SVG 动物 */
+.animal-wm{color:var(--accent-a,rgba(129,140,248,0.5))}

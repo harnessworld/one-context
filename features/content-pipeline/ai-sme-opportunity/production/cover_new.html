@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>封面</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 1080px; height: 1920px; overflow: hidden; font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #05050a; }
+#cover { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
+#overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(3,3,8,0.82) 0%, rgba(3,3,8,0.30) 18%, rgba(3,3,8,0.08) 38%, rgba(3,3,8,0.08) 52%, rgba(3,3,8,0.45) 72%, rgba(3,3,8,0.92) 100%); }
+#noise { position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"); pointer-events: none; }
+#header { position: absolute; top: 0; left: 0; right: 0; padding: 76px 76px 0; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+#tagline { font-size: 30px; font-weight: 400; color: rgba(255,255,255,0.55); letter-spacing: 6px; }
+#brand { display: flex; align-items: center; gap: 16px; }
+#brand-name { font-size: 30px; font-weight: 600; color: rgba(255,255,255,0.80); letter-spacing: 3px; }
+#content { position: absolute; top: 0; bottom: 0; left: 0; right: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 200px 72px 280px; text-align: center; z-index: 20; gap: 0; }
+#tag { display: inline-block; font-size: 26px; font-weight: 600; letter-spacing: 8px; padding: 10px 32px; border-radius: 100px; margin-bottom: 52px; background: rgba(255,193,7,0.14); border: 1.5px solid rgba(255,213,79,0.55); color: #FFE082; }
+#headline { font-size: 82px; font-weight: 900; line-height: 1.0; letter-spacing: 0px; color: #ffffff; text-align: center; word-break: keep-all; text-shadow: 0 0 72px rgba(255,193,7,0.38), 0 4px 28px rgba(0,0,0,0.92); }
+#divider { width: 120px; height: 3px; border-radius: 2px; margin: 44px auto 44px; background: linear-gradient(135deg, #FFECB3 0%, #FFC107 42%, #FF8F00 100%); }
+#subline { font-size: 48px; font-weight: 500; line-height: 1.55; color: rgba(255,255,255,0.75); letter-spacing: 3px; max-width: 900px; text-shadow: 0 2px 20px rgba(0,0,0,0.8); }
+#footer { position: absolute; bottom: 0; left: 0; right: 0; padding: 0 76px 60px; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+#footer-left { display: flex; flex-direction: column; gap: 12px; }
+.foot-item { display: flex; align-items: center; gap: 14px; font-size: 27px; color: rgba(255,255,255,0.38); letter-spacing: 2px; }
+.foot-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; background: #FFCA28; box-shadow: 0 0 6px #FFCA28; }
+#watermark { font-size: 24px; color: rgba(255,255,255,0.22); letter-spacing: 3px; }
+#accent-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, transparent 2%, #FFD54F 35%, #FFB300 70%, transparent 98%); }
+#bg-fallback { position: absolute; inset: 0; background: radial-gradient(ellipse 120% 80% at 50% 28%, #1a1508 0%, #0c0a05 42%, #050508 100%), radial-gradient(ellipse 80% 60% at 50% 75%, rgba(255,193,7,0.26) 0%, transparent 60%), radial-gradient(ellipse 60% 60% at 80% 20%, rgba(255,171,0,0.16) 0%, transparent 60%); }
+</style>
+</head>
+<body>
+<div id="cover">
+    <div id="bg-fallback"></div>
+    <div id="overlay"></div>
+    <div id="noise"></div>
+    <div id="header">
+        <div id="tagline">AI时代的职业选择</div>
+        <div id="brand">
+            <div id="brand-name">大厂吾师兄</div>
+        </div>
+    </div>
+    <div id="content">
+        <div id="tag">2026 · 职场洞察</div>
+        <div id="headline">放下大厂滤镜</div>
+        <div id="divider"></div>
+        <div id="subline">中小厂的AI机会<br>比你想象的大</div>
+    </div>
+    <div id="footer">
+        <div id="footer-left">
+            <div class="foot-item"><div class="foot-dot"></div>中小厂正在抢AI人才</div>
+            <div class="foot-item"><div class="foot-dot"></div>大厂光环正在消退</div>
+        </div>
+        <div id="watermark">豆包AI生成</div>
+    </div>
+    <div id="accent-bar"></div>
+</div>
+</body>
+</html>
