@@ -943,3 +943,4 @@ workspaces:
         - features/README.md
         - features/INDEX.md
         - features/_template/
+        - skills/skill-parallel-verify/

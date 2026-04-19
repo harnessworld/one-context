@@ -34,3 +34,4 @@ Read these files for project context:
 @features/README.md
 @features/INDEX.md
 @features/_template
+@skills/skill-parallel-verify

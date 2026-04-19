@@ -35,11 +35,12 @@ default and confirm.
 2. **Style / theme.** 推荐风格：
    - 技术分享 → `mobile-tech`（深蓝科技，默认最安全）
    - 亲和/生活 → `mobile-warm`（暖橙）
-   - 正式汇报 → `mobile-minimal`（白底极简）或 `mobile-data`（数据蓝）
+   - 正式汇报 → `mobile-deep-blue`（深蓝汇报）或 `mobile-data`（数据蓝）或 `mobile-minimal`（白底极简）
    - 赛博/活动 → `mobile-dark`（OLED 黑）
    - 文化/教育 → `mobile-nature`（自然绿）
 3. **Starting point.** 用哪个 full-deck 模板打底？
    - 通用 → `mobile-generic`
+   - 汇报/深度分析 → `deep-reporting`（shell 布局，高视觉一致性，推荐默认）
    - 技术分享 → `mobile-tech-sharing`
    - 产品发布 → `mobile-product-pitch`
    - 课程介绍 → `mobile-course-intro`
@@ -84,7 +85,7 @@ A good opening message:
 
 ### Step 4: Assemble from full-deck template
 
-1. **Start from `templates/full-decks/mobile-generic/`** (NOT the minimal `templates/deck.html`).
+1. **Start from a full-deck template**: `mobile-generic/`（传统布局）或 `deep-reporting/`（shell 布局，推荐汇报类使用）。NOT the minimal `templates/deck.html`.
 2. Swap slide sections by copying from `templates/single-page/` as needed.
 3. Replace demo data with actual content.
 4. Add inline SVG diagrams (参考下方「SVG 图标速查」和「SVG 架构图模板」).
@@ -161,6 +162,60 @@ A vs B 对比 ....... Split 50/50
 步骤/流程 ......... Process Flow
 结尾 .............. Thanks
 ```
+
+## Shell layout — 受约束布局模式（推荐汇报类使用）
+
+Shell 布局是一种更严格的布局系统，每页强制使用相同结构，大幅减少 AI 的决策空间。
+配套模板: `deep-reporting`，配套主题: `mobile-deep-blue`。
+
+### 何时用 shell vs 传统 7 布局
+
+| 场景 | 推荐 |
+|------|------|
+| 汇报/商务演示（需要视觉一致性） | Shell (`deep-reporting` 模板) |
+| 自由创意/技术分享 | 传统 7 布局 |
+| 要求每页必须有图解 | Shell（强制 hero-right SVG） |
+| 需要多变版式 | 传统 7 布局 |
+
+### Shell 每页结构（固定）
+
+```
+slide-shell
+├── slide-topline (eyebrow + page-no)
+├── slide-main > hero-grid
+│   ├── hero-left (ordinal + title + sub + accent-bar + extras)
+│   └── hero-right (SVG 图解 — 必填)
+└── footer (section label + key insight)  ← 注意: 是 .footer 非 .slide-footer
+```
+
+### Shell 视觉词汇
+
+| 元素 | 用途 | CSS class |
+|------|------|-----------|
+| 节标签 | 左上大写标签 | `.eyebrow` |
+| 页码+指示点 | 右上 N/M 数量 | `.page-no` |
+| 装饰序号 | 大号半透明数字 | `.hero-ordinal` |
+| 渐变主标题 | 页面核心标题 | `.hero-title` |
+| 副标题 | 标题下方说明 | `.hero-sub` |
+| 渐变强调条 | 标题组收尾装饰 | `.hero-accent-bar` |
+| 背景光晕 | hero-left 装饰 | `.hero-glow` |
+| 标签徽章 | 话题标签 | `.hashtag` |
+| 通知卡片 | 列表项 | `.notif-card` + `.notif-icon` |
+| 高亮洞察 | footer 右侧 | `.footer-strong` |
+
+### Shell mode self-check (额外)
+
+- [ ] 每页都使用 `slide-shell` 包裹（终页可用 `.slide-shell--fullbleed` 退化）
+- [ ] 每页 hero-right 都包含 SVG 或语义化 HTML 组件（不含纯 emoji 占位）
+- [ ] page-no 格式为 NN / MM，所有页的 MM 相同且等于实际 slide 总数
+- [ ] hero-ordinal 与 page-no 的 NN 部分一致（如 ordinal="03" 对应 page-no "03 / 09"）
+- [ ] eyebrow 为大写英文标签（短词如 HOOK/SHIFT/CASES）
+- [ ] hero-title 字号 ≥96px（inline font-size 不得低于此值以保证手机可读）
+- [ ] 终页使用 full-bleed SVG 模式（终页可省略 slide-topline / hero-grid / footer）
+- [ ] 终页 SVG 内如有硬编码页码，必须与实际页数一致
+- [ ] footer 使用 `.footer` 类名（不是 `.slide-footer`）
+
+**注意**: shell-layout.css 重定义了 mobile-layout.css 中的 `.grid-2` 和 `.split`（shell 版本使用 grid 布局 + `height:100%`）。当两者同时加载时，shell 版本因加载顺序在后而优先。
 
 ## SVG 图标速查 (内联)
 
@@ -354,6 +409,7 @@ A vs B 对比 ....... Split 50/50
 | 主题 | 文件 | 背景色 | 场景 |
 |------|------|--------|------|
 | **mobile-tech** | mobile-tech.css | 深蓝 #0f172a | 技术分享、工程内训（默认） |
+| **mobile-deep-blue** | mobile-deep-blue.css | 深蓝 #07111f | 汇报、短视频式演示（配合 shell 布局） |
 | **mobile-warm** | mobile-warm.css | 暖黄 #fffbeb | 亲和介绍、生活类、小红书 |
 | **mobile-minimal** | mobile-minimal.css | 白色 #ffffff | 正式汇报、学术报告 |
 | **mobile-dark** | mobile-dark.css | 纯黑 #000000 | OLED 设备、赛博风 |
@@ -423,7 +479,7 @@ html-deck-layout/
 ├── references/                 (detailed catalogs & spec)
 │   ├── spec-cheatsheet.md      (layout rules, CSS code, self-check)
 │   ├── authoring-guide.md      (6-step authoring workflow)
-│   ├── mobile-themes.md        (6 themes catalog)
+│   ├── mobile-themes.md        (7 themes catalog)
 │   ├── mobile-layouts.md       (7 layouts catalog)
 │   ├── svg-snippets.md         (SVG icon library)
 │   └── emoji-guide.md          (emoji quick reference)
@@ -431,8 +487,10 @@ html-deck-layout/
 │   ├── base.css                (mobile-first design tokens)
 │   ├── fonts.css               (font stack)
 │   ├── mobile-layout.css       (fill-deck, #P, slide structure)
-│   └── themes/                 (6 theme CSS overrides)
+│   ├── shell-layout.css        (shell layout — slide-shell, hero-grid, etc.)
+│   └── themes/                 (7 theme CSS overrides)
 │       ├── mobile-tech.css
+│       ├── mobile-deep-blue.css (deep blue — shell reporting)
 │       ├── mobile-warm.css
 │       ├── mobile-minimal.css
 │       ├── mobile-dark.css
@@ -440,8 +498,9 @@ html-deck-layout/
 │       └── mobile-nature.css
 ├── templates/
 │   ├── deck.html               (minimal 3-slide starter — NOT recommended as starting point)
-│   ├── full-decks/             (4 complete deck templates — USE THESE)
+│   ├── full-decks/             (5 complete deck templates — USE THESE)
 │   │   ├── mobile-generic/
+│   │   ├── deep-reporting/     (shell layout — high consistency, recommended for reports)
 │   │   ├── mobile-tech-sharing/
 │   │   ├── mobile-product-pitch/
 │   │   └── mobile-course-intro/
