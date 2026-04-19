@@ -378,7 +378,9 @@ These files provide deeper detail when needed but are NOT required for basic gen
 - [references/emoji-guide.md](references/emoji-guide.md) — emoji quick reference by scenario
 - [references/authoring-guide.md](references/authoring-guide.md) — detailed 6-step authoring workflow
 
-## Relationship with html-video-from-slides
+## Relationship with other skills
+
+### html-video-from-slides
 
 | This skill | html-video-from-slides |
 |-----------|----------------------|
@@ -388,6 +390,17 @@ These files provide deeper detail when needed but are NOT required for basic gen
 
 Workflow: use this skill to create slides → then use html-video-from-slides to produce video.
 Layout spec is shared: [references/spec-cheatsheet.md](references/spec-cheatsheet.md).
+
+### srt-to-deck
+
+| This skill | srt-to-deck |
+|-----------|------------|
+| **Generate** slides (prompt → HTML) | **Generate** slides (SRT → HTML) |
+| Layout rules & templates | **Reuses** this skill's layout rules & templates |
+| Input: user prompt | Input: Whisper SRT file |
+
+`srt-to-deck` is a sibling skill that shares this skill's entire visual system (themes, layouts, SVG, fill-deck rules). It adds SRT parsing + topic segmentation + automatic layout matching on top.
+The output is the same format (presentation.html with `go(n)`) and is compatible with html-video-from-slides.
 
 ## File structure
 

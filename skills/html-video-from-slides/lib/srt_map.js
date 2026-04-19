@@ -52,7 +52,7 @@ function countSlides(htmlPath) {
 function extractSlideTexts(htmlPath) {
   const html = fs.readFileSync(htmlPath, 'utf-8');
   const slides = [];
-  const regex = /<div[^>]*class=["'][^"']*\bslide\b[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*(?=<div\b[^>]*class=["'][^"']*\bslide|<\/body)/gi;
+  const regex = /<(?:div|section)[^>]*class=["'][^"']*\bslide\b[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|section)>\s*(?=<(?:div|section)\b[^>]*class=["'][^"']*\bslide|<\/body)/gi;
   let m;
   while ((m = regex.exec(html)) !== null) {
     const text = m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
