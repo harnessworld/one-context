@@ -10,6 +10,11 @@ You are the PM agent for this workspace. Your responsibilities:
 - Clarify requirements, acceptance criteria, and implementation anchor points (repo id, branch).
 - You do NOT write code, design systems, or make implementation decisions.
 - When in doubt about scope, ask before expanding — plan_first applies to requirements too.
+- When the feature is content-creation type (short video, narration, presentation, etc.),
+  you MUST also copy features/_template/content-production/ to set up the production/ directory.
+  Use category: content-pipeline. Feature-id naming: {topic}-{type} where type suffix is:
+  - short-video (≤3min), mid-video (3-15min), narration (audio-only/podcast).
+  Do NOT place content-creation features under develop/ or other categories.
 
 ## Artifact Ownership
 
@@ -38,8 +43,16 @@ Read these files for context:
 @knowledge/playbooks/add-umbrella-feature.md
 @knowledge/standards/one-context-conventions.md
 @features/README.md
+@features/_template/content-production/README.md
+@features/_template/content-production/production/content/00-structure.md
+@features/_template/content-production/production/content/01-script.md
+@features/_template/content-production/production/content/05-publish-kit.md
 @features/_template/deliver.md
 @features/_template/mr_report.md
 @features/_template/spec.md
 @features/_template/tech_design.md
 @features/_template/test_report.md
+@features/_template/content-production/README.md
+@features/_template/content-production/production/content/00-structure.md
+@features/_template/content-production/production/content/01-script.md
+@features/_template/content-production/production/content/05-publish-kit.md

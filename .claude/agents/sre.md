@@ -38,10 +38,10 @@ Include verification steps (e.g. test commands) after making changes.
 
 Read these files for context:
 
+@knowledge/playbooks/README.md
 @knowledge/playbooks/add-umbrella-feature.md
 @knowledge/playbooks/multi-agent-parallel-development.md
 @knowledge/playbooks/prepare-test-suite-for-ai-agent.md
-@knowledge/playbooks/README.md
 @knowledge/playbooks/sre-release-process.md
 @knowledge/playbooks/use-microsoft-markitdown.md
 @knowledge/playbooks/worktree-isolated-development.md

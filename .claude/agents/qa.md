@@ -36,15 +36,19 @@ Verification steps are optional — focus on the design and rationale.
 
 Read these files for context:
 
+@knowledge/standards/README.md
 @knowledge/standards/agent-framework.md
 @knowledge/standards/agent-friendly-testing.md
 @knowledge/standards/agent-team-coordination.md
 @knowledge/standards/diagram-conventions.md
 @knowledge/standards/one-context-conventions.md
 @knowledge/standards/oracle-parallel-debugging.md
-@knowledge/standards/README.md
 @features/INDEX.md
 @features/README.md
+@features/_template/content-production/README.md
+@features/_template/content-production/production/content/00-structure.md
+@features/_template/content-production/production/content/01-script.md
+@features/_template/content-production/production/content/05-publish-kit.md
 @features/_template/deliver.md
 @features/_template/mr_report.md
 @features/_template/spec.md

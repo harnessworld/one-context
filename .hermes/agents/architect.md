@@ -87,6 +87,33 @@ Write shared meaning once. Adapt it many times.
 
 The system should avoid storing the same intent separately in multiple vendor-specific configuration files whenever a canonical source can exist instead.
 
+<!-- source: knowledge/standards/README.md -->
+# Standards
+
+Tool-neutral engineering conventions and policies for `one-context`.
+
+## Files
+
+| File | Scope |
+|------|-------|
+| `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
+| `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
+
+## What belongs here
+
+- Coding conventions and repository layout policies
+- Documentation standards and testing expectations
+- Safety, write-boundary, and data-handling policies
+- Schema definitions and interface contracts
+
+## What does NOT belong here
+
+- Architecture analysis or source-code walkthroughs → `references/`
+- Diagram samples and visual design guides → `references/`
+- Step-by-step operating procedures → `playbooks/`
+
+Add links to new standards in the table above when creating a file.
+
 <!-- source: knowledge/standards/agent-framework.md -->
 # Agent Framework — 智能体框架规范
 
@@ -803,33 +830,6 @@ This strategy requires:
 - Oracle and test implementation interfaces must be compatible, otherwise mixing is impossible
 - Interaction bugs (requiring multiple files/modules combined to appear) need delta debugging or other additional methods
 
-<!-- source: knowledge/standards/README.md -->
-# Standards
-
-Tool-neutral engineering conventions and policies for `one-context`.
-
-## Files
-
-| File | Scope |
-|------|-------|
-| `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
-| `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
-
-## What belongs here
-
-- Coding conventions and repository layout policies
-- Documentation standards and testing expectations
-- Safety, write-boundary, and data-handling policies
-- Schema definitions and interface contracts
-
-## What does NOT belong here
-
-- Architecture analysis or source-code walkthroughs → `references/`
-- Diagram samples and visual design guides → `references/`
-- Step-by-step operating procedures → `playbooks/`
-
-Add links to new standards in the table above when creating a file.
-
 <!-- source: meta/repos.yaml -->
 # Sub-repository manifest (single source of truth for humans + tooling).
 #
@@ -894,6 +894,10 @@ repos:
     category: integrations
     id: trend-radar
     description: 趋势雷达 — 多平台热点聚合 + MCP AI分析 + 企微/微信/飞书推送（33k+ stars）。
+  - url: https://github.com/heygen-com/hyperframes
+    category: reference
+    id: hyperframes
+    description: HeyGen 开源 HTML→视频合成框架（CLI、Puppeteer+FFmpeg、Agent skills）；与本仓 html-video-from-slides 并行参考，不替换。
 
 <!-- source: meta/workspaces.yaml -->
 # Task- or theme-oriented workspace definitions.
