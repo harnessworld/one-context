@@ -44,8 +44,17 @@ skills/.skills_store_lock.json
 # Local env (proxy, etc.); README "Network / HTTP proxy"
 .env
 
-# Features: production/ directories are build artifacts (covers, srt, JSON, node_modules, etc.)
-features/**/production/
+# Features: production/ — track creative assets, ignore media & temp
+# See features/_template/content-production/ for canonical layout
+features/**/production/tmp/
+features/**/production/media/
+features/**/production/**/*.wav
+features/**/production/**/*.mp4
+features/**/production/**/*.png
+features/**/production/**/*.jpg
+features/**/production/**/*.webm
+features/**/production/**/*.bak
+features/**/production/node_modules/
 
 # Features: temporary build artifacts
 features/**/temp_*/

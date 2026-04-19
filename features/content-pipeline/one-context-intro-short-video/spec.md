@@ -2,7 +2,7 @@
 id: one-context-intro-short-video
 title: one-context 中视频介绍（爆款口播框架）
 status: draft
-category: develop
+category: content-pipeline
 primary_repo_id: one-context
 owner: ""
 updated: "2026-04-02"
@@ -40,12 +40,12 @@ updated: "2026-04-02"
 
 - **仓库 id**（`meta/repos.yaml`）: `one-context`（主文案与事实来源）；可选协作仓库 `VideoFactory`（剪辑与成片）。
 - **分支 / PR**: —
-- **主要路径**: `features/develop/one-context-intro-short-video/production/`；成片流水线见 `skills/html-video-from-slides/`（单入口 `cli.js`，勿在子目录复制脚本）。
+- **主要路径**: `features/content-pipeline/one-context-intro-short-video/production/`；成片流水线见 `skills/html-video-from-slides/`（单入口 `cli.js`，勿在子目录复制脚本）。
 
 # 关联
 
 - **Workspace**（如有）: —
-- **对标框架**: 与 `features/develop/claudecode-source-analysis/` 同属 develop 类内容；口播结构可参考「架构拆解」类爆款节奏（前 3 秒炸场、15 秒小高潮）。
+- **对标框架**: 参考 `features/develop/claudecode-source-analysis/` 的文档风格；口播结构可参考「架构拆解」类爆款节奏（前 3 秒炸场、15 秒小高潮）。
 
 # 开放问题
 
