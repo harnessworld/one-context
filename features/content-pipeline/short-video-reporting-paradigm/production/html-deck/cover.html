@@ -170,14 +170,14 @@ body {
     /* text-shadow 由JS注入主题色 */
 }
 
-/* 自适应字号 */
-#headline.len5  { font-size: 200px; }
-#headline.len6  { font-size: 180px; }
-#headline.len7  { font-size: 160px; letter-spacing: -2px; }
-#headline.len8  { font-size: 140px; letter-spacing: -1px; }
-#headline.len10 { font-size: 118px; letter-spacing: 0px; }
-#headline.len12 { font-size: 100px; }
-#headline.long  { font-size: 82px;  letter-spacing: 0px; }
+/* 自适应字号 — 按每行最大 CJK 视觉宽度分档 */
+#headline.len5  { font-size: 200px; }                          /* maxLineW ≤4 */
+#headline.len6  { font-size: 180px; }                          /* maxLineW ≤5 */
+#headline.len7  { font-size: 155px; letter-spacing: -2px; }    /* maxLineW ≤6 */
+#headline.len8  { font-size: 130px; letter-spacing: -1px; }    /* maxLineW ≤7 */
+#headline.len10 { font-size: 110px; letter-spacing: 0px; }     /* maxLineW ≤9 */
+#headline.len12 { font-size: 95px; }                           /* maxLineW ≤11 */
+#headline.long  { font-size: 82px;  letter-spacing: 0px; }     /* maxLineW >11 */
 
 /* 强调词：由JS动态wrap一个<em>标签 */
 #headline em {
@@ -438,15 +438,24 @@ const THEMES = {
     // ── 主标题 ──
     const headEl = document.getElementById('headline');
     const lines = CONFIG.headline.split('\n');
-    const totalChars = CONFIG.headline.replace(/\n/g, '').length;
 
-    // 字号 class
-    const cls = totalChars <= 5 ? 'len5'
-              : totalChars <= 6 ? 'len6'
-              : totalChars <= 7 ? 'len7'
-              : totalChars <= 8 ? 'len8'
-              : totalChars <= 10 ? 'len10'
-              : totalChars <= 12 ? 'len12' : 'long';
+    // CJK 视觉宽度：CJK/fullwidth = 1，ASCII = 0.55
+    function cjkWidth(s) {
+        let w = 0;
+        for (const c of s) {
+            w += /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(c) ? 1 : 0.55;
+        }
+        return Math.round(w);
+    }
+    const maxLineW = Math.max(...lines.map(l => cjkWidth(l)));
+
+    // 按每行最大视觉宽度分档，确保单行不溢出（可用宽度 936px）
+    const cls = maxLineW <= 4 ? 'len5'
+              : maxLineW <= 5 ? 'len6'
+              : maxLineW <= 6 ? 'len7'
+              : maxLineW <= 7 ? 'len8'
+              : maxLineW <= 9 ? 'len10'
+              : maxLineW <= 11 ? 'len12' : 'long';
     headEl.classList.add(cls);
     headEl.style.textShadow = t.textGlow;
 
