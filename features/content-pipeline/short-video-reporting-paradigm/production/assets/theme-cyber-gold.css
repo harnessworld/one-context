@@ -1,0 +1,219 @@
+/* Cyber Gold — 口播录屏向：深空底 + 琥珀金强调 + 微网格氛围 */
+
+:root {
+  --c-bg: #040308;
+  --c-surface: rgba(22, 18, 34, 0.94);
+  --c-surface-2: rgba(36, 30, 56, 0.92);
+  --c-text-1: #f8fafc;
+  --c-text-2: #a8a3b8;
+  --c-accent-a: #fbbf24;
+  --c-accent-b: #f59e0b;
+  --c-accent-c: #22d3ee;
+  --c-border: rgba(251, 191, 36, 0.14);
+  --c-overlay: rgba(4, 3, 8, 0.65);
+  --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 12px 36px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.55);
+  --gold-glow: 0 0 42px rgba(251, 191, 36, 0.12);
+}
+
+/* 画布：径向光 + 细网格，避免「一片死黑」 */
+#P {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(251, 191, 36, 0.16), transparent 52%),
+    radial-gradient(ellipse 55% 45% at 100% 85%, rgba(34, 211, 238, 0.07), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 75%, rgba(245, 158, 11, 0.06), transparent 48%),
+    linear-gradient(165deg, #05040a 0%, #0b0814 48%, #050308 100%);
+  position: relative;
+  isolation: isolate;
+}
+
+#P::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.42;
+  background-image:
+    linear-gradient(rgba(251, 191, 36, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(251, 191, 36, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 20%, transparent 72%);
+}
+
+.s.slide {
+  position: relative;
+  z-index: 1;
+}
+
+/* 卡片：玻璃感 + 金边高光 */
+.g {
+  background: linear-gradient(152deg, rgba(32, 26, 48, 0.96) 0%, rgba(14, 12, 22, 0.98) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  box-shadow:
+    var(--gold-glow),
+    0 16px 48px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.g .g-title {
+  letter-spacing: 0.02em;
+}
+
+.process-flow .g.step {
+  background: linear-gradient(160deg, rgba(28, 24, 42, 0.95), rgba(12, 10, 20, 0.98));
+  border: 1px solid rgba(251, 191, 36, 0.16);
+  box-shadow: var(--shadow-sm), var(--gold-glow);
+}
+
+/* 页眉角标：琥珀渐变 */
+.slide-header .badge {
+  background: linear-gradient(135deg, #fde68a 0%, #f59e0b 48%, #d97706 100%);
+  color: #1c1003;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.35);
+}
+
+.slide-header h2 {
+  text-shadow: 0 2px 28px rgba(251, 191, 36, 0.12);
+}
+
+/* 底栏：细金线 */
+.slide-footer {
+  border-top: 1px solid rgba(251, 191, 36, 0.12);
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.04), transparent);
+}
+
+.pill {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fef3c7;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* 空示意图槽位：金属拉丝感（无 svg 子元素时） */
+.card-diagram:empty {
+  min-height: 140px !important;
+  border-radius: var(--r-md) !important;
+  background:
+    linear-gradient(118deg, rgba(251, 191, 36, 0.12) 0%, transparent 42%),
+    linear-gradient(180deg, rgba(12, 10, 18, 0.9), rgba(22, 18, 34, 0.85)) !important;
+  border: 1px dashed rgba(251, 191, 36, 0.22) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-diagram:empty::after {
+  content: "";
+  position: absolute;
+  inset: -40% -60%;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.07) 48%,
+    transparent 62%
+  );
+  animation: cyber-shimmer 3.2s ease-in-out infinite;
+}
+
+@keyframes cyber-shimmer {
+  0% {
+    transform: translateX(-12%) rotate(8deg);
+  }
+  100% {
+    transform: translateX(18%) rotate(8deg);
+  }
+}
+
+/* 封面：双环光晕，避免标题「浮空」 */
+#s1 .col.slide-main {
+  position: relative;
+}
+
+#s1 .col.slide-main::before {
+  content: "";
+  position: absolute;
+  width: min(92vw, 1400px);
+  height: min(92vw, 1400px);
+  max-width: 1400px;
+  max-height: 1400px;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(251, 191, 36, 0.14);
+  box-shadow:
+    0 0 80px rgba(251, 191, 36, 0.08),
+    inset 0 0 60px rgba(251, 191, 36, 0.04);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#s1 .col.slide-main::after {
+  content: "";
+  position: absolute;
+  width: min(72vw, 980px);
+  height: min(72vw, 980px);
+  max-width: 980px;
+  max-height: 980px;
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(34, 211, 238, 0.1);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#s1 .col.slide-main > div {
+  position: relative;
+  z-index: 1;
+}
+
+/* 结束页与封面一致的光感 */
+#s27 .col.slide-main {
+  position: relative;
+}
+
+#s27 .col.slide-main::before {
+  content: "";
+  position: absolute;
+  width: 900px;
+  height: 900px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(251, 191, 36, 0.12);
+  box-shadow: 0 0 70px rgba(251, 191, 36, 0.07);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#s27 .col.slide-main > div {
+  position: relative;
+  z-index: 1;
+}
+
+/* 含流程图的容器 */
+.card-diagram:not(:empty) {
+  border: 1px solid rgba(251, 191, 36, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), var(--shadow-sm);
+  background: linear-gradient(165deg, rgba(18, 14, 28, 0.95), rgba(8, 6, 14, 0.98)) !important;
+}
+
+.process-flow .arrow {
+  font-size: 48px;
+  font-weight: 700;
+  color: rgba(251, 191, 36, 0.85);
+  text-shadow: 0 0 18px rgba(251, 191, 36, 0.35);
+  line-height: 1;
+}
+
+.divider-h {
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.35), transparent);
+}

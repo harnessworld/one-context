@@ -1083,6 +1083,8 @@
   function next() { go(index + 1); }
   function prev() { go(index - 1); }
 
+  /** html-video-from-slides 截图阶段会调用全局 go(n)，必须挂到 window */
+  window.go = go;
   window.nextSlide = next;
   window.prevSlide = prev;
 

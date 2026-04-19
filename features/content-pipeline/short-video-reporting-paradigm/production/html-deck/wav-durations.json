@@ -1,0 +1,39 @@
+{
+  "wavFile": "voiceover.wav",
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "srtFile": "sub.srt",
+  "wrapSubtitles": true,
+  "srtReplacements": [
+    ["请不吝点赞 订阅 转发 打赏支持明镜与点点栏目", ""],
+    ["盘骨开天地", "盘古开天地"],
+    ["方案潜质", "方案前置"],
+    ["围着听众传", "围着听众转"],
+    ["口干舌造", "口干舌燥"],
+    ["豆豹AI", "豆包AI"],
+    ["测重点", "侧重点"],
+    ["技要", "纪要"],
+    ["简烈", "简洁"],
+    ["粥报", "周报"]
+  ],
+  "subtitle": {
+    "fontName": "Microsoft YaHei",
+    "fontSize": 20,
+    "bold": true,
+    "primaryColour": "#FFFF00",
+    "primaryAlpha": 108,
+    "marginV": 20,
+    "charsPerLine": 26
+  },
+  "slideDurationsSec": [
+    9.1,
+    24.32,
+    119.66,
+    33.32,
+    40.6,
+    87.64,
+    88.38,
+    68.1,
+    25.128958
+  ]
+}
