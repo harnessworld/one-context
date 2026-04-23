@@ -82,19 +82,23 @@ test_cases:
 - 备份路径：`{skill所在目录}/backups/SKILL.md.bak`
 - 只备份一次，已有备份则跳过
 - 备份位置仅存放原始版本
-- 每轮修复前，将当前 SKILL.md 复制到 `.skill-parallel-verify/round-{N}/SKILL.md.snapshot` 作为工作快照
 
 **门控条件**：备份完成
 
 ### Step 3: 创建工作目录（或断点恢复）
 
-**操作**：检查是否已有 `.skill-parallel-verify/verification.json`（工作目录位于**项目根目录**下，已在 `.gitignore` 中排除）
+**操作**：确定工作目录路径并检查是否已有 `verification.json`
+
+**工作目录命名规则**：`tmp/verify-{skill-name}-{YYYYMMDD}/`
+- `{skill-name}`：从 skill_path 提取，如 `skills/html-deck-layout/SKILL.md` → `html-deck-layout`
+- `{YYYYMMDD}`：当天日期
+- 示例：`tmp/verify-html-deck-layout-20260419/`
 
 **如果是新启动**：
-- 创建项目根目录下的 `.skill-parallel-verify/` 目录和 `verification.json` 状态文件
+- 创建 `tmp/verify-{skill-name}-{YYYYMMDD}/` 目录和 `verification.json` 状态文件
 - 初始化 verification.json（含 test_case_content 快照）
 
-> ⚠️ 工作目录说明：`.skill-parallel-verify/` 是运行时产物目录，位于项目根目录，已在 `.gitignore` 中排除，不会被提交到 Git。
+> ⚠️ 工作目录说明：`tmp/` 是运行时产物目录，已在 `.gitignore` 中排除，不会被提交到 Git。
 
 **如果是断点恢复**（verification.json 存在且 status = "running"）：
 - 读取 verification.json，根据 last_checkpoint 判断断点位置
