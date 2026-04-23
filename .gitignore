@@ -87,6 +87,7 @@ deck-slides/
 # IDEs
 .idea/
 .vscode/
+.obsidian/
 
 # Agent runtime (local, personal) — keep small project manifest committable
 .openclaw/**
