@@ -26,6 +26,7 @@
 | trend-radar-integration        | TrendRadar 趋势雷达集成 — 热点情报 + MCP + 微信推送                         | integrations | in_progress | `features/integrations/trend-radar/`      | trend-radar    |
 | short-video-reporting-paradigm | 短视频式汇报范式 — 用内容创作思路重塑职场汇报                             | content-pipeline | draft | `features/content-pipeline/short-video-reporting-paradigm/` | one-context |
 | hyperframes-video              | HyperFrames WAV-to-Video — HTML Native 动画视频制作技能              | content-pipeline | draft | `features/content-pipeline/hyperframes-video/` | one-context |
+| sandbox-agent-era-mid-video    | Agent时代下最被低估的技术——沙箱（中视频口播）                    | content-pipeline | draft | `features/content-pipeline/sandbox-agent-era-mid-video/` | one-context |
 
 
 **Columns**

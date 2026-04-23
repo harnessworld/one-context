@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1">
+<title>沙箱：Agent 时代最被低估的技术</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="mobile-layout.css">
+<link rel="stylesheet" href="themes/mobile-tech.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
+  body {
+    margin: 0;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+  #P {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    position: relative;
+    background: var(--c-bg);
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    color: var(--c-text-1);
+    transform-origin: 0 0;
+  }
+  /* Whisper anchor — hidden */
+  .wa { display: none; }
+
+  /* Orb glow backgrounds */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Gradient text utility */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--c-accent-a) 0%, var(--c-accent-b) 50%, var(--c-accent-c) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Danger gradient (red) */
+  .gradient-danger {
+    background: linear-gradient(135deg, #ff6b9d, #ef4444, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Evolution bar */
+  .evo-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+  }
+  .evo-step {
+    text-align: center;
+  }
+  .evo-step .emoji { font-size: 56px; line-height: 1; }
+  .evo-step .label { font-size: 24px; color: var(--c-text-2); margin-top: 6px; }
+  .evo-arrow {
+    font-size: 28px;
+    font-weight: 900;
+    color: rgba(56,189,248,0.35);
+  }
+
+  /* Footer for page numbers */
+  .slide-footer {
+    flex-shrink: 0;
+    margin-top: var(--sp-md);
+    padding-top: var(--sp-sm);
+    border-top: 1px solid var(--c-border);
+    font-size: var(--fs-footer);
+    color: var(--c-text-2);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Badge with custom colors */
+  .badge-danger {
+    display: inline-block;
+    font-size: var(--fs-pill);
+    padding: 4px 16px;
+    border-radius: var(--r-full);
+    background: #ef4444;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: var(--sp-sm);
+  }
+  .badge-purple {
+    display: inline-block;
+    font-size: var(--fs-pill);
+    padding: 4px 16px;
+    border-radius: var(--r-full);
+    background: var(--c-accent-c);
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: var(--sp-sm);
+  }
+</style>
+</head>
+<body>
+<div id="P">
+
+  <!-- ================================================================ -->
+  <!-- Slide 1: Cover — 沙箱：Agent 时代最被低估的技术                    -->
+  <!-- ================================================================ -->
+  <section class="s slide is-active" id="slide-1">
+    <div class="wa">沙箱 Agent 时代 新基建 定时炸弹</div>
+    <!-- Orb glows -->
+    <div class="orb" style="width:700px;height:700px;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%);top:-200px;left:-150px"></div>
+    <div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(129,140,248,0.06),transparent 70%);bottom:-100px;right:-80px"></div>
+
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <!-- Evolution bar -->
+        <div class="evo-bar" style="margin-bottom:48px">
+          <div class="evo-step"><div class="emoji">🤖</div><div class="label">AI Agent</div></div>
+          <div class="evo-arrow">──────▶</div>
+          <div class="evo-step"><div class="emoji">🛡️</div><div class="label">沙箱隔离</div></div>
+          <div class="evo-arrow">──────▶</div>
+          <div class="evo-step"><div class="emoji">🏗️</div><div class="label">安全架构</div></div>
+        </div>
+
+        <!-- Hero title -->
+        <div style="font-size:180px;font-weight:900;line-height:0.95;letter-spacing:-4px;margin:16px 0 20px" class="gradient-text">沙箱</div>
+        <div style="font-size:64px;font-weight:800;color:var(--c-text-1);letter-spacing:2px;margin-bottom:16px">Agent 时代最被低估的技术</div>
+        <div style="font-size:40px;color:var(--c-text-2);max-width:1100px;margin:0 auto;line-height:1.5">没有沙箱，AI Agent 就是定时炸弹<br>安全隔离 · 状态管理 · 弹性伸缩 · 生命周期</div>
+
+        <!-- Pills -->
+        <div style="display:flex;gap:20px;justify-content:center;margin-top:48px">
+          <div class="g" style="flex:0 0 auto;padding:18px 36px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="font-size:44px">🔒</div>
+            <div style="font-size:36px;font-weight:800;color:var(--c-accent-a)">安全隔离</div>
+          </div>
+          <div class="g" style="flex:0 0 auto;padding:18px 36px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="font-size:44px">♻️</div>
+            <div style="font-size:36px;font-weight:800;color:var(--c-accent-b)">弹性伸缩</div>
+          </div>
+          <div class="g" style="flex:0 0 auto;padding:18px 36px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px">
+            <div style="font-size:44px">🔄</div>
+            <div style="font-size:36px;font-weight:800;color:var(--c-accent-c)">生命周期</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>Sandbox · 新基建</span>
+      <span>01 / 09</span>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- Slide 2: 灾难现场 — 一条命令清空生产环境                           -->
+  <!-- ================================================================ -->
+  <section class="s slide" id="slide-2">
+    <div class="wa">Alexey Grigorev terraform destroy 生产环境 194万行数据</div>
+    <div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(239,68,68,0.06),transparent 70%);top:-100px;right:-100px"></div>
+
+    <div class="slide-header">
+      <span class="badge-danger">⚠️ 真实案例</span>
+      <h2>一条命令，清空生产环境</h2>
+    </div>
+    <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+      <div class="g" style="flex-shrink:0">
+        <p class="g-body" style="margin:0">2026 年 3 月，Alexey Grigorev 让 Claude Code Agent 执行迁移，Agent 却执行了 <strong style="color:var(--c-accent-a)">terraform destroy</strong>——数据库、VPC、ECS 集群全部消失。</p>
+      </div>
+      <!-- Disaster flow SVG -->
+      <div class="card-diagram" style="min-height:380px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+        <svg viewBox="0 0 1600 380" preserveAspectRatio="xMidYMid meet">
+          <!-- Step 1: Agent -->
+          <rect x="20" y="90" width="280" height="200" rx="16" fill="rgba(56,189,248,0.1)" stroke="var(--c-accent-a)" stroke-width="2"/>
+          <text x="160" y="130" text-anchor="middle" font-size="52" fill="var(--c-accent-a)">🤖</text>
+          <text x="160" y="180" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-accent-a)">Claude Code</text>
+          <text x="160" y="215" text-anchor="middle" font-size="22" fill="var(--c-text-2)">AI Agent 接收指令</text>
+          <text x="160" y="248" text-anchor="middle" font-size="20" fill="var(--c-text-2)">"删除误创建的资源"</text>
+          <!-- Arrow 1→2 -->
+          <line x1="310" y1="190" x2="390" y2="190" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr-danger)"/>
+          <!-- Step 2: Command -->
+          <rect x="400" y="90" width="280" height="200" rx="16" fill="rgba(251,191,36,0.1)" stroke="var(--c-accent-e, #fbbf24)" stroke-width="2"/>
+          <text x="540" y="130" text-anchor="middle" font-size="52" fill="var(--c-accent-e, #fbbf24)">⚡</text>
+          <text x="540" y="180" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-accent-e, #fbbf24)">terraform</text>
+          <text x="540" y="215" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-accent-e, #fbbf24)">destroy</text>
+          <text x="540" y="252" text-anchor="middle" font-size="20" fill="var(--c-text-2)">Agent 越权执行</text>
+          <!-- Arrow 2→3 -->
+          <line x1="690" y1="190" x2="770" y2="190" stroke="#ef4444" stroke-width="3" marker-end="url(#arr-red)"/>
+          <!-- Step 3: Destruction -->
+          <rect x="780" y="90" width="320" height="200" rx="16" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="2.5"/>
+          <text x="940" y="130" text-anchor="middle" font-size="52">💥</text>
+          <text x="940" y="178" text-anchor="middle" font-size="28" font-weight="800" fill="#ef4444">基础设施清空</text>
+          <text x="940" y="215" text-anchor="middle" font-size="22" fill="var(--c-text-2)">数据库 · VPC · ECS</text>
+          <text x="940" y="250" text-anchor="middle" font-size="22" fill="var(--c-text-2)">全部消失</text>
+          <!-- Arrow 3→4 -->
+          <line x1="1110" y1="190" x2="1190" y2="190" stroke="var(--c-text-2)" stroke-width="2" stroke-dasharray="8 4"/>
+          <!-- Step 4: Recovery -->
+          <rect x="1200" y="90" width="380" height="200" rx="16" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+          <text x="1390" y="130" text-anchor="middle" font-size="52">⏳</text>
+          <text x="1390" y="180" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-accent-b)">24 小时恢复</text>
+          <text x="1390" y="218" text-anchor="middle" font-size="24" font-weight="900" fill="#ef4444">194 万行数据</text>
+          <text x="1390" y="252" text-anchor="middle" font-size="20" fill="var(--c-text-2)">两年半积累 · 瞬间归零</text>
+
+          <!-- Arrow markers -->
+          <defs>
+            <marker id="arr-danger" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker>
+            <marker id="arr-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ef4444"/></marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>⚠️ 真实灾难案例</span>
+      <span>02 / 09</span>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- Slide 3: 三大认知误区                                            -->
+  <!-- ================================================================ -->
+  <section class="s slide" id="slide-3">
+    <div class="wa">认知误区 安全工具 Docker 拖慢性能 预热60ms</div>
+    <div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,0.06),transparent 70%);bottom:-100px;left:-80px"></div>
+
+    <div class="slide-header">
+      <span class="badge">❌ 误区</span>
+      <h2>三个致命误区</h2>
+    </div>
+    <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+      <div class="card-diagram" style="min-height:580px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+        <svg viewBox="0 0 1500 580" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <marker id="arr3" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker>
+          </defs>
+
+          <!-- ===== Top: Three misconception cards ===== -->
+
+          <!-- 误区 #1: 沙箱只是安全工具？ -->
+          <rect x="20" y="10" width="460" height="230" rx="18" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.35)" stroke-width="2"/>
+          <rect x="20" y="10" width="460" height="5" rx="2.5" fill="#ef4444" opacity="0.7"/>
+          <text x="60" y="60" font-size="44" fill="#ef4444">🔒</text>
+          <text x="115" y="60" font-size="28" font-weight="900" fill="#ef4444">沙箱只是安全工具？</text>
+          <rect x="370" y="33" width="95" height="34" rx="17" fill="rgba(239,68,68,0.15)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+          <text x="417" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#ef4444">误区 #1</text>
+
+          <circle cx="60" cy="100" r="5" fill="#ef4444" opacity="0.5"/>
+          <text x="76" y="107" font-size="22" fill="var(--c-text-2)">安全只是最基础的功能</text>
+          <circle cx="60" cy="138" r="5" fill="#ef4444" opacity="0.5"/>
+          <text x="76" y="145" font-size="22" font-weight="700" fill="var(--c-text-1)">沙箱还是状态容器</text>
+          <circle cx="60" cy="176" r="5" fill="#ef4444" opacity="0.5"/>
+          <text x="76" y="183" font-size="22" font-weight="700" fill="var(--c-text-1)">弹性单元 · 生命周期管理器</text>
+          <!-- X mark -->
+          <rect x="380" y="90" width="76" height="38" rx="10" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+          <text x="418" y="116" text-anchor="middle" font-size="24" font-weight="900" fill="#ef4444">✗</text>
+
+          <!-- 误区 #2: 沙箱就是 Docker？ -->
+          <rect x="520" y="10" width="460" height="230" rx="18" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.35)" stroke-width="2"/>
+          <rect x="520" y="10" width="460" height="5" rx="2.5" fill="#fbbf24" opacity="0.7"/>
+          <text x="560" y="60" font-size="44" fill="#fbbf24">🐳</text>
+          <text x="615" y="60" font-size="28" font-weight="900" fill="#fbbf24">沙箱就是 Docker？</text>
+          <rect x="870" y="33" width="95" height="34" rx="17" fill="rgba(251,191,36,0.15)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+          <text x="917" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#fbbf24">误区 #2</text>
+
+          <circle cx="560" cy="100" r="5" fill="#fbbf24" opacity="0.5"/>
+          <text x="576" y="107" font-size="22" fill="var(--c-text-2)">Docker 共享宿主内核</text>
+          <circle cx="560" cy="138" r="5" fill="#fbbf24" opacity="0.5"/>
+          <text x="576" y="145" font-size="22" font-weight="700" fill="var(--c-text-1)">攻击面大，容器拦不住</text>
+          <circle cx="560" cy="176" r="5" fill="#fbbf24" opacity="0.5"/>
+          <text x="576" y="183" font-size="22" font-weight="700" fill="var(--c-text-1)">Agent 会主动探测 + 提权</text>
+          <rect x="880" y="90" width="76" height="38" rx="10" fill="rgba(251,191,36,0.12)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+          <text x="918" y="116" text-anchor="middle" font-size="24" font-weight="900" fill="#fbbf24">✗</text>
+
+          <!-- 误区 #3: 沙箱拖慢性能？ -->
+          <rect x="1020" y="10" width="460" height="230" rx="18" fill="rgba(249,115,22,0.06)" stroke="rgba(249,115,22,0.35)" stroke-width="2"/>
+          <rect x="1020" y="10" width="460" height="5" rx="2.5" fill="#f97316" opacity="0.7"/>
+          <text x="1060" y="60" font-size="44" fill="#f97316">🐢</text>
+          <text x="1115" y="60" font-size="28" font-weight="900" fill="#f97316">沙箱拖慢性能？</text>
+          <rect x="1370" y="33" width="95" height="34" rx="17" fill="rgba(249,115,22,0.15)" stroke="rgba(249,115,22,0.3)" stroke-width="1"/>
+          <text x="1417" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#f97316">误区 #3</text>
+
+          <circle cx="1060" cy="100" r="5" fill="#f97316" opacity="0.5"/>
+          <text x="1076" y="107" font-size="22" fill="var(--c-text-2)">那是老观念了</text>
+          <circle cx="1060" cy="138" r="5" fill="#f97316" opacity="0.5"/>
+          <text x="1076" y="145" font-size="22" font-weight="700" fill="var(--c-text-1)">预热池分配仅 60ms</text>
+          <circle cx="1060" cy="176" r="5" fill="#f97316" opacity="0.5"/>
+          <text x="1076" y="183" font-size="22" font-weight="700" fill="var(--c-accent-a)">比你眨眼还快</text>
+          <rect x="1380" y="90" width="76" height="38" rx="10" fill="rgba(249,115,22,0.12)" stroke="rgba(249,115,22,0.3)" stroke-width="1"/>
+          <text x="1418" y="116" text-anchor="middle" font-size="24" font-weight="900" fill="#f97316">✗</text>
+
+          <!-- ===== Down arrows from misconceptions to truth ===== -->
+          <line x1="250" y1="250" x2="250" y2="280" stroke="rgba(239,68,68,0.4)" stroke-width="2.5" marker-end="url(#arr3)" opacity="0.5"/>
+          <line x1="750" y1="250" x2="750" y2="280" stroke="rgba(251,191,36,0.4)" stroke-width="2.5" marker-end="url(#arr3)" opacity="0.5"/>
+          <line x1="1250" y1="250" x2="1250" y2="280" stroke="rgba(249,115,22,0.4)" stroke-width="2.5" marker-end="url(#arr3)" opacity="0.5"/>
+
+          <!-- ===== Bottom: Truth card spanning full width ===== -->
+          <rect x="20" y="290" width="1460" height="270" rx="18" fill="linear-gradient(135deg,rgba(56,189,248,0.06),rgba(129,140,248,0.06))" stroke="var(--c-accent-a)" stroke-width="2"
+                style="fill:rgba(56,189,248,0.04)"/>
+          <!-- Top accent gradient bar -->
+          <rect x="20" y="290" width="487" height="5" rx="2.5" fill="#ef4444" opacity="0.4"/>
+          <rect x="507" y="290" width="486" height="5" rx="0" fill="#fbbf24" opacity="0.4"/>
+          <rect x="993" y="290" width="487" height="5" rx="2.5" fill="#f97316" opacity="0.4"/>
+
+          <!-- ✅ Truth header -->
+          <text x="750" y="350" text-anchor="middle" font-size="44" fill="var(--c-accent-a)">✅</text>
+          <text x="750" y="400" text-anchor="middle" font-size="32" font-weight="900" fill="var(--c-accent-a)">真相：沙箱是 Agent 工程化的基石</text>
+
+          <!-- Four capability pillars -->
+          <!-- 安全 -->
+          <rect x="120" y="430" width="300" height="60" rx="12" fill="rgba(56,189,248,0.1)" stroke="rgba(56,189,248,0.25)" stroke-width="1"/>
+          <text x="270" y="468" text-anchor="middle" font-size="24" font-weight="800" fill="var(--c-accent-a)">🔐 安全隔离</text>
+          <!-- 环境 -->
+          <rect x="460" y="430" width="300" height="60" rx="12" fill="rgba(129,140,248,0.1)" stroke="rgba(129,140,248,0.25)" stroke-width="1"/>
+          <text x="610" y="468" text-anchor="middle" font-size="24" font-weight="800" fill="var(--c-accent-c)">♻️ 可复现环境</text>
+          <!-- 伸缩 -->
+          <rect x="800" y="430" width="300" height="60" rx="12" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.25)" stroke-width="1"/>
+          <text x="950" y="468" text-anchor="middle" font-size="24" font-weight="800" fill="#10b981">📈 弹性伸缩</text>
+          <!-- 生命周期 -->
+          <rect x="1140" y="430" width="300" height="60" rx="12" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.25)" stroke-width="1"/>
+          <text x="1290" y="468" text-anchor="middle" font-size="24" font-weight="800" fill="var(--c-accent-b)">🔄 生命周期</text>
+
+          <!-- Bottom emphasis -->
+          <text x="750" y="535" text-anchor="middle" font-size="22" fill="var(--c-text-2)">四种能力缺一不可——没有沙箱，Agent 上不了生产</text>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>认知纠偏</span>
+      <span>03 / 09</span>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- Slide 4: n8n 案例对比 — 应用层 vs 系统级                          -->
+  <!-- ================================================================ -->
+  <section class="s slide" id="slide-4">
+    <div class="wa">n8n Pyodide 沙箱逃逸 应用层 Docker 共享内核</div>
+    <div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(239,68,68,0.05),transparent 70%);top:-150px;right:-120px"></div>
+
+    <div class="slide-header">
+      <span class="badge-danger">🔓 逃逸案例</span>
+      <h2>应用层沙箱 ≠ 系统级隔离</h2>
+    </div>
+    <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+      <div class="card-diagram" style="min-height:580px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+        <svg viewBox="0 0 1500 580" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <marker id="arr4r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ef4444"/></marker>
+            <marker id="arr4y" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/></marker>
+            <marker id="arr4b" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker>
+          </defs>
+
+          <!-- ===== Left: n8n Pyodide escape ===== -->
+          <rect x="20" y="10" width="700" height="380" rx="18" fill="rgba(239,68,68,0.05)" stroke="rgba(239,68,68,0.35)" stroke-width="2"/>
+          <rect x="20" y="10" width="700" height="5" rx="2.5" fill="#ef4444" opacity="0.7"/>
+
+          <!-- Header -->
+          <text x="60" y="60" font-size="44" fill="#ef4444">🚨</text>
+          <text x="115" y="60" font-size="28" font-weight="900" fill="#ef4444">n8n 沙箱逃逸</text>
+          <rect x="540" y="33" width="160" height="34" rx="17" fill="rgba(239,68,68,0.15)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+          <text x="620" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#ef4444">⚠️ 2026-04 CVE</text>
+
+          <!-- Attack flow: 3 steps -->
+          <!-- Step 1: Pyodide -->
+          <rect x="50" y="90" width="200" height="110" rx="14" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.3)" stroke-width="1.5"/>
+          <text x="150" y="125" text-anchor="middle" font-size="38">🐍</text>
+          <text x="150" y="155" text-anchor="middle" font-size="22" font-weight="800" fill="#ef4444">Pyodide</text>
+          <text x="150" y="183" text-anchor="middle" font-size="18" fill="var(--c-text-2)">应用层 Python 沙箱</text>
+
+          <!-- Arrow 1→2 -->
+          <line x1="260" y1="145" x2="300" y2="145" stroke="#ef4444" stroke-width="2.5" marker-end="url(#arr4r)"/>
+
+          <!-- Step 2: JS Interop -->
+          <rect x="310" y="90" width="200" height="110" rx="14" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.3)" stroke-width="1.5"/>
+          <text x="410" y="125" text-anchor="middle" font-size="38">⚡</text>
+          <text x="410" y="155" text-anchor="middle" font-size="22" font-weight="800" fill="#fbbf24">JS 互操作</text>
+          <text x="410" y="183" text-anchor="middle" font-size="18" fill="var(--c-text-2)">逃逸接口调用</text>
+
+          <!-- Arrow 2→3 -->
+          <line x1="520" y1="145" x2="560" y2="145" stroke="#ef4444" stroke-width="2.5" marker-end="url(#arr4r)"/>
+
+          <!-- Step 3: System Command -->
+          <rect x="570" y="90" width="120" height="110" rx="14" fill="rgba(239,68,68,0.18)" stroke="#ef4444" stroke-width="2.5"/>
+          <text x="630" y="125" text-anchor="middle" font-size="38">💥</text>
+          <text x="630" y="155" text-anchor="middle" font-size="20" font-weight="900" fill="#ef4444">系统</text>
+          <text x="630" y="183" text-anchor="middle" font-size="20" font-weight="900" fill="#ef4444">命令</text>
+
+          <!-- Result box -->
+          <rect x="50" y="220" width="640" height="80" rx="12" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.2)" stroke-width="1"/>
+          <text x="70" y="255" font-size="22" font-weight="800" fill="#ef4444">❌ 修复方案：直接删除 Python 执行功能</text>
+          <text x="70" y="285" font-size="20" fill="var(--c-text-2)">不是修漏洞——是整个应用层沙箱方案被放弃</text>
+
+          <!-- Severity indicator -->
+          <rect x="50" y="320" width="190" height="50" rx="12" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+          <text x="145" y="352" text-anchor="middle" font-size="20" font-weight="700" fill="#ef4444">🔴 严重 (Critical)</text>
+          <rect x="260" y="320" width="200" height="50" rx="12" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.25)" stroke-width="1"/>
+          <text x="360" y="352" text-anchor="middle" font-size="20" font-weight="700" fill="#fbbf24">应用层隔离失效</text>
+
+          <!-- ===== Right: Docker kernel sharing ===== -->
+          <rect x="780" y="10" width="700" height="380" rx="18" fill="rgba(251,191,36,0.05)" stroke="rgba(251,191,36,0.35)" stroke-width="2"/>
+          <rect x="780" y="10" width="700" height="5" rx="2.5" fill="#fbbf24" opacity="0.7"/>
+
+          <!-- Header -->
+          <text x="820" y="60" font-size="44" fill="#fbbf24">⚠️</text>
+          <text x="875" y="60" font-size="28" font-weight="900" fill="#fbbf24">Docker 容器也不够</text>
+          <rect x="1300" y="33" width="160" height="34" rx="17" fill="rgba(251,191,36,0.15)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+          <text x="1380" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#fbbf24">共享内核</text>
+
+          <!-- Architecture diagram: shared kernel -->
+          <!-- Apps on top -->
+          <rect x="830" y="90" width="135" height="55" rx="10" fill="rgba(56,189,248,0.1)" stroke="var(--c-accent-a)" stroke-width="1.5"/>
+          <text x="897" y="124" text-anchor="middle" font-size="18" font-weight="700" fill="var(--c-accent-a)">容器 A</text>
+
+          <rect x="985" y="90" width="135" height="55" rx="10" fill="rgba(167,139,250,0.1)" stroke="var(--c-accent-c)" stroke-width="1.5"/>
+          <text x="1052" y="124" text-anchor="middle" font-size="18" font-weight="700" fill="var(--c-accent-c)">容器 B</text>
+
+          <rect x="1140" y="90" width="135" height="55" rx="10" fill="rgba(239,68,68,0.15)" stroke="rgba(239,68,68,0.4)" stroke-width="2"/>
+          <text x="1207" y="124" text-anchor="middle" font-size="18" font-weight="700" fill="#ef4444">Agent 🤖</text>
+
+          <!-- Arrows down to kernel -->
+          <line x1="897" y1="150" x2="897" y2="180" stroke="var(--c-text-2)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <line x1="1052" y1="150" x2="1052" y2="180" stroke="var(--c-text-2)" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <line x1="1207" y1="150" x2="1207" y2="180" stroke="#ef4444" stroke-width="2.5" marker-end="url(#arr4r)"/>
+
+          <!-- Shared kernel bar -->
+          <rect x="810" y="185" width="640" height="70" rx="12" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.35)" stroke-width="2"/>
+          <text x="1130" y="215" text-anchor="middle" font-size="24" font-weight="800" fill="#fbbf24">🐧 共享宿主内核</text>
+          <text x="1130" y="242" text-anchor="middle" font-size="18" fill="var(--c-text-2)">container !== isolation</text>
+
+          <!-- Attack paths -->
+          <rect x="810" y="275" width="300" height="100" rx="12" fill="var(--c-surface-2)" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="830" y="308" font-size="22" font-weight="700" fill="var(--c-text-1)">🔍 Agent 探测边界</text>
+          <text x="830" y="340" font-size="20" fill="var(--c-text-2)">主动探测环境信息</text>
+          <text x="830" y="364" font-size="20" fill="var(--c-text-2)">尝试提权操作</text>
+
+          <line x1="1120" y1="325" x2="1160" y2="325" stroke="#ef4444" stroke-width="2.5" marker-end="url(#arr4r)"/>
+
+          <rect x="1170" y="275" width="280" height="100" rx="12" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.3)" stroke-width="1.5"/>
+          <text x="1190" y="308" font-size="22" font-weight="700" fill="#ef4444">💀 内核漏洞</text>
+          <text x="1190" y="340" font-size="20" fill="var(--c-text-2)">容器逃逸</text>
+          <text x="1190" y="364" font-size="20" fill="var(--c-text-2)">宿主机完全暴露</text>
+
+          <!-- ===== Bottom: Comparison summary ===== -->
+          <rect x="20" y="410" width="1460" height="155" rx="16" style="fill:rgba(56,189,248,0.03)" stroke="var(--c-border)" stroke-width="1"/>
+          <!-- Top accent bar -->
+          <rect x="20" y="410" width="730" height="5" rx="2.5" fill="#ef4444" opacity="0.4"/>
+          <rect x="750" y="410" width="730" height="5" rx="2.5" fill="#fbbf24" opacity="0.4"/>
+
+          <text x="750" y="460" text-anchor="middle" font-size="28" font-weight="900" fill="var(--c-text-1)">核心结论：应用层隔离 ≠ 系统级隔离</text>
+
+          <!-- Left conclusion -->
+          <rect x="80" y="485" width="430" height="60" rx="12" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.2)" stroke-width="1"/>
+          <text x="295" y="523" text-anchor="middle" font-size="22" font-weight="700" fill="#ef4444">应用层沙箱 → 逃逸后被放弃</text>
+
+          <!-- Arrow -->
+          <text x="540" y="520" font-size="28" fill="var(--c-text-2)" font-weight="700">→</text>
+
+          <!-- Right conclusion -->
+          <rect x="580" y="485" width="430" height="60" rx="12" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.2)" stroke-width="1"/>
+          <text x="795" y="523" text-anchor="middle" font-size="22" font-weight="700" fill="#fbbf24">Docker 容器 → 共享内核攻击面</text>
+
+          <!-- Arrow to solution -->
+          <text x="1030" y="520" font-size="28" fill="var(--c-accent-a)" font-weight="700">→</text>
+
+          <!-- Solution -->
+          <rect x="1070" y="485" width="380" height="60" rx="12" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.3)" stroke-width="1.5"/>
+          <text x="1260" y="523" text-anchor="middle" font-size="22" font-weight="900" fill="#10b981">✅ microVM 硬件虚拟化</text>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>应用层沙箱的局限</span>
+      <span>04 / 09</span>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- Slide 5: 沙箱技术三层架构 — 系统调用路径与攻击面                    -->
+  <!-- ================================================================ -->
+  <section class="s slide" id="slide-5">
+    <div class="wa">三层架构 namespace cgroup seccomp gVisor Sentry Gofer KVM Firecracker VMM 系统调用 攻击面</div>
+    <div class="orb" style="width:550px;height:550px;background:radial-gradient(circle,rgba(56,189,248,0.06),transparent 70%);bottom:-100px;left:-100px"></div>
+
+    <div class="slide-header">
+      <span class="badge">🏗️ 架构</span>
+      <h2>沙箱隔离三层架构：从系统调用看攻击面</h2>
+    </div>
+    <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+      <!-- Three-column stack architecture SVG -->
+      <div class="card-diagram" style="min-height:580px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+        <svg viewBox="0 0 1500 600" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <marker id="arr5" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker>
+            <marker id="arr5r" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#ef4444"/></marker>
+            <marker id="arr5d" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--c-text-2)"/></marker>
+            <marker id="arr5g" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#10b981"/></marker>
+            <!-- Shared kernel hatch pattern -->
+            <pattern id="hatch-red" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(239,68,68,0.15)" stroke-width="2"/>
+            </pattern>
+          </defs>
+
+          <!-- ===== Column 1: L1 Container ===== -->
+          <rect x="20" y="10" width="470" height="470" rx="18" fill="rgba(56,189,248,0.04)" stroke="var(--c-accent-a)" stroke-width="1.5"/>
+          <!-- Header -->
+          <rect x="20" y="10" width="470" height="40" rx="18" fill="rgba(56,189,248,0.12)"/>
+          <rect x="20" y="32" width="470" height="18" fill="rgba(56,189,248,0.12)"/>
+          <text x="40" y="38" font-size="22" font-weight="900" fill="var(--c-accent-a)">L1 容器隔离</text>
+          <rect x="340" y="16" width="130" height="26" rx="13" fill="rgba(239,68,68,0.15)" stroke="rgba(239,68,68,0.4)" stroke-width="1"/>
+          <text x="405" y="34" text-anchor="middle" font-size="14" font-weight="700" fill="#ef4444">⚠️ 攻击面大</text>
+
+          <!-- App layer -->
+          <rect x="40" y="62" width="430" height="40" rx="8" fill="rgba(56,189,248,0.1)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+          <text x="255" y="88" text-anchor="middle" font-size="18" font-weight="700" fill="var(--c-accent-a)">App Process</text>
+
+          <!-- Arrow down -->
+          <line x1="255" y1="102" x2="255" y2="118" stroke="var(--c-text-2)" stroke-width="1.5" marker-end="url(#arr5d)"/>
+
+          <!-- Namespace box -->
+          <rect x="40" y="120" width="430" height="52" rx="8" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <text x="60" y="142" font-size="16" font-weight="700" fill="var(--c-text-1)">namespace 隔离</text>
+          <text x="60" y="162" font-size="14" fill="var(--c-text-2)">PID │ NET │ MNT │ UTS │ IPC │ USER</text>
+
+          <!-- Arrow down -->
+          <line x1="255" y1="172" x2="255" y2="188" stroke="var(--c-text-2)" stroke-width="1.5" marker-end="url(#arr5d)"/>
+
+          <!-- cgroup + seccomp -->
+          <rect x="40" y="190" width="210" height="46" rx="8" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <text x="60" y="210" font-size="15" font-weight="700" fill="var(--c-text-1)">cgroup 限制</text>
+          <text x="60" y="228" font-size="13" fill="var(--c-text-2)">CPU / MEM / IO</text>
+          <rect x="260" y="190" width="210" height="46" rx="8" fill="rgba(56,189,248,0.06)" stroke="rgba(56,189,248,0.2)" stroke-width="1"/>
+          <text x="280" y="210" font-size="15" font-weight="700" fill="var(--c-text-1)">seccomp-bpf</text>
+          <text x="280" y="228" font-size="13" fill="var(--c-text-2)">syscall 白名单过滤</text>
+
+          <!-- Arrow down -->
+          <line x1="255" y1="236" x2="255" y2="258" stroke="#ef4444" stroke-width="2" marker-end="url(#arr5r)"/>
+          <text x="395" y="250" font-size="13" fill="#ef4444" font-weight="600">~380 syscalls 暴露</text>
+
+          <!-- Shared kernel - danger zone -->
+          <rect x="40" y="260" width="430" height="60" rx="8" fill="url(#hatch-red)" stroke="rgba(239,68,68,0.5)" stroke-width="2"/>
+          <rect x="40" y="260" width="430" height="60" rx="8" fill="rgba(239,68,68,0.08)"/>
+          <text x="255" y="285" text-anchor="middle" font-size="20" font-weight="900" fill="#ef4444">🔴 宿主内核（共享）</text>
+          <text x="255" y="308" text-anchor="middle" font-size="14" fill="var(--c-text-2)">syscall → 内核 → 全部资源可达</text>
+
+          <!-- Attack vector box -->
+          <rect x="40" y="335" width="430" height="55" rx="8" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.25)" stroke-width="1"/>
+          <text x="60" y="355" font-size="14" font-weight="700" fill="#ef4444">攻击路径</text>
+          <text x="60" y="378" font-size="13" fill="var(--c-text-2)">内核 CVE → 容器逃逸 → 宿主机沦陷</text>
+
+          <!-- Bottom metric -->
+          <rect x="40" y="405" width="430" height="64" rx="10" fill="var(--c-surface-2)" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="255" y="430" text-anchor="middle" font-size="15" font-weight="700" fill="var(--c-accent-a)">启动 ~ms 级 · 最快</text>
+          <text x="255" y="455" text-anchor="middle" font-size="13" fill="var(--c-text-2)">适用于：低风险、可信代码、CI 构建</text>
+
+          <!-- ===== Vertical separator arrows ===== -->
+          <line x1="505" y1="200" x2="530" y2="200" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#arr5)" opacity="0.4"/>
+          <text x="517" y="192" text-anchor="middle" font-size="13" fill="var(--c-text-2)">更强</text>
+          <line x1="1005" y1="200" x2="1030" y2="200" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#arr5)" opacity="0.4"/>
+          <text x="1017" y="192" text-anchor="middle" font-size="13" fill="var(--c-text-2)">更强</text>
+
+          <!-- ===== Column 2: L2 gVisor ===== -->
+          <rect x="540" y="10" width="470" height="470" rx="18" fill="rgba(167,139,250,0.04)" stroke="var(--c-accent-c)" stroke-width="1.5"/>
+          <rect x="540" y="10" width="470" height="40" rx="18" fill="rgba(167,139,250,0.12)"/>
+          <rect x="540" y="32" width="470" height="18" fill="rgba(167,139,250,0.12)"/>
+          <text x="560" y="38" font-size="22" font-weight="900" fill="var(--c-accent-c)">L2 用户态内核 (gVisor)</text>
+          <rect x="870" y="16" width="120" height="26" rx="13" fill="rgba(251,191,36,0.15)" stroke="rgba(251,191,36,0.4)" stroke-width="1"/>
+          <text x="930" y="34" text-anchor="middle" font-size="14" font-weight="700" fill="#fbbf24">⚠️ IO 开销</text>
+
+          <!-- App layer -->
+          <rect x="560" y="62" width="430" height="40" rx="8" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+          <text x="775" y="88" text-anchor="middle" font-size="18" font-weight="700" fill="var(--c-accent-c)">App Process</text>
+
+          <!-- Arrow down to Sentry -->
+          <line x1="775" y1="102" x2="775" y2="118" stroke="var(--c-text-2)" stroke-width="1.5" marker-end="url(#arr5d)"/>
+          <text x="870" y="112" font-size="12" fill="var(--c-accent-c)" font-weight="600">syscall 拦截</text>
+
+          <!-- Sentry layer - key differentiator -->
+          <rect x="560" y="120" width="430" height="60" rx="8" fill="rgba(167,139,250,0.12)" stroke="var(--c-accent-c)" stroke-width="2"/>
+          <text x="580" y="145" font-size="17" font-weight="900" fill="var(--c-accent-c)">🛡️ Sentry</text>
+          <text x="700" y="145" font-size="14" fill="var(--c-text-1)">(用户态内核)</text>
+          <text x="580" y="168" font-size="13" fill="var(--c-text-2)">重新实现 ~200 Linux syscall · 拦截所有应用请求</text>
+
+          <!-- Two branches: Gofer (IO) vs direct (limited) -->
+          <line x1="680" y1="180" x2="680" y2="198" stroke="var(--c-text-2)" stroke-width="1.5" marker-end="url(#arr5d)"/>
+          <line x1="870" y1="180" x2="870" y2="198" stroke="var(--c-text-2)" stroke-width="1.5" marker-end="url(#arr5d)"/>
+          <text x="640" y="194" font-size="11" fill="var(--c-text-2)">文件 IO</text>
+          <text x="830" y="194" font-size="11" fill="var(--c-text-2)">非 IO</text>
+
+          <!-- Gofer -->
+          <rect x="560" y="200" width="240" height="44" rx="8" fill="rgba(167,139,250,0.06)" stroke="rgba(167,139,250,0.2)" stroke-width="1"/>
+          <text x="580" y="220" font-size="15" font-weight="700" fill="var(--c-text-1)">Gofer</text>
+          <text x="580" y="237" font-size="13" fill="var(--c-text-2)">9p 协议 → 宿主文件系统</text>
+
+          <!-- Limited kernel syscall box -->
+          <rect x="810" y="200" width="180" height="44" rx="8" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.2)" stroke-width="1"/>
+          <text x="830" y="220" font-size="15" font-weight="700" fill="#fbbf24">宿主内核</text>
+          <text x="830" y="237" font-size="13" fill="var(--c-text-2)">仅 ~35 syscall</text>
+
+          <!-- Arrow to kernel -->
+          <line x1="775" y1="244" x2="775" y2="258" stroke="rgba(251,191,36,0.6)" stroke-width="1.5" marker-end="url(#arr5d)"/>
+
+          <!-- Host kernel - reduced exposure -->
+          <rect x="560" y="260" width="430" height="60" rx="8" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.4)" stroke-width="2"/>
+          <text x="775" y="285" text-anchor="middle" font-size="18" font-weight="900" fill="#fbbf24">🟡 宿主内核（受限访问）</text>
+          <text x="775" y="308" text-anchor="middle" font-size="14" fill="var(--c-text-2)">syscall → Sentry 过滤 → 仅 35 条达内核</text>
+
+          <!-- Attack vector -->
+          <rect x="560" y="335" width="430" height="55" rx="8" fill="rgba(251,191,36,0.05)" stroke="rgba(251,191,36,0.2)" stroke-width="1"/>
+          <text x="580" y="355" font-size="14" font-weight="700" fill="#fbbf24">攻击路径</text>
+          <text x="580" y="378" font-size="13" fill="var(--c-text-2)">Sentry 漏洞 / 未覆盖 syscall / IO 性能瓶颈</text>
+
+          <!-- Bottom metric -->
+          <rect x="560" y="405" width="430" height="64" rx="10" fill="var(--c-surface-2)" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="775" y="430" text-anchor="middle" font-size="15" font-weight="700" fill="var(--c-accent-c)">启动 ~100ms · IO 开销 2-5x</text>
+          <text x="775" y="455" text-anchor="middle" font-size="13" fill="var(--c-text-2)">GKE Sandbox · 适合网络密集 / 不可信代码</text>
+
+          <!-- ===== Column 3: L3 microVM ===== -->
+          <rect x="1060" y="10" width="430" height="470" rx="18" fill="rgba(16,185,129,0.04)" stroke="#10b981" stroke-width="2"/>
+          <rect x="1060" y="10" width="430" height="40" rx="18" fill="rgba(16,185,129,0.12)"/>
+          <rect x="1060" y="32" width="430" height="18" fill="rgba(16,185,129,0.12)"/>
+          <text x="1080" y="38" font-size="22" font-weight="900" fill="#10b981">L3 microVM</text>
+          <rect x="1330" y="16" width="140" height="26" rx="13" fill="rgba(16,185,129,0.15)" stroke="rgba(16,185,129,0.5)" stroke-width="1"/>
+          <text x="1400" y="34" text-anchor="middle" font-size="14" font-weight="700" fill="#10b981">✅ 最小攻击面</text>
+
+          <!-- App layer -->
+          <rect x="1080" y="62" width="390" height="40" rx="8" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.3)" stroke-width="1"/>
+          <text x="1275" y="88" text-anchor="middle" font-size="18" font-weight="700" fill="#10b981">App Process</text>
+
+          <!-- Arrow down -->
+          <line x1="1275" y1="102" x2="1275" y2="118" stroke="var(--c-text-2)" stroke-width="1.5" marker-end="url(#arr5d)"/>
+          <text x="1350" y="112" font-size="12" fill="#10b981" font-weight="600">正常 syscall</text>
+
+          <!-- Guest kernel - INDEPENDENT -->
+          <rect x="1080" y="120" width="390" height="50" rx="8" fill="rgba(16,185,129,0.12)" stroke="#10b981" stroke-width="2"/>
+          <text x="1100" y="143" font-size="17" font-weight="900" fill="#10b981">🐧 Guest Kernel</text>
+          <text x="1100" y="162" font-size="13" fill="var(--c-text-2)">独立 Linux 内核 · 完整 syscall</text>
+
+          <!-- Arrow down to KVM boundary -->
+          <line x1="1275" y1="170" x2="1275" y2="192" stroke="#10b981" stroke-width="2" marker-end="url(#arr5g)"/>
+
+          <!-- KVM boundary - HARDWARE ENFORCED -->
+          <rect x="1080" y="194" width="390" height="50" rx="8" fill="rgba(16,185,129,0.2)" stroke="#10b981" stroke-width="3"/>
+          <text x="1275" y="216" text-anchor="middle" font-size="17" font-weight="900" fill="#10b981">🔒 KVM 硬件边界</text>
+          <text x="1275" y="236" text-anchor="middle" font-size="13" fill="#10b981">VT-x / AMD-V · EPT 页表隔离</text>
+
+          <!-- Arrow down -->
+          <line x1="1275" y1="244" x2="1275" y2="260" stroke="var(--c-text-2)" stroke-width="1.5" marker-end="url(#arr5d)"/>
+
+          <!-- VMM layer -->
+          <rect x="1080" y="262" width="390" height="55" rx="8" fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+          <text x="1100" y="283" font-size="15" font-weight="700" fill="var(--c-text-1)">Firecracker VMM</text>
+          <text x="1100" y="305" font-size="13" fill="var(--c-text-2)">~5万行 Rust · 仅 virtio-net/blk + serial</text>
+
+          <!-- Arrow to host kernel -->
+          <line x1="1275" y1="317" x2="1275" y2="333" stroke="var(--c-text-2)" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr5d)"/>
+
+          <!-- Host kernel - minimal exposure -->
+          <rect x="1080" y="335" width="390" height="50" rx="8" fill="rgba(16,185,129,0.04)" stroke="rgba(16,185,129,0.25)" stroke-width="1.5"/>
+          <text x="1275" y="357" text-anchor="middle" font-size="16" font-weight="700" fill="var(--c-text-2)">🟢 宿主内核 (最小暴露)</text>
+          <text x="1275" y="377" text-anchor="middle" font-size="13" fill="var(--c-text-2)">仅 KVM + virtio 驱动接口</text>
+
+          <!-- Attack vector -->
+          <rect x="1080" y="400" width="390" height="55" rx="8" fill="rgba(16,185,129,0.05)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+          <text x="1100" y="420" font-size="14" font-weight="700" fill="#10b981">攻击路径</text>
+          <text x="1100" y="445" font-size="13" fill="var(--c-text-2)">VMM 漏洞 / virtio 设备模拟 · 极难利用</text>
+
+          <!-- Bottom note: Cube -->
+          <rect x="20" y="492" width="1470" height="46" rx="12" fill="rgba(129,140,248,0.06)" stroke="rgba(129,140,248,0.2)" stroke-width="1"/>
+          <text x="40" y="521" font-size="16" fill="var(--c-text-1)" font-weight="700">🆕 腾讯云 Cube</text>
+          <text x="210" y="521" font-size="15" fill="var(--c-text-2)">2026-04-21 开源 · microVM 架构 · 冷启动 125ms · 预热池 60ms · 空沙箱 30MB · KVM 硬件虚拟化强隔离</text>
+          <text x="1200" y="521" font-size="15" fill="var(--c-accent-c)" font-weight="700">门槛降到零</text>
+
+          <!-- Bottom comparison metrics -->
+          <rect x="20" y="548" width="1470" height="44" rx="10" fill="var(--c-surface-2)" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="255" y="576" text-anchor="middle" font-size="15" font-weight="700" fill="var(--c-accent-a)">L1: ~380 syscalls 暴露</text>
+          <line x1="490" y1="555" x2="490" y2="585" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="775" y="576" text-anchor="middle" font-size="15" font-weight="700" fill="var(--c-accent-c)">L2: 仅 ~35 syscalls 达内核</text>
+          <line x1="1060" y1="555" x2="1060" y2="585" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="1275" y="576" text-anchor="middle" font-size="15" font-weight="700" fill="#10b981">L3: 硬件级隔离 · 攻击面最小</text>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>从系统调用看隔离架构</span>
+      <span>05 / 09</span>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- Slide 6: Anthropic 三层解耦 — Session/Harness/Sandbox            -->
+  <!-- ================================================================ -->
+  <section class="s slide" id="slide-6">
+    <div class="wa">Anthropic Session Harness Sandbox 三层解耦 脑手分离 p50下降60%</div>
+    <div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(129,140,248,0.06),transparent 70%);top:-120px;left:-100px"></div>
+
+    <div class="slide-header">
+      <span class="badge-purple">🧠 架构</span>
+      <h2>脑手分离：三层解耦</h2>
+    </div>
+    <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+      <div class="g" style="flex-shrink:0">
+        <p class="g-body" style="margin:0">沙箱挂了怎么办？Anthropic 的答案：<strong style="color:var(--c-accent-a)">把脑和手分开</strong>。Session 记忆 + Harness 调度 + Sandbox 执行，三者解耦。</p>
+      </div>
+      <!-- Three-layer decoupling SVG: left = 3-layer stack, right = metrics -->
+      <div class="card-diagram" style="min-height:380px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+        <svg viewBox="0 0 1500 420" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <marker id="arr6d" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker>
+          </defs>
+
+          <!-- ===== LEFT: 3-layer vertical stack ===== -->
+
+          <!-- Session Layer -->
+          <rect x="40" y="15" width="480" height="110" rx="16" fill="rgba(16,185,129,0.1)" stroke="var(--c-accent-b, #818cf8)" stroke-width="2.5"/>
+          <text x="80" y="55" font-size="36" fill="var(--c-accent-b, #818cf8)">📜</text>
+          <text x="130" y="55" font-size="28" font-weight="900" fill="var(--c-accent-b, #818cf8)">Session</text>
+          <rect x="310" y="28" width="90" height="28" rx="8" fill="rgba(16,185,129,0.15)"/>
+          <text x="355" y="48" text-anchor="middle" font-size="16" font-weight="700" fill="#10b981">持久化</text>
+          <text x="80" y="85" font-size="20" fill="var(--c-text-2)">append-only 事件日志 · 不在沙箱里 · 挂了也在</text>
+          <text x="80" y="112" font-size="18" fill="var(--c-text-2)">沙箱销毁后，日志仍可用于恢复</text>
+
+          <!-- Arrow Session → Harness -->
+          <line x1="280" y1="135" x2="280" y2="160" stroke="var(--c-accent-a)" stroke-width="2.5" marker-end="url(#arr6d)"/>
+          <text x="305" y="153" font-size="16" fill="var(--c-text-2)">读取历史</text>
+
+          <!-- Harness Layer -->
+          <rect x="40" y="170" width="480" height="110" rx="16" fill="rgba(129,140,248,0.1)" stroke="var(--c-accent-c)" stroke-width="2.5"/>
+          <text x="80" y="210" font-size="36" fill="var(--c-accent-c)">🧠</text>
+          <text x="130" y="210" font-size="28" font-weight="900" fill="var(--c-accent-c)">Harness</text>
+          <rect x="310" y="183" width="90" height="28" rx="8" fill="rgba(129,140,248,0.15)"/>
+          <text x="355" y="203" text-anchor="middle" font-size="16" font-weight="700" fill="var(--c-accent-c)">无状态</text>
+          <text x="80" y="245" font-size="20" fill="var(--c-text-2)">调用模型 · 路由工具 · 管理上下文</text>
+          <text x="80" y="268" font-size="18" fill="var(--c-text-2)">所有状态从 Session 读取，可随时重建</text>
+
+          <!-- Arrow Harness → Sandbox -->
+          <line x1="280" y1="290" x2="280" y2="315" stroke="var(--c-accent-a)" stroke-width="2.5" marker-end="url(#arr6d)"/>
+          <text x="305" y="308" font-size="16" fill="var(--c-text-2)">分配执行</text>
+
+          <!-- Sandbox Layer -->
+          <rect x="40" y="325" width="480" height="85" rx="16" fill="rgba(56,189,248,0.08)" stroke="var(--c-accent-a)" stroke-width="2.5"/>
+          <text x="80" y="365" font-size="36" fill="var(--c-accent-a)">🤲</text>
+          <text x="130" y="365" font-size="28" font-weight="900" fill="var(--c-accent-a)">Sandbox</text>
+          <text x="310" y="365" font-size="20" fill="var(--c-text-2)">隔离执行 · 碰不到凭证</text>
+
+          <!-- Destroy / Rebuild cycle arrow (loop on left side) -->
+          <path d="M40 390 C-20 390 -20 60 40 60" fill="none" stroke="var(--c-accent-a)" stroke-width="2" stroke-dasharray="8 4" opacity="0.35"/>
+          <text x="8" y="230" font-size="16" fill="var(--c-accent-a)" transform="rotate(-90 8 230)" font-weight="700">🔥 销毁 → ♻️ 重建</text>
+
+          <!-- ===== MIDDLE: Destroy/Rebuild detail ===== -->
+          <rect x="560" y="15" width="390" height="195" rx="16" fill="rgba(239,68,68,0.05)" stroke="rgba(239,68,68,0.2)" stroke-width="1.5"/>
+          <text x="580" y="55" font-size="26" font-weight="900" fill="#ef4444">🔥 销毁 → ♻️ 重建</text>
+          <text x="580" y="90" font-size="20" fill="var(--c-text-2)">旧架构：所有东西塞在一个容器</text>
+          <text x="580" y="118" font-size="20" fill="var(--c-text-2)">挂了就得抢救，前功尽弃</text>
+          <line x1="580" y1="138" x2="920" y2="138" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+          <text x="580" y="168" font-size="20" fill="var(--c-accent-a)">新架构：Harness 从 Session 恢复</text>
+          <text x="580" y="195" font-size="20" fill="var(--c-accent-a)">重新 provision 新 Sandbox · 秒级就绪</text>
+
+          <!-- Key insight box -->
+          <rect x="560" y="230" width="390" height="180" rx="16" fill="rgba(56,189,248,0.04)" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="580" y="270" font-size="22" font-weight="900" fill="var(--c-accent-a)">💡 核心洞察</text>
+          <text x="580" y="305" font-size="20" fill="var(--c-text-1)">沙箱从"宠物"变"牲口"</text>
+          <text x="580" y="338" font-size="20" fill="var(--c-text-2)">销毁重建即可</text>
+          <text x="580" y="375" font-size="20" fill="var(--c-text-2)">模型推理不再等沙箱配置</text>
+          <text x="580" y="400" font-size="18" fill="var(--c-accent-c)">拿到 Session ID 即可推理</text>
+
+          <!-- ===== RIGHT: Performance metrics ===== -->
+          <rect x="990" y="15" width="480" height="395" rx="16" fill="var(--c-surface-2)" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="1230" y="55" text-anchor="middle" font-size="26" font-weight="900" fill="var(--c-text-1)">📊 性能提升</text>
+          <text x="1230" y="85" text-anchor="middle" font-size="18" fill="var(--c-text-2)">解耦后模型推理不等沙箱配置完成</text>
+
+          <!-- p50 metric -->
+          <rect x="1020" y="110" width="420" height="70" rx="12" fill="rgba(16,185,129,0.08)"/>
+          <text x="1040" y="140" font-size="22" font-weight="700" fill="var(--c-text-2)">首 Token 延迟 p50</text>
+          <text x="1040" y="168" font-size="20" fill="var(--c-text-2)">中位数响应时间</text>
+          <text x="1420" y="155" text-anchor="end" font-size="48" font-weight="900" fill="#10b981">↓60%</text>
+
+          <!-- p95 metric -->
+          <rect x="1020" y="200" width="420" height="70" rx="12" fill="rgba(56,189,248,0.08)"/>
+          <text x="1040" y="230" font-size="22" font-weight="700" fill="var(--c-text-2)">首 Token 延迟 p95</text>
+          <text x="1040" y="258" font-size="20" fill="var(--c-text-2)">尾延迟优化</text>
+          <text x="1420" y="245" text-anchor="end" font-size="48" font-weight="900" fill="var(--c-accent-a)">↓90%+</text>
+
+          <!-- Before/After comparison -->
+          <rect x="1020" y="290" width="420" height="105" rx="12" fill="rgba(129,140,248,0.06)" stroke="rgba(129,140,248,0.15)" stroke-width="1"/>
+          <text x="1230" y="320" text-anchor="middle" font-size="20" font-weight="800" fill="var(--c-text-1)">新旧架构对比</text>
+          <rect x="1040" y="340" width="170" height="42" rx="8" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+          <text x="1125" y="367" text-anchor="middle" font-size="18" font-weight="700" fill="#ef4444">旧：宠物</text>
+          <text x="1220" y="366" font-size="24" fill="var(--c-text-2)">→</text>
+          <rect x="1250" y="340" width="170" height="42" rx="8" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.3)" stroke-width="1"/>
+          <text x="1335" y="367" text-anchor="middle" font-size="18" font-weight="700" fill="#10b981">新：牲口</text>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>Anthropic managed agents 架构</span>
+      <span>06 / 09</span>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- Slide 7: 三大核心价值                                            -->
+  <!-- ================================================================ -->
+  <section class="s slide" id="slide-7">
+    <div class="wa">核心价值 安全隔离 可复现环境 弹性伸缩 凭证隔离 销毁重建 池化技术</div>
+    <div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(16,185,129,0.06),transparent 70%);top:-80px;right:-60px"></div>
+
+    <div class="slide-header">
+      <span class="badge" style="background:#10b981">💎 价值</span>
+      <h2>沙箱的三大核心价值</h2>
+    </div>
+    <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+      <div class="g" style="flex-shrink:0">
+        <p class="g-body" style="margin:0">安全隔离、可复现环境、弹性伸缩——三者缺一不可，构成 Agent 工程化的<span style="color:var(--c-accent-a);font-weight:800">三角基座</span>。</p>
+      </div>
+      <!-- Three-pillar value diagram -->
+      <div class="card-diagram" style="min-height:460px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+        <svg viewBox="0 0 1500 480" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <marker id="arr7" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--c-accent-a)"/></marker>
+          </defs>
+
+          <!-- ===== Pillar 1: 安全隔离 ===== -->
+          <rect x="30" y="10" width="460" height="340" rx="18" fill="rgba(56,189,248,0.05)" stroke="var(--c-accent-a)" stroke-width="2"/>
+          <!-- Top accent line -->
+          <rect x="30" y="10" width="460" height="5" rx="2.5" fill="var(--c-accent-a)" opacity="0.7"/>
+          <text x="70" y="60" font-size="44" fill="var(--c-accent-a)">🔐</text>
+          <text x="125" y="60" font-size="28" font-weight="900" fill="var(--c-accent-a)">安全隔离</text>
+          <!-- Pill badge -->
+          <rect x="340" y="33" width="130" height="34" rx="17" fill="rgba(56,189,248,0.15)" stroke="rgba(56,189,248,0.3)" stroke-width="1"/>
+          <text x="405" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="var(--c-accent-a)">纵深防御</text>
+
+          <!-- Bullet items -->
+          <circle cx="70" cy="95" r="4" fill="var(--c-accent-a)" opacity="0.6"/>
+          <text x="84" y="101" font-size="20" fill="var(--c-text-2)">凭证不直接暴露在沙箱内</text>
+          <circle cx="70" cy="130" r="4" fill="var(--c-accent-a)" opacity="0.6"/>
+          <text x="84" y="136" font-size="20" fill="var(--c-text-2)">Git token → 凭证助手安全注入</text>
+          <circle cx="70" cy="165" r="4" fill="var(--c-accent-a)" opacity="0.6"/>
+          <text x="84" y="171" font-size="20" fill="var(--c-text-2)">OAuth token → 外部 vault + MCP</text>
+
+          <!-- Key insight box -->
+          <rect x="55" y="195" width="410" height="48" rx="10" fill="rgba(56,189,248,0.08)" stroke="rgba(56,189,248,0.15)" stroke-width="1"/>
+          <text x="75" y="226" font-size="20" font-weight="700" fill="var(--c-text-1)">⚠️ 防横向移动，非万能方案</text>
+
+          <!-- Bottom tag chips -->
+          <rect x="55" y="262" width="190" height="38" rx="10" fill="rgba(56,189,248,0.1)" stroke="rgba(56,189,248,0.25)" stroke-width="1"/>
+          <text x="150" y="288" text-anchor="middle" font-size="17" font-weight="700" fill="var(--c-accent-a)">🔑 凭证隔离</text>
+          <rect x="260" y="262" width="190" height="38" rx="10" fill="rgba(56,189,248,0.1)" stroke="rgba(56,189,248,0.25)" stroke-width="1"/>
+          <text x="355" y="288" text-anchor="middle" font-size="17" font-weight="700" fill="var(--c-accent-a)">🔗 MCP 代理</text>
+
+          <!-- Down arrow 1 → summary -->
+          <line x1="260" y1="360" x2="260" y2="393" stroke="var(--c-accent-a)" stroke-width="2.5" marker-end="url(#arr7)" opacity="0.5"/>
+
+          <!-- ===== Pillar 2: 可复现环境 ===== -->
+          <rect x="520" y="10" width="460" height="340" rx="18" fill="rgba(167,139,250,0.05)" stroke="var(--c-accent-c)" stroke-width="2"/>
+          <rect x="520" y="10" width="460" height="5" rx="2.5" fill="var(--c-accent-c)" opacity="0.7"/>
+          <text x="560" y="60" font-size="44" fill="var(--c-accent-c)">♻️</text>
+          <text x="615" y="60" font-size="28" font-weight="900" fill="var(--c-accent-c)">可复现环境</text>
+          <rect x="830" y="33" width="130" height="34" rx="17" fill="rgba(167,139,250,0.15)" stroke="rgba(167,139,250,0.3)" stroke-width="1"/>
+          <text x="895" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="var(--c-accent-c)">宠物→牲口</text>
+
+          <circle cx="560" cy="95" r="4" fill="var(--c-accent-c)" opacity="0.6"/>
+          <text x="574" y="101" font-size="20" fill="var(--c-text-2)">随时销毁释放 CPU / 内存</text>
+          <circle cx="560" cy="130" r="4" fill="var(--c-accent-c)" opacity="0.6"/>
+          <text x="574" y="136" font-size="20" fill="var(--c-text-2)">重建 + Session 恢复文件系统</text>
+          <circle cx="560" cy="165" r="4" fill="var(--c-accent-c)" opacity="0.6"/>
+          <text x="574" y="171" font-size="20" fill="var(--c-text-2)">状态从 Session 重建，无损失</text>
+
+          <rect x="545" y="195" width="410" height="48" rx="10" fill="rgba(167,139,250,0.08)" stroke="rgba(167,139,250,0.15)" stroke-width="1"/>
+          <text x="565" y="226" font-size="22" font-weight="900" fill="var(--c-accent-c)">💰 成本节省 50–80%</text>
+
+          <rect x="545" y="262" width="190" height="38" rx="10" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.25)" stroke-width="1"/>
+          <text x="640" y="288" text-anchor="middle" font-size="17" font-weight="700" fill="var(--c-accent-c)">🔥 销毁重建</text>
+          <rect x="750" y="262" width="190" height="38" rx="10" fill="rgba(167,139,250,0.1)" stroke="rgba(167,139,250,0.25)" stroke-width="1"/>
+          <text x="845" y="288" text-anchor="middle" font-size="17" font-weight="700" fill="var(--c-accent-c)">📜 Session 恢复</text>
+
+          <!-- Down arrow 2 → summary -->
+          <line x1="750" y1="360" x2="750" y2="393" stroke="var(--c-accent-c)" stroke-width="2.5" marker-end="url(#arr7)" opacity="0.5"/>
+
+          <!-- ===== Pillar 3: 弹性伸缩 ===== -->
+          <rect x="1010" y="10" width="460" height="340" rx="18" fill="rgba(16,185,129,0.05)" stroke="#10b981" stroke-width="2"/>
+          <rect x="1010" y="10" width="460" height="5" rx="2.5" fill="#10b981" opacity="0.7"/>
+          <text x="1050" y="60" font-size="44" fill="#10b981">📈</text>
+          <text x="1105" y="60" font-size="28" font-weight="900" fill="#10b981">弹性伸缩</text>
+          <rect x="1320" y="33" width="130" height="34" rx="17" fill="rgba(16,185,129,0.15)" stroke="rgba(16,185,129,0.3)" stroke-width="1"/>
+          <text x="1385" y="56" text-anchor="middle" font-size="16" font-weight="700" fill="#10b981">池化技术</text>
+
+          <circle cx="1050" cy="95" r="4" fill="#10b981" opacity="0.6"/>
+          <text x="1064" y="101" font-size="20" fill="var(--c-text-2)">预先创建空闲沙箱</text>
+          <circle cx="1050" cy="130" r="4" fill="#10b981" opacity="0.6"/>
+          <text x="1064" y="136" font-size="20" fill="var(--c-text-2)">请求来了毫秒级就绪</text>
+          <circle cx="1050" cy="165" r="4" fill="#10b981" opacity="0.6"/>
+          <text x="1064" y="171" font-size="20" fill="var(--c-text-2)">完成后资源释放回池</text>
+
+          <rect x="1035" y="195" width="410" height="48" rx="10" fill="rgba(16,185,129,0.08)" stroke="rgba(16,185,129,0.15)" stroke-width="1"/>
+          <text x="1055" y="226" font-size="22" font-weight="900" fill="#10b981">⚡ 预热池就绪 ≈ 60ms</text>
+
+          <rect x="1035" y="262" width="190" height="38" rx="10" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.25)" stroke-width="1"/>
+          <text x="1130" y="288" text-anchor="middle" font-size="17" font-weight="700" fill="#10b981">🏊 预热池化</text>
+          <rect x="1240" y="262" width="190" height="38" rx="10" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.25)" stroke-width="1"/>
+          <text x="1335" y="288" text-anchor="middle" font-size="17" font-weight="700" fill="#10b981">⏱️ 秒级供给</text>
+
+          <!-- Down arrow 3 → summary -->
+          <line x1="1240" y1="360" x2="1240" y2="393" stroke="#10b981" stroke-width="2.5" marker-end="url(#arr7)" opacity="0.5"/>
+
+          <!-- ===== Bottom Summary Bar ===== -->
+          <rect x="30" y="400" width="1440" height="70" rx="14" fill="rgba(16,185,129,0.03)" stroke="var(--c-border)" stroke-width="1"/>
+          <!-- Three-color left accents hinting at the three pillars -->
+          <rect x="30" y="400" width="153" height="5" rx="2.5" fill="var(--c-accent-a)" opacity="0.5"/>
+          <rect x="183" y="400" width="153" height="5" rx="0" fill="var(--c-accent-c)" opacity="0.5"/>
+          <rect x="336" y="400" width="153" height="5" rx="0" fill="#10b981" opacity="0.5"/>
+          <rect x="489" y="400" width="981" height="5" rx="2.5" fill="var(--c-border)" opacity="0.3"/>
+
+          <text x="70" y="446" font-size="24" font-weight="900" fill="var(--c-text-1)">🎯</text>
+          <text x="108" y="446" font-size="22" font-weight="700" fill="var(--c-text-1)">沙箱解决的不是单一安全问题，而是 Agent 工程化落地的</text>
+          <text x="820" y="446" font-size="22" font-weight="900" fill="var(--c-accent-a)">一整套问题</text>
+          <text x="1000" y="446" font-size="22" fill="var(--c-text-2)">— 没有沙箱，Agent 上不了生产</text>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>三大核心价值</span>
+      <span>07 / 09</span>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- Slide 8: 行业趋势 2026                                           -->
+  <!-- ================================================================ -->
+  <section class="s slide" id="slide-8">
+    <div class="wa">行业趋势 OpenAI Anthropic AWS 腾讯云 Cube 开源 从闭源到开源</div>
+    <div class="orb" style="width:600px;height:600px;background:radial-gradient(circle,rgba(251,191,36,0.05),transparent 70%);bottom:-150px;right:-100px"></div>
+
+    <div class="slide-header">
+      <span class="badge" style="background:var(--c-accent-e, #fbbf24)">🌊 趋势</span>
+      <h2>2026：沙箱赛道全部亮灯</h2>
+    </div>
+    <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+      <!-- Timeline SVG -->
+      <div class="card-diagram" style="min-height:520px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+        <svg viewBox="0 0 1500 520" preserveAspectRatio="xMidYMid meet">
+          <!-- Main timeline -->
+          <line x1="80" y1="140" x2="1420" y2="140" stroke="var(--c-border)" stroke-width="4" stroke-linecap="round"/>
+          <!-- Glow line -->
+          <line x1="80" y1="140" x2="1420" y2="140" stroke="url(#timeline-grad)" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+          <defs>
+            <linearGradient id="timeline-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="var(--c-accent-a)"/>
+              <stop offset="50%" stop-color="var(--c-accent-c)"/>
+              <stop offset="100%" stop-color="#10b981"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Node 1: OpenAI -->
+          <circle cx="200" cy="140" r="24" fill="var(--c-bg)" stroke="var(--c-accent-a)" stroke-width="3"/>
+          <text x="200" y="146" text-anchor="middle" font-size="28" fill="var(--c-accent-a)">·</text>
+          <rect x="100" y="175" width="200" height="120" rx="14" fill="rgba(56,189,248,0.08)" stroke="var(--c-accent-a)" stroke-width="1.5"/>
+          <text x="200" y="210" text-anchor="middle" font-size="26" font-weight="800" fill="var(--c-accent-a)">OpenAI</text>
+          <text x="200" y="242" text-anchor="middle" font-size="20" fill="var(--c-text-2)">Agents SDK</text>
+          <text x="200" y="270" text-anchor="middle" font-size="20" fill="var(--c-text-2)">沙箱集成支持</text>
+
+          <!-- Node 2: Anthropic -->
+          <circle cx="530" cy="140" r="24" fill="var(--c-bg)" stroke="var(--c-accent-c)" stroke-width="3"/>
+          <text x="530" y="146" text-anchor="middle" font-size="28" fill="var(--c-accent-c)">·</text>
+          <rect x="430" y="175" width="200" height="120" rx="14" fill="rgba(167,139,250,0.08)" stroke="var(--c-accent-c)" stroke-width="1.5"/>
+          <text x="530" y="210" text-anchor="middle" font-size="26" font-weight="800" fill="var(--c-accent-c)">Anthropic</text>
+          <text x="530" y="242" text-anchor="middle" font-size="20" fill="var(--c-text-2)">managed agents</text>
+          <text x="530" y="270" text-anchor="middle" font-size="20" fill="var(--c-text-2)">沙箱接口规范</text>
+
+          <!-- Node 3: AWS -->
+          <circle cx="860" cy="140" r="24" fill="var(--c-bg)" stroke="#fbbf24" stroke-width="3"/>
+          <text x="860" y="146" text-anchor="middle" font-size="28" fill="#fbbf24">·</text>
+          <rect x="760" y="175" width="200" height="120" rx="14" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.4)" stroke-width="1.5"/>
+          <text x="860" y="210" text-anchor="middle" font-size="26" font-weight="800" fill="#fbbf24">AWS</text>
+          <text x="860" y="242" text-anchor="middle" font-size="20" fill="var(--c-text-2)">Firecracker</text>
+          <text x="860" y="270" text-anchor="middle" font-size="20" fill="var(--c-text-2)">Lambda / Fargate</text>
+
+          <!-- Node 4: Alibaba -->
+          <circle cx="1190" cy="140" r="18" fill="var(--c-bg)" stroke="var(--c-text-2)" stroke-width="2"/>
+          <rect x="1090" y="0" width="200" height="105" rx="14" fill="var(--c-surface-2)" stroke="var(--c-border)" stroke-width="1"/>
+          <text x="1190" y="35" text-anchor="middle" font-size="26" font-weight="800" fill="var(--c-text-1)">阿里云</text>
+          <text x="1190" y="67" text-anchor="middle" font-size="20" fill="var(--c-text-2)">Agent Sandbox</text>
+          <text x="1190" y="92" text-anchor="middle" font-size="20" fill="var(--c-text-2)">沙箱服务</text>
+          <!-- Down arrow from Alibaba to timeline -->
+          <line x1="1190" y1="110" x2="1190" y2="120" stroke="var(--c-text-2)" stroke-width="2"/>
+
+          <!-- Node 5: Tencent Cube — largest, highlighted -->
+          <circle cx="1420" cy="140" r="28" fill="var(--c-bg)" stroke="#10b981" stroke-width="4"/>
+          <text x="1420" y="147" text-anchor="middle" font-size="20" font-weight="900" fill="#10b981">★</text>
+          <!-- Highlight box above timeline for Cube -->
+          <rect x="1300" y="0" width="200" height="105" rx="14" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="2"/>
+          <text x="1400" y="30" text-anchor="middle" font-size="26" font-weight="900" fill="#10b981">腾讯云</text>
+          <text x="1400" y="58" text-anchor="middle" font-size="22" font-weight="700" fill="var(--c-text-1)">Cube 开源</text>
+          <text x="1400" y="85" text-anchor="middle" font-size="18" fill="var(--c-text-2)">2026-04-21</text>
+          <line x1="1400" y1="110" x2="1415" y2="115" stroke="#10b981" stroke-width="2"/>
+
+          <!-- Bottom: Trend summary -->
+          <rect x="80" y="340" width="1340" height="160" rx="16" fill="linear-gradient(135deg,rgba(16,185,129,0.05),rgba(56,189,248,0.05))" stroke="var(--c-border)" stroke-width="1"
+                style="fill:rgba(16,185,129,0.04)"/>
+          <!-- Left arrow text -->
+          <text x="150" y="390" font-size="24" font-weight="800" fill="var(--c-accent-a)">闭源 →</text>
+          <text x="340" y="390" font-size="24" font-weight="800" fill="#10b981">→ 开源</text>
+          <text x="150" y="435" font-size="24" font-weight="800" fill="var(--c-accent-a)">美国 →</text>
+          <text x="340" y="435" font-size="24" font-weight="800" fill="#10b981">→ 中国</text>
+
+          <!-- Right: Key quote -->
+          <text x="650" y="385" font-size="28" font-weight="900" fill="var(--c-text-1)">沙箱赛道已经全部亮灯</text>
+          <text x="650" y="425" font-size="22" fill="var(--c-text-2)">OpenAI · Anthropic · AWS · 阿里云 · 腾讯云</text>
+          <text x="650" y="465" font-size="22" fill="var(--c-text-2)">从底层到上层，从国外到国内，全面入局</text>
+
+          <!-- Timeline labels -->
+          <text x="200" y="310" text-anchor="middle" font-size="18" fill="var(--c-text-2)">SDK 集成</text>
+          <text x="530" y="310" text-anchor="middle" font-size="18" fill="var(--c-text-2)">架构规范</text>
+          <text x="860" y="310" text-anchor="middle" font-size="18" fill="var(--c-text-2)">基础设施</text>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>行业趋势 2026</span>
+      <span>08 / 09</span>
+    </div>
+  </section>
+
+  <!-- ================================================================ -->
+  <!-- Slide 9: CTA 金句收尾                                           -->
+  <!-- ================================================================ -->
+  <section class="s slide" id="slide-9">
+    <div class="wa">执行环境 裸跑 沙箱保护 最有价值 最安全可靠</div>
+    <div class="orb" style="width:800px;height:800px;background:radial-gradient(circle,rgba(56,189,248,0.07),transparent 60%);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+    <div class="orb" style="width:500px;height:500px;background:radial-gradient(circle,rgba(129,140,248,0.05),transparent 70%);bottom:-120px;right:-80px"></div>
+
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <!-- Key quote -->
+        <div style="font-size:48px;margin-bottom:40px;opacity:0.3">🛡️</div>
+        <div style="font-size:56px;font-weight:900;line-height:1.3;max-width:1300px;margin:0 auto 48px">
+          <span class="gradient-text" style="font-size:72px;font-weight:900;line-height:1.2;display:block;margin-bottom:24px">最有价值的</span>
+          <span style="color:var(--c-text-1)">不是最聪明的大模型</span>
+          <br>
+          <span style="color:var(--c-accent-a)">而是最安全可靠的</span>
+          <span class="gradient-text" style="font-size:72px;font-weight:900">执行环境</span>
+        </div>
+
+        <div style="height:2px;width:200px;background:linear-gradient(90deg,transparent,var(--c-accent-a),var(--c-accent-c),transparent);margin:0 auto 48px"></div>
+
+        <!-- CTA -->
+        <div style="font-size:44px;color:var(--c-text-2);margin-bottom:32px">你用 Agent 的时候，是直接裸跑还是有沙箱保护？</div>
+
+        <!-- Pills -->
+        <div style="display:flex;gap:20px;justify-content:center">
+          <span class="pill" style="background:rgba(239,68,68,0.15);color:#ef4444;font-size:36px;padding:12px 28px">❌ 裸跑</span>
+          <span class="pill" style="background:rgba(16,185,129,0.15);color:#10b981;font-size:36px;padding:12px 28px">🛡️ 沙箱保护</span>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>沙箱 · Agent 时代新基建</span>
+      <span>09 / 09</span>
+    </div>
+  </section>
+
+</div>
+
+<!-- Navigation & Scaling -->
+<script>
+(function() {
+  var PW = 1920, PH = 1080;
+  function fit() {
+    var el = document.getElementById('P'),
+        r = Math.min(window.innerWidth / PW, window.innerHeight / PH),
+        x = (window.innerWidth - PW * r) / 2,
+        y = (window.innerHeight - PH * r) / 2;
+    el.style.transform = 'scale(' + r + ')';
+    el.style.transformOrigin = '0 0';
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  // Slide navigation
+  var slides = document.querySelectorAll('.s.slide');
+  var total = slides.length;
+  var cur = 0;
+
+  function showSlide(index) {
+    if (index < 0 || index >= total) return;
+    slides.forEach(function(s, i) {
+      s.classList.toggle('is-active', i === index);
+    });
+    cur = index;
+  }
+
+  function go(n) {
+    showSlide(n);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      showSlide(cur + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      showSlide(cur - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      showSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      showSlide(total - 1);
+    }
+  });
+
+  // Click navigation: right 70% → next, left 30% → prev
+  document.getElementById('P').addEventListener('click', function(e) {
+    if (e.clientX - document.getElementById('P').getBoundingClientRect().left > PW * 0.3) {
+      showSlide(cur + 1);
+    } else {
+      showSlide(cur - 1);
+    }
+  });
+})();
+</script>
+</body>
+</html>
