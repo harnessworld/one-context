@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>封面</title>
+<style>
+:root {
+  --bg: #03080f;
+  --glass-blur: 56px;
+  --glass-sat: 220%;
+  --glass-border: rgba(255,255,255,0.32);
+  --glass-shadow: 0 16px 56px rgba(0,0,0,0.5), 0 4px 24px rgba(79,156,249,0.08), inset 0 0 0 1px rgba(255,255,255,0.08);
+  --accent: #4f9cf9; --accent2: #a78bfa; --accent3: #34d399;
+  --text: #e8edf5; --muted: rgba(148,163,184,0.75);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { width: 1080px; height: 1920px; background: var(--bg); color: var(--text); font-family: 'Noto Sans SC','Microsoft YaHei',sans-serif; overflow: hidden; }
+#cover { position: relative; width: 1080px; height: 1920px; }
+
+/* 背景：与PPT一致 */
+.bg { position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 90% 55% at 15% 8%, rgba(79,156,249,0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 45% at 85% 90%, rgba(167,139,250,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 45%, rgba(52,211,153,0.06) 0%, transparent 65%),
+    var(--bg);
+}
+.bg::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.62;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.055) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, black 15%, transparent 75%);
+}
+
+/* 毛玻璃卡片 */
+.glass {
+  position: absolute;
+  left: 60px; right: 60px;
+  top: 480px; bottom: 380px;
+  isolation: isolate;
+  background:
+    linear-gradient(165deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.06) 38%, rgba(255,255,255,0.02) 100%),
+    linear-gradient(90deg, rgba(79,156,249,0.06) 0%, transparent 45%, rgba(167,139,250,0.05) 100%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  border: 1px solid var(--glass-border);
+  border-radius: 32px;
+  box-shadow: var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 60px;
+  overflow: hidden;
+}
+.glass::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 0;
+  opacity: 0.4;
+  background-image:
+    repeating-linear-gradient(105deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 120% 80% at 12% 0%, rgba(255,255,255,0.14), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 100% 100%, rgba(56,189,248,0.06), transparent 45%);
+  mix-blend-mode: overlay;
+}
+.glass > * { position: relative; z-index: 1; }
+
+/* 标签 */
+.chip {
+  display: inline-block; padding: 10px 36px; border-radius: 100px; font-size: 28px; font-weight: 700; letter-spacing: 4px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.26);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+  color: var(--accent);
+  margin-bottom: 48px;
+}
+
+/* 主标题 */
+.headline {
+  font-size: 96px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  letter-spacing: 2px;
+  background: linear-gradient(135deg, #e8edf5 0%, #4f9cf9 50%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 36px;
+}
+
+/* 分割线 */
+.divider {
+  width: 200px; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  border-radius: 2px;
+  margin-bottom: 40px;
+}
+
+/* 副标题 */
+.subline {
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--muted);
+  letter-spacing: 2px;
+}
+
+/* 底部信息 */
+.footer {
+  position: absolute;
+  bottom: 80px; left: 80px; right: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.brand {
+  font-size: 26px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 3px;
+}
+.hints {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 14px;
+}
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 24px;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 1px;
+}
+.dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+</style>
+</head>
+<body>
+<div id="cover">
+  <div class="bg"></div>
+  <div class="glass">
+    <div class="chip">2026 · 职场洞察</div>
+    <div class="headline">放下大厂滤镜</div>
+    <div class="divider"></div>
+    <div class="subline">中小厂的 AI 机会<br>比你想象的大</div>
+  </div>
+  <div class="footer">
+    <div class="brand">大厂吾师兄</div>
+    <div class="hints">
+      <div class="hint"><div class="dot"></div>中小厂正在抢 AI 人才</div>
+      <div class="hint"><div class="dot"></div>大厂光环正在消退</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

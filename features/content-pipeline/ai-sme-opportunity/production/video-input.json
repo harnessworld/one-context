@@ -1,0 +1,14 @@
+{
+  "wavFile": "voiceover.wav",
+  "srtFile": "sub.srt",
+  "outputFile": "final.mp4",
+  "burnSubtitles": true,
+  "subtitle": {
+    "fontSize": 18,
+    "marginV": 18,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "primaryColour": "#FFFF00",
+    "charsPerLine": 24
+  }
+}

@@ -13,9 +13,10 @@ const { pathToFileURL } = require('url');
 const ffmpegStatic = require('ffmpeg-static');
 const { run: runWav } = require('./wav_pipeline');
 const { prepareSrtForBurn } = require('./srt_postprocess');
+const { resolvePath, ensureDir } = require('./path_resolver');
 
 async function extractSlideTexts(projectRoot) {
-  const html = path.join(projectRoot, 'presentation.html');
+  const html = resolvePath(projectRoot, 'slides', 'presentation.html');
   if (!fs.existsSync(html)) {
     throw new Error(`找不到 presentation.html：${html}`);
   }
@@ -72,7 +73,7 @@ function findWavPath(projectRoot, explicit) {
 
 async function run(projectRoot, skillDir, options = {}) {
   const forceWhisperSrt = options.forceWhisperSrt === true;
-  const inputPath = path.join(projectRoot, 'video-input.json');
+  const inputPath = resolvePath(projectRoot, 'timing', 'video-input.json');
   let wavExplicit = null;
   let whisperModel = 'medium';
   let outputFile = 'final_auto.mp4';
@@ -268,7 +269,8 @@ async function run(projectRoot, skillDir, options = {}) {
 
   // 无外部 srtFile 时，把 Whisper 生成的 SRT 拷到项目根，便于校对文案、保留时间轴（未 burn 也会复制供审阅）
   if (!externalSrt && fs.existsSync(srtOut)) {
-    const dest = path.join(projectRoot, 'sub.srt');
+    const dest = path.join(projectRoot, 'subtitles', 'sub.srt');
+    ensureDir(dest);
     try {
       fs.copyFileSync(srtOut, dest);
       if (srtReplacements.length > 0 || wrapSubtitles) {

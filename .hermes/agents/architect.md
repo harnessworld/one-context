@@ -890,6 +890,14 @@ repos:
     id: arch-diagram-gen
     alias: archdiag
     description: Claude AI skill for generating dark-themed system architecture diagrams (HTML/SVG).
+  - url: https://github.com/sansan0/TrendRadar
+    category: integrations
+    id: trend-radar
+    description: 趋势雷达 — 多平台热点聚合 + MCP AI分析 + 企微/微信/飞书推送（33k+ stars）。
+  - url: https://github.com/heygen-com/hyperframes
+    category: reference
+    id: hyperframes
+    description: HeyGen 开源 HTML→视频合成框架（CLI、Puppeteer+FFmpeg、Agent skills）；与本仓 html-video-from-slides 并行参考，不替换。
 
 <!-- source: meta/workspaces.yaml -->
 # Task- or theme-oriented workspace definitions.
@@ -935,3 +943,4 @@ workspaces:
         - features/README.md
         - features/INDEX.md
         - features/_template/
+        - skills/skill-parallel-verify/

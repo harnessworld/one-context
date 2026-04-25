@@ -1,300 +1,301 @@
-# Cover Elements — 组件库
+# Cover Elements — 装饰 SVG 图库
 
-> 可组合的封面组件，按需拼装。
-
----
-
-## Hero 标题
-
-### A. 纯色标题
-
-```html
-<div style="font-size:160px;font-weight:900;color:#f8f4ec;line-height:1.05;letter-spacing:-4px">
-  【主标题】
-</div>
-```
-
-### B. 渐变标题（科技感）
-
-```html
-<div style="font-size:160px;font-weight:900;line-height:1.05;letter-spacing:-4px;background:linear-gradient(135deg,#6366f1,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
-  【主标题】
-</div>
-```
-
-### C. 渐变标题（数据感 - 绿色系）
-
-```html
-<div style="font-size:160px;font-weight:900;line-height:1.05;background:linear-gradient(135deg,#22c55e,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
-  【主标题】
-</div>
-```
-
-### D. 渐变标题（暖色系）
-
-```html
-<div style="font-size:160px;font-weight:900;line-height:1.05;letter-spacing:-4px;background:linear-gradient(135deg,#f97316,#eab308);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
-  【主标题】
-</div>
-```
+> 可配置的背景装饰图形，通过 CONFIG 的 `decoSVG` 字段内联替换。
 
 ---
 
-## 副标题
+## 使用方式
 
-```html
-<!-- 简约型 -->
-<div style="font-size:60px;font-weight:700;color:#8a8a8a">
-  【副标题】
-</div>
+在 CONFIG 中将 SVG 字符串赋值给 `decoSVG`：
 
-<!-- 科技型 -->
-<div style="font-size:60px;font-weight:700;color:#f0f0f5;letter-spacing:2px">
-  【副标题】
-</div>
+```javascript
+const CONFIG = {
+    // ...
+    decoSVG: `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <!-- 你的 SVG 内容 -->
+    </svg>`,
+    decoRotate: -15,    // 旋转角度
+    decoOpacity: 0.7,   // 透明度
+    decoScale: 1.2,     // 缩放
+};
 ```
+
+留空 `decoSVG: ""` 则使用默认手机图案。
 
 ---
 
-## Badge 标签
+## 图案 1：手机（默认）
 
-```html
-<!-- 简约型 -->
-<div style="font-size:28px;padding:12px 32px;background:rgba(232,213,163,.15);border-radius:40px;color:#e8d5a3">
-  【标签】
-</div>
+短视频内容的标准装饰，模拟手机播放界面。
 
-<!-- 科技型 -->
-<div style="font-size:26px;padding:10px 28px;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(6,182,212,.2));border-radius:40px;color:#06b6d4">
-  【标签】
-</div>
+**推荐参数**：`decoRotate: -11` | `decoOpacity: 0.82` | `decoScale: 1`
 
-<!-- 数据型 -->
-<div style="font-size:26px;padding:10px 28px;background:rgba(34,197,94,.15);border-radius:40px;color:#22c55e">
-  【标签】
-</div>
+```svg
+<svg viewBox="0 0 210 400" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <defs>
+        <linearGradient id="ph-screen" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0d2236"/>
+            <stop offset="45%" stop-color="#122a42"/>
+            <stop offset="100%" stop-color="#241432"/>
+        </linearGradient>
+        <linearGradient id="ph-glow" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00d4e8" stop-opacity="0.55"/>
+            <stop offset="55%" stop-color="#8b5cf6" stop-opacity="0.38"/>
+            <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.22"/>
+        </linearGradient>
+        <linearGradient id="ph-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00f0ff"/>
+            <stop offset="100%" stop-color="#8b5cf6"/>
+        </linearGradient>
+    </defs>
+    <rect x="8" y="6" width="194" height="388" rx="28" fill="#0c1220" stroke="rgba(255,255,255,0.38)" stroke-width="2.5"/>
+    <rect x="18" y="18" width="174" height="364" rx="20" fill="url(#ph-screen)" stroke="rgba(0,240,255,0.35)" stroke-width="1.5"/>
+    <ellipse cx="105" cy="120" rx="72" ry="88" fill="url(#ph-glow)"/>
+    <circle cx="62" cy="44" r="4" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="78" cy="44" r="4" fill="rgba(255,255,255,0.28)"/>
+    <circle cx="94" cy="44" r="4" fill="rgba(255,255,255,0.16)"/>
+    <rect x="118" y="40" width="64" height="8" rx="4" fill="rgba(255,255,255,0.14)"/>
+    <circle cx="105" cy="188" r="36" fill="rgba(0,0,0,0.42)" stroke="rgba(0,240,255,0.65)" stroke-width="2.5"/>
+    <path d="M96 168 L96 208 L132 188 Z" fill="rgba(255,255,255,0.95)"/>
+    <rect x="32" y="318" width="146" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+    <rect x="32" y="318" width="62" height="5" rx="2.5" fill="url(#ph-bar)"/>
+    <text x="105" y="342" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="13" font-family="system-ui,sans-serif" letter-spacing="1">0:15</text>
+    <rect x="78" y="372" width="54" height="4" rx="2" fill="rgba(255,255,255,0.28)"/>
+</svg>
 ```
+
+**适用主题**：tech、growth
 
 ---
 
-## 进化条
+## 图案 2：芯片 / 处理器
 
-展示流程/演进/阶段，**可选组件**。
+AI 算力、芯片技术、硬件主题。
 
-```html
-<!-- 竖版用 -->
-<div style="display:flex;justify-content:center;align-items:center;gap:20px;padding:20px 40px;background:rgba(255,255,255,.05);border-radius:50px">
-  <div style="text-align:center">
-    <div style="font-size:48px">🌱</div>
-    <div style="font-size:22px;color:#8a8a8a;margin-top:4px">阶段一</div>
-  </div>
-  <div style="color:rgba(255,255,255,.3);font-size:24px">▶</div>
-  <div style="text-align:center">
-    <div style="font-size:48px">📝</div>
-    <div style="font-size:22px;color:#8a8a8a;margin-top:4px">阶段二</div>
-  </div>
-  <div style="color:rgba(255,255,255,.3);font-size:24px">▶</div>
-  <div style="text-align:center">
-    <div style="font-size:48px">🎬</div>
-    <div style="font-size:22px;color:#8a8a8a;margin-top:4px">阶段三</div>
-  </div>
-  <div style="color:rgba(255,255,255,.3);font-size:24px">▶</div>
-  <div style="text-align:center">
-    <div style="font-size:48px">🚀</div>
-    <div style="font-size:22px;color:#8a8a8a;margin-top:4px">阶段四</div>
-  </div>
-</div>
+**推荐参数**：`decoRotate: -8` | `decoOpacity: 0.75` | `decoScale: 1.3`
+
+```svg
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <defs>
+        <linearGradient id="ch-core" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0d1a2a"/>
+            <stop offset="100%" stop-color="#1a0d2a"/>
+        </linearGradient>
+        <linearGradient id="ch-glow" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.2"/>
+        </linearGradient>
+    </defs>
+    <!-- 核心 -->
+    <rect x="80" y="80" width="140" height="140" rx="12" fill="url(#ch-core)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+    <rect x="95" y="95" width="110" height="110" rx="6" fill="url(#ch-glow)" stroke="rgba(0,240,255,0.3)" stroke-width="1"/>
+    <!-- 电路纹理 -->
+    <line x1="110" y1="110" x2="110" y2="190" stroke="rgba(0,240,255,0.25)" stroke-width="1.5"/>
+    <line x1="130" y1="110" x2="130" y2="190" stroke="rgba(139,92,246,0.2)" stroke-width="1.5"/>
+    <line x1="150" y1="110" x2="150" y2="190" stroke="rgba(0,240,255,0.3)" stroke-width="1.5"/>
+    <line x1="170" y1="110" x2="170" y2="190" stroke="rgba(139,92,246,0.2)" stroke-width="1.5"/>
+    <line x1="190" y1="110" x2="190" y2="190" stroke="rgba(0,240,255,0.25)" stroke-width="1.5"/>
+    <!-- 引脚 - 上 -->
+    <line x1="110" y1="80" x2="110" y2="50" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="130" y1="80" x2="130" y2="50" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="150" y1="80" x2="150" y2="50" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="170" y1="80" x2="170" y2="50" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="190" y1="80" x2="190" y2="50" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <!-- 引脚 - 下 -->
+    <line x1="110" y1="220" x2="110" y2="250" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="130" y1="220" x2="130" y2="250" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="150" y1="220" x2="150" y2="250" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="170" y1="220" x2="170" y2="250" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="190" y1="220" x2="190" y2="250" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <!-- 引脚 - 左 -->
+    <line x1="80" y1="110" x2="50" y2="110" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="80" y1="130" x2="50" y2="130" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="80" y1="150" x2="50" y2="150" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="80" y1="170" x2="50" y2="170" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="80" y1="190" x2="50" y2="190" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <!-- 引脚 - 右 -->
+    <line x1="220" y1="110" x2="250" y2="110" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="220" y1="130" x2="250" y2="130" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="220" y1="150" x2="250" y2="150" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="220" y1="170" x2="250" y2="170" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <line x1="220" y1="190" x2="250" y2="190" stroke="rgba(255,255,255,0.35)" stroke-width="2.5"/>
+    <!-- 中心发光点 -->
+    <circle cx="150" cy="150" r="18" fill="rgba(0,240,255,0.3)"/>
+    <circle cx="150" cy="150" r="8" fill="rgba(0,240,255,0.6)"/>
+</svg>
 ```
 
-**变体：3 阶段**
-
-```html
-<div style="display:flex;justify-content:center;align-items:center;gap:32px;padding:20px 48px;background:rgba(255,255,255,.05);border-radius:50px">
-  <div style="text-align:center">
-    <div style="font-size:48px">📋</div>
-    <div style="font-size:22px;color:#8a8a8a;margin-top:4px">规划</div>
-  </div>
-  <div style="color:rgba(255,255,255,.3);font-size:28px">━━▶</div>
-  <div style="text-align:center">
-    <div style="font-size:48px">🔨</div>
-    <div style="font-size:22px;color:#8a8a8a;margin-top:4px">执行</div>
-  </div>
-  <div style="color:rgba(255,255,255,.3);font-size:28px">━━▶</div>
-  <div style="text-align:center">
-    <div style="font-size:48px">✅</div>
-    <div style="font-size:22px;color:#8a8a8a;margin-top:4px">交付</div>
-  </div>
-</div>
-```
+**适用主题**：tech、danger
 
 ---
 
-## Pill 卡片
+## 图案 3：火箭
 
-展示并列信息块，**可选组件**。
+增长、突破、起飞主题。
 
-### 竖版 3 列
+**推荐参数**：`decoRotate: -25` | `decoOpacity: 0.7` | `decoScale: 1.1`
 
-```html
-<div style="display:flex;gap:16px">
-  <div style="flex:1;background:rgba(255,255,255,.05);border-radius:20px;padding:24px 20px;text-align:center">
-    <div style="font-size:40px">⏱</div>
-    <div style="font-size:38px;font-weight:700;color:#06b6d4;margin-top:8px">5分钟</div>
-    <div style="font-size:30px;color:#8a8a8a;margin-top:4px">视频时长</div>
-  </div>
-  <div style="flex:1;background:rgba(255,255,255,.05);border-radius:20px;padding:24px 20px;text-align:center">
-    <div style="font-size:40px">🎯</div>
-    <div style="font-size:38px;font-weight:700;color:#6366f1;margin-top:8px">3个</div>
-    <div style="font-size:30px;color:#8a8a8a;margin-top:4px">核心要点</div>
-  </div>
-  <div style="flex:1;background:rgba(255,255,255,.05);border-radius:20px;padding:24px 20px;text-align:center">
-    <div style="font-size:40px">💡</div>
-    <div style="font-size:38px;font-weight:700;color:#22c55e;margin-top:8px">实战</div>
-    <div style="font-size:30px;color:#8a8a8a;margin-top:4px">案例演示</div>
-  </div>
-</div>
+```svg
+<svg viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <defs>
+        <linearGradient id="rk-body" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1a2030"/>
+            <stop offset="100%" stop-color="#201a30"/>
+        </linearGradient>
+        <linearGradient id="rk-flame" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stop-color="#FFD700" stop-opacity="0.8"/>
+            <stop offset="40%" stop-color="#FF8C00" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#FF2A55" stop-opacity="0"/>
+        </linearGradient>
+    </defs>
+    <!-- 火箭体 -->
+    <path d="M100 30 Q130 80 130 180 L130 280 L70 280 L70 180 Q70 80 100 30Z" fill="url(#rk-body)" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
+    <!-- 舱窗 -->
+    <circle cx="100" cy="130" r="22" fill="#0a1520" stroke="rgba(0,240,255,0.5)" stroke-width="1.5"/>
+    <circle cx="100" cy="130" r="16" fill="rgba(0,240,255,0.12)"/>
+    <!-- 侧翼 -->
+    <path d="M70 220 L40 290 L70 270Z" fill="url(#rk-body)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+    <path d="M130 220 L160 290 L130 270Z" fill="url(#rk-body)" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+    <!-- 喷口 -->
+    <rect x="82" y="275" width="36" height="14" rx="2" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+    <!-- 火焰 -->
+    <path d="M85 289 Q90 340 100 380 Q110 340 115 289Z" fill="url(#rk-flame)"/>
+    <!-- 装饰环 -->
+    <line x1="70" y1="200" x2="130" y2="200" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+    <line x1="72" y1="170" x2="128" y2="170" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+</svg>
 ```
 
-### 横版侧边栏
-
-```html
-<div style="width:380px;display:flex;flex-direction:column;gap:16px">
-  <div style="background:rgba(255,255,255,.05);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:16px">
-    <div style="font-size:36px">⏱</div>
-    <div style="flex:1">
-      <div style="font-size:32px;font-weight:700;color:#06b6d4">5分钟</div>
-      <div style="font-size:24px;color:#8a8a8a">视频时长</div>
-    </div>
-  </div>
-  <div style="background:rgba(255,255,255,.05);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:16px">
-    <div style="font-size:36px">🎯</div>
-    <div style="flex:1">
-      <div style="font-size:32px;font-weight:700;color:#6366f1">3个</div>
-      <div style="font-size:24px;color:#8a8a8a">核心要点</div>
-    </div>
-  </div>
-</div>
-```
+**适用主题**：growth、finance
 
 ---
 
-## 大数字
+## 图案 4：上升图表
 
-数据型封面核心组件。
+数据、金融、趋势主题。
 
-```html
-<!-- 超大数字 + 标签 -->
-<div style="font-size:280px;font-weight:900;line-height:1;background:linear-gradient(135deg,#22c55e,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">
-  100+
-</div>
-<div style="font-size:48px;font-weight:600;color:#888888;margin-top:16px">
-  行业案例
-</div>
+**推荐参数**：`decoRotate: 5` | `decoOpacity: 0.65` | `decoScale: 1.4`
+
+```svg
+<svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <defs>
+        <linearGradient id="gt-area" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#00FF88" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#00FF88" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="gt-line" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#FFD700"/>
+            <stop offset="100%" stop-color="#00FF88"/>
+        </linearGradient>
+    </defs>
+    <!-- 网格线 -->
+    <line x1="40" y1="40" x2="40" y2="240" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="40" y1="240" x2="290" y2="240" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <line x1="40" y1="160" x2="290" y2="160" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 4"/>
+    <line x1="40" y1="80" x2="290" y2="80" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4 4"/>
+    <!-- 柱形 -->
+    <rect x="60" y="190" width="24" height="50" rx="3" fill="rgba(255,215,0,0.15)"/>
+    <rect x="100" y="170" width="24" height="70" rx="3" fill="rgba(255,215,0,0.15)"/>
+    <rect x="140" y="150" width="24" height="90" rx="3" fill="rgba(255,215,0,0.2)"/>
+    <rect x="180" y="120" width="24" height="120" rx="3" fill="rgba(0,255,136,0.2)"/>
+    <rect x="220" y="90" width="24" height="150" rx="3" fill="rgba(0,255,136,0.25)"/>
+    <rect x="260" y="55" width="24" height="185" rx="3" fill="rgba(0,255,136,0.3)"/>
+    <!-- 趋势线面积 -->
+    <path d="M72 190 L112 170 L152 150 L192 120 L232 90 L272 55 L272 240 L72 240Z" fill="url(#gt-area)"/>
+    <!-- 趋势线 -->
+    <path d="M72 190 L112 170 L152 150 L192 120 L232 90 L272 55" stroke="url(#gt-line)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- 数据点 -->
+    <circle cx="192" cy="120" r="6" fill="#00FF88" opacity="0.6"/>
+    <circle cx="272" cy="55" r="6" fill="#00FF88" opacity="0.8"/>
+    <!-- 箭头 -->
+    <path d="M264 48 L272 55 L264 62" stroke="#00FF88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
+</svg>
 ```
+
+**适用主题**：finance、growth
 
 ---
 
-## 光晕装饰
+## 图案 5：书本/知识
 
-科技型封面背景装饰。
+教程、知识分享、学习主题。
 
-```html
-<!-- 光晕 1：右上角 -->
-<div style="position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(99,102,241,.2),transparent 70%);top:-200px;right:-100px;border-radius:50%"></div>
+**推荐参数**：`decoRotate: -5` | `decoOpacity: 0.6` | `decoScale: 1.2`
 
-<!-- 光晕 2：左下角 -->
-<div style="position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(6,182,212,.15),transparent 70%);bottom:-150px;left:-100px;border-radius:50%"></div>
-
-<!-- 光晕 3：中央偏后 -->
-<div style="position:absolute;width:800px;height:800px;background:radial-gradient(circle,rgba(34,197,94,.1),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;z-index:0"></div>
+```svg
+<svg viewBox="0 0 280 320" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <defs>
+        <linearGradient id="bk-cover" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1a1a2e"/>
+            <stop offset="100%" stop-color="#16213e"/>
+        </linearGradient>
+    </defs>
+    <!-- 书本主体 -->
+    <path d="M40 40 L40 280 Q80 260 140 270 L140 30 Q80 20 40 40Z" fill="url(#bk-cover)" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+    <path d="M140 30 Q200 20 240 40 L240 280 Q200 260 140 270Z" fill="url(#bk-cover)" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+    <!-- 书脊 -->
+    <line x1="140" y1="30" x2="140" y2="270" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+    <!-- 左页文字线 -->
+    <line x1="60" y1="80" x2="120" y2="75" stroke="rgba(0,240,255,0.2)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="60" y1="100" x2="125" y2="95" stroke="rgba(0,240,255,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="60" y1="120" x2="120" y2="117" stroke="rgba(0,240,255,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="60" y1="140" x2="110" y2="138" stroke="rgba(0,240,255,0.12)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="60" y1="160" x2="125" y2="156" stroke="rgba(0,240,255,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="60" y1="180" x2="115" y2="178" stroke="rgba(0,240,255,0.12)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="60" y1="200" x2="120" y2="198" stroke="rgba(0,240,255,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="60" y1="220" x2="108" y2="218" stroke="rgba(0,240,255,0.12)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="60" y1="240" x2="125" y2="238" stroke="rgba(0,240,255,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <!-- 右页文字线 -->
+    <line x1="160" y1="75" x2="220" y2="80" stroke="rgba(139,92,246,0.2)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="95" x2="220" y2="100" stroke="rgba(139,92,246,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="115" x2="215" y2="120" stroke="rgba(139,92,246,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="135" x2="210" y2="138" stroke="rgba(139,92,246,0.12)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="155" x2="220" y2="160" stroke="rgba(139,92,246,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="175" x2="218" y2="178" stroke="rgba(139,92,246,0.12)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="195" x2="220" y2="200" stroke="rgba(139,92,246,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="215" x2="212" y2="218" stroke="rgba(139,92,246,0.12)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="160" y1="235" x2="220" y2="240" stroke="rgba(139,92,246,0.15)" stroke-width="2" stroke-linecap="round"/>
+    <!-- 页面发光 -->
+    <ellipse cx="140" cy="150" rx="80" ry="90" fill="rgba(0,240,255,0.04)"/>
+</svg>
 ```
+
+**适用主题**：tech、growth
 
 ---
 
-## 来源行
+## 自定义 SVG 指南
 
-```html
-<!-- 简约型 -->
-<div style="font-size:24px;color:rgba(255,255,255,.3);letter-spacing:2px">
-  来源：【数据来源】
-</div>
+### 尺寸与定位
 
-<!-- 科技型 -->
-<div style="font-size:24px;color:rgba(255,255,255,.25);letter-spacing:3px">
-  SOURCE: 【DATA SOURCE】
-</div>
+装饰图形容器固定为：`width: 520px; height: 990px`，居中偏下（`top: 52%`）。
 
-<!-- 数据型 -->
-<div style="font-size:24px;color:rgba(255,255,255,.25);letter-spacing:2px">
-  统计周期：2024年Q1 | 数据来源：【来源】
-</div>
-```
+- SVG 的 `viewBox` 决定自身比例
+- 通过 `decoScale` 控制整体大小
+- 通过 `decoRotate` 控制旋转角度
 
----
+### 颜色适配
 
-## 说明文字
+SVG 内的颜色**不会**随主题自动变化。建议：
 
-```html
-<div style="font-size:40px;color:#8a8a8a;max-width:900px;line-height:1.5;text-align:center">
-  【说明文字，1-2 句，可用 <strong style="color:#e8d5a3">strong</strong> 高亮关键词】
-</div>
-```
+1. 使用半透明色（`rgba`），让底层主题色微微透出
+2. 避免使用纯白/纯黑，用 `rgba(255,255,255,0.x)` 保持层次
+3. 渐变 `id` 使用唯一前缀，避免与默认手机 SVG 的 `id` 冲突
+
+### 在 CONFIG 中写入
+
+JavaScript 字符串中需要转义：
+- 反引号 → 用普通引号替代
+- 确保 `<` / `>` 不会被 HTML 解析器误读（放在 `<script>` 中的模板字符串即可）
 
 ---
 
-## 组合示例
+## 图案速查
 
-### 简约型 + 副标题 + 来源
-
-```html
-<body style="width:1080px;height:1920px;background:#0f0f0f;color:#f8f4ec;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 64px">
-  <div style="font-size:28px;padding:12px 32px;background:rgba(232,213,163,.15);border-radius:40px;color:#e8d5a3;margin-bottom:40px">【标签】</div>
-  <div style="font-size:160px;font-weight:900;line-height:1.1;text-align:center;letter-spacing:-4px">【主标题】</div>
-  <div style="font-size:60px;font-weight:700;color:#8a8a8a;margin-top:24px;text-align:center">【副标题】</div>
-  <div style="position:absolute;bottom:48px;font-size:28px;color:rgba(255,255,255,.3)">【来源】</div>
-</body>
-```
-
-### 科技型 + 进化条 + Pill
-
-```html
-<!-- 结构：进化条(上) + Hero(中) + Pill(下)，用 justify-content:space-between 撑满 -->
-<body style="width:1080px;height:1920px;background:#0a0a0f;color:#f0f0f5;display:flex;flex-direction:column;justify-content:space-between;padding:80px 64px;position:relative;overflow:hidden">
-  <!-- 光晕 -->
-  <div style="position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(99,102,241,.2),transparent 70%);top:-200px;right:-100px;border-radius:50%"></div>
-
-  <!-- 上：进化条 -->
-  <div style="display:flex;justify-content:center;gap:20px;padding:20px 40px;background:rgba(255,255,255,.05);border-radius:50px;position:relative;z-index:2">
-    <!-- 进化条内容 -->
-  </div>
-
-  <!-- 中：Hero -->
-  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;z-index:2;gap:20px">
-    <div style="font-size:26px;padding:10px 28px;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(6,182,212,.2));border-radius:40px;color:#06b6d4">【标签】</div>
-    <div style="font-size:150px;font-weight:900;line-height:1.05;letter-spacing:-4px;background:linear-gradient(135deg,#6366f1,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent">【主标题】</div>
-    <div style="font-size:58px;font-weight:700;color:#f0f0f5;letter-spacing:2px">【副标题】</div>
-  </div>
-
-  <!-- 下：Pill -->
-  <div style="display:flex;gap:16px;position:relative;z-index:2">
-    <!-- Pill 卡片 -->
-  </div>
-</body>
-```
-
----
-
-## 字号速查表
-
-| 元素 | 竖版 | 横版 |
-|------|------|------|
-| 主标题 | 140-180px | 100-130px |
-| 副标题 | 56-64px | 42-52px |
-| 说明文字 | 36-42px | 28-34px |
-| Badge | 24-28px | 20-24px |
-| Pill 标题 | 36-42px | 28-34px |
-| Pill 副说明 | 28-32px | 22-26px |
-| 进化条 emoji | 44-52px | 36-44px |
-| 进化条 label | 20-24px | 18-22px |
-| 大数字 | 240-300px | 180-220px |
-| 来源行 | 22-28px | 18-24px |
+| 图案 | 推荐旋转 | 推荐透明度 | 推荐缩放 | 适合主题 |
+|------|---------|-----------|---------|----------|
+| 手机（默认） | -11° | 0.82 | 1.0 | tech, growth |
+| 芯片 | -8° | 0.75 | 1.3 | tech, danger |
+| 火箭 | -25° | 0.70 | 1.1 | growth, finance |
+| 上升图表 | 5° | 0.65 | 1.4 | finance, growth |
+| 书本 | -5° | 0.60 | 1.2 | tech, growth |

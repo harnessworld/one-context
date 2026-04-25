@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>用短视频思维做汇报｜Short-Video Reporting Deck</title>
+  <link rel="stylesheet" href="../../../../skills/html-deck-layout/assets/base.css">
+  <link rel="stylesheet" href="../../../../skills/html-deck-layout/assets/fonts.css">
+  <link rel="stylesheet" href="../../../../skills/html-deck-layout/assets/mobile-layout.css">
+  <style>
+    :root {
+      --c-bg: #07111f;
+      --c-surface: rgba(11, 24, 44, 0.86);
+      --c-surface-2: rgba(25, 46, 77, 0.86);
+      --c-text-1: #f5f8ff;
+      --c-text-2: #9fb4d3;
+      --c-accent-a: #65a7ff;
+      --c-accent-b: #9a7bff;
+      --c-accent-c: #35d0ff;
+      --c-accent-d: #ff6b9d;
+      --c-accent-e: #ffd93d;
+      --c-border: rgba(255,255,255,0.10);
+      --shadow-sm: 0 10px 24px rgba(0,0,0,0.22);
+      --shadow-md: 0 18px 40px rgba(0,0,0,0.28);
+      --shadow-lg: 0 28px 90px rgba(0,0,0,0.40);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; width: 100%; height: 100%; overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(53,208,255,0.14), transparent 22%),
+        radial-gradient(circle at 84% 18%, rgba(154,123,255,0.16), transparent 26%),
+        linear-gradient(145deg, #02060d 0%, #081221 34%, #0a1630 68%, #07111f 100%);
+      font-family: var(--font-sans), system-ui, sans-serif;
+      color: var(--c-text-1);
+    }
+    body { display:flex; justify-content:center; align-items:center; padding:24px; }
+    #P {
+      width: 1920px; height: 1080px; position: relative; overflow: hidden;
+      background:
+        radial-gradient(circle at 16% 10%, rgba(101,167,255,0.12), transparent 22%),
+        radial-gradient(circle at 82% 22%, rgba(154,123,255,0.16), transparent 24%),
+        linear-gradient(145deg, #030812 0%, #081323 32%, #0a1730 62%, #08111f 100%);
+      box-shadow: 0 36px 120px rgba(0,0,0,0.48);
+    }
+    #P::before {
+      content:""; position:absolute; inset:0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 96px 96px; pointer-events:none; opacity: 0.35;
+    }
+    #P::after {
+      content:""; position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+      pointer-events:none;
+    }
+
+    /* Slide container */
+    .s.slide {
+      width:100%; height:100%; display:none; flex-direction:column; position:absolute; inset:0;
+      padding: 40px 56px 32px; background: transparent;
+    }
+    .s.slide.is-active { display:flex; }
+
+    /* Shell — shared card container for every page */
+    .slide-shell {
+      flex:1; min-height:0; border-radius:34px; overflow:hidden;
+      border: 1px solid rgba(255,255,255,0.10);
+      background:
+        radial-gradient(circle at top left, rgba(101,167,255,0.08), transparent 24%),
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)),
+        rgba(4, 11, 22, 0.62);
+      backdrop-filter: blur(22px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), var(--shadow-lg);
+      padding: 28px 34px 20px;
+      display:flex; flex-direction:column;
+    }
+
+    /* Topline */
+    .slide-topline {
+      display:flex; align-items:center; justify-content:space-between; margin-bottom: 10px; flex-shrink:0;
+    }
+    .eyebrow {
+      font-size: 24px; letter-spacing: 0.20em; text-transform: uppercase; color: #90b7ff; font-weight: 900;
+      text-shadow: 0 0 20px rgba(101,167,255,0.3);
+    }
+    .page-no {
+      font-size:24px; color: rgba(255,255,255,0.62); font-weight:700;
+      display:flex; align-items:center; gap:12px;
+    }
+    .page-no::before {
+      content:""; width:8px; height:8px; border-radius:50%;
+      background: linear-gradient(135deg, #65a7ff, #9a7bff);
+      box-shadow: 0 0 12px rgba(101,167,255,0.6);
+    }
+
+    /* Common hero elements — used on ALL pages for consistency */
+    .hero-glow {
+      position:absolute; top:-60px; left:-80px; width:520px; height:440px; pointer-events:none;
+      background: radial-gradient(ellipse at 50% 50%, rgba(101,167,255,0.12), rgba(154,123,255,0.06) 40%, transparent 72%);
+      filter: blur(40px); z-index:0;
+    }
+    .hero-glow-right {
+      position:absolute; top:-60px; right:-80px; width:520px; height:440px; pointer-events:none;
+      background: radial-gradient(ellipse at 50% 50%, rgba(154,123,255,0.12), rgba(101,167,255,0.06) 40%, transparent 72%);
+      filter: blur(40px); z-index:0;
+    }
+    .hero-glow-center {
+      position:absolute; top:50%; left:50%; width:600px; height:500px; pointer-events:none;
+      background: radial-gradient(ellipse at 50% 50%, rgba(101,167,255,0.08), rgba(154,123,255,0.04) 40%, transparent 72%);
+      filter: blur(50px); z-index:0; transform: translate(-50%, -50%);
+    }
+    .hero-glow ~ *, .hero-glow-right ~ *, .hero-glow-center ~ * { position:relative; z-index:1; }
+
+    .hero-ordinal {
+      font-size: 100px; font-weight: 980; letter-spacing: -0.06em; line-height:1;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: -12px; user-select:none; pointer-events:none;
+    }
+    .hero-accent-bar {
+      width: 120px; height: 6px; border-radius: 3px;
+      background: linear-gradient(90deg, #65a7ff, #9a7bff, #35d0ff);
+      margin-top: 24px;
+      box-shadow: 0 0 28px rgba(101,167,255,0.4), 0 0 60px rgba(154,123,255,0.2);
+    }
+    .hero-title {
+      font-size: 120px; line-height:0.96; font-weight:980; letter-spacing:-0.06em; margin:0 0 20px;
+      background: linear-gradient(135deg, #ffffff 0%, #cfe3ff 30%, #ffffff 55%, #a8c8ff 80%, #ffffff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      filter: drop-shadow(0 14px 40px rgba(0,0,0,0.34));
+    }
+    .hero-sub { font-size:42px; line-height:1.34; color:#b2c6e3; max-width:860px; margin:0 0 24px; font-weight:500; }
+
+    /* Layout grids */
+    .hero-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; height:100%; }
+    .hero-left { padding: 14px 4px 14px 6px; display:flex; flex-direction:column; justify-content:center; position:relative; }
+    .hero-right {
+      border-radius:30px; overflow:hidden; position:relative;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(53,208,255,0.18), transparent 22%),
+        radial-gradient(circle at 78% 14%, rgba(154,123,255,0.22), transparent 26%),
+        linear-gradient(145deg, #0f1f3c 0%, #18315e 42%, #162850 70%, #0b1830 100%);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: var(--shadow-lg);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .hero-right::before {
+      content:""; position:absolute; inset:24px; border-radius:24px;
+      border:1px solid rgba(255,255,255,0.08); pointer-events:none;
+    }
+    .hero-right::after {
+      content:""; position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0)); pointer-events:none;
+    }
+
+    .slide-main { flex:1; min-height:0; display:flex; flex-direction:column; }
+    .fill-deck { flex:1; min-height:0; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; height:100%; }
+    .grid-2x2 { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:20px; height:100%; }
+    .split { display:grid; grid-template-columns:1fr 1fr; gap:20px; height:100%; }
+
+    /* Cards */
+    .g, .panel {
+      background:
+        radial-gradient(circle at top left, rgba(101,167,255,0.06), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)),
+        rgba(10, 20, 38, 0.90);
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:26px; box-shadow: var(--shadow-md); padding:26px 28px;
+      display:flex; flex-direction:column; min-height:0; overflow:hidden;
+    }
+
+    /* Hashtag labels */
+    .hashtag {
+      display: inline-flex; align-items: center;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, rgba(101,167,255,0.2), rgba(154,123,255,0.15));
+      border: 1px solid rgba(101,167,255,0.3);
+      border-radius: 8px;
+      font-size: 28px; font-weight: 800; color: #65a7ff;
+    }
+    .hashtag::before { content: "#"; margin-right: 4px; }
+
+    /* Notification cards */
+    .notif-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      border-radius: 20px; padding: 24px 28px;
+      border: 1px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; gap: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .notif-icon {
+      width: 64px; height: 64px; border-radius: 18px;
+      background: linear-gradient(135deg, #65a7ff, #9a7bff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; flex-shrink:0;
+    }
+
+    /* Short video card */
+    .sv-card {
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 28px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .sv-card-header { display: flex; align-items: center; gap: 16px; }
+    .sv-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: linear-gradient(135deg, #65a7ff, #9a7bff);
+      border: 3px solid rgba(255,255,255,0.2); flex-shrink:0;
+    }
+    .sv-username { font-size: 32px; font-weight: 800; color: white; }
+    .sv-content { font-size: 32px; line-height: 1.4; color: #eef4ff; }
+
+    /* Video progress bar */
+    .video-progress {
+      height: 6px; background: rgba(255,255,255,0.1);
+      border-radius: 3px; overflow: hidden;
+    }
+    .video-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #ff6b9d, #ffd93d);
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(255,107,157,0.5);
+    }
+
+    /* Danmu */
+    .danmu {
+      position: absolute; white-space: nowrap;
+      padding: 8px 16px; background: rgba(0,0,0,0.6);
+      border-radius: 20px; font-size: 28px; color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+      font-weight: 700;
+    }
+
+    /* Label row */
+    .label-row { display:flex; gap:12px; flex-wrap:wrap; }
+
+    /* Footer */
+    .footer {
+      margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08);
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:24px; color:rgba(255,255,255,0.56); flex-shrink:0;
+    }
+    .footer-strong { color:#dce9ff; font-weight:900; }
+
+    /* Navigation */
+    .nav-zone-left, .nav-zone-right {
+      position:fixed; top:0; width:18vw; height:100vh; z-index:9999; cursor:pointer; background:transparent;
+    }
+    .nav-zone-left { left:0; }
+    .nav-zone-right { right:0; }
+    #navigation-hint {
+      position:fixed; bottom:12px; left:50%; transform:translateX(-50%);
+      font-size:12px; color:rgba(255,255,255,0.42);
+      letter-spacing:0.12em; text-transform:uppercase; pointer-events:none; z-index:10000;
+    }
+
+    /* Swipe hint */
+    .swipe-hint {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 24px; color: rgba(255,255,255,0.6);
+    }
+  </style>
+</head>
+<body>
+<div class="nav-zone-left" data-nav="prev"></div>
+<div class="nav-zone-right" data-nav="next"></div>
+<div id="P">
+
+  <!-- ==================== Slide 1: Cover ==================== -->
+  <section class="s slide is-active" id="slide-1">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">HOOK</div><div class="page-no">01 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">01</div>
+            <h1 class="hero-title">用短视频<br>思维做汇报</h1>
+            <p class="hero-sub">精心准备的汇报，老板为什么不买账？<br>用短视频的逻辑改造你的工作汇报</p>
+            <div class="hero-accent-bar"></div>
+            <div class="label-row" style="margin-top:24px;">
+              <span class="hashtag">结论先行</span>
+              <span class="hashtag">数据说话</span>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="phoneGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#1a2d4d"/>
+                  <stop offset="100%" stop-color="#0d1525"/>
+                </linearGradient>
+                <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#ff6b9d"/>
+                  <stop offset="100%" stop-color="#ffd93d"/>
+                </linearGradient>
+                <filter id="glow1"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <!-- Phone — much bigger, centered -->
+              <rect x="240" y="30" width="420" height="700" rx="52" fill="url(#phoneGrad)" stroke="rgba(255,255,255,0.2)" stroke-width="10"/>
+              <path d="M390 34 h120 a8 8 0 0 1 8 8 v8 a0 0 0 0 1 0 0 h-136 a0 0 0 0 1 0 0 v-8 a8 8 0 0 1 8-8z" fill="#0d1525"/>
+              <rect x="268" y="70" width="364" height="620" rx="36" fill="#112241"/>
+              <!-- Video content area -->
+              <rect x="284" y="120" width="332" height="340" rx="16" fill="rgba(101,167,255,0.15)"/>
+              <text x="450" y="280" text-anchor="middle" font-size="40" fill="white" font-weight="900" opacity="0.6">汇报视频</text>
+              <!-- Play button -->
+              <circle cx="450" cy="280" r="56" fill="rgba(255,255,255,0.15)" stroke="white" stroke-width="3"/>
+              <polygon points="438,256 438,304 478,280" fill="white"/>
+              <!-- Progress bar -->
+              <rect x="296" y="480" width="308" height="10" rx="5" fill="rgba(255,255,255,0.15)"/>
+              <rect x="296" y="480" width="180" height="10" rx="5" fill="url(#progressGrad)"/>
+              <!-- Like / comment / share -->
+              <text x="310" y="560" font-size="44" fill="white">❤️</text>
+              <text x="362" y="555" font-size="28" fill="rgba(255,255,255,0.8)">2.4w</text>
+              <text x="440" y="560" font-size="44" fill="white">💬</text>
+              <text x="492" y="555" font-size="28" fill="rgba(255,255,255,0.8)">1.8k</text>
+              <text x="570" y="560" font-size="44" fill="white">↗️</text>
+              <!-- Hook icon floating right -->
+              <text x="720" y="200" font-size="120" filter="url(#glow1)">🪝</text>
+              <text x="720" y="320" text-anchor="middle" font-size="32" fill="#ff6b9d" font-weight="900">CATCH</text>
+              <text x="720" y="360" text-anchor="middle" font-size="32" fill="#ff6b9d" font-weight="900">ATTENTION</text>
+              <!-- Swipe hint -->
+              <text x="450" y="660" text-anchor="middle" font-size="26" fill="rgba(255,255,255,0.5)">← 滑动查看更多 →</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Opening Hook</span><span class="footer-strong">先让人停下来，再让人点头</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 2: Pain Point ==================== -->
+  <section class="s slide" id="slide-2">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">RETENTION</div><div class="page-no">02 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">02</div>
+            <h1 class="hero-title" style="font-size:110px;">老板走神<br>不是偶然</h1>
+            <p class="hero-sub">精心准备了20页PPT，<br>老板可能只看3页。<br>注意力不会等你慢慢进入重点。</p>
+            <div class="hero-accent-bar"></div>
+            <div class="notif-card" style="margin-top:24px; max-width:500px;">
+              <div class="notif-icon">📱</div>
+              <div>
+                <div style="font-size:30px;font-weight:800;">问题不在勤奋</div>
+                <div style="font-size:26px;color:#9fb4d3;">而在排序</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="retGrad" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stop-color="rgba(255,107,157,0)"/>
+                  <stop offset="100%" stop-color="rgba(255,107,157,0.3)"/>
+                </linearGradient>
+                <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#65a7ff"/>
+                  <stop offset="100%" stop-color="#ff6b9d"/>
+                </linearGradient>
+              </defs>
+              <!-- Phone sliding away -->
+              <text x="760" y="140" font-size="100" transform="rotate(30,760,140)">📱</text>
+              <text x="680" y="260" font-size="30" fill="rgba(255,255,255,0.6)">← 迫不及待划走</text>
+              <!-- Retention curve chart -->
+              <line x1="100" y1="680" x2="820" y2="680" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+              <line x1="100" y1="680" x2="100" y2="100" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+              <text x="40" y="110" font-size="28" fill="#9fb4d3">注意力</text>
+              <text x="790" y="720" font-size="28" fill="#9fb4d3">时间</text>
+              <!-- Curve -->
+              <path d="M100 150 Q 250 180, 350 280 T 600 440 T 820 650" fill="none" stroke="url(#lineGrad)" stroke-width="10" stroke-linecap="round"/>
+              <path d="M100 150 Q 250 180, 350 280 T 600 440 T 820 650 L 820 680 L 100 680 Z" fill="url(#retGrad)"/>
+              <!-- Key points -->
+              <circle cx="300" cy="260" r="14" fill="#35d0ff"/>
+              <text x="326" y="240" font-size="30" fill="white" font-weight="800">前段都在铺垫</text>
+              <circle cx="600" cy="440" r="14" fill="#9a7bff"/>
+              <text x="440" y="420" font-size="30" fill="white" font-weight="800">重点出现时</text>
+              <text x="440" y="460" font-size="30" fill="white" font-weight="800">注意力已滑走</text>
+              <!-- Stats bubble -->
+              <rect x="140" y="60" width="220" height="110" rx="18" fill="rgba(255,107,157,0.2)" stroke="rgba(255,107,157,0.4)"/>
+              <text x="250" y="116" text-anchor="middle" font-size="58" fill="#ff6b9d" font-weight="980">20→3</text>
+              <text x="250" y="150" text-anchor="middle" font-size="26" fill="rgba(255,255,255,0.7)">20页只看3页</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Diagnosis</span><span class="footer-strong">信息顺序错误 = 注意力坍塌</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 3: Mindset Shift ==================== -->
+  <section class="s slide" id="slide-3">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">FOR YOU</div><div class="page-no">03 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:flex-start; padding-top:30px;">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">03</div>
+            <div style="font-size:36px; color:#ff6b9d; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">PARADIGM SHIFT</div>
+            <h1 class="hero-title" style="font-size:96px;">思维转变<br>内容→用户</h1>
+            <p class="hero-sub">不是自我表达，<br>而是围绕听众的需要：<br>困惑、痛点、想要什么</p>
+            <div class="hero-accent-bar"></div>
+            <!-- Two contrast cards -->
+            <div style="display:flex; gap:14px; margin-top:28px;">
+              <div style="padding:16px 22px; border-radius:14px; background:rgba(255,107,157,0.15); border:1px solid rgba(255,107,157,0.3); flex:1;">
+                <div style="font-size:26px; color:#ff6b9d; font-weight:900;">✗ 内容思维</div>
+                <div style="font-size:22px; color:#b8cae6; margin-top:6px;">我想表达什么</div>
+              </div>
+              <div style="padding:16px 22px; border-radius:14px; background:rgba(101,167,255,0.15); border:1px solid rgba(101,167,255,0.3); flex:1;">
+                <div style="font-size:26px; color:#65a7ff; font-weight:900;">✓ 用户思维</div>
+                <div style="font-size:22px; color:#b8cae6; margin-top:6px;">他需要知道什么</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="oldG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4a5568"/><stop offset="100%" stop-color="#2d3748"/></linearGradient>
+                <linearGradient id="newG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#9a7bff"/></linearGradient>
+              </defs>
+              <!-- Left — Desktop monitor for 内容思维 -->
+              <!-- Monitor frame -->
+              <rect x="40" y="60" width="380" height="280" rx="16" fill="url(#oldG)" stroke="rgba(255,255,255,0.15)" stroke-width="6"/>
+              <!-- Screen -->
+              <rect x="60" y="80" width="340" height="220" rx="8" fill="#1a202c"/>
+              <!-- Desktop top bar -->
+              <rect x="60" y="80" width="340" height="28" rx="8" fill="rgba(255,255,255,0.08)"/>
+              <circle cx="80" cy="94" r="5" fill="#ff6b9d"/>
+              <circle cx="96" cy="94" r="5" fill="#ffd93d"/>
+              <circle cx="112" cy="94" r="5" fill="rgba(255,255,255,0.3)"/>
+              <text x="230" y="96" text-anchor="middle" font-size="14" fill="rgba(255,255,255,0.4)">传统汇报.pptx</text>
+              <!-- Desktop content -->
+              <rect x="80" y="126" width="160" height="60" rx="8" fill="rgba(255,255,255,0.08)"/>
+              <text x="100" y="162" font-size="24" fill="rgba(255,255,255,0.6)">我做了什么</text>
+              <rect x="80" y="198" width="160" height="60" rx="8" fill="rgba(255,255,255,0.08)"/>
+              <text x="100" y="234" font-size="24" fill="rgba(255,255,255,0.6)">我准备了多少</text>
+              <rect x="260" y="126" width="120" height="132" rx="8" fill="rgba(255,255,255,0.06)"/>
+              <text x="280" y="195" font-size="24" fill="rgba(255,255,255,0.5)">图表</text>
+              <!-- Monitor stand -->
+              <rect x="190" y="345" width="80" height="20" rx="4" fill="#4a5568"/>
+              <rect x="160" y="365" width="140" height="10" rx="5" fill="#4a5568"/>
+              <!-- Label -->
+              <text x="230" y="420" text-anchor="middle" font-size="32" fill="rgba(255,255,255,0.6)" font-weight="900">桌面端思维</text>
+              <text x="230" y="460" text-anchor="middle" font-size="36" fill="rgba(255,255,255,0.8)" font-weight="900">内容思维</text>
+              <text x="230" y="500" text-anchor="middle" font-size="60">😴</text>
+              <!-- Arrow -->
+              <path d="M430 380 C 490 310, 550 310, 610 380" fill="none" stroke="#65a7ff" stroke-width="10" stroke-linecap="round"/>
+              <polygon points="590,350 650,380 590,410" fill="#65a7ff"/>
+              <text x="520" y="300" text-anchor="middle" font-size="32" fill="#65a7ff" font-weight="900">转变</text>
+              <!-- Right phone — For You -->
+              <rect x="540" y="60" width="320" height="640" rx="40" fill="#112241" stroke="url(#newG)" stroke-width="6"/>
+              <rect x="660" y="74" width="100" height="22" rx="11" fill="#0d1525"/>
+              <text x="700" y="140" text-anchor="middle" font-size="30" fill="#65a7ff" font-weight="800">推荐页</text>
+              <text x="700" y="180" text-anchor="middle" font-size="36" fill="white" font-weight="900">用户思维</text>
+              <rect x="580" y="220" width="240" height="90" rx="16" fill="rgba(101,167,255,0.2)" stroke="rgba(101,167,255,0.3)"/>
+              <text x="600" y="274" font-size="30" fill="white">他为什么要继续听</text>
+              <rect x="580" y="330" width="240" height="90" rx="16" fill="rgba(101,167,255,0.2)" stroke="rgba(101,167,255,0.3)"/>
+              <text x="600" y="384" font-size="30" fill="white">现在该怎么拍板</text>
+              <rect x="580" y="440" width="240" height="90" rx="16" fill="rgba(101,167,255,0.2)" stroke="rgba(101,167,255,0.3)"/>
+              <text x="600" y="494" font-size="30" fill="white">帮他省判断成本</text>
+              <text x="700" y="620" text-anchor="middle" font-size="60">🎯</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Paradigm Shift</span><span class="footer-strong">从"我想表达什么"到"他需要知道什么"</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 4: Four Principles ==================== -->
+  <section class="s slide" id="slide-4">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">HASHTAG</div><div class="page-no">04 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:center; padding-top:10px;">
+            <div class="hero-glow"></div>
+            <!-- Big decorative # watermark -->
+            <div style="position:absolute; top:-20px; left:-30px; font-size:320px; font-weight:980; line-height:1; letter-spacing:-0.08em; background:linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; user-select:none; pointer-events:none; z-index:0;">#</div>
+            <div style="position:relative; z-index:1;">
+              <div class="hero-ordinal">04</div>
+              <h1 class="hero-title" style="font-size:104px;">四条原则</h1>
+              <p class="hero-sub">每一条都像短视频的标签，<br>短、准、有力</p>
+              <div class="hero-accent-bar"></div>
+              <!-- Principle summary with colored dots -->
+              <div style="display:flex; flex-direction:column; gap:14px; margin-top:28px;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:#ff6b9d;box-shadow:0 0 16px rgba(255,107,157,0.5);flex-shrink:0;"></div>
+                  <span style="font-size:30px;color:#b2c6e3;">先说结论</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:#65a7ff;box-shadow:0 0 16px rgba(101,167,255,0.5);flex-shrink:0;"></div>
+                  <span style="font-size:30px;color:#b2c6e3;">用数据说话</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:#9a7bff;box-shadow:0 0 16px rgba(154,123,255,0.5);flex-shrink:0;"></div>
+                  <span style="font-size:30px;color:#b2c6e3;">带着方案来</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div style="width:18px;height:18px;border-radius:50%;background:#35d0ff;box-shadow:0 0 16px rgba(53,208,255,0.5);flex-shrink:0;"></div>
+                  <span style="font-size:30px;color:#b2c6e3;">按听众裁剪</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="c1g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff6b9d"/><stop offset="100%" stop-color="#ff8fab"/></linearGradient>
+                <linearGradient id="c2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#8fc4ff"/></linearGradient>
+                <linearGradient id="c3g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9a7bff"/><stop offset="100%" stop-color="#b8a8ff"/></linearGradient>
+                <linearGradient id="c4g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#35d0ff"/><stop offset="100%" stop-color="#6de0ff"/></linearGradient>
+              </defs>
+              <!-- Card 1 — top left, slightly rotated -->
+              <g transform="rotate(-2, 230, 190)">
+                <rect x="40" y="60" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(255,107,157,0.3)" stroke-width="2"/>
+                <rect x="40" y="60" width="380" height="8" rx="4" fill="url(#c1g)"/>
+                <!-- Large number + title -->
+                <text x="72" y="148" font-size="72" fill="#ff6b9d" font-weight="980" opacity="0.35">01</text>
+                <text x="160" y="148" font-size="42" fill="white" font-weight="900">结论先行</text>
+                <!-- Description -->
+                <text x="72" y="200" font-size="28" fill="#b8cae6">先说结果，再说过程。</text>
+                <text x="72" y="240" font-size="28" fill="#b8cae6">开头30秒让老板知道</text>
+                <text x="72" y="280" font-size="28" fill="#b8cae6">你要说什么。</text>
+                <!-- Hashtag badge -->
+                <rect x="290" y="70" width="120" height="36" rx="8" fill="rgba(255,107,157,0.2)" stroke="rgba(255,107,157,0.4)" stroke-width="1"/>
+                <text x="350" y="96" text-anchor="middle" font-size="22" fill="#ff6b9d" font-weight="800"># 最重要</text>
+              </g>
+
+              <!-- Card 2 — top right, slightly rotated -->
+              <g transform="rotate(1.5, 670, 190)">
+                <rect x="480" y="80" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(101,167,255,0.3)" stroke-width="2"/>
+                <rect x="480" y="80" width="380" height="8" rx="4" fill="url(#c2g)"/>
+                <text x="512" y="168" font-size="72" fill="#65a7ff" font-weight="980" opacity="0.35">02</text>
+                <text x="600" y="168" font-size="42" fill="white" font-weight="900">数据说话</text>
+                <text x="512" y="220" font-size="28" fill="#b8cae6">用具体数字替代</text>
+                <text x="512" y="260" font-size="28" fill="#b8cae6">模糊描述，让观点</text>
+                <text x="512" y="300" font-size="28" fill="#b8cae6">有分量、有可信度。</text>
+                <rect x="722" y="90" width="128" height="36" rx="8" fill="rgba(101,167,255,0.2)" stroke="rgba(101,167,255,0.4)" stroke-width="1"/>
+                <text x="786" y="116" text-anchor="middle" font-size="22" fill="#65a7ff" font-weight="800"># 有说服力</text>
+              </g>
+
+              <!-- Card 3 — bottom left, slightly rotated -->
+              <g transform="rotate(1.8, 230, 530)">
+                <rect x="40" y="400" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(154,123,255,0.3)" stroke-width="2"/>
+                <rect x="40" y="400" width="380" height="8" rx="4" fill="url(#c3g)"/>
+                <text x="72" y="488" font-size="72" fill="#9a7bff" font-weight="980" opacity="0.35">03</text>
+                <text x="160" y="488" font-size="42" fill="white" font-weight="900">方案前置</text>
+                <text x="72" y="540" font-size="28" fill="#b8cae6">别只说问题，带着</text>
+                <text x="72" y="580" font-size="28" fill="#b8cae6">2个以上方案和</text>
+                <text x="72" y="620" font-size="28" fill="#b8cae6">你的倾向。</text>
+                <rect x="290" y="410" width="120" height="36" rx="8" fill="rgba(154,123,255,0.2)" stroke="rgba(154,123,255,0.4)" stroke-width="1"/>
+                <text x="350" y="436" text-anchor="middle" font-size="22" fill="#9a7bff" font-weight="800"># 可执行</text>
+              </g>
+
+              <!-- Card 4 — bottom right, slightly rotated -->
+              <g transform="rotate(-1.5, 670, 530)">
+                <rect x="480" y="420" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(53,208,255,0.3)" stroke-width="2"/>
+                <rect x="480" y="420" width="380" height="8" rx="4" fill="url(#c4g)"/>
+                <text x="512" y="508" font-size="72" fill="#35d0ff" font-weight="980" opacity="0.35">04</text>
+                <text x="600" y="508" font-size="42" fill="white" font-weight="900">按听众裁剪</text>
+                <text x="512" y="560" font-size="28" fill="#b8cae6">给CEO看的和给</text>
+                <text x="512" y="600" font-size="28" fill="#b8cae6">团队看的不能一样。</text>
+                <text x="512" y="640" font-size="28" fill="#b8cae6">精准投放内容。</text>
+                <rect x="722" y="430" width="128" height="36" rx="8" fill="rgba(53,208,255,0.2)" stroke="rgba(53,208,255,0.4)" stroke-width="1"/>
+                <text x="786" y="456" text-anchor="middle" font-size="22" fill="#35d0ff" font-weight="800"># 定制化</text>
+              </g>
+
+              <!-- Connecting lines between cards -->
+              <line x1="420" y1="320" x2="480" y2="340" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="6,6"/>
+              <line x1="420" y1="400" x2="480" y2="380" stroke="rgba(255,255,255,0.08)" stroke-width="2" stroke-dasharray="6,6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Core Formula</span><span class="footer-strong">像图标一样短，像标题一样有力</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 5: Opening 30 Seconds ==================== -->
+  <section class="s slide" id="slide-5">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">TIMELINE</div><div class="page-no">05 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">05</div>
+            <h1 class="hero-title" style="font-size:104px;">开场30秒</h1>
+            <p class="hero-sub">场景→问题→预期→请求<br><br>别从盘古开天地开始讲话，<br>直接抓住重点</p>
+            <div class="hero-accent-bar"></div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="seg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff6b9d"/><stop offset="100%" stop-color="#ff8fab"/></linearGradient>
+                <linearGradient id="seg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9a7bff"/><stop offset="100%" stop-color="#b8a8ff"/></linearGradient>
+                <linearGradient id="seg3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#8fc4ff"/></linearGradient>
+                <linearGradient id="seg4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#35d0ff"/><stop offset="100%" stop-color="#6de0ff"/></linearGradient>
+              </defs>
+
+              <!-- ===== 剪映式编辑器界面 ===== -->
+              <!-- 整体背景 -->
+              <rect x="20" y="20" width="860" height="720" rx="20" fill="#0d1525"/>
+
+              <!-- 顶部工具栏 -->
+              <rect x="20" y="20" width="860" height="52" rx="20" fill="#141e33"/>
+              <rect x="20" y="52" width="860" height="20" fill="#141e33"/>
+              <!-- 工具栏按钮 -->
+              <rect x="40" y="32" width="60" height="28" rx="6" fill="rgba(255,255,255,0.1)"/>
+              <text x="70" y="52" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.6)">撤销</text>
+              <rect x="110" y="32" width="60" height="28" rx="6" fill="rgba(255,255,255,0.1)"/>
+              <text x="140" y="52" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.6)">重做</text>
+              <rect x="180" y="32" width="60" height="28" rx="6" fill="rgba(255,255,255,0.1)"/>
+              <text x="210" y="52" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.6)">分割</text>
+              <rect x="250" y="32" width="60" height="28" rx="6" fill="rgba(255,255,255,0.1)"/>
+              <text x="280" y="52" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.6)">删除</text>
+              <!-- 项目名 -->
+              <text x="450" y="54" text-anchor="middle" font-size="20" fill="rgba(255,255,255,0.5)" font-weight="700">30秒开场.mp4</text>
+              <!-- 导出按钮 -->
+              <rect x="770" y="30" width="90" height="32" rx="8" fill="#65a7ff"/>
+              <text x="815" y="52" text-anchor="middle" font-size="18" fill="white" font-weight="800">导出</text>
+
+              <!-- 预览区 -->
+              <rect x="40" y="82" width="820" height="260" rx="14" fill="#0a1220"/>
+              <!-- 预览区 — 当前帧画面 -->
+              <rect x="50" y="92" width="800" height="240" rx="10" fill="#112241"/>
+              <!-- 预览画面内容 — 停在第一个片段 -->
+              <rect x="60" y="102" width="780" height="180" rx="8" fill="rgba(255,107,157,0.08)"/>
+              <text x="450" y="170" text-anchor="middle" font-size="54" fill="white" font-weight="900" opacity="0.4">现 场</text>
+              <text x="450" y="240" text-anchor="middle" font-size="30" fill="#ff6b9d" font-weight="800" opacity="0.6">01 / 04 现状</text>
+              <!-- 播放控制 -->
+              <circle cx="450" cy="310" r="18" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+              <polygon points="445,302 445,318 458,310" fill="white"/>
+              <!-- 时间码 -->
+              <text x="370" y="316" text-anchor="end" font-size="18" fill="rgba(255,255,255,0.5)" font-weight="700">00:03</text>
+              <text x="530" y="316" font-size="18" fill="rgba(255,255,255,0.5)" font-weight="700">/ 00:30</text>
+
+              <!-- ===== 时间线区域 ===== -->
+              <rect x="40" y="352" width="820" height="380" rx="14" fill="#0f1826"/>
+              <!-- 时间线标题行 -->
+              <text x="60" y="380" font-size="18" fill="rgba(255,255,255,0.4)" font-weight="700">时间线</text>
+              <!-- 刻度尺 -->
+              <line x1="120" y1="392" x2="830" y2="392" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+              <text x="120" y="388" font-size="14" fill="rgba(255,255,255,0.3)">0s</text>
+              <line x1="120" y1="388" x2="120" y2="395" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+              <text x="244" y="388" font-size="14" fill="rgba(255,255,255,0.3)">5s</text>
+              <line x1="244" y1="388" x2="244" y2="395" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+              <text x="368" y="388" font-size="14" fill="rgba(255,255,255,0.3)">10s</text>
+              <line x1="368" y1="388" x2="368" y2="395" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+              <text x="492" y="388" font-size="14" fill="rgba(255,255,255,0.3)">15s</text>
+              <line x1="492" y1="388" x2="492" y2="395" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+              <text x="616" y="388" font-size="14" fill="rgba(255,255,255,0.3)">20s</text>
+              <line x1="616" y1="388" x2="616" y2="395" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+              <text x="740" y="388" font-size="14" fill="rgba(255,255,255,0.3)">25s</text>
+              <line x1="740" y1="388" x2="740" y2="395" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+              <text x="826" y="388" font-size="14" fill="rgba(255,255,255,0.3)">30s</text>
+              <line x1="830" y1="388" x2="830" y2="395" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+
+              <!-- 播放头（竖线 + 三角）当前在第1段末尾 -->
+              <polygon points="287,392 293,392 290,398" fill="white"/>
+              <line x1="290" y1="398" x2="290" y2="710" stroke="white" stroke-width="2" opacity="0.8"/>
+
+              <!-- 轨道1 — 主视频轨 -->
+              <rect x="60" y="404" width="50" height="24" rx="4" fill="rgba(255,255,255,0.06)"/>
+              <text x="85" y="420" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.4)">视频</text>
+              <!-- Fragment 1 -->
+              <rect x="120" y="400" width="170" height="32" rx="6" fill="url(#seg1)" opacity="0.9"/>
+              <text x="205" y="422" text-anchor="middle" font-size="18" fill="white" font-weight="900">01 现状</text>
+              <!-- Fragment 2 -->
+              <rect x="294" y="400" width="186" height="32" rx="6" fill="url(#seg2)" opacity="0.9"/>
+              <text x="387" y="422" text-anchor="middle" font-size="18" fill="white" font-weight="900">02 问题</text>
+              <!-- Fragment 3 -->
+              <rect x="484" y="400" width="194" height="32" rx="6" fill="url(#seg3)" opacity="0.9"/>
+              <text x="581" y="422" text-anchor="middle" font-size="18" fill="white" font-weight="900">03 预期</text>
+              <!-- Fragment 4 -->
+              <rect x="682" y="400" width="148" height="32" rx="6" fill="url(#seg4)" opacity="0.9"/>
+              <text x="756" y="422" text-anchor="middle" font-size="18" fill="white" font-weight="900">04 请求</text>
+
+              <!-- 轨道2 — 字幕轨 -->
+              <rect x="60" y="446" width="50" height="24" rx="4" fill="rgba(255,255,255,0.06)"/>
+              <text x="85" y="462" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.4)">字幕</text>
+              <rect x="120" y="442" width="170" height="28" rx="5" fill="rgba(255,107,157,0.25)" stroke="rgba(255,107,157,0.4)" stroke-width="1"/>
+              <text x="205" y="461" text-anchor="middle" font-size="15" fill="rgba(255,255,255,0.7)">现在在哪</text>
+              <rect x="294" y="442" width="186" height="28" rx="5" fill="rgba(154,123,255,0.25)" stroke="rgba(154,123,255,0.4)" stroke-width="1"/>
+              <text x="387" y="461" text-anchor="middle" font-size="15" fill="rgba(255,255,255,0.7)">卡在哪里</text>
+              <rect x="484" y="442" width="194" height="28" rx="5" fill="rgba(101,167,255,0.25)" stroke="rgba(101,167,255,0.4)" stroke-width="1"/>
+              <text x="581" y="461" text-anchor="middle" font-size="15" fill="rgba(255,255,255,0.7)">会变成什么</text>
+              <rect x="682" y="442" width="148" height="28" rx="5" fill="rgba(53,208,255,0.25)" stroke="rgba(53,208,255,0.4)" stroke-width="1"/>
+              <text x="756" y="461" text-anchor="middle" font-size="15" fill="rgba(255,255,255,0.7)">拍什么板</text>
+
+              <!-- 轨道3 — 音效/标记轨 -->
+              <rect x="60" y="486" width="50" height="24" rx="4" fill="rgba(255,255,255,0.06)"/>
+              <text x="85" y="502" text-anchor="middle" font-size="13" fill="rgba(255,255,255,0.4)">标记</text>
+              <!-- 小菱形标记 -->
+              <polygon points="205,486 213,494 205,502 197,494" fill="rgba(255,107,157,0.6)"/>
+              <text x="205" y="520" text-anchor="middle" font-size="14" fill="rgba(255,107,157,0.7)">Hook</text>
+              <polygon points="387,486 395,494 387,502 379,494" fill="rgba(154,123,255,0.6)"/>
+              <text x="387" y="520" text-anchor="middle" font-size="14" fill="rgba(154,123,255,0.7)">转折</text>
+              <polygon points="581,486 589,494 581,502 573,494" fill="rgba(101,167,255,0.6)"/>
+              <text x="581" y="520" text-anchor="middle" font-size="14" fill="rgba(101,167,255,0.7)">愿景</text>
+              <polygon points="756,486 764,494 756,502 748,494" fill="rgba(53,208,255,0.6)"/>
+              <text x="756" y="520" text-anchor="middle" font-size="14" fill="rgba(53,208,255,0.7)">CTA</text>
+
+              <!-- 片段详情面板 — 选中片段的高亮说明 -->
+              <rect x="40" y="540" width="820" height="170" rx="14" fill="#111b2e"/>
+              <!-- 4个片段详情横排 -->
+              <rect x="54" y="554" width="190" height="142" rx="12" fill="rgba(255,107,157,0.1)" stroke="rgba(255,107,157,0.3)" stroke-width="1.5"/>
+              <text x="149" y="584" text-anchor="middle" font-size="26" fill="#ff6b9d" font-weight="900">01</text>
+              <text x="149" y="614" text-anchor="middle" font-size="24" fill="white" font-weight="800">现状</text>
+              <text x="149" y="646" text-anchor="middle" font-size="18" fill="#b8cae6">现在在哪</text>
+              <text x="149" y="676" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.4)">0-7秒</text>
+
+              <rect x="254" y="554" width="190" height="142" rx="12" fill="rgba(154,123,255,0.1)" stroke="rgba(154,123,255,0.3)" stroke-width="1.5"/>
+              <text x="349" y="584" text-anchor="middle" font-size="26" fill="#9a7bff" font-weight="900">02</text>
+              <text x="349" y="614" text-anchor="middle" font-size="24" fill="white" font-weight="800">问题</text>
+              <text x="349" y="646" text-anchor="middle" font-size="18" fill="#b8cae6">卡在哪里</text>
+              <text x="349" y="676" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.4)">8-15秒</text>
+
+              <rect x="454" y="554" width="190" height="142" rx="12" fill="rgba(101,167,255,0.1)" stroke="rgba(101,167,255,0.3)" stroke-width="1.5"/>
+              <text x="549" y="584" text-anchor="middle" font-size="26" fill="#65a7ff" font-weight="900">03</text>
+              <text x="549" y="614" text-anchor="middle" font-size="24" fill="white" font-weight="800">预期</text>
+              <text x="549" y="646" text-anchor="middle" font-size="18" fill="#b8cae6">会变成什么</text>
+              <text x="549" y="676" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.4)">16-22秒</text>
+
+              <rect x="654" y="554" width="190" height="142" rx="12" fill="rgba(53,208,255,0.1)" stroke="rgba(53,208,255,0.3)" stroke-width="1.5"/>
+              <text x="749" y="584" text-anchor="middle" font-size="26" fill="#35d0ff" font-weight="900">04</text>
+              <text x="749" y="614" text-anchor="middle" font-size="24" fill="white" font-weight="800">请求</text>
+              <text x="749" y="646" text-anchor="middle" font-size="18" fill="#b8cae6">你要我拍什么板</text>
+              <text x="749" y="676" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.4)">23-30秒</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Opening Pattern</span><span class="footer-strong">先让对方知道为什么听，再决定听多深</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 6: Handling Interruptions ==================== -->
+  <section class="s slide" id="slide-6">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">LIVE COMMENTS</div><div class="page-no">06 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">06</div>
+            <h1 class="hero-title" style="font-size:96px;">被打断<br>怎么办？</h1>
+            <p class="hero-sub">提前准备好关键点：<br>钱 / 时间 / 人 / 风险<br><br>核心版 + 详细版，随时切换</p>
+            <div class="hero-accent-bar"></div>
+            <div class="label-row" style="margin-top:24px;">
+              <span class="hashtag">有备无患</span>
+              <span class="hashtag">灵活切换</span>
+            </div>
+          </div>
+          <div class="hero-right" style="position:relative;">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <!-- Phone frame -->
+              <rect x="250" y="30" width="400" height="700" rx="48" fill="#0d1525" stroke="rgba(255,255,255,0.15)" stroke-width="8"/>
+              <rect x="274" y="68" width="352" height="620" rx="32" fill="#112241"/>
+              <!-- Video bg -->
+              <rect x="290" y="86" width="320" height="300" rx="12" fill="rgba(101,167,255,0.1)"/>
+              <text x="450" y="230" text-anchor="middle" font-size="40" fill="white" font-weight="900" opacity="0.5">汇报中...</text>
+              <!-- Progress bar -->
+              <rect x="300" y="400" width="300" height="8" rx="4" fill="rgba(255,255,255,0.15)"/>
+              <rect x="300" y="400" width="120" height="8" rx="4" fill="url(#progressGrad)"/>
+              <!-- Strategy cards stacked -->
+              <rect x="290" y="430" width="320" height="80" rx="14" fill="rgba(101,167,255,0.15)" stroke="rgba(101,167,255,0.25)" stroke-width="1"/>
+              <text x="310" y="478" font-size="28" fill="white" font-weight="900">🛡️ 应对：准备关键点</text>
+              <rect x="290" y="526" width="320" height="80" rx="14" fill="rgba(154,123,255,0.15)" stroke="rgba(154,123,255,0.25)" stroke-width="1"/>
+              <text x="310" y="574" font-size="28" fill="white" font-weight="900">🔄 版本：核心+详细切换</text>
+              <rect x="290" y="622" width="320" height="60" rx="14" fill="rgba(53,208,255,0.15)" stroke="rgba(53,208,255,0.25)" stroke-width="1"/>
+              <text x="310" y="660" font-size="28" fill="white" font-weight="900">📩 24h内书面跟进</text>
+            </svg>
+            <!-- Danmu overlays floating on top -->
+            <div class="danmu" style="top:90px;left:60px;font-size:26px;">老板："直接说结论！"</div>
+            <div class="danmu" style="top:170px;left:300px;font-size:26px;">老板："要花多少钱？"</div>
+            <div class="danmu" style="top:260px;left:120px;font-size:26px;">老板："什么时候上线？"</div>
+            <div class="danmu" style="top:340px;left:450px;font-size:26px;">老板："风险是什么？"</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Handling Interruptions</span><span class="footer-strong">被打断是正常的，准备好才是专业的</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 7: What Boss Cares ==================== -->
+  <section class="s slide" id="slide-7">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">NOTIFICATION</div><div class="page-no">07 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">07</div>
+            <h1 class="hero-title" style="font-size:88px;">老板真正<br>关心什么？</h1>
+            <p class="hero-sub">公司能不能赚钱，<br>能不能一直赚下去。<br>他最终的目的是持续健康发展。</p>
+            <div class="hero-accent-bar"></div>
+          </div>
+          <div class="hero-right" style="padding:20px;">
+            <div style="display:flex;flex-direction:column;gap:16px;height:100%;justify-content:center;">
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,#ff6b9d,#ff8fab);">💰</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">赚钱 & 持续赚钱</div>
+                  <div style="font-size:28px;color:#9fb4d3;">现金流 / 利润 / 花销效率</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:#ff6b9d;border-color:#ff6b9d;">TOP1</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,#65a7ff,#8fc4ff);">🎯</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">目标达成</div>
+                  <div style="font-size:28px;color:#9fb4d3;">进度 / 阻力 / 资源需求</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;">追踪</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,#9a7bff,#b8a8ff);">⚠️</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">风险与变化</div>
+                  <div style="font-size:28px;color:#9fb4d3;">市场变化 / 团队 / 技术风险</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:#9a7bff;border-color:#9a7bff;">预警</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,#35d0ff,#6de0ff);">✅</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">决策点</div>
+                  <div style="font-size:28px;color:#9fb4d3;">需要你拍板什么 / 选项对比</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:#35d0ff;border-color:#35d0ff;">行动</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Leadership Lens</span><span class="footer-strong">风险早暴露，决策点明确，行动能落地</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 8: Real Cases ==================== -->
+  <section class="s slide" id="slide-8">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">DOUBLE TAP</div><div class="page-no">08 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:center;">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">08</div>
+            <h1 class="hero-title" style="font-size:104px;">真实案例</h1>
+            <p class="hero-sub">不同行业，同一套短视频思维。<br>老板一听就知道下一步拍什么板。</p>
+            <div class="hero-accent-bar"></div>
+            <!-- A/B case summary -->
+            <div style="margin-top:28px; display:flex; flex-direction:column; gap:14px;">
+              <div style="padding:18px 22px; border-radius:16px; background:linear-gradient(135deg, rgba(101,167,255,0.12), rgba(154,123,255,0.08)); border-left:5px solid #65a7ff;">
+                <div style="font-size:30px; font-weight:900; color:white;">Case A · 软件公司</div>
+                <div style="font-size:24px; color:#9fb4d3; margin-top:4px;">Q3 汇报 → 结论先行 + 方案前置</div>
+                <div style="font-size:22px; color:#65a7ff; margin-top:4px;">❤️ 老板觉得很赞</div>
+              </div>
+              <div style="padding:18px 22px; border-radius:16px; background:linear-gradient(135deg, rgba(53,208,255,0.12), rgba(255,107,157,0.08)); border-left:5px solid #35d0ff;">
+                <div style="font-size:30px; font-weight:900; color:white;">Case B · 硬件公司</div>
+                <div style="font-size:24px; color:#9fb4d3; margin-top:4px;">项目进度 → 数据说话 + 风险预警</div>
+                <div style="font-size:22px; color:#ffd93d; margin-top:4px;">👍 决策待定</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="caseA" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#9a7bff"/></linearGradient>
+                <linearGradient id="caseB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#35d0ff"/><stop offset="100%" stop-color="#ff6b9d"/></linearGradient>
+              </defs>
+
+              <!-- Case A — 左上，更大卡片 -->
+              <g transform="rotate(-2.5, 230, 220)">
+                <rect x="44" y="44" width="440" height="370" rx="24" fill="rgba(0,0,0,0.3)" filter="blur(8)"/>
+                <rect x="40" y="40" width="440" height="370" rx="24" fill="rgba(10,20,38,0.95)" stroke="rgba(101,167,255,0.25)" stroke-width="2"/>
+                <rect x="40" y="40" width="440" height="10" rx="5" fill="url(#caseA)"/>
+                <!-- 案例头 -->
+                <rect x="64" y="66" width="110" height="36" rx="10" fill="rgba(101,167,255,0.2)"/>
+                <text x="119" y="92" text-anchor="middle" font-size="22" fill="#65a7ff" font-weight="800">CASE A</text>
+                <text x="186" y="94" font-size="34" fill="white" font-weight="900">软件公司</text>
+                <text x="64" y="126" font-size="24" fill="#9fb4d3">@CEO周报 · Q3汇报</text>
+                <!-- 数据行 — 更大 -->
+                <rect x="64" y="148" width="392" height="52" rx="10" fill="rgba(101,167,255,0.08)"/>
+                <text x="86" y="184" font-size="30" fill="white" font-weight="800">📈 收入</text>
+                <text x="430" y="184" text-anchor="end" font-size="32" fill="#65a7ff" font-weight="900">+15% YoY</text>
+                <rect x="64" y="212" width="392" height="52" rx="10" fill="rgba(101,167,255,0.08)"/>
+                <text x="86" y="248" font-size="30" fill="white" font-weight="800">💰 毛利</text>
+                <text x="430" y="248" text-anchor="end" font-size="32" fill="#65a7ff" font-weight="900">62%</text>
+                <!-- 风险行 -->
+                <rect x="64" y="276" width="392" height="52" rx="10" fill="rgba(255,107,157,0.12)"/>
+                <text x="86" y="312" font-size="28" fill="#ff6b9d" font-weight="800">⚠️ 续约风险 3 大客户</text>
+                <!-- 方案行 -->
+                <rect x="64" y="340" width="392" height="52" rx="10" fill="rgba(101,167,255,0.12)"/>
+                <text x="86" y="376" font-size="28" fill="#65a7ff" font-weight="800">✓ 应对方案已准备</text>
+              </g>
+
+              <!-- Case B — 右下，更大卡片 -->
+              <g transform="rotate(2, 680, 510)">
+                <rect x="444" y="384" width="440" height="370" rx="24" fill="rgba(0,0,0,0.3)" filter="blur(8)"/>
+                <rect x="440" y="380" width="440" height="370" rx="24" fill="rgba(10,20,38,0.95)" stroke="rgba(53,208,255,0.25)" stroke-width="2"/>
+                <rect x="440" y="380" width="440" height="10" rx="5" fill="url(#caseB)"/>
+                <!-- 案例头 -->
+                <rect x="464" y="406" width="110" height="36" rx="10" fill="rgba(53,208,255,0.2)"/>
+                <text x="519" y="432" text-anchor="middle" font-size="22" fill="#35d0ff" font-weight="800">CASE B</text>
+                <text x="586" y="434" font-size="34" fill="white" font-weight="900">硬件公司</text>
+                <text x="464" y="466" font-size="24" fill="#9fb4d3">@项目进度 · 周报</text>
+                <!-- 数据行 -->
+                <rect x="464" y="488" width="392" height="52" rx="10" fill="rgba(53,208,255,0.08)"/>
+                <text x="486" y="524" font-size="30" fill="white" font-weight="800">📊 进度</text>
+                <text x="830" y="524" text-anchor="end" font-size="32" fill="#35d0ff" font-weight="900">78% (+5%)</text>
+                <rect x="464" y="552" width="392" height="52" rx="10" fill="rgba(255,217,61,0.08)"/>
+                <text x="486" y="588" font-size="28" fill="#ffd93d" font-weight="800">💰 成本超预算 10%</text>
+                <rect x="464" y="616" width="392" height="52" rx="10" fill="rgba(53,208,255,0.08)"/>
+                <text x="486" y="652" font-size="28" fill="#b8cae6" font-weight="800">🔧 技术难点已突破</text>
+                <rect x="464" y="680" width="392" height="52" rx="10" fill="rgba(53,208,255,0.08)"/>
+                <text x="486" y="716" font-size="28" fill="#35d0ff" font-weight="800">🎯 目标重新评估中</text>
+              </g>
+
+              <!-- 中间连接 — "同一套思维" -->
+              <rect x="290" y="330" width="320" height="64" rx="14" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+              <text x="450" y="370" text-anchor="middle" font-size="28" fill="white" font-weight="900">🔄 同一套短视频思维</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Real Cases</span><span class="footer-strong">不同场景，同一套短视频思维</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 9: Closing — Premium ==================== -->
+  <section class="s slide" id="slide-9">
+    <div class="slide-shell" style="padding:0; overflow:hidden; border:none; background:transparent; box-shadow:none; backdrop-filter:none;">
+      <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;position:absolute;inset:0;">
+        <defs>
+          <radialGradient id="burst" cx="50%" cy="42%" r="50%">
+            <stop offset="0%" stop-color="rgba(101,167,255,0.22)"/>
+            <stop offset="30%" stop-color="rgba(154,123,255,0.10)"/>
+            <stop offset="60%" stop-color="rgba(53,208,255,0.03)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <linearGradient id="quoteGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="25%" stop-color="#cfe3ff"/>
+            <stop offset="50%" stop-color="#9a7bff"/>
+            <stop offset="75%" stop-color="#65a7ff"/>
+            <stop offset="100%" stop-color="#35d0ff"/>
+          </linearGradient>
+          <linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="rgba(101,167,255,0.12)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </linearGradient>
+          <linearGradient id="longBar" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff6b9d"/>
+            <stop offset="25%" stop-color="#9a7bff"/>
+            <stop offset="50%" stop-color="#65a7ff"/>
+            <stop offset="75%" stop-color="#35d0ff"/>
+            <stop offset="100%" stop-color="#65a7ff"/>
+          </linearGradient>
+          <linearGradient id="p1g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(255,107,157,0.25)"/><stop offset="100%" stop-color="rgba(255,107,157,0.05)"/></linearGradient>
+          <linearGradient id="p2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(101,167,255,0.25)"/><stop offset="100%" stop-color="rgba(101,167,255,0.05)"/></linearGradient>
+          <linearGradient id="p3g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(154,123,255,0.25)"/><stop offset="100%" stop-color="rgba(154,123,255,0.05)"/></linearGradient>
+          <linearGradient id="p4g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(53,208,255,0.25)"/><stop offset="100%" stop-color="rgba(53,208,255,0.05)"/></linearGradient>
+          <filter id="bigGlow"><feGaussianBlur stdDeviation="40" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="softGlow"><feGaussianBlur stdDeviation="16" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- 背景 -->
+        <rect width="1920" height="1080" fill="#050d1a"/>
+        <rect width="1920" height="1080" fill="url(#burst)"/>
+        <line x1="0" y1="0" x2="1920" y2="1080" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+        <line x1="1920" y1="0" x2="0" y2="1080" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+
+        <!-- 光束射线 -->
+        <polygon points="960,400 140,0 300,0" fill="url(#rayGrad)" opacity="0.6"/>
+        <polygon points="960,400 1620,0 1780,0" fill="url(#rayGrad)" opacity="0.5"/>
+        <polygon points="960,400 940,0 1000,0" fill="url(#rayGrad)" opacity="0.35"/>
+
+        <!-- 装饰圆环 -->
+        <circle cx="260" cy="200" r="150" fill="none" stroke="rgba(101,167,255,0.06)" stroke-width="2"/>
+        <circle cx="260" cy="200" r="95" fill="none" stroke="rgba(101,167,255,0.04)" stroke-width="1"/>
+        <circle cx="1660" cy="880" r="190" fill="none" stroke="rgba(154,123,255,0.05)" stroke-width="2"/>
+        <circle cx="1660" cy="880" r="120" fill="none" stroke="rgba(154,123,255,0.03)" stroke-width="1"/>
+
+        <!-- 散布光点 -->
+        <circle cx="120" cy="520" r="4" fill="rgba(101,167,255,0.6)" filter="url(#softGlow)"/>
+        <circle cx="1800" cy="260" r="4" fill="rgba(154,123,255,0.6)" filter="url(#softGlow)"/>
+        <circle cx="1540" cy="120" r="3" fill="rgba(53,208,255,0.5)" filter="url(#softGlow)"/>
+        <circle cx="360" cy="860" r="3" fill="rgba(255,107,157,0.5)" filter="url(#softGlow)"/>
+        <circle cx="720" cy="120" r="2" fill="rgba(255,255,255,0.35)" filter="url(#softGlow)"/>
+        <circle cx="1400" cy="580" r="2" fill="rgba(255,255,255,0.3)" filter="url(#softGlow)"/>
+        <circle cx="540" cy="920" r="3" fill="rgba(53,208,255,0.4)" filter="url(#softGlow)"/>
+        <circle cx="1200" cy="960" r="2" fill="rgba(101,167,255,0.4)" filter="url(#softGlow)"/>
+
+        <!-- 对角装饰线 -->
+        <line x1="0" y1="1060" x2="380" y2="700" stroke="rgba(101,167,255,0.04)" stroke-width="1"/>
+        <line x1="1920" y1="20" x2="1540" y2="380" stroke="rgba(154,123,255,0.04)" stroke-width="1"/>
+
+        <!-- 页码 -->
+        <text x="80" y="1060" font-size="24" fill="rgba(255,255,255,0.3)" font-weight="700">09 / 09</text>
+        <text x="1840" y="1060" text-anchor="end" font-size="24" fill="rgba(255,255,255,0.3)" font-weight="700" letter-spacing="0.2em">FIN</text>
+
+        <!-- 巨大引号 — 左上 + 右下 -->
+        <text x="-20" y="240" font-size="380" font-weight="980" fill="rgba(255,255,255,0.03)" letter-spacing="-0.08em">"</text>
+        <text x="1540" y="1040" font-size="380" font-weight="980" fill="rgba(255,255,255,0.03)" letter-spacing="-0.08em">"</text>
+
+        <!-- 核心金句 — 光晕底层 -->
+        <text x="960" y="390" text-anchor="middle" font-size="136" font-weight="980" fill="rgba(101,167,255,0.10)" filter="url(#bigGlow)" letter-spacing="-0.04em">先停住注意力</text>
+        <text x="960" y="540" text-anchor="middle" font-size="136" font-weight="980" fill="rgba(154,123,255,0.10)" filter="url(#bigGlow)" letter-spacing="-0.04em">再推动决策</text>
+        <!-- 核心金句 — 渐变正文 -->
+        <text x="960" y="390" text-anchor="middle" font-size="136" font-weight="980" fill="url(#quoteGrad)" letter-spacing="-0.04em">先停住注意力</text>
+        <text x="960" y="540" text-anchor="middle" font-size="136" font-weight="980" fill="url(#quoteGrad)" letter-spacing="-0.04em">再推动决策</text>
+
+        <!-- 全宽彩虹渐变线 + 两端发光点 -->
+        <rect x="300" y="586" width="1320" height="6" rx="3" fill="url(#longBar)"/>
+        <circle cx="300" cy="589" r="8" fill="#ff6b9d" filter="url(#softGlow)"/>
+        <circle cx="1620" cy="589" r="8" fill="#65a7ff" filter="url(#softGlow)"/>
+
+        <!-- 副句 -->
+        <text x="960" y="650" text-anchor="middle" font-size="38" fill="#9fb4d3" font-weight="400" letter-spacing="0.06em">从周报开始练手，把每一次汇报都当作一次创作</text>
+
+        <!-- 四原则 — 悬浮玻璃卡片 + 顶部色条 -->
+        <g transform="translate(200, 720)">
+          <rect width="340" height="110" rx="20" fill="url(#p1g)" stroke="rgba(255,107,157,0.35)" stroke-width="1.5"/>
+          <rect width="340" height="7" rx="3.5" fill="#ff6b9d"/>
+          <text x="170" y="52" text-anchor="middle" font-size="36" fill="#ff6b9d" font-weight="900"># 结论先行</text>
+          <text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">先说结果</text>
+        </g>
+        <g transform="translate(580, 720)">
+          <rect width="340" height="110" rx="20" fill="url(#p2g)" stroke="rgba(101,167,255,0.35)" stroke-width="1.5"/>
+          <rect width="340" height="7" rx="3.5" fill="#65a7ff"/>
+          <text x="170" y="52" text-anchor="middle" font-size="36" fill="#65a7ff" font-weight="900"># 数据说话</text>
+          <text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">用数字证明</text>
+        </g>
+        <g transform="translate(960, 720)">
+          <rect width="340" height="110" rx="20" fill="url(#p3g)" stroke="rgba(154,123,255,0.35)" stroke-width="1.5"/>
+          <rect width="340" height="7" rx="3.5" fill="#9a7bff"/>
+          <text x="170" y="52" text-anchor="middle" font-size="36" fill="#9a7bff" font-weight="900"># 方案前置</text>
+          <text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">带着方案来</text>
+        </g>
+        <g transform="translate(1340, 720)">
+          <rect width="340" height="110" rx="20" fill="url(#p4g)" stroke="rgba(53,208,255,0.35)" stroke-width="1.5"/>
+          <rect width="340" height="7" rx="3.5" fill="#35d0ff"/>
+          <text x="170" y="52" text-anchor="middle" font-size="36" fill="#35d0ff" font-weight="900"># 按听众裁剪</text>
+          <text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">精准投放</text>
+        </g>
+
+        <!-- 底部 -->
+        <line x1="300" y1="1030" x2="1620" y2="1030" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <text x="960" y="1020" text-anchor="middle" font-size="20" fill="rgba(255,255,255,0.22)" letter-spacing="0.3em">汇报不是演习，每一次都是实战</text>
+
+      </svg>
+    </div>
+  </section>
+
+</div>
+<div id="navigation-hint">Use ← → Space PgUp PgDn Home End</div>
+<script>
+(() => {
+  const slides = Array.from(document.querySelectorAll('.s.slide'));
+  const prevZone = document.querySelector('[data-nav="prev"]');
+  const nextZone = document.querySelector('[data-nav="next"]');
+  let index = Math.max(0, slides.findIndex(s => s.classList.contains('is-active')));
+
+  function render() {
+    slides.forEach((slide, i) => slide.classList.toggle('is-active', i === index));
+    const id = slides[index]?.id || `slide-${index + 1}`;
+    try { if (location.hash !== `#${id}`) history.replaceState(null, "", `#${id}`); } catch (_) {}
+  }
+
+  function go(nextIndex) { index = Math.max(0, Math.min(nextIndex, slides.length - 1)); render(); }
+  function next() { go(index + 1); }
+  function prev() { go(index - 1); }
+
+  /** html-video-from-slides 截图阶段会调用全局 go(n)，必须挂到 window */
+  window.go = go;
+  window.nextSlide = next;
+  window.prevSlide = prev;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { e.preventDefault(); go(0); }
+    else if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+  }, { passive: false });
+
+  [nextZone, prevZone].forEach(zone => {
+    if (!zone) return;
+    zone.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (zone.dataset.nav === 'next') next(); else prev(); });
+  });
+
+  window.addEventListener('hashchange', () => {
+    const hash = location.hash.slice(1);
+    const idx = slides.findIndex(s => s.id === hash);
+    if (idx >= 0) { index = idx; render(); }
+  });
+
+  const initialHash = location.hash.slice(1);
+  const initialIdx = slides.findIndex(s => s.id === initialHash);
+  if (initialIdx >= 0) index = initialIdx;
+  render();
+})();
+</script>
+</body>
+</html>

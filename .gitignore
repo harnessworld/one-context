@@ -44,8 +44,17 @@ skills/.skills_store_lock.json
 # Local env (proxy, etc.); README "Network / HTTP proxy"
 .env
 
-# Features: production/ directories are build artifacts (covers, srt, JSON, node_modules, etc.)
-features/**/production/
+# Features: production/ — track creative assets, ignore media & temp
+# See features/_template/content-production/ for canonical layout
+features/**/production/tmp/
+features/**/production/media/
+features/**/production/**/*.wav
+features/**/production/**/*.mp4
+features/**/production/**/*.png
+features/**/production/**/*.jpg
+features/**/production/**/*.webm
+features/**/production/**/*.bak
+features/**/production/node_modules/
 
 # Features: temporary build artifacts
 features/**/temp_*/
@@ -62,6 +71,15 @@ _search*.cjs
 *.webm
 *.wav
 
+# Backup files
+*.bak
+backups/
+
+# Test screenshots & media
+*.png
+*.jpg
+deck-slides/
+
 # OS
 .DS_Store
 *.swp
@@ -69,6 +87,7 @@ _search*.cjs
 # IDEs
 .idea/
 .vscode/
+.obsidian/
 
 # Agent runtime (local, personal) — keep small project manifest committable
 .openclaw/**
@@ -105,9 +124,13 @@ SOUL.md
 USER.md
 TOOLS.md
 canvas-philosophy.md
+/cover*.html
 
 # Skill parallel verify runtime output
 .skill-parallel-verify/
+
+# Local one-context config (sensitive word lists, etc.)
+.onecxt/sensitive-words.yaml
 
 # Claude Code local settings (personal, not shared)
 .claude/settings.json

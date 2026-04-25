@@ -15,6 +15,7 @@ const {
 } = require('./ass_colours');
 const { execSync } = require('child_process');
 const { pathToFileURL } = require('url');
+const { resolvePath } = require('./path_resolver');
 
 function parseScript(md) {
   const blocks = md.split(/(?=^# 【)/m).filter((s) => s.trim());
@@ -162,8 +163,19 @@ async function run(projectRoot, skillDir) {
     : {};
 
   const TEMP_DIR = path.join(projectRoot, 'tmp');
-  const HTML_FILE = path.join(projectRoot, cfg.input?.htmlFile ?? 'presentation.html');
-  const SCRIPT_FILE = path.join(projectRoot, cfg.input?.scriptFile ?? '讲稿.md');
+  const HTML_FILE = cfg.input?.htmlFile
+    ? path.join(projectRoot, cfg.input.htmlFile)
+    : resolvePath(projectRoot, 'slides', 'presentation.html');
+  // Support new content/01-script.md path, fallback to legacy 讲稿.md
+  let scriptPath;
+  if (cfg.input?.scriptFile) {
+    scriptPath = path.join(projectRoot, cfg.input.scriptFile);
+  } else {
+    const newScriptPath = path.join(projectRoot, 'content', '01-script.md');
+    const legacyScriptPath = path.join(projectRoot, '讲稿.md');
+    scriptPath = fs.existsSync(newScriptPath) ? newScriptPath : legacyScriptPath;
+  }
+  const SCRIPT_FILE = scriptPath;
   const OUTPUT_MP4 = path.join(projectRoot, cfg.output?.file ?? 'final.mp4');
   const voiceCfg = cfg.voice ?? {};
   const VOICE_SINGLE = voiceCfg.name ?? 'zh-CN-YunxiNeural';

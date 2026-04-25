@@ -510,8 +510,9 @@ def silence_split_durations(wav_path: str, n_slides: int, total: float) -> tuple
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--wav", required=True)
-    ap.add_argument("--slides-json", required=True)
-    ap.add_argument("--out-json", required=True)
+    ap.add_argument("--slides-json", default=None, help="幻灯文案 JSON（--srt-only 时可省略）")
+    ap.add_argument("--out-json", default=None, help="对齐输出 JSON（--srt-only 时可省略）")
+    ap.add_argument("--srt-only", action="store_true", help="仅转写输出 SRT，跳过幻灯对齐（无需 --slides-json / --out-json）")
     ap.add_argument(
         "--model",
         default="medium",
@@ -577,12 +578,21 @@ def main() -> int:
             flush=True,
         )
 
-    with open(args.slides_json, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    slides = data.get("slides") or []
-    if not slides:
-        print("slides.json 缺少 slides 数组", file=sys.stderr)
-        return 2
+    if args.srt_only:
+        if not args.srt_out:
+            print("--srt-only 需要同时指定 --srt-out", file=sys.stderr)
+            return 2
+        slides = []
+    else:
+        if not args.slides_json or not args.out_json:
+            print("非 --srt-only 模式需要 --slides-json 和 --out-json", file=sys.stderr)
+            return 2
+        with open(args.slides_json, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        slides = data.get("slides") or []
+        if not slides:
+            print("slides.json 缺少 slides 数组", file=sys.stderr)
+            return 2
 
     try:
         from faster_whisper import WhisperModel
@@ -686,6 +696,24 @@ def main() -> int:
     # 输出 SRT 字幕（如果请求）
     if args.srt_out and seg_list:
         write_srt(seg_list, args.srt_out, t2s=use_t2s)
+
+    # --srt-only：只转写输出 SRT，不做幻灯对齐
+    if args.srt_only:
+        print(f"✅ --srt-only：已输出 SRT → {args.srt_out}", flush=True)
+        if not seg_list:
+            print("⚠️  Whisper 未产出有效片段", file=sys.stderr)
+            return 1
+        # 分析字幕缺口（可选辅助信息）
+        if os.path.isfile(args.srt_out):
+            spans = parse_srt_times(args.srt_out)
+            gaps = find_subtitle_gaps(spans, audio_end, threshold_sec=args.max_subtitle_gap_sec)
+            if gaps:
+                print(f"\n字幕缺口（>{args.max_subtitle_gap_sec}s）：", flush=True)
+                for g in gaps:
+                    print(f"  {g['fromSec']:.1f}–{g['toSec']:.1f}s（{g['durationSec']:.1f}s，{g['kind']}）", flush=True)
+            else:
+                print("字幕连续，无显著缺口。", flush=True)
+        return 0
 
     def finalize_out(out: dict) -> int:
         """写入 out.json；分析字幕缺口；strict 模式下有缺口则返回 4。"""

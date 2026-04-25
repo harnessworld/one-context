@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resolvePath } = require('./path_resolver');
 
 // ── SRT parser ──────────────────────────────────────────────
 
@@ -52,7 +53,7 @@ function countSlides(htmlPath) {
 function extractSlideTexts(htmlPath) {
   const html = fs.readFileSync(htmlPath, 'utf-8');
   const slides = [];
-  const regex = /<div[^>]*class=["'][^"']*\bslide\b[^"']*["'][^>]*>([\s\S]*?)<\/div>\s*(?=<div\b[^>]*class=["'][^"']*\bslide|<\/body)/gi;
+  const regex = /<(?:div|section)[^>]*class=["'][^"']*\bslide\b[^"']*["'][^>]*>([\s\S]*?)<\/(?:div|section)>\s*(?=<(?:div|section)\b[^>]*class=["'][^"']*\bslide|<\/body)/gi;
   let m;
   while ((m = regex.exec(html)) !== null) {
     const text = m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 140);
@@ -154,7 +155,8 @@ function generate(projectDir, entries, boundariesStr) {
     totalDurationSec: Math.round(totalDur * 100) / 100,
   };
 
-  const outPath = path.join(projectDir, 'wav-durations.json');
+  const outPath = path.join(projectDir, 'timing', 'wav-durations.json');
+  fs.mkdirSync(path.dirname(outPath), { recursive: true });
   fs.writeFileSync(outPath, JSON.stringify(wavDurations, null, 2), 'utf-8');
   console.log(`\n✅ ${outPath}`);
   console.log(`   ${durations.length} slides, total ${Math.round(totalDur * 100) / 100}s (${(totalDur / 60).toFixed(1)} min)`);
@@ -166,8 +168,8 @@ function generate(projectDir, entries, boundariesStr) {
 // ── Main ────────────────────────────────────────────────────
 
 function run(projectDir, { boundaries }) {
-  const srtPath = path.join(projectDir, 'sub.srt');
-  const htmlPath = path.join(projectDir, 'presentation.html');
+  const srtPath = resolvePath(projectDir, 'subtitles', 'sub.srt');
+  const htmlPath = resolvePath(projectDir, 'slides', 'presentation.html');
 
   if (!fs.existsSync(srtPath)) {
     console.error('❌ sub.srt not found in', projectDir);

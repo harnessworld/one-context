@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>封面 · 横版</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    width: 1440px;
+    height: 1080px;
+    overflow: hidden;
+    font-family: 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #05050a;
+}
+
+#cover {
+    position: relative;
+    width: 1440px;
+    height: 1080px;
+    overflow: hidden;
+}
+
+#bg {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+}
+
+#bg-fallback {
+    position: absolute;
+    inset: 0;
+}
+
+#overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+        linear-gradient(to right,
+            rgba(3,3,8,0.88) 0%,
+            rgba(3,3,8,0.55) 42%,
+            rgba(3,3,8,0.35) 68%,
+            rgba(3,3,8,0.62) 100%
+        ),
+        linear-gradient(to bottom,
+            rgba(3,3,8,0.5) 0%,
+            rgba(3,3,8,0.08) 35%,
+            rgba(3,3,8,0.2) 100%
+        );
+}
+
+#noise {
+    position: absolute; inset: 0;
+    z-index: 5;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* 右侧背景：手机竖屏水印（与竖版同一 SVG） */
+#phone-deco {
+    position: absolute;
+    right: 100px;
+    top: 50%;
+    width: 400px;
+    height: 762px;
+    margin-top: -381px;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0.78;
+    transform: rotate(-9deg);
+    filter: drop-shadow(0 0 80px rgba(0, 240, 255, 0.22))
+            drop-shadow(0 24px 70px rgba(0, 0, 0, 0.45));
+}
+#phone-deco svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 44px 56px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#tagline {
+    font-size: 26px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 5px;
+}
+
+#brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+#brand-name {
+    font-size: 26px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 2px;
+}
+
+#avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.25);
+    display: block;
+}
+
+#avatar-fallback {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.20);
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+}
+
+/* 横版主区：左 hero + 右 pill 列（对齐 cover-design PRESETS 科技横版） */
+#main-row {
+    position: absolute;
+    top: 100px;
+    bottom: 72px;
+    left: 56px;
+    right: 56px;
+    display: flex;
+    align-items: center;
+    gap: 48px;
+    z-index: 20;
+}
+
+#content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    text-align: left;
+    gap: 0;
+}
+
+#tag {
+    display: inline-block;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 6px;
+    padding: 10px 28px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+}
+
+#headline {
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -3px;
+    color: #ffffff;
+    word-break: keep-all;
+}
+
+#headline.len5  { font-size: 132px; }
+#headline.len6  { font-size: 122px; }
+#headline.len7  { font-size: 112px; letter-spacing: -2px; }
+#headline.len8  { font-size: 104px; letter-spacing: -1px; }
+#headline.len10 { font-size: 90px; }
+#headline.len12 { font-size: 80px; }
+#headline.long  { font-size: 68px; }
+
+#headline em {
+    font-style: normal;
+}
+
+#divider {
+    width: 120px;
+    height: 4px;
+    border-radius: 2px;
+    margin: 32px 0;
+}
+
+#subline {
+    font-size: 34px;
+    font-weight: 500;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.78);
+    letter-spacing: 2px;
+    max-width: 780px;
+    text-shadow: 0 2px 16px rgba(0,0,0,0.75);
+}
+
+#pills-col {
+    width: 320px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    z-index: 21;
+}
+
+.pill-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 22px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    font-size: 26px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.88);
+    letter-spacing: 2px;
+}
+
+.pill-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+#footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0 56px 36px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 20;
+}
+
+#watermark {
+    font-size: 20px;
+    color: rgba(255,255,255,0.22);
+    letter-spacing: 2px;
+}
+
+#accent-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+}
+</style>
+</head>
+<body>
+<div id="cover">
+
+    <img id="bg" src="" alt="">
+    <div id="bg-fallback"></div>
+    <div id="overlay"></div>
+
+    <div id="phone-deco" aria-hidden="true">
+        <svg viewBox="0 0 210 400" xmlns="http://www.w3.org/2000/svg" fill="none">
+            <defs>
+                <linearGradient id="ph-screen-h" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#0d2236"/>
+                    <stop offset="45%" stop-color="#122a42"/>
+                    <stop offset="100%" stop-color="#241432"/>
+                </linearGradient>
+                <linearGradient id="ph-glow-h" x1="0%" y1="100%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00d4e8" stop-opacity="0.55"/>
+                    <stop offset="55%" stop-color="#8b5cf6" stop-opacity="0.38"/>
+                    <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.22"/>
+                </linearGradient>
+                <linearGradient id="ph-bar-h" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#00f0ff"/>
+                    <stop offset="100%" stop-color="#8b5cf6"/>
+                </linearGradient>
+            </defs>
+            <rect x="8" y="6" width="194" height="388" rx="28" fill="#0c1220" stroke="rgba(255,255,255,0.38)" stroke-width="2.5"/>
+            <rect x="18" y="18" width="174" height="364" rx="20" fill="url(#ph-screen-h)" stroke="rgba(0,240,255,0.35)" stroke-width="1.5"/>
+            <ellipse cx="105" cy="120" rx="72" ry="88" fill="url(#ph-glow-h)"/>
+            <circle cx="62" cy="44" r="4" fill="rgba(255,255,255,0.5)"/>
+            <circle cx="78" cy="44" r="4" fill="rgba(255,255,255,0.28)"/>
+            <circle cx="94" cy="44" r="4" fill="rgba(255,255,255,0.16)"/>
+            <rect x="118" y="40" width="64" height="8" rx="4" fill="rgba(255,255,255,0.14)"/>
+            <circle cx="105" cy="188" r="36" fill="rgba(0,0,0,0.42)" stroke="rgba(0,240,255,0.65)" stroke-width="2.5"/>
+            <path d="M96 168 L96 208 L132 188 Z" fill="rgba(255,255,255,0.95)"/>
+            <rect x="32" y="318" width="146" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+            <rect x="32" y="318" width="62" height="5" rx="2.5" fill="url(#ph-bar-h)"/>
+            <text x="105" y="342" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="13" font-family="system-ui,sans-serif" letter-spacing="1">0:15</text>
+            <rect x="78" y="372" width="54" height="4" rx="2" fill="rgba(255,255,255,0.28)"/>
+        </svg>
+    </div>
+
+    <div id="noise"></div>
+
+    <div id="header">
+        <div id="tagline">拯救你的职场</div>
+        <div id="brand">
+            <div id="brand-name">大厂吾师兄</div>
+            <img id="avatar" src="" onerror="this.style.display='none'" alt="">
+            <div id="avatar-fallback">🐶</div>
+        </div>
+    </div>
+
+    <div id="main-row">
+        <div id="content">
+            <div id="tag"></div>
+            <div id="headline"></div>
+            <div id="divider"></div>
+            <div id="subline"></div>
+        </div>
+        <div id="pills-col"></div>
+    </div>
+
+    <div id="footer">
+        <div id="watermark"></div>
+    </div>
+    <div id="accent-bar"></div>
+</div>
+
+<script>
+const CONFIG = {
+    headline:    "短视频\n式汇报",
+    accentLine:  1,
+    subline:     "把老板当用户：钩子开场、节奏高潮、信息密度一套讲清",
+    tag:         "2026 · 职场汇报",
+    bgImage:     "",
+    avatarImage: "",
+    footerItems: ["钩子结构", "叙事节奏"],
+    watermark:   "豆包AI生成",
+    theme:       "tech",
+};
+
+const THEMES = {
+    danger: {
+        accent:     "#FF2A55",
+        accent2:    "#FF8C00",
+        tagBg:      "rgba(255,42,85,0.12)",
+        tagBorder:  "rgba(255,42,85,0.5)",
+        tagColor:   "#FF6B8A",
+        glowColor:  "rgba(255,42,85,0.25)",
+        glowColor2: "rgba(255,140,0,0.15)",
+        dotColor:   "#FF2A55",
+        bar:        "linear-gradient(90deg, transparent 2%, #FF2A55 35%, #FF8C00 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,42,85,0.35), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FF2A55 0%, #FF8C00 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #1a0508 0%, #0d0305 40%, #050208 100%)",
+    },
+    growth: {
+        accent:     "#FFD700",
+        accent2:    "#00F0FF",
+        tagBg:      "rgba(255,215,0,0.10)",
+        tagBorder:  "rgba(255,215,0,0.45)",
+        tagColor:   "#FFD700",
+        glowColor:  "rgba(255,215,0,0.20)",
+        glowColor2: "rgba(0,240,255,0.12)",
+        dotColor:   "#FFD700",
+        bar:        "linear-gradient(90deg, transparent 2%, #FFD700 35%, #00F0FF 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,215,0,0.30), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #150f00 0%, #0a0800 40%, #050505 100%)",
+    },
+    tech: {
+        accent:     "#00F0FF",
+        accent2:    "#8B5CF6",
+        tagBg:      "rgba(0,240,255,0.08)",
+        tagBorder:  "rgba(0,240,255,0.40)",
+        tagColor:   "#00D4E8",
+        glowColor:  "rgba(0,240,255,0.18)",
+        glowColor2: "rgba(139,92,246,0.18)",
+        dotColor:   "#00F0FF",
+        bar:        "linear-gradient(90deg, transparent 2%, #00F0FF 35%, #8B5CF6 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(0,240,255,0.25), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #00F0FF 0%, #8B5CF6 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #03101a 0%, #020810 40%, #03050f 100%)",
+    },
+    finance: {
+        accent:     "#FFD700",
+        accent2:    "#00FF88",
+        tagBg:      "rgba(255,215,0,0.10)",
+        tagBorder:  "rgba(255,215,0,0.45)",
+        tagColor:   "#FFD700",
+        glowColor:  "rgba(255,215,0,0.18)",
+        glowColor2: "rgba(0,255,136,0.15)",
+        dotColor:   "#00FF88",
+        bar:        "linear-gradient(90deg, transparent 2%, #FFD700 35%, #00FF88 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,215,0,0.28), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FFD700 0%, #00FF88 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #0e0f00 0%, #070800 40%, #040505 100%)",
+    },
+};
+
+(function render() {
+    const t = THEMES[CONFIG.theme] || THEMES.danger;
+
+    const bgEl = document.getElementById('bg');
+    if (CONFIG.bgImage) {
+        bgEl.src = CONFIG.bgImage;
+        bgEl.onerror = () => { bgEl.style.display = 'none'; };
+    } else {
+        bgEl.style.display = 'none';
+    }
+
+    document.getElementById('bg-fallback').style.background =
+        t.fallbackBg + `, radial-gradient(ellipse 80% 60% at 50% 75%, ${t.glowColor} 0%, transparent 60%), radial-gradient(ellipse 60% 60% at 80% 20%, ${t.glowColor2} 0%, transparent 60%)`;
+
+    if (CONFIG.avatarImage) {
+        document.getElementById('avatar').src = CONFIG.avatarImage;
+        document.getElementById('avatar-fallback').style.display = 'none';
+    } else {
+        document.getElementById('avatar').style.display = 'none';
+    }
+
+    const tagEl = document.getElementById('tag');
+    tagEl.textContent = CONFIG.tag;
+    tagEl.style.cssText += `background:${t.tagBg}; border:1.5px solid ${t.tagBorder}; color:${t.tagColor};`;
+
+    const headEl = document.getElementById('headline');
+    const lines = CONFIG.headline.split('\n');
+    const totalChars = CONFIG.headline.replace(/\n/g, '').length;
+
+    const cls = totalChars <= 5 ? 'len5'
+              : totalChars <= 6 ? 'len6'
+              : totalChars <= 7 ? 'len7'
+              : totalChars <= 8 ? 'len8'
+              : totalChars <= 10 ? 'len10'
+              : totalChars <= 12 ? 'len12' : 'long';
+    headEl.classList.add(cls);
+    headEl.style.textShadow = t.textGlow;
+
+    headEl.innerHTML = lines.map((line, i) => {
+        if (CONFIG.accentLine === i + 1) {
+            return `<em style="background:${t.accentGrad}; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">${line}</em>`;
+        }
+        return `<span>${line}</span>`;
+    }).join('<br>');
+
+    document.getElementById('divider').style.background = t.accentGrad;
+    document.getElementById('subline').textContent = CONFIG.subline;
+
+    const pillsCol = document.getElementById('pills-col');
+    pillsCol.innerHTML = '';
+    (CONFIG.footerItems || []).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'pill-row';
+        div.innerHTML = `<span class="pill-dot" style="background:${t.dotColor};box-shadow:0 0 8px ${t.dotColor}"></span>${item}`;
+        pillsCol.appendChild(div);
+    });
+
+    document.getElementById('watermark').textContent = CONFIG.watermark;
+    document.getElementById('accent-bar').style.background = t.bar;
+})();
+</script>
+</body>
+</html>

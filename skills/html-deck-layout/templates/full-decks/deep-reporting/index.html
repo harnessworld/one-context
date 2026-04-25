@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>Deep Reporting Deck</title>
+  <link rel="stylesheet" href="../../../assets/base.css">
+  <link rel="stylesheet" href="../../../assets/fonts.css">
+  <link rel="stylesheet" href="../../../assets/mobile-layout.css">
+  <link rel="stylesheet" href="../../../assets/shell-layout.css">
+  <link rel="stylesheet" href="../../../assets/themes/mobile-deep-blue.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Per-deck background — deep blue atmosphere */
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; width: 100%; height: 100%; overflow: hidden;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(53,208,255,0.14), transparent 22%),
+        radial-gradient(circle at 84% 18%, rgba(154,123,255,0.16), transparent 26%),
+        linear-gradient(145deg, #02060d 0%, #081221 34%, #0a1630 68%, #07111f 100%);
+      font-family: var(--font-sans), system-ui, sans-serif;
+      color: var(--c-text-1);
+    }
+    body { display: flex; justify-content: center; align-items: center; padding: 24px; }
+    #P {
+      background:
+        radial-gradient(circle at 16% 10%, rgba(101,167,255,0.12), transparent 22%),
+        radial-gradient(circle at 82% 22%, rgba(154,123,255,0.16), transparent 24%),
+        linear-gradient(145deg, #030812 0%, #081323 32%, #0a1730 62%, #08111f 100%);
+      box-shadow: 0 36px 120px rgba(0,0,0,0.48);
+    }
+    #P::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 96px 96px; pointer-events: none; opacity: 0.35;
+    }
+    #P::after {
+      content: ""; position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div class="nav-zone-left" data-nav="prev"></div>
+<div class="nav-zone-right" data-nav="next"></div>
+<div id="P" class="tpl-deep-reporting">
+
+  <!-- ==================== Slide 1: Cover ==================== -->
+  <section class="s slide is-active" id="slide-1">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">HOOK</div><div class="page-no">01 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">01</div>
+            <h1 class="hero-title">封面标题<br>第二行</h1>
+            <p class="hero-sub">一句话副标题<br>补充说明</p>
+            <div class="hero-accent-bar"></div>
+            <div class="label-row" style="margin-top:24px;">
+              <span class="hashtag">标签一</span>
+              <span class="hashtag">标签二</span>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <!-- PLACEHOLDER: cover illustration SVG -->
+              <rect x="100" y="100" width="700" height="560" rx="40" fill="rgba(101,167,255,0.08)" stroke="rgba(101,167,255,0.2)" stroke-width="2"/>
+              <text x="450" y="400" text-anchor="middle" font-size="48" fill="rgba(255,255,255,0.3)" font-weight="900">封面插图</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Opening</span><span class="footer-strong">关键洞察</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 2: Pain Point ==================== -->
+  <section class="s slide" id="slide-2">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">PAIN</div><div class="page-no">02 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">02</div>
+            <h1 class="hero-title" style="font-size:110px;">痛点标题</h1>
+            <p class="hero-sub">痛点描述第一行<br>痛点描述第二行</p>
+            <div class="hero-accent-bar"></div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <!-- PLACEHOLDER: decay curve / data diagram -->
+              <line x1="100" y1="680" x2="820" y2="680" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+              <line x1="100" y1="680" x2="100" y2="100" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+              <text x="40" y="110" font-size="28" fill="#9fb4d3">注意力</text>
+              <text x="790" y="720" font-size="28" fill="#9fb4d3">时间</text>
+              <path d="M100 150 Q 250 180, 350 280 T 600 440 T 820 650" fill="none" stroke="url(#lineGrad)" stroke-width="10" stroke-linecap="round"/>
+              <defs>
+                <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#ff6b9d"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Diagnosis</span><span class="footer-strong">关键洞察</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 3: Mindset Shift ==================== -->
+  <section class="s slide" id="slide-3">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">SHIFT</div><div class="page-no">03 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:flex-start; padding-top:30px;">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">03</div>
+            <div style="font-size:36px; color:var(--c-accent-d); font-weight:900; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">PARADIGM SHIFT</div>
+            <h1 class="hero-title" style="font-size:96px;">转变标题</h1>
+            <p class="hero-sub">转变描述第一行<br>转变描述第二行</p>
+            <div class="hero-accent-bar"></div>
+            <div style="display:flex; gap:14px; margin-top:28px;">
+              <div style="padding:16px 22px; border-radius:14px; background:rgba(255,107,157,0.15); border:1px solid rgba(255,107,157,0.3); flex:1;">
+                <div style="font-size:26px; color:var(--c-accent-d); font-weight:900;">旧思维</div>
+                <div style="font-size:22px; color:#b8cae6; margin-top:6px;">旧方式描述</div>
+              </div>
+              <div style="padding:16px 22px; border-radius:14px; background:rgba(101,167,255,0.15); border:1px solid rgba(101,167,255,0.3); flex:1;">
+                <div style="font-size:26px; color:var(--c-accent-a); font-weight:900;">新思维</div>
+                <div style="font-size:22px; color:#b8cae6; margin-top:6px;">新方式描述</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <!-- PLACEHOLDER: before/after comparison diagram -->
+              <rect x="60" y="80" width="360" height="600" rx="28" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+              <text x="240" y="130" text-anchor="middle" font-size="32" fill="rgba(255,255,255,0.5)" font-weight="900">BEFORE</text>
+              <rect x="480" y="80" width="360" height="600" rx="28" fill="rgba(101,167,255,0.06)" stroke="rgba(101,167,255,0.25)" stroke-width="2"/>
+              <text x="660" y="130" text-anchor="middle" font-size="32" fill="var(--c-accent-a)" font-weight="900">AFTER</text>
+              <path d="M430 380 L460 380 L470 370 M470 390 L460 380" fill="none" stroke="var(--c-accent-a)" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Paradigm Shift</span><span class="footer-strong">关键洞察</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 4: Principles ==================== -->
+  <section class="s slide" id="slide-4">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">PRINCIPLES</div><div class="page-no">04 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:center; padding-top:10px;">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">04</div>
+            <h1 class="hero-title" style="font-size:104px;">原则标题</h1>
+            <p class="hero-sub">原则概述</p>
+            <div class="hero-accent-bar"></div>
+            <div style="display:flex; flex-direction:column; gap:14px; margin-top:28px;">
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--c-accent-d);box-shadow:0 0 16px rgba(255,107,157,0.5);flex-shrink:0;"></div>
+                <span style="font-size:30px;color:#b2c6e3;">原则一</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--c-accent-a);box-shadow:0 0 16px rgba(101,167,255,0.5);flex-shrink:0;"></div>
+                <span style="font-size:30px;color:#b2c6e3;">原则二</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--c-accent-b);box-shadow:0 0 16px rgba(154,123,255,0.5);flex-shrink:0;"></div>
+                <span style="font-size:30px;color:#b2c6e3;">原则三</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px;">
+                <div style="width:18px;height:18px;border-radius:50%;background:var(--c-accent-c);box-shadow:0 0 16px rgba(53,208,255,0.5);flex-shrink:0;"></div>
+                <span style="font-size:30px;color:#b2c6e3;">原则四</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <defs>
+                <linearGradient id="c1g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff6b9d"/><stop offset="100%" stop-color="#ff8fab"/></linearGradient>
+                <linearGradient id="c2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#8fc4ff"/></linearGradient>
+                <linearGradient id="c3g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#9a7bff"/><stop offset="100%" stop-color="#b8a8ff"/></linearGradient>
+                <linearGradient id="c4g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#35d0ff"/><stop offset="100%" stop-color="#6de0ff"/></linearGradient>
+              </defs>
+              <!-- 2x2 principle cards -->
+              <rect x="40" y="60" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(255,107,157,0.3)" stroke-width="2"/>
+              <rect x="40" y="60" width="380" height="8" rx="4" fill="url(#c1g)"/>
+              <text x="72" y="148" font-size="72" fill="#ff6b9d" font-weight="980" opacity="0.35">01</text>
+              <text x="160" y="148" font-size="42" fill="white" font-weight="900">原则一</text>
+              <text x="72" y="200" font-size="28" fill="#b8cae6">原则一描述</text>
+              <rect x="480" y="80" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(101,167,255,0.3)" stroke-width="2"/>
+              <rect x="480" y="80" width="380" height="8" rx="4" fill="url(#c2g)"/>
+              <text x="512" y="168" font-size="72" fill="#65a7ff" font-weight="980" opacity="0.35">02</text>
+              <text x="600" y="168" font-size="42" fill="white" font-weight="900">原则二</text>
+              <text x="512" y="220" font-size="28" fill="#b8cae6">原则二描述</text>
+              <rect x="40" y="400" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(154,123,255,0.3)" stroke-width="2"/>
+              <rect x="40" y="400" width="380" height="8" rx="4" fill="url(#c3g)"/>
+              <text x="72" y="488" font-size="72" fill="#9a7bff" font-weight="980" opacity="0.35">03</text>
+              <text x="160" y="488" font-size="42" fill="white" font-weight="900">原则三</text>
+              <text x="72" y="540" font-size="28" fill="#b8cae6">原则三描述</text>
+              <rect x="480" y="420" width="380" height="260" rx="28" fill="rgba(10,20,38,0.95)" stroke="rgba(53,208,255,0.3)" stroke-width="2"/>
+              <rect x="480" y="420" width="380" height="8" rx="4" fill="url(#c4g)"/>
+              <text x="512" y="508" font-size="72" fill="#35d0ff" font-weight="980" opacity="0.35">04</text>
+              <text x="600" y="508" font-size="42" fill="white" font-weight="900">原则四</text>
+              <text x="512" y="560" font-size="28" fill="#b8cae6">原则四描述</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Core Formula</span><span class="footer-strong">关键洞察</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 5: Method / Timeline ==================== -->
+  <section class="s slide" id="slide-5">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">METHOD</div><div class="page-no">05 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">05</div>
+            <h1 class="hero-title" style="font-size:104px;">方法标题</h1>
+            <p class="hero-sub">方法描述第一行<br>方法描述第二行</p>
+            <div class="hero-accent-bar"></div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <!-- PLACEHOLDER: timeline / process diagram -->
+              <defs>
+                <linearGradient id="seg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff6b9d"/><stop offset="100%" stop-color="#ff8fab"/></linearGradient>
+                <linearGradient id="seg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9a7bff"/><stop offset="100%" stop-color="#b8a8ff"/></linearGradient>
+                <linearGradient id="seg3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#65a7ff"/><stop offset="100%" stop-color="#8fc4ff"/></linearGradient>
+                <linearGradient id="seg4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#35d0ff"/><stop offset="100%" stop-color="#6de0ff"/></linearGradient>
+              </defs>
+              <rect x="120" y="200" width="170" height="40" rx="8" fill="url(#seg1)" opacity="0.9"/>
+              <text x="205" y="228" text-anchor="middle" font-size="22" fill="white" font-weight="900">步骤一</text>
+              <rect x="310" y="200" width="180" height="40" rx="8" fill="url(#seg2)" opacity="0.9"/>
+              <text x="400" y="228" text-anchor="middle" font-size="22" fill="white" font-weight="900">步骤二</text>
+              <rect x="510" y="200" width="180" height="40" rx="8" fill="url(#seg3)" opacity="0.9"/>
+              <text x="600" y="228" text-anchor="middle" font-size="22" fill="white" font-weight="900">步骤三</text>
+              <rect x="710" y="200" width="140" height="40" rx="8" fill="url(#seg4)" opacity="0.9"/>
+              <text x="780" y="228" text-anchor="middle" font-size="22" fill="white" font-weight="900">步骤四</text>
+              <!-- Detail cards below -->
+              <rect x="80" y="300" width="180" height="140" rx="14" fill="rgba(255,107,157,0.1)" stroke="rgba(255,107,157,0.3)" stroke-width="1.5"/>
+              <text x="170" y="340" text-anchor="middle" font-size="28" fill="#ff6b9d" font-weight="900">01</text>
+              <text x="170" y="380" text-anchor="middle" font-size="24" fill="white" font-weight="800">步骤一</text>
+              <text x="170" y="416" text-anchor="middle" font-size="18" fill="#b8cae6">详细说明</text>
+              <rect x="280" y="300" width="180" height="140" rx="14" fill="rgba(154,123,255,0.1)" stroke="rgba(154,123,255,0.3)" stroke-width="1.5"/>
+              <text x="370" y="340" text-anchor="middle" font-size="28" fill="#9a7bff" font-weight="900">02</text>
+              <text x="370" y="380" text-anchor="middle" font-size="24" fill="white" font-weight="800">步骤二</text>
+              <text x="370" y="416" text-anchor="middle" font-size="18" fill="#b8cae6">详细说明</text>
+              <rect x="480" y="300" width="180" height="140" rx="14" fill="rgba(101,167,255,0.1)" stroke="rgba(101,167,255,0.3)" stroke-width="1.5"/>
+              <text x="570" y="340" text-anchor="middle" font-size="28" fill="#65a7ff" font-weight="900">03</text>
+              <text x="570" y="380" text-anchor="middle" font-size="24" fill="white" font-weight="800">步骤三</text>
+              <text x="570" y="416" text-anchor="middle" font-size="18" fill="#b8cae6">详细说明</text>
+              <rect x="680" y="300" width="180" height="140" rx="14" fill="rgba(53,208,255,0.1)" stroke="rgba(53,208,255,0.3)" stroke-width="1.5"/>
+              <text x="770" y="340" text-anchor="middle" font-size="28" fill="#35d0ff" font-weight="900">04</text>
+              <text x="770" y="380" text-anchor="middle" font-size="24" fill="white" font-weight="800">步骤四</text>
+              <text x="770" y="416" text-anchor="middle" font-size="18" fill="#b8cae6">详细说明</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Pattern</span><span class="footer-strong">关键洞察</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 6: Tactics ==================== -->
+  <section class="s slide" id="slide-6">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">TACTICS</div><div class="page-no">06 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">06</div>
+            <h1 class="hero-title" style="font-size:96px;">策略标题</h1>
+            <p class="hero-sub">策略描述第一行<br>策略描述第二行<br>策略描述第三行</p>
+            <div class="hero-accent-bar"></div>
+            <div class="label-row" style="margin-top:24px;">
+              <span class="hashtag">标签一</span>
+              <span class="hashtag">标签二</span>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <!-- PLACEHOLDER: interaction / interface diagram -->
+              <rect x="100" y="60" width="700" height="640" rx="36" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+              <text x="450" y="120" text-anchor="middle" font-size="32" fill="rgba(255,255,255,0.5)" font-weight="900">场景示意图</text>
+              <rect x="140" y="160" width="280" height="100" rx="16" fill="rgba(101,167,255,0.12)" stroke="rgba(101,167,255,0.3)" stroke-width="1"/>
+              <text x="280" y="220" text-anchor="middle" font-size="28" fill="white" font-weight="800">策略卡片 A</text>
+              <rect x="480" y="160" width="280" height="100" rx="16" fill="rgba(154,123,255,0.12)" stroke="rgba(154,123,255,0.3)" stroke-width="1"/>
+              <text x="620" y="220" text-anchor="middle" font-size="28" fill="white" font-weight="800">策略卡片 B</text>
+              <rect x="140" y="300" width="620" height="80" rx="14" fill="rgba(53,208,255,0.08)" stroke="rgba(53,208,255,0.2)" stroke-width="1"/>
+              <text x="450" y="350" text-anchor="middle" font-size="28" fill="var(--c-accent-c)" font-weight="800">策略详情行</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Tactics</span><span class="footer-strong">关键洞察</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 7: Evidence / Perspective ==================== -->
+  <section class="s slide" id="slide-7">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">EVIDENCE</div><div class="page-no">07 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">07</div>
+            <h1 class="hero-title" style="font-size:88px;">视角标题</h1>
+            <p class="hero-sub">视角描述第一行<br>视角描述第二行<br>视角描述第三行</p>
+            <div class="hero-accent-bar"></div>
+          </div>
+          <div class="hero-right" style="padding:20px;">
+            <div style="display:flex;flex-direction:column;gap:16px;height:100%;justify-content:center;">
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,var(--c-accent-d),#ff8fab);">1</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">证据点一</div>
+                  <div style="font-size:28px;color:var(--c-text-2);">证据一描述</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:var(--c-accent-d);border-color:var(--c-accent-d);">TOP</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,var(--c-accent-a),#8fc4ff);">2</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">证据点二</div>
+                  <div style="font-size:28px;color:var(--c-text-2);">证据二描述</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;">追踪</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,var(--c-accent-b),#b8a8ff);">3</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">证据点三</div>
+                  <div style="font-size:28px;color:var(--c-text-2);">证据三描述</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:var(--c-accent-b);border-color:var(--c-accent-b);">预警</span>
+              </div>
+              <div class="notif-card">
+                <div class="notif-icon" style="background:linear-gradient(135deg,var(--c-accent-c),#6de0ff);">4</div>
+                <div style="flex:1;">
+                  <div style="font-size:34px;font-weight:800;color:white;">证据点四</div>
+                  <div style="font-size:28px;color:var(--c-text-2);">证据四描述</div>
+                </div>
+                <span class="hashtag" style="font-size:22px;padding:6px 12px;color:var(--c-accent-c);border-color:var(--c-accent-c);">行动</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Leadership Lens</span><span class="footer-strong">关键洞察</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 8: Cases ==================== -->
+  <section class="s slide" id="slide-8">
+    <div class="slide-shell">
+      <div class="slide-topline"><div class="eyebrow">CASES</div><div class="page-no">08 / 09</div></div>
+      <div class="slide-main">
+        <div class="hero-grid">
+          <div class="hero-left" style="justify-content:center;">
+            <div class="hero-glow"></div>
+            <div class="hero-ordinal">08</div>
+            <h1 class="hero-title" style="font-size:104px;">案例标题</h1>
+            <p class="hero-sub">案例概述第一行<br>案例概述第二行</p>
+            <div class="hero-accent-bar"></div>
+            <!-- A/B case summary -->
+            <div style="margin-top:28px; display:flex; flex-direction:column; gap:14px;">
+              <div style="padding:18px 22px; border-radius:16px; background:linear-gradient(135deg, rgba(101,167,255,0.12), rgba(154,123,255,0.08)); border-left:5px solid var(--c-accent-a);">
+                <div style="font-size:30px; font-weight:900; color:white;">Case A · 标题</div>
+                <div style="font-size:24px; color:var(--c-text-2); margin-top:4px;">案例 A 描述</div>
+              </div>
+              <div style="padding:18px 22px; border-radius:16px; background:linear-gradient(135deg, rgba(53,208,255,0.12), rgba(255,107,157,0.08)); border-left:5px solid var(--c-accent-c);">
+                <div style="font-size:30px; font-weight:900; color:white;">Case B · 标题</div>
+                <div style="font-size:24px; color:var(--c-text-2); margin-top:4px;">案例 B 描述</div>
+              </div>
+            </div>
+          </div>
+          <div class="hero-right">
+            <svg viewBox="0 0 900 760" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+              <!-- PLACEHOLDER: A/B comparison cards -->
+              <rect x="40" y="40" width="400" height="340" rx="24" fill="rgba(10,20,38,0.95)" stroke="rgba(101,167,255,0.25)" stroke-width="2"/>
+              <rect x="40" y="40" width="400" height="10" rx="5" fill="var(--c-accent-a)"/>
+              <text x="60" y="100" font-size="34" fill="white" font-weight="900">CASE A</text>
+              <text x="60" y="140" font-size="26" fill="var(--c-text-2)">案例 A 详情</text>
+              <rect x="460" y="380" width="400" height="340" rx="24" fill="rgba(10,20,38,0.95)" stroke="rgba(53,208,255,0.25)" stroke-width="2"/>
+              <rect x="460" y="380" width="400" height="10" rx="5" fill="var(--c-accent-c)"/>
+              <text x="480" y="440" font-size="34" fill="white" font-weight="900">CASE B</text>
+              <text x="480" y="480" font-size="26" fill="var(--c-text-2)">案例 B 详情</text>
+              <rect x="290" y="330" width="320" height="50" rx="14" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+              <text x="450" y="364" text-anchor="middle" font-size="26" fill="white" font-weight="900">同一套思维</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><span>Real Cases</span><span class="footer-strong">关键洞察</span></div>
+    </div>
+  </section>
+
+  <!-- ==================== Slide 9: Closing — Full-bleed SVG ==================== -->
+  <section class="s slide" id="slide-9">
+    <div class="slide-shell slide-shell--fullbleed">
+      <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;position:absolute;inset:0;">
+        <defs>
+          <radialGradient id="burst" cx="50%" cy="42%" r="50%">
+            <stop offset="0%" stop-color="rgba(101,167,255,0.22)"/>
+            <stop offset="30%" stop-color="rgba(154,123,255,0.10)"/>
+            <stop offset="60%" stop-color="rgba(53,208,255,0.03)"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </radialGradient>
+          <linearGradient id="quoteGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="25%" stop-color="#cfe3ff"/>
+            <stop offset="50%" stop-color="#9a7bff"/>
+            <stop offset="75%" stop-color="#65a7ff"/>
+            <stop offset="100%" stop-color="#35d0ff"/>
+          </linearGradient>
+          <linearGradient id="longBar" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#ff6b9d"/>
+            <stop offset="25%" stop-color="#9a7bff"/>
+            <stop offset="50%" stop-color="#65a7ff"/>
+            <stop offset="75%" stop-color="#35d0ff"/>
+            <stop offset="100%" stop-color="#65a7ff"/>
+          </linearGradient>
+          <linearGradient id="p1g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(255,107,157,0.25)"/><stop offset="100%" stop-color="rgba(255,107,157,0.05)"/></linearGradient>
+          <linearGradient id="p2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(101,167,255,0.25)"/><stop offset="100%" stop-color="rgba(101,167,255,0.05)"/></linearGradient>
+          <linearGradient id="p3g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(154,123,255,0.25)"/><stop offset="100%" stop-color="rgba(154,123,255,0.05)"/></linearGradient>
+          <linearGradient id="p4g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="rgba(53,208,255,0.25)"/><stop offset="100%" stop-color="rgba(53,208,255,0.05)"/></linearGradient>
+          <filter id="bigGlow"><feGaussianBlur stdDeviation="40" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="softGlow"><feGaussianBlur stdDeviation="16" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- Background -->
+        <rect width="1920" height="1080" fill="#050d1a"/>
+        <rect width="1920" height="1080" fill="url(#burst)"/>
+
+        <!-- Light rays -->
+        <linearGradient id="rayGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="rgba(101,167,255,0.12)"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </linearGradient>
+        <polygon points="960,400 140,0 300,0" fill="url(#rayGrad)" opacity="0.6"/>
+        <polygon points="960,400 1620,0 1780,0" fill="url(#rayGrad)" opacity="0.5"/>
+
+        <!-- Decorative circles -->
+        <circle cx="260" cy="200" r="150" fill="none" stroke="rgba(101,167,255,0.06)" stroke-width="2"/>
+        <circle cx="1660" cy="880" r="190" fill="none" stroke="rgba(154,123,255,0.05)" stroke-width="2"/>
+
+        <!-- Light dots -->
+        <circle cx="120" cy="520" r="4" fill="rgba(101,167,255,0.6)" filter="url(#softGlow)"/>
+        <circle cx="1800" cy="260" r="4" fill="rgba(154,123,255,0.6)" filter="url(#softGlow)"/>
+
+        <!-- Page number -->
+        <text x="80" y="1060" font-size="24" fill="rgba(255,255,255,0.3)" font-weight="700">09 / 09</text>
+        <text x="1840" y="1060" text-anchor="end" font-size="24" fill="rgba(255,255,255,0.3)" font-weight="700" letter-spacing="0.2em">FIN</text>
+
+        <!-- Core quote — glow layer -->
+        <text x="960" y="390" text-anchor="middle" font-size="136" font-weight="980" fill="rgba(101,167,255,0.10)" filter="url(#bigGlow)" letter-spacing="-0.04em">核心金句</text>
+        <text x="960" y="540" text-anchor="middle" font-size="136" font-weight="980" fill="rgba(154,123,255,0.10)" filter="url(#bigGlow)" letter-spacing="-0.04em">第二行</text>
+        <!-- Core quote — gradient text -->
+        <text x="960" y="390" text-anchor="middle" font-size="136" font-weight="980" fill="url(#quoteGrad)" letter-spacing="-0.04em">核心金句</text>
+        <text x="960" y="540" text-anchor="middle" font-size="136" font-weight="980" fill="url(#quoteGrad)" letter-spacing="-0.04em">第二行</text>
+
+        <!-- Full-width rainbow bar -->
+        <rect x="300" y="586" width="1320" height="6" rx="3" fill="url(#longBar)"/>
+        <circle cx="300" cy="589" r="8" fill="#ff6b9d" filter="url(#softGlow)"/>
+        <circle cx="1620" cy="589" r="8" fill="#65a7ff" filter="url(#softGlow)"/>
+
+        <!-- Sub quote -->
+        <text x="960" y="650" text-anchor="middle" font-size="38" fill="#9fb4d3" font-weight="400" letter-spacing="0.06em">副金句 / 行动号召</text>
+
+        <!-- 4 principle cards -->
+        <g transform="translate(200, 720)">
+          <rect width="340" height="110" rx="20" fill="url(#p1g)" stroke="rgba(255,107,157,0.35)" stroke-width="1.5"/>
+          <rect width="340" height="7" rx="3.5" fill="#ff6b9d"/>
+          <text x="170" y="52" text-anchor="middle" font-size="36" fill="#ff6b9d" font-weight="900"># 原则一</text>
+          <text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">原则一简述</text>
+        </g>
+        <g transform="translate(580, 720)">
+          <rect width="340" height="110" rx="20" fill="url(#p2g)" stroke="rgba(101,167,255,0.35)" stroke-width="1.5"/>
+          <rect width="340" height="7" rx="3.5" fill="#65a7ff"/>
+          <text x="170" y="52" text-anchor="middle" font-size="36" fill="#65a7ff" font-weight="900"># 原则二</text>
+          <text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">原则二简述</text>
+        </g>
+        <g transform="translate(960, 720)">
+          <rect width="340" height="110" rx="20" fill="url(#p3g)" stroke="rgba(154,123,255,0.35)" stroke-width="1.5"/>
+          <rect width="340" height="7" rx="3.5" fill="#9a7bff"/>
+          <text x="170" y="52" text-anchor="middle" font-size="36" fill="#9a7bff" font-weight="900"># 原则三</text>
+          <text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">原则三简述</text>
+        </g>
+        <g transform="translate(1340, 720)">
+          <rect width="340" height="110" rx="20" fill="url(#p4g)" stroke="rgba(53,208,255,0.35)" stroke-width="1.5"/>
+          <rect width="340" height="7" rx="3.5" fill="#35d0ff"/>
+          <text x="170" y="52" text-anchor="middle" font-size="36" fill="#35d0ff" font-weight="900"># 原则四</text>
+          <text x="170" y="88" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.5)">原则四简述</text>
+        </g>
+
+        <!-- Bottom line -->
+        <line x1="300" y1="1030" x2="1620" y2="1030" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <text x="960" y="1020" text-anchor="middle" font-size="20" fill="rgba(255,255,255,0.22)" letter-spacing="0.3em">底部文案</text>
+      </svg>
+    </div>
+  </section>
+
+</div>
+<div id="navigation-hint">Use ← → Space PgUp PgDn Home End</div>
+<script>
+(() => {
+  const slides = Array.from(document.querySelectorAll('.s.slide'));
+  const prevZone = document.querySelector('[data-nav="prev"]');
+  const nextZone = document.querySelector('[data-nav="next"]');
+  let index = Math.max(0, slides.findIndex(s => s.classList.contains('is-active')));
+
+  function render() {
+    slides.forEach((slide, i) => slide.classList.toggle('is-active', i === index));
+    const id = slides[index]?.id || `slide-${index + 1}`;
+    try { if (location.hash !== `#${id}`) history.replaceState(null, "", `#${id}`); } catch (_) {}
+  }
+
+  function go(nextIndex) { index = Math.max(0, Math.min(nextIndex, slides.length - 1)); render(); }
+  function next() { go(index + 1); }
+  function prev() { go(index - 1); }
+
+  window.nextSlide = next;
+  window.prevSlide = prev;
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') { e.preventDefault(); go(0); }
+    else if (e.key === 'End') { e.preventDefault(); go(slides.length - 1); }
+  }, { passive: false });
+
+  [nextZone, prevZone].forEach(zone => {
+    if (!zone) return;
+    zone.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); if (zone.dataset.nav === 'next') next(); else prev(); });
+  });
+
+  window.addEventListener('hashchange', () => {
+    const hash = location.hash.slice(1);
+    const idx = slides.findIndex(s => s.id === hash);
+    if (idx >= 0) { index = idx; render(); }
+  });
+
+  const initialHash = location.hash.slice(1);
+  const initialIdx = slides.findIndex(s => s.id === initialHash);
+  if (initialIdx >= 0) index = initialIdx;
+  render();
+})();
+</script>
+</body>
+</html>

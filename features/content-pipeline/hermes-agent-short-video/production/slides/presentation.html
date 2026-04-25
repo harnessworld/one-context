@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenClaw vs Hermes - 对比</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #1a1408;
+    color: #e8e0d0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .slide {
+    width: 100%;
+    height: 100%;
+    padding: 48px 56px 80px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ---- Slide 1 Layout ---- */
+  .slide-1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 0 48px;
+    background:
+      radial-gradient(ellipse 60% 50% at 30% 40%, rgba(120, 80, 20, 0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 75% 50%, rgba(40, 60, 30, 0.15) 0%, transparent 70%),
+      linear-gradient(180deg, #1c1a0e 0%, #181510 50%, #141210 100%);
+  }
+
+  /* ---- 顶部标题区 ---- */
+  .header {
+    grid-column: 1 / 2;
+    grid-row: 1;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(45, 80, 45, 0.55);
+    border: 1px solid rgba(80, 140, 80, 0.4);
+    color: #8fbc8f;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 18px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+  }
+
+  .title {
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1.25;
+    margin-bottom: 12px;
+  }
+
+  .title .highlight {
+    color: #e07030;
+  }
+
+  .subtitle {
+    font-size: 22px;
+    font-weight: 500;
+    color: #b0a898;
+    line-height: 1.6;
+  }
+
+  /* ---- 左侧卡片区 ---- */
+  .left-cards {
+    grid-column: 1 / 2;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 32px;
+    align-self: start;
+  }
+
+  .card {
+    background: rgba(60, 50, 30, 0.35);
+    border: 1px solid rgba(100, 85, 50, 0.25);
+    border-radius: 14px;
+    padding: 24px 28px;
+    backdrop-filter: blur(8px);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .card-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .card-title.openclaw { color: #d4913a; }
+  .card-title.hermes   { color: #7db87d; }
+
+  .card-desc {
+    font-size: 15px;
+    color: #b0a898;
+    margin-bottom: 4px;
+  }
+
+  .card-accent {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .card-accent.openclaw { color: #5a9a5a; }
+  .card-accent.hermes   { color: #5a9a5a; }
+
+  /* ---- 右侧 VS 面板 ---- */
+  .right-panel {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    padding-top: 24px;
+  }
+
+  .vs-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .vs-box {
+    flex: 1;
+    max-width: 240px;
+    text-align: center;
+    padding: 28px 20px;
+    border-radius: 14px;
+    backdrop-filter: blur(6px);
+  }
+
+  .vs-box.openclaw {
+    background: rgba(140, 70, 30, 0.2);
+    border: 2px solid #b85c30;
+  }
+
+  .vs-box.hermes {
+    background: rgba(50, 90, 50, 0.15);
+    border: 2px solid rgba(100, 160, 100, 0.5);
+  }
+
+  .vs-box .box-title {
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 10px;
+  }
+
+  .vs-box.openclaw .box-title { color: #e0a050; }
+  .vs-box.hermes .box-title   { color: #a0d8a0; }
+
+  .vs-box .box-desc {
+    font-size: 15px;
+    color: #c0b8a8;
+    line-height: 1.6;
+  }
+
+  .vs-box.hermes .box-desc .sparkle {
+    color: #c8a840;
+  }
+
+  .vs-label {
+    font-size: 32px;
+    font-weight: 900;
+    color: #d07030;
+    flex-shrink: 0;
+    text-shadow: 0 0 20px rgba(208, 112, 48, 0.3);
+  }
+
+  /* ---- 记忆对比行 ---- */
+  .memory-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .memory-box {
+    flex: 1;
+    max-width: 240px;
+    text-align: center;
+    padding: 16px 20px;
+    border-radius: 12px;
+    backdrop-filter: blur(6px);
+  }
+
+  .memory-box.openclaw {
+    background: rgba(120, 70, 30, 0.18);
+    border: 1px solid rgba(160, 100, 50, 0.25);
+  }
+
+  .memory-box.hermes {
+    background: rgba(50, 80, 50, 0.18);
+    border: 1px solid rgba(100, 150, 100, 0.25);
+  }
+
+  .memory-box .mem-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .memory-box.openclaw .mem-title { color: #c8b098; }
+  .memory-box.hermes .mem-title   { color: #a0cca0; }
+
+  .memory-box .mem-desc {
+    font-size: 13px;
+    color: #908878;
+  }
+
+  .memory-spacer {
+    width: 56px;
+    flex-shrink: 0;
+  }
+
+  /* ---- 底部总结 ---- */
+  .conclusion {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    color: #d8c8a8;
+    letter-spacing: 2px;
+  }
+
+  .conclusion .oc { color: #d4913a; }
+  .conclusion .hm { color: #7db87d; }
+
+  /* ---- Slide 2 Layout ---- */
+  .slide-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 48px;
+    align-items: center;
+    background:
+      radial-gradient(ellipse 60% 50% at 70% 35%, rgba(140, 60, 20, 0.2) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 50% at 25% 60%, rgba(80, 50, 20, 0.15) 0%, transparent 70%),
+      linear-gradient(180deg, #1c1a0e 0%, #181510 50%, #141210 100%);
+  }
+
+  .s2-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .s2-chart-wrapper {
+    background: rgba(30, 25, 18, 0.7);
+    border: 1px solid rgba(100, 85, 50, 0.2);
+    border-radius: 16px;
+    padding: 48px 48px 32px;
+    backdrop-filter: blur(8px);
+    width: 90%;
+    max-width: 580px;
+  }
+
+  .s2-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    height: 360px;
+    padding-bottom: 8px;
+    justify-content: center;
+  }
+
+  .s2-bar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .s2-bar {
+    width: 72px;
+    border-radius: 8px 8px 3px 3px;
+    background: rgba(100, 90, 70, 0.5);
+    border: 1px solid rgba(120, 100, 70, 0.3);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .s2-bar .bar-num-gray {
+    font-size: 28px;
+    font-weight: 700;
+    color: rgba(200, 190, 170, 0.6);
+  }
+
+  .s2-bar.active {
+    background: rgba(220, 100, 30, 0.25);
+    border: 3px solid #e07030;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 96px;
+    border-radius: 12px;
+  }
+
+  .s2-bar.active .bar-num {
+    font-size: 42px;
+    font-weight: 900;
+    color: #e07030;
+  }
+
+  .s2-bar.active .bar-trigger {
+    font-size: 18px;
+    font-weight: 700;
+    color: #e07030;
+  }
+
+  .s2-bar-label {
+    font-size: 18px;
+    color: #908878;
+    font-weight: 500;
+  }
+
+  .s2-bar-label.active {
+    color: #e07030;
+    font-weight: 700;
+  }
+
+  .s2-chart-caption {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 16px;
+    color: #908878;
+    font-weight: 500;
+  }
+
+  .s2-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-right: 24px;
+  }
+
+  .s2-badge {
+    display: inline-block;
+    align-self: flex-end;
+    background: rgba(200, 70, 30, 0.6);
+    border: 1px solid rgba(240, 100, 50, 0.5);
+    color: #ffd8c0;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 6px 20px;
+    border-radius: 20px;
+    letter-spacing: 2px;
+  }
+
+  .s2-title {
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1.35;
+  }
+
+  .s2-title .highlight {
+    color: #e07030;
+    display: block;
+  }
+
+  .s2-subtitle {
+    font-size: 20px;
+    font-weight: 500;
+    color: #b0a898;
+  }
+
+  .s2-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 12px;
+  }
+
+  .s2-card {
+    border-radius: 12px;
+    padding: 20px 24px;
+    backdrop-filter: blur(6px);
+  }
+
+  .s2-card.simple {
+    background: rgba(120, 50, 30, 0.25);
+    border: 1px solid rgba(180, 80, 40, 0.25);
+  }
+
+  .s2-card.complex {
+    background: rgba(40, 35, 28, 0.6);
+    border: 1px solid rgba(100, 85, 50, 0.25);
+  }
+
+  .s2-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .s2-card.simple .s2-card-title { color: #e07030; }
+  .s2-card.complex .s2-card-title { color: #f0e8d8; }
+
+  .s2-card-desc {
+    font-size: 14px;
+    color: #b0a898;
+  }
+
+  /* ---- 页码指示器 ---- */
+  .pagination {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(180, 160, 130, 0.3);
+    border: 1px solid rgba(180, 160, 130, 0.4);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .dot.active {
+    background: #e07030;
+    border-color: #e07030;
+    transform: scale(1.3);
+  }
+</style>
+</head>
+<body>
+
+<!-- Slide 1 -->
+<div class="slide slide-1 active">
+  <!-- 左上标题 -->
+  <div class="header">
+    <div class="badge">对比</div>
+    <div class="title">两个 <span class="highlight">完全不同</span> 的路数</div>
+    <div class="subtitle">具体到技能和记忆，差别更明显</div>
+  </div>
+
+  <!-- 左侧卡片 -->
+  <div class="left-cards">
+    <div class="card">
+      <div class="card-title openclaw">OpenClaw</div>
+      <div class="card-desc">交通枢纽 · 消息转发 · 幕后调度员</div>
+      <div class="card-accent openclaw">连接外部平台</div>
+    </div>
+    <div class="card">
+      <div class="card-title hermes">Hermes Agent</div>
+      <div class="card-desc">自我进化 · 总结经验 · 闭环反馈</div>
+      <div class="card-accent hermes">越用越聪明</div>
+    </div>
+  </div>
+
+  <!-- 右侧 VS 面板 -->
+  <div class="right-panel">
+    <div class="vs-row">
+      <div class="vs-box openclaw">
+        <div class="box-title">OpenClaw</div>
+        <div class="box-desc">插件市场<br>手动配置</div>
+      </div>
+      <div class="vs-label">VS</div>
+      <div class="vs-box hermes">
+        <div class="box-title">Hermes</div>
+        <div class="box-desc">自动归纳<br>边用边学 <span class="sparkle">&#10024;</span></div>
+      </div>
+    </div>
+
+    <div class="memory-row">
+      <div class="memory-box openclaw">
+        <div class="mem-title">Markdown 记信息</div>
+      </div>
+      <div class="memory-spacer"></div>
+      <div class="memory-box hermes">
+        <div class="mem-title">热 · 温 · 冷</div>
+        <div class="mem-desc">多层记忆</div>
+      </div>
+    </div>
+
+    <div class="conclusion">一个<span class="oc">连接外部</span>，一个<span class="hm">强化自身</span></div>
+  </div>
+</div>
+
+<!-- Slide 2 -->
+<div class="slide slide-2">
+  <!-- 左侧：阶梯图表 -->
+  <div class="s2-left">
+    <div class="s2-chart-wrapper">
+      <div class="s2-chart">
+        <div class="s2-bar-group">
+          <div class="s2-bar" style="height: 60px;"><span class="bar-num-gray">1</span></div>
+          <div class="s2-bar-label">1</div>
+        </div>
+        <div class="s2-bar-group">
+          <div class="s2-bar" style="height: 110px;"><span class="bar-num-gray">2</span></div>
+          <div class="s2-bar-label">2</div>
+        </div>
+        <div class="s2-bar-group">
+          <div class="s2-bar" style="height: 165px;"><span class="bar-num-gray">3</span></div>
+          <div class="s2-bar-label">3</div>
+        </div>
+        <div class="s2-bar-group">
+          <div class="s2-bar" style="height: 225px;"><span class="bar-num-gray">4</span></div>
+          <div class="s2-bar-label">4</div>
+        </div>
+        <div class="s2-bar-group">
+          <div class="s2-bar active" style="height: 320px;">
+            <span class="bar-num">5+</span>
+            <span class="bar-trigger">触发!</span>
+          </div>
+          <div class="s2-bar-label active">5+</div>
+        </div>
+      </div>
+      <div class="s2-chart-caption">复杂流程才会触发技能生成</div>
+    </div>
+  </div>
+
+  <!-- 右侧：文字内容 -->
+  <div class="s2-right">
+    <div class="s2-badge">触发门槛</div>
+    <div class="s2-title">不是什么任务都会<span class="highlight">生成技能</span></div>
+    <div class="s2-subtitle">连续 5+ 工具调用才会触发</div>
+    <div class="s2-cards">
+      <div class="s2-card simple">
+        <div class="s2-card-title">简单任务</div>
+        <div class="s2-card-desc">一两个步骤 → 不值得变技能</div>
+      </div>
+      <div class="s2-card complex">
+        <div class="s2-card-title">复杂流程</div>
+        <div class="s2-card-desc">重复性任务 → 才值得保存</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 页码指示器 -->
+<div class="pagination">
+  <div class="dot active" data-slide="0"></div>
+  <div class="dot" data-slide="1"></div>
+</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+  let current = 0;
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= slides.length) return;
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = idx;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goTo(current - 1);
+  });
+
+  dots.forEach(function(dot) {
+    dot.addEventListener('click', function() {
+      goTo(parseInt(this.dataset.slide));
+    });
+  });
+})();
+</script>
+</body>
+</html>

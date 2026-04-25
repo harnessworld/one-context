@@ -1,0 +1,43 @@
+/* === Mobile Deep Blue — 深蓝汇报风 === */
+/* 专为 shell 布局设计，灵感源自 short-video-reporting-paradigm presentation.html */
+
+:root {
+  /* --- Base color overrides --- */
+  --c-bg: #07111f;
+  --c-surface: rgba(11, 24, 44, 0.86);
+  --c-surface-2: rgba(25, 46, 77, 0.86);
+  --c-text-1: #f5f8ff;
+  --c-text-2: #9fb4d3;
+  --c-accent-a: #65a7ff;
+  --c-accent-b: #9a7bff;
+  --c-accent-c: #35d0ff;
+  --c-accent-d: #ff6b9d;
+  --c-accent-e: #ffd93d;
+  --c-border: rgba(255, 255, 255, 0.10);
+  --c-overlay: rgba(7, 17, 31, 0.6);
+
+  /* --- Shadow overrides (deeper for dark backgrounds) --- */
+  --shadow-sm: 0 10px 24px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 18px 40px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 28px 90px rgba(0, 0, 0, 0.40);
+
+  /* --- Shell-specific visual tokens --- */
+  --shell-title-gradient: linear-gradient(135deg, #ffffff 0%, #cfe3ff 30%, #ffffff 55%, #a8c8ff 80%, #ffffff 100%);
+  --shell-accent-gradient: linear-gradient(90deg, #65a7ff, #9a7bff, #35d0ff);
+  --shell-dot-gradient: linear-gradient(135deg, #65a7ff, #9a7bff);
+  --shell-glow-color-a: rgba(101, 167, 255, 0.12);
+  --shell-glow-color-b: rgba(154, 123, 255, 0.06);
+  --shell-surface: rgba(4, 11, 22, 0.62);
+  --shell-border: rgba(255, 255, 255, 0.10);
+  --shell-radius: 34px;
+  --shell-padding: 28px 34px 20px;
+  --shell-hero-right-bg: linear-gradient(145deg, #0f1f3c 0%, #18315e 42%, #162850 70%, #0b1830 100%);
+  --shell-hero-right-border-inner: rgba(255, 255, 255, 0.08);
+  --shell-hero-right-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+  --shell-card-bg: rgba(10, 20, 38, 0.90);
+  --shell-card-glow: radial-gradient(circle at top left, rgba(101, 167, 255, 0.06), transparent 28%);
+  --shell-card-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  --shell-ordinal-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  --shell-hashtag-gradient: linear-gradient(135deg, rgba(101, 167, 255, 0.2), rgba(154, 123, 255, 0.15));
+  --shell-hashtag-border: rgba(101, 167, 255, 0.3);
+}

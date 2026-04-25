@@ -1,0 +1,238 @@
+/* === Mobile Deck Layout System === */
+
+/* --- Container: fixed 1920×1080 viewport --- */
+#P {
+  width: var(--slide-w);
+  height: var(--slide-h);
+  overflow: hidden;
+  position: relative;
+  background: var(--c-bg);
+  font-family: var(--font-sans);
+  color: var(--c-text-1);
+}
+
+/* --- Slide (page) --- */
+.s.slide {
+  width: 100%;
+  height: 100%;
+  display: none;
+  flex-direction: column;
+  padding: var(--slide-pad);
+  box-sizing: border-box;
+  position: relative;
+}
+
+.s.slide.is-active {
+  display: flex;
+}
+
+/* --- Slide header --- */
+.slide-header {
+  flex-shrink: 0;
+  margin-bottom: var(--sp-md);
+}
+
+.slide-header .badge {
+  display: inline-block;
+  font-size: var(--fs-pill);
+  padding: 4px 16px;
+  border-radius: var(--r-full);
+  background: var(--c-accent-a);
+  color: var(--c-bg);
+  font-weight: 600;
+  margin-bottom: var(--sp-sm);
+}
+
+.slide-header h2 {
+  font-size: var(--fs-page-title);
+  font-weight: 700;
+  line-height: var(--lh-tight);
+  margin: 0;
+}
+
+/* --- Main content column --- */
+.col.slide-main {
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  display: flex;
+}
+
+/* --- fill-deck: vertical space filling --- */
+.slide-main.fill-deck {
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.slide-main.fill-deck .slide-cards {
+  flex: 1 1 0;
+  min-height: 0;
+  align-items: stretch;
+  display: flex;
+  gap: var(--card-gap);
+}
+
+.slide-main.fill-deck .slide-cards > .g {
+  align-self: stretch;
+  height: 100%;
+  min-height: 0;
+}
+
+/* --- Cards --- */
+.g {
+  background: var(--c-surface);
+  border-radius: var(--r-md);
+  padding: var(--card-pad);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--c-border);
+}
+
+.g .g-title {
+  font-size: var(--fs-card-title);
+  font-weight: 600;
+  margin: 0 0 var(--sp-sm) 0;
+  flex-shrink: 0;
+}
+
+.g .g-body {
+  font-size: var(--fs-card-body);
+  line-height: var(--lh-normal);
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* --- card-diagram: flex:1 illustration zone --- */
+.card-diagram {
+  flex: 1;
+  min-height: 240px;
+  margin-top: var(--sp-md);
+}
+
+.card-diagram svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- v-center: only for short content pages --- */
+.slide-main.v-center {
+  justify-content: center;
+  align-items: center;
+}
+
+/* --- Footer bar --- */
+.slide-footer {
+  flex-shrink: 0;
+  margin-top: var(--sp-md);
+  padding-top: var(--sp-sm);
+  border-top: 1px solid var(--c-border);
+  font-size: var(--fs-footer);
+  color: var(--c-text-2);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* --- Stat (oversized number) --- */
+.stat-value {
+  font-size: var(--fs-stat);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--c-accent-a);
+}
+
+.stat-label {
+  font-size: var(--fs-body);
+  color: var(--c-text-2);
+  margin-top: var(--sp-xs);
+}
+
+/* --- Pill / badge --- */
+.pill {
+  display: inline-block;
+  font-size: var(--fs-pill);
+  padding: 6px 18px;
+  border-radius: var(--r-full);
+  background: var(--c-surface-2);
+  color: var(--c-text-1);
+  font-weight: 500;
+}
+
+/* --- Divider helpers --- */
+.divider-h {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--c-border), transparent);
+  margin: var(--sp-md) 0;
+}
+
+.divider-v {
+  width: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 var(--sp-md);
+  align-self: stretch;
+}
+
+/* --- Grid layout helpers --- */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--card-gap);
+}
+
+.grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--card-gap);
+}
+
+/* --- Split layout --- */
+.split {
+  display: flex;
+  gap: var(--card-gap);
+}
+
+.split > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* --- Process flow --- */
+.process-flow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+  flex: 1;
+  min-height: 0;
+}
+
+.process-flow .step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.process-flow .arrow {
+  font-size: var(--fs-body);
+  color: var(--c-accent-a);
+  flex-shrink: 0;
+}
+
+/* --- Emoji sizing --- */
+.emoji-lg {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.emoji-xl {
+  font-size: 96px;
+  line-height: 1;
+}
+
+/* --- .wa: Whisper anchor (for html-video-from-slides) --- */
+.wa {
+  /* No visual style; semantic anchor for Whisper alignment */
+}

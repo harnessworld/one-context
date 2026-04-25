@@ -1,0 +1,7 @@
+/* Deep Reporting Template — Scoped Overrides */
+
+/* Scope all overrides under .tpl-deep-reporting to avoid leaking into other templates */
+.tpl-deep-reporting .s.slide {
+  padding: 40px 56px 32px;
+  background: transparent;
+}

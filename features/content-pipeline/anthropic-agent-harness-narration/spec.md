@@ -2,7 +2,7 @@
 id: anthropic-agent-harness-narration
 title: Anthropic Agent Harness 哲学 — 口播稿
 status: draft
-category: develop
+category: content-pipeline
 primary_repo_id: one-context
 owner: ""
 updated: "2026-04-11"
@@ -18,7 +18,7 @@ updated: "2026-04-11"
 
 ## 目标
 
-- [ ] 产出一份可照稿录制的口播 Markdown：**建议路径** `features/develop/anthropic-agent-harness-narration/narration.md`（或同目录 `content/narration.md`）。
+- [ ] 产出一份可照稿录制的口播 Markdown：路径 `production/content/01-script.md`。
 - [ ] 结构包含：开场钩子（15–30s 量级）、核心概念分层（Harness 是什么 / 与模型能力的关系）、至少 2 个「失效模式 → 束具层应对」的叙事、收束金句或行动建议。
 - [ ] 列明**参考来源**（Anthropic Engineering 等官方文章标题 + URL + 访问日期），口播中区分「Anthropic 公开表述」与「个人归纳」。
 - [ ] 给出**预估总时长**（如 3–8 分钟档）及分段时长备注，便于后续对齐幻灯或 `skills/html-video-from-slides` 流水线。
@@ -40,7 +40,7 @@ updated: "2026-04-11"
 - [ ] 参考来源章节可追溯至 Anthropic（或其他）原文；无未标注的敏感或商业机密。
 - [ ] 全文无与公开资料明显矛盾的技术断言；存疑处列入「开放问题」或口播中口头免责。
 - [ ] 若计划走 HTML 幻灯 + wav-auto：在 spec 或口播头注释中注明目标时长与是否需逐页对齐字幕。
-- [ ] 成片输入音频：自「下载」目录复制后的 `production/voiceover.wav` 存在且为**唯一** WAV；`wav-auto` 的 `--project` 指向 `features/develop/anthropic-agent-harness-narration/production/`（或你实际使用的等价素材目录）。
+- [ ] 成片输入音频：自「下载」目录复制后的 `production/voiceover.wav` 存在且为**唯一** WAV；`wav-auto` 的 `--project` 指向 `features/content-pipeline/anthropic-agent-harness-narration/production/`（或你实际使用的等价素材目录）。
 
 # 内容要点（撰写清单，非口播正文）
 
@@ -55,12 +55,12 @@ updated: "2026-04-11"
 
 - **仓库 id**（`meta/repos.yaml`）: **one-context**（口播稿与需求说明位于本伞仓 `features/`）。
 - **分支 / PR**: （按需）
-- **主要路径或模块**: `features/develop/anthropic-agent-harness-narration/`（口播稿与幻灯成片素材建议放在 **`production/`** 子目录：`presentation.html`、`voiceover.wav`（从**下载**目录拷入）、`video-input.json`）；成片流程见 `skills/html-video-from-slides/SKILL.md` 的 `wav-auto`。
+- **主要路径或模块**: `features/content-pipeline/anthropic-agent-harness-narration/`（口播稿与幻灯成片素材建议放在 **`production/`** 子目录：`presentation.html`、`voiceover.wav`（从**下载**目录拷入）、`video-input.json`）；成片流程见 `skills/html-video-from-slides/SKILL.md` 的 `wav-auto`。
 
 # 关联
 
 - **Workspace**（`meta/workspaces.yaml` id，如有）:
-- **其他需求目录**（跨类别时链接主从）: `features/develop/hermes-agent-short-video/`（若同一批次短视频成片）
+- **其他需求目录**（跨类别时链接主从）: `features/content-pipeline/hermes-agent-short-video/`（若同一批次短视频成片）
 
 # 开放问题
 

@@ -27,6 +27,7 @@ agents:
       - knowledge/standards/one-context-conventions.md
       - features/README.md
       - features/_template/
+      - features/_template/content-production/
     owns:
       - "features/**/spec.md"
       - "features/INDEX.md"
@@ -37,6 +38,11 @@ agents:
       - Clarify requirements, acceptance criteria, and implementation anchor points (repo id, branch).
       - You do NOT write code, design systems, or make implementation decisions.
       - When in doubt about scope, ask before expanding — plan_first applies to requirements too.
+      - When the feature is content-creation type (short video, narration, presentation, etc.),
+        you MUST also copy features/_template/content-production/ to set up the production/ directory.
+        Use category: content-pipeline. Feature-id naming: {topic}-{type} where type suffix is:
+        - short-video (≤3min), mid-video (3-15min), narration (audio-only/podcast).
+        Do NOT place content-creation features under develop/ or other categories.
 
   - id: architect
     name: "Architect Agent"

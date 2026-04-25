@@ -264,7 +264,7 @@ class CursorAdapter(AdapterBase):
                 "---",
                 f'description: "Skill: {skill.name} — {description}"',
                 "globs:",
-                "alwaysApply: false",
+                "alwaysApply: true",
                 "---",
             ]
 

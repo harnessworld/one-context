@@ -6,6 +6,8 @@
 
 ## 目录结构
 
+### 软件开发型 feature
+
 ```text
 features/
   README.md          # 本约定（权威）
@@ -19,6 +21,33 @@ features/
       mr_report.md
       deliver.md
 ```
+
+### 内容生产型 feature（短视频 / 演示文稿）
+
+```text
+<feature-id>/
+├── spec.md                         # Feature 规格
+├── review_record.md                # 评审记录（不在 production/ 内）
+├── issue_checklist.md              # 问题清单（不在 production/ 内）
+│
+└── production/
+    ├── content/                    # 内容创作资产 ✅ 跟踪
+    │   ├── 00-structure.md         #   话题大纲
+    │   ├── 01-script.md            #   口播讲稿
+    │   └── 05-publish-kit.md       #   发布素材
+    ├── slides/                     # 幻灯片资产 ✅ 跟踪
+    │   └── presentation.html       #   主幻灯
+    ├── subtitles/                  # 字幕资产 ✅ 跟踪
+    │   └── sub.srt                 #   校对后字幕
+    ├── timing/                     # 时间轴与配置 ✅ 跟踪
+    │   ├── wav-durations.json      #   精确翻页时长
+    │   └── video-input.json        #   配置 + srtReplacements
+    ├── media/                      # 媒体文件 ❌ 不跟踪
+    │   └── *.wav, *.mp4, *.png
+    └── tmp/                        # 构建中间物 ❌ 不跟踪
+```
+
+新建内容型 feature 时，复制 `features/_template/content-production/` 目录结构。详见 `features/_template/content-production/README.md`。
 
 - **`<category>`**：按主题或产品线划分；跨类需求选一个 **主类别** 落目录，在 `spec.md` 里链接其他相关需求目录即可。
 - **`<feature-id>`**：建议稳定、简短；可与 `INDEX.md` 中的 `id` 列一致。

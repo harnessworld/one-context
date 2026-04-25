@@ -45,6 +45,10 @@ Read these files for context:
 @knowledge/standards/oracle-parallel-debugging.md
 @features/INDEX.md
 @features/README.md
+@features/_template/content-production/README.md
+@features/_template/content-production/production/content/00-structure.md
+@features/_template/content-production/production/content/01-script.md
+@features/_template/content-production/production/content/05-publish-kit.md
 @features/_template/deliver.md
 @features/_template/mr_report.md
 @features/_template/spec.md

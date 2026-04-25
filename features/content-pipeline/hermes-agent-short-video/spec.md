@@ -2,7 +2,7 @@
 id: hermes-agent-short-video
 title: Hermes Agent 短视频口播成片
 status: draft
-category: develop
+category: content-pipeline
 primary_repo_id: one-context
 owner: ""
 updated: "2026-04-09"
@@ -37,7 +37,7 @@ updated: "2026-04-09"
 
 - **仓库 id**（`meta/repos.yaml`）: one-context（技能与素材路径在本伞仓）
 - **分支 / PR**: （按需）
-- **主要路径或模块**: `features/develop/hermes-agent-short-video/production/`、`skills/html-video-from-slides/cli.js`
+- **主要路径或模块**: `features/content-pipeline/hermes-agent-short-video/production/`、`skills/html-video-from-slides/cli.js`
 
 # 关联
 

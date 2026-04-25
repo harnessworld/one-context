@@ -1,0 +1,451 @@
+/* === Shell Layout System === */
+/* Complements mobile-layout.css; provides a constrained slide-shell pattern
+   where every page follows the same visual structure.
+   Designed for high visual consistency — reduces AI micro-decisions. */
+
+:root {
+  /* Shell visual tokens — override in theme CSS to re-skin.
+     mobile-deep-blue.css provides the canonical values. */
+  --shell-title-gradient: linear-gradient(135deg, #ffffff 0%, var(--c-accent-a) 30%, #ffffff 55%, var(--c-accent-b) 80%, #ffffff 100%);
+  --shell-accent-gradient: linear-gradient(90deg, var(--c-accent-a), var(--c-accent-b), var(--c-accent-c));
+  --shell-dot-gradient: linear-gradient(135deg, var(--c-accent-a), var(--c-accent-b));
+  --shell-glow-color-a: rgba(101, 167, 255, 0.12);
+  --shell-glow-color-b: rgba(154, 123, 255, 0.06);
+  --shell-surface: rgba(4, 11, 22, 0.62);
+  --shell-border: rgba(255, 255, 255, 0.10);
+  --shell-radius: 34px;
+  --shell-padding: 28px 34px 20px;
+  --shell-hero-right-bg: linear-gradient(145deg, #0f1f3c 0%, #18315e 42%, #162850 70%, #0b1830 100%);
+  --shell-hero-right-border-inner: rgba(255, 255, 255, 0.08);
+  --shell-hero-right-overlay: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+  --shell-card-bg: rgba(10, 20, 38, 0.90);
+  --shell-card-glow: radial-gradient(circle at top left, rgba(101, 167, 255, 0.06), transparent 28%);
+  --shell-card-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  --shell-ordinal-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  --shell-hashtag-gradient: linear-gradient(135deg, rgba(101, 167, 255, 0.2), rgba(154, 123, 255, 0.15));
+  --shell-hashtag-border: rgba(101, 167, 255, 0.3);
+}
+
+/* ---- Shell — shared card container for every page ---- */
+.slide-shell {
+  flex: 1;
+  min-height: 0;
+  border-radius: var(--shell-radius);
+  overflow: hidden;
+  border: 1px solid var(--shell-border);
+  background:
+    var(--shell-card-glow),
+    var(--shell-card-surface),
+    var(--shell-surface);
+  backdrop-filter: blur(22px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--shadow-lg);
+  padding: var(--shell-padding);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Full-bleed variant: strips all card styling so inner SVG fills the slide.
+   Use on closing slides that render their own full-canvas visuals. */
+.slide-shell--fullbleed {
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+}
+
+/* ---- Topline ---- */
+.slide-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.eyebrow {
+  font-size: 24px;
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--c-accent-a);
+  font-weight: 900;
+  text-shadow: 0 0 20px var(--shell-glow-color-a);
+}
+
+.page-no {
+  font-size: 24px;
+  color: var(--c-text-2);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-no::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--shell-dot-gradient);
+  box-shadow: 0 0 12px var(--shell-glow-color-a);
+}
+
+/* ---- Common hero elements — used on ALL pages for consistency ---- */
+.hero-glow {
+  position: absolute;
+  top: -60px;
+  left: -80px;
+  width: 520px;
+  height: 440px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, var(--shell-glow-color-a), var(--shell-glow-color-b) 40%, transparent 72%);
+  filter: blur(40px);
+  z-index: 0;
+}
+
+.hero-glow-right {
+  position: absolute;
+  top: -60px;
+  right: -80px;
+  width: 520px;
+  height: 440px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, var(--shell-glow-color-b), var(--shell-glow-color-a) 40%, transparent 72%);
+  filter: blur(40px);
+  z-index: 0;
+}
+
+.hero-glow-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 600px;
+  height: 500px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, var(--shell-glow-color-a), var(--shell-glow-color-b) 40%, transparent 72%);
+  filter: blur(50px);
+  z-index: 0;
+  transform: translate(-50%, -50%);
+}
+
+.hero-glow ~ *,
+.hero-glow-right ~ *,
+.hero-glow-center ~ * {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-ordinal {
+  font-size: 100px;
+  font-weight: 980;
+  letter-spacing: -0.06em;
+  line-height: 1;
+  background: var(--shell-ordinal-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: -12px;
+  user-select: none;
+  pointer-events: none;
+}
+
+.hero-accent-bar {
+  width: 120px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--shell-accent-gradient);
+  margin-top: 24px;
+  box-shadow: 0 0 28px var(--shell-glow-color-a), 0 0 60px var(--shell-glow-color-b);
+}
+
+.hero-title {
+  font-size: 120px;
+  line-height: 0.96;
+  font-weight: 980;
+  letter-spacing: -0.06em;
+  margin: 0 0 20px;
+  background: var(--shell-title-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 14px 40px rgba(0, 0, 0, 0.34));
+}
+
+.hero-sub {
+  font-size: 42px;
+  line-height: 1.34;
+  color: var(--c-text-2);
+  max-width: 860px;
+  margin: 0 0 24px;
+  font-weight: 500;
+}
+
+/* ---- Layout grids ---- */
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  height: 100%;
+}
+
+.hero-left {
+  padding: 14px 4px 14px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.hero-right {
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
+  background: var(--shell-hero-right-bg);
+  border: 1px solid var(--shell-border);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-right::before {
+  content: "";
+  position: absolute;
+  inset: 24px;
+  border-radius: 24px;
+  border: 1px solid var(--shell-hero-right-border-inner);
+  pointer-events: none;
+}
+
+.hero-right::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--shell-hero-right-overlay);
+  pointer-events: none;
+}
+
+/* ---- Slide main (shell variant, no .col prefix needed) ---- */
+.slide-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- Grid utilities ---- */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  height: 100%;
+}
+
+.grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 20px;
+  height: 100%;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  height: 100%;
+}
+
+/* ---- Cards (shell variant) ---- */
+.g, .panel {
+  background:
+    var(--shell-card-glow),
+    var(--shell-card-surface),
+    var(--shell-card-bg);
+  border: 1px solid var(--shell-border);
+  border-radius: 26px;
+  box-shadow: var(--shadow-md);
+  padding: 26px 28px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ---- Hashtag labels ---- */
+.hashtag {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: var(--shell-hashtag-gradient);
+  border: 1px solid var(--shell-hashtag-border);
+  border-radius: 8px;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--c-accent-a);
+}
+
+.hashtag::before {
+  content: "#";
+  margin-right: 4px;
+}
+
+/* ---- Notification cards ---- */
+.notif-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border-radius: 20px;
+  padding: 24px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.notif-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--c-accent-a), var(--c-accent-b));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+/* ---- Short video card ---- */
+.sv-card {
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sv-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sv-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-accent-a), var(--c-accent-b));
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.sv-username {
+  font-size: 32px;
+  font-weight: 800;
+  color: white;
+}
+
+.sv-content {
+  font-size: 32px;
+  line-height: 1.4;
+  color: #eef4ff;
+}
+
+/* ---- Video progress bar ---- */
+.video-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.video-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-accent-d), var(--c-accent-e));
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(255, 107, 157, 0.5);
+}
+
+/* ---- Danmu (floating comments) ---- */
+.danmu {
+  position: absolute;
+  white-space: nowrap;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  font-size: 28px;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  font-weight: 700;
+}
+
+/* ---- Label row ---- */
+.label-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ---- Footer (shell variant — NOT .slide-footer) ---- */
+/* Intentionally different class name to avoid conflict with mobile-layout.css */
+.footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--c-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 24px;
+  color: var(--c-text-2);
+  flex-shrink: 0;
+}
+
+.footer-strong {
+  color: var(--c-text-1);
+  font-weight: 900;
+}
+
+/* ---- Swipe hint ---- */
+.swipe-hint {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ---- Navigation zones ---- */
+.nav-zone-left,
+.nav-zone-right {
+  position: fixed;
+  top: 0;
+  width: 18vw;
+  height: 100vh;
+  z-index: 9999;
+  cursor: pointer;
+  background: transparent;
+}
+
+.nav-zone-left {
+  left: 0;
+}
+
+.nav-zone-right {
+  right: 0;
+}
+
+#navigation-hint {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.42);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 10000;
+}

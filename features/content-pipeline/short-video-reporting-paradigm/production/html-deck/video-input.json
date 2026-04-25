@@ -1,0 +1,19 @@
+{
+  "outputFile": "final_auto.mp4",
+  "whisperModel": "small",
+  "burnSubtitles": true,
+  "noSpeechThreshold": 0.85,
+  "vadFilter": false,
+  "strictSubtitles": false,
+  "maxSubtitleGapSec": 2.5,
+  "subtitle": {
+    "fontName": "Microsoft YaHei",
+    "fontSize": 20,
+    "bold": true,
+    "primaryColour": "#FFFF00",
+    "primaryAlpha": 108,
+    "marginV": 20,
+    "charsPerLine": 26
+  },
+  "wrapSubtitles": true
+}

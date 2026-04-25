@@ -170,12 +170,26 @@ class OpenClawAdapter(AdapterBase):
         root: Path,
         skills: list[SkillMeta],
     ) -> list[GeneratedFile]:
-        """Generate ``.openclaw/skills/<name>.json`` for each skill."""
+        """Generate ``.openclaw/skills/<name>.json`` for each skill.
+
+        The full SKILL.md body (stripped of frontmatter) is inlined as
+        ``content`` so consumers do not need to read the source file.
+        """
+        from one_context.skills import strip_frontmatter
+
         self._skills = list(skills)
         files: list[GeneratedFile] = []
 
         for skill in skills:
             fm = skill.frontmatter
+
+            # Read and inline the SKILL.md body
+            skill_path = root / skill.source_path
+            if skill_path.is_file():
+                full_text = skill_path.read_text(encoding="utf-8")
+                body = strip_frontmatter(full_text).strip()
+            else:
+                body = skill.body.strip() if skill.body else ""
 
             config: dict[str, Any] = {
                 "_generated": GENERATED_NOTICE_JSON,
@@ -184,6 +198,7 @@ class OpenClawAdapter(AdapterBase):
                 "description": fm.get("description", ""),
                 "source": skill.source_path,
                 "trigger_phrases": fm.get("triggers", []),
+                "content": body,
             }
 
             openclaw_meta = fm.get("openclaw")
