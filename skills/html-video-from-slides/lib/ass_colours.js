@@ -51,11 +51,24 @@ function hexToAssWithAlpha(hex, alpha255) {
 
 /** wav-auto / wav 烧录与 tts 共用的默认字幕外观 */
 const DEFAULT_SUBTITLE_STYLE = {
-  fontSize: 18,
-  marginV: 18,
-  primaryColour: '#FFFF00',
-  /** 字幕字色半透明：ASS alpha，0 不透明，255 全透明 */
-  primaryAlpha: 108,
+  fontSize: 48,
+  marginV: 8,
+  primaryColour: '#FFD700',
+  fontName: 'Microsoft YaHei',
+  bold: false,
+  /** 字幕字色：ASS alpha，0 不透明，255 全透明。
+   *  在有半透明底栏(barHeight)时，字本身保持不透明即可，
+   *  由底栏负责可读性对比度，避免字本身发灰。 */
+  primaryAlpha: 0,
+  /** 取消黑色描边；ASS outline 在深色背景上会产生脏黑边，
+   *  依靠 drawBox 提供干净底栏替代（barHeight=0 时不绘制） */
+  outline: 0,
+  /** 底部半透明保护栏高度(px)。
+   *  0 = 不绘制底栏，字幕直接浮于画面（默认）。
+   *  >0 = 在画面底部绘制半透明暗色矩形，托住字幕避免与正文重叠。
+   *  多数播客/知识类视频推荐不设底栏，保持画面干净。 */
+  barHeight: 0,
+  barAlpha: 0.55,
 };
 
 module.exports = {

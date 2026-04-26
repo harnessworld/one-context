@@ -66,6 +66,9 @@ _*_*.py
 _*-*.txt
 _search*.cjs
 
+# Step session runtime data
+features/**/production/.step/
+
 # Video media files (generated, not for repo)
 *.mp4
 *.webm

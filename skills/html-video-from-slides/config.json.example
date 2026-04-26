@@ -32,8 +32,13 @@
     "marginV": 18,
     "fontName": "Microsoft YaHei",
     "bold": true,
-    "charsPerLine": 28,
+    "charsPerLine": 42,
     "primaryColour": "#FFFF00",
-    "primaryAlpha": 108
+    "primaryAlpha": 108,
+    "backAlpha": 255,
+    "shadow": 0,
+    "outline": 1,
+    "barHeight": 80,
+    "barAlpha": 0.65
   }
 }

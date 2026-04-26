@@ -44,7 +44,7 @@ function suggestCharsPerLine(fontSize, videoWidth = 1920) {
   const usable = Math.max(960, videoWidth - marginPx);
   const perChar = fs * 1.22;
   const n = Math.floor(usable / perChar);
-  return Math.max(14, Math.min(22, n));
+  return Math.max(14, Math.min(50, n));
 }
 
 /**
@@ -199,7 +199,7 @@ function prepareSrtForBurn(srcPath, destPath, opts = {}) {
   if (cpl == null || cpl === 0) {
     cpl = suggestCharsPerLine(opts.fontSize ?? 18);
   }
-  const wrapChars = Math.max(8, Math.min(36, Number(cpl) || 20));
+  const wrapChars = Math.max(8, Math.min(60, Number(cpl) || 20));
 
   for (const b of blocks) {
     let t = applyReplacements(b.text, reps);

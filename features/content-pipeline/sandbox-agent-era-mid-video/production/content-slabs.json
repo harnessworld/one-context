@@ -1,0 +1,106 @@
+{
+  "pageCount": 9,
+  "theme": "mobile-tech",
+  "pages": [
+    {
+      "id": 0,
+      "role": "cover",
+      "layout": "Cover",
+      "title": "一条命令，删光生产环境",
+      "body": "欢迎收听AI播客。2026年3月8日，一名数据科学家让AI Agent做迁移操作，结果Agent执行了错误命令，把数据库和基础设施全部删除，两年半的学生作业数据瞬间丢失。",
+      "wa": "AI agent就一条命令就把整个生产环境给删掉了",
+      "srtRange": [1, 9],
+      "durationSec": 47.6,
+      "accentColor": "g-hi"
+    },
+    {
+      "id": 1,
+      "role": "content",
+      "layout": "Grid 2x2",
+      "title": "沙箱不等于100%隔离",
+      "body": "很多人误以为沙箱是铁壁铜墙。实际上它只是在操作系统或虚拟机层面做了一层限制，一旦找到漏洞仍可跳出。恶意程序还会检测沙箱并改变行为，root权限更会大幅降低沙箱效果。安全不能100%依赖沙箱，需要多层手段配合。",
+      "wa": "沙箱就像一个铁壁铜墙一样把所有的危险都挡住了",
+      "srtRange": [9, 20],
+      "durationSec": 70.2,
+      "accentColor": "g-gn"
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "layout": "Card + Diagram",
+      "title": "隔离技术金字塔",
+      "body": "隔离技术分为多个层级。最底层是硬件虚拟化，给每个AI任务分配独立虚拟机，最安全但资源消耗最大。往上是用户态内核和WebAssembly，通过拦截系统调用实现隔离，适合多租户高安全场景。传统容器适合做开发测试。",
+      "wa": "隔离技术就像一个金字塔一样,最底层的就是靠硬件的虚拟化",
+      "srtRange": [20, 30],
+      "durationSec": 66.7,
+      "accentColor": "g-or"
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "layout": "Card + Diagram",
+      "title": "按场景选隔离方案",
+      "body": "选择隔离技术要在安全和开销间找平衡。不可信代码加多租户环境推荐硬件虚拟化或Micro VM；追求极致启动速度和低资源消耗选WASM；普通开发测试用加固容器；本地边缘端简单任务用OS API或运行时沙箱。",
+      "wa": "要在安全和开销当中去找一个平衡",
+      "srtRange": [30, 39],
+      "durationSec": 60.1,
+      "accentColor": "g-sk"
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "layout": "Card + Diagram",
+      "title": "脑手分离三层解耦",
+      "body": "Anthropic Managed Agents采用脑手分离架构：大脑做决策、双手执行、记忆保存状态。三部分通过标准化接口通信，可独立升级替换。P50首次响应时间降低60%，P95降低90%以上，更安全高效，支持多智能体协作。",
+      "wa": "把智能体拆分成了大脑和双手和记忆",
+      "srtRange": [39, 55],
+      "durationSec": 107.5,
+      "accentColor": "g-rd"
+    },
+    {
+      "id": 5,
+      "role": "content",
+      "layout": "Grid 2x2",
+      "title": "安全与弹性优势",
+      "body": "API密钥等敏感信息完全隔离在执行环境之外，通过代理机制访问，即使沙箱被攻破也拿不到关键信息。每个沙箱按需启动、用完销毁，服务端完全无状态，可随时升级回滚。任务状态保存在外部日志中，异常时可快速恢复。",
+      "wa": "API的密钥完全地隔离在了执行环境之外",
+      "srtRange": [55, 67],
+      "durationSec": 66.1,
+      "accentColor": "g-purple"
+    },
+    {
+      "id": 6,
+      "role": "content",
+      "layout": "Grid 2x2",
+      "title": "沙箱核心价值",
+      "body": "沙箱最核心的是隔离：把不可信代码或高风险任务完全隔绝在虚拟环境中，不影响真实数据和系统。它可以做到文件级、进程级的细粒度隔离，任务结束立即销毁环境，所有操作都可记录，实现高安全性和可追溯性。",
+      "wa": "给你的服务器穿上了一层防弹衣",
+      "srtRange": [67, 79],
+      "durationSec": 58.3,
+      "accentColor": "g-hi"
+    },
+    {
+      "id": 7,
+      "role": "content",
+      "layout": "Grid 2x2",
+      "title": "沙箱技术新趋势",
+      "body": "当前趋势包括：沙箱与AI检测引擎结合，动态分析程序行为，加上硬件辅助隔离大幅提升安全性。轻量化沙箱实现毫秒级启动和无服务器架构。标准化接口推动跨平台互通，国产沙箱也在政策推动下日益普及。",
+      "wa": "把沙箱和AI的检测引擎结合起来",
+      "srtRange": [79, 90],
+      "durationSec": 46.9,
+      "accentColor": "g-gn"
+    },
+    {
+      "id": 8,
+      "role": "thanks",
+      "layout": "Thanks",
+      "title": "未来展望与结语",
+      "body": "未来沙箱将更智能，具备机器学习和自适应能力，针对不同威胁自动调整防护策略，自动化取证生成证据链。硬件级隔离将更普遍，标准化协议将串联云端、边缘和终端，形成一体化安全基础设施，构筑数字经济的安全底座。",
+      "wa": "以后的沙箱会变得更加智能",
+      "srtRange": [90, 107],
+      "durationSec": 82.5,
+      "accentColor": "g-or"
+    }
+  ],
+  "layoutStats": {"Cover": 1, "Grid 2x2": 4, "Card + Diagram": 3, "Thanks": 1}
+}
