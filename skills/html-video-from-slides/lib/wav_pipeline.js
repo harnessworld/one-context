@@ -42,13 +42,78 @@ function getMediaDuration(filePath) {
   return 0;
 }
 
+/** SRT 时间戳 → ASS 时间戳（H:MM:SS.cc） */
+function srtTimeToAss(ts) {
+  const m = ts.match(/(\d+):(\d+):(\d+)[,.](\d{1,3})/);
+  if (!m) return '0:00:00.00';
+  const h = parseInt(m[1], 10);
+  const min = m[2];
+  const s = m[3];
+  const cs = Math.round(parseInt(m[4].padEnd(3, '0').slice(0, 3), 10) / 10)
+    .toString()
+    .padStart(2, '0');
+  return `${h}:${min}:${s}.${cs}`;
+}
+
+/** 将 SRT 转为 ASS 文件（ass filter 对 MarginV 支持更标准） */
+function generateAssFromSrt(srtPath, assPath, style) {
+  const raw = fs.readFileSync(srtPath, 'utf-8');
+  const lines = raw.replace(/^\ufeff/, '').replace(/\r\n/g, '\n').split('\n');
+  const blocks = [];
+  let i = 0;
+  while (i < lines.length) {
+    while (i < lines.length && !lines[i].trim()) i++;
+    if (i >= lines.length) break;
+    const index = lines[i++];
+    if (i >= lines.length) break;
+    const timeLine = lines[i++];
+    const textLines = [];
+    while (i < lines.length && lines[i].trim() !== '') {
+      textLines.push(lines[i++]);
+    }
+    if (timeLine && timeLine.includes('-->')) {
+      blocks.push({ index, timeLine, text: textLines.join('\n') });
+    }
+  }
+
+  const header = `[Script Info]
+ScriptType: v4.00+
+PlayResX: ${style.width || 1920}
+PlayResY: ${style.height || 1080}
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,${style.fontName || 'Microsoft YaHei'},${style.fontSize || 18},${style.primaryAss || '&H00FFFFFF'},&H00000000,${style.outlineCol || '&H00000000'},${style.backAss || '&H00000000'},${style.bold || 0},0,0,0,100,100,0,0,${style.borderStyle || 1},${style.outlineWidth || 1},${style.shadowVal || 0},2,60,60,${style.marginV || 18},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+`;
+
+  const dialogues = [];
+  for (const b of blocks) {
+    const parts = b.timeLine.split('-->');
+    if (parts.length !== 2) continue;
+    const start = srtTimeToAss(parts[0].trim());
+    const end = srtTimeToAss(parts[1].trim());
+    // 强制单行：合并所有换行
+    const text = b.text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!text) continue;
+    dialogues.push(`Dialogue: 0,${start},${end},Default,,0,0,0,,${text}`);
+  }
+
+  fs.writeFileSync(assPath, '\ufeff' + header + dialogues.join('\n') + '\n', 'utf-8');
+}
+
 /**
  * @param {object} [options]
  * @param {object} [options.cfg] 内存中的配置（与 wav-durations.json 同结构）；若提供则不再读 wav-durations.json
  */
 async function run(projectRoot, skillDir, options = {}) {
   void skillDir;
-  const HTML_FILE = resolvePath(projectRoot, 'slides', 'presentation.html');
+  // Pipeline output lands in root; fallback to slides/ for backward compat
+  const htmlRoot = path.join(projectRoot, 'presentation.html');
+  const htmlSlides = resolvePath(projectRoot, 'slides', 'presentation.html');
+  const HTML_FILE = fs.existsSync(htmlRoot) ? htmlRoot : htmlSlides;
   const CONFIG_FILE = resolvePath(projectRoot, 'timing', 'wav-durations.json');
   const TEMP_DIR = path.join(projectRoot, 'tmp');
 
@@ -101,8 +166,20 @@ async function run(projectRoot, skillDir, options = {}) {
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1500);
 
+  // Ensure go() is exposed globally for templates that define it inside IIFE
+  await page.addScriptTag({
+    content: `
+      (function() {
+        if (typeof go === 'function' && typeof window.go !== 'function') {
+          window.go = go;
+        }
+      })();
+    `
+  });
+  await page.waitForTimeout(300);
+
   const numSlides = await page.evaluate(
-    () => document.querySelectorAll('.s, .slide').length
+    () => document.querySelectorAll('.s.slide').length
   );
   if (slideDurations.length !== numSlides) {
     await browser.close();
@@ -127,6 +204,21 @@ async function run(projectRoot, skillDir, options = {}) {
 
   for (let i = 0; i < numSlides; i++) {
     await page.evaluate((n) => {
+      // 核心修复：直接修改 style.display 强制 Chromium headless 重排/重绘。
+      // 纯 classList.toggle 在 headless 模式下不会触发合成器更新帧缓冲，
+      // 导致所有截图都返回第一帧。
+      const slides = document.querySelectorAll('.s.slide');
+      slides.forEach((s, idx) => {
+        if (idx === n) {
+          s.style.display = 'flex';
+          s.style.flexDirection = 'column';
+          s.classList.add('is-active');
+        } else {
+          s.style.display = 'none';
+          s.classList.remove('is-active');
+        }
+      });
+      // 同步页面内部状态（页码、进度条等副作用）
       if (typeof go === 'function') go(n);
       else if (typeof goTo === 'function') goTo(n);
     }, i);
@@ -189,33 +281,36 @@ async function run(projectRoot, skillDir, options = {}) {
     const bold = subCfg.bold !== false ? 1 : 0;
     const srtReplacements = cfg.srtReplacements || [];
     const wrapSubtitles = cfg.wrapSubtitles !== false;
-    const fontSizeEff = fontSize;
     const primaryAss = hexToAssPrimaryColour(
       subCfg.primaryColour ?? DEFAULT_SUBTITLE_STYLE.primaryColour,
       subCfg.primaryAlpha ?? DEFAULT_SUBTITLE_STYLE.primaryAlpha
     );
     const outlineWidth =
-      typeof subCfg.outline === 'number' ? subCfg.outline : 2;
+      typeof subCfg.outline === 'number' ? subCfg.outline : (DEFAULT_SUBTITLE_STYLE.outline ?? 0);
     const borderStyle =
       typeof subCfg.borderStyle === 'number' ? subCfg.borderStyle : 1;
-    const opaqueBar = borderStyle === 3;
     const backAlpha =
       typeof subCfg.backAlpha === 'number' ? subCfg.backAlpha : 255;
-    const backAss =
-      subCfg.backColour != null
-        ? hexToAssWithAlpha(subCfg.backColour, backAlpha)
-        : opaqueBar
-          ? '&HFF000000'
-          : '&H80000000';
-    const outlineCol = opaqueBar ? '&HFF000000' : '&H00000000';
-    const shadowVal = opaqueBar ? 0 : 1;
+    const backAss = subCfg.backColour != null
+      ? hexToAssWithAlpha(subCfg.backColour, backAlpha)
+      : hexToAssWithAlpha('#000000', backAlpha);
+    const outlineCol = borderStyle === 3 ? '&HFF000000' : '&H00000000';
+    const shadowVal = typeof subCfg.shadow === 'number' ? subCfg.shadow : 0;
+    const barHeight =
+      typeof subCfg.barHeight === 'number'
+        ? subCfg.barHeight
+        : (DEFAULT_SUBTITLE_STYLE.barHeight ?? 60);
+    const barAlpha =
+      typeof subCfg.barAlpha === 'number'
+        ? subCfg.barAlpha
+        : (DEFAULT_SUBTITLE_STYLE.barAlpha ?? 0.55);
 
     let srtForBurn = srtAbs;
     if (wrapSubtitles || srtReplacements.length > 0) {
       const tmpSrt = path.join(TEMP_DIR, 'sub_for_burn.srt');
       prepareSrtForBurn(srtAbs, tmpSrt, {
         charsPerLine: subCfg.charsPerLine > 0 ? subCfg.charsPerLine : undefined,
-        fontSize: fontSizeEff,
+        fontSize,
         replacements: srtReplacements,
         wrap: wrapSubtitles,
       });
@@ -223,31 +318,44 @@ async function run(projectRoot, skillDir, options = {}) {
       const effLine =
         subCfg.charsPerLine > 0
           ? subCfg.charsPerLine
-          : suggestCharsPerLine(fontSizeEff);
+          : suggestCharsPerLine(fontSize);
       console.log(
         `📝 字幕预处理: ${wrapSubtitles ? `每行≤${effLine} 字` : '不换行'}${srtReplacements.length ? `；${srtReplacements.length} 组替换` : ''}`
       );
     }
 
-    const srtFilter = srtForBurn
+    // SRT → ASS（ass filter 对 MarginV 支持更标准）
+    const assPath = path.join(TEMP_DIR, 'sub_for_burn.ass');
+    generateAssFromSrt(srtForBurn, assPath, {
+      width: 1920,
+      height: 1080,
+      fontSize,
+      fontName,
+      bold,
+      primaryAss,
+      outlineCol,
+      backAss,
+      outlineWidth,
+      shadowVal,
+      borderStyle,
+      marginV,
+    });
+    const assFilter = assPath
       .replace(/\\/g, '/')
       .replace(/^([A-Za-z]):/, (_, d) => `${d}\\:`);
+
+    const alphaHex = Math.max(0, Math.min(255, Math.round((1 - barAlpha) * 255)))
+      .toString(16)
+      .padStart(2, '0');
+    const drawBox =
+      barHeight > 0
+        ? `format=rgba,drawbox=y=ih-${barHeight}:color=#000000${alphaHex}:width=iw:height=${barHeight}:t=fill,format=yuv420p,`
+        : '';
 
     console.log('📝 烧录字幕...');
     ff(
       `-y -i "${mergedPath}" ` +
-      `-vf "subtitles='${srtFilter}':charenc=UTF-8:force_style='` +
-      `FontName=${fontName},` +
-      `FontSize=${fontSize},` +
-      `PrimaryColour=${primaryAss},` +
-      `OutlineColour=${outlineCol},` +
-      `BackColour=${backAss},` +
-      `Bold=${bold},` +
-      `BorderStyle=${borderStyle},` +
-      `Outline=${outlineWidth},` +
-      `Shadow=${shadowVal},` +
-      `Alignment=2,MarginV=${marginV},WrapStyle=0,MarginL=120,MarginR=120` +
-      `'" ` +
+      `-vf "${drawBox}ass='${assFilter}'" ` +
       `-c:a copy "${OUTPUT}"`
     );
     console.log('✅ 字幕烧录完成');
