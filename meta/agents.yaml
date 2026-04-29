@@ -139,6 +139,7 @@ agents:
     description: "多智能体协作评审技术方案，支持双 Agent 对弈和多角色委员会两种模式。"
     knowledge:
       - knowledge/standards/
+      - knowledge/prompts/grill-me.md
       - features/INDEX.md
       - features/README.md
       - features/_template/tech_design.md
