@@ -680,6 +680,7 @@ Do not duplicate the same intent in vendor-specific formats. If a tool needs a s
 | 作者 | ✅ | 原作者或组织 |
 | 发布日期 | ✅ | 原文发布日期 |
 | 收录日期 | 建议 | 写入知识库的日期 |
+| SHA256 | 建议 | 源文档内容 hash（用于增量编译检测，`kb-compile` 自动填充） |
 
 示例：
 
@@ -688,6 +689,7 @@ Do not duplicate the same intent in vendor-specific formats. If a tool needs a s
 > 作者：Author Name (Organization)
 > 发布日期：2026-04-15
 > 收录日期：2026-04-17
+> SHA256：a1b2c3d4e5f6
 ```
 
 不标注出处的外部资料不得合入 `knowledge/`。
@@ -1417,6 +1419,7 @@ agents:
     description: "多智能体协作评审技术方案，支持双 Agent 对弈和多角色委员会两种模式。"
     knowledge:
       - knowledge/standards/
+      - knowledge/prompts/grill-me.md
       - features/INDEX.md
       - features/README.md
       - features/_template/tech_design.md
@@ -1598,6 +1601,7 @@ features/
 | trend-radar-integration        | TrendRadar 趋势雷达集成 — 热点情报 + MCP + 微信推送                         | integrations | in_progress | `features/integrations/trend-radar/`      | trend-radar    |
 | short-video-reporting-paradigm | 短视频式汇报范式 — 用内容创作思路重塑职场汇报                             | content-pipeline | draft | `features/content-pipeline/short-video-reporting-paradigm/` | one-context |
 | hyperframes-video              | HyperFrames WAV-to-Video — HTML Native 动画视频制作技能              | content-pipeline | draft | `features/content-pipeline/hyperframes-video/` | one-context |
+| sandbox-agent-era-mid-video    | Agent时代下最被低估的技术——沙箱（中视频口播）                    | content-pipeline | draft | `features/content-pipeline/sandbox-agent-era-mid-video/` | one-context |
 
 
 **Columns**
@@ -1936,19 +1940,23 @@ test_cases:
 - 备份路径：`{skill所在目录}/backups/SKILL.md.bak`
 - 只备份一次，已有备份则跳过
 - 备份位置仅存放原始版本
-- 每轮修复前，将当前 SKILL.md 复制到 `.skill-parallel-verify/round-{N}/SKILL.md.snapshot` 作为工作快照
 
 **门控条件**：备份完成
 
 ### Step 3: 创建工作目录（或断点恢复）
 
-**操作**：检查是否已有 `.skill-parallel-verify/verification.json`（工作目录位于**项目根目录**下，已在 `.gitignore` 中排除）
+**操作**：确定工作目录路径并检查是否已有 `verification.json`
+
+**工作目录命名规则**：`tmp/verify-{skill-name}-{YYYYMMDD}/`
+- `{skill-name}`：从 skill_path 提取，如 `skills/html-deck-layout/SKILL.md` → `html-deck-layout`
+- `{YYYYMMDD}`：当天日期
+- 示例：`tmp/verify-html-deck-layout-20260419/`
 
 **如果是新启动**：
-- 创建项目根目录下的 `.skill-parallel-verify/` 目录和 `verification.json` 状态文件
+- 创建 `tmp/verify-{skill-name}-{YYYYMMDD}/` 目录和 `verification.json` 状态文件
 - 初始化 verification.json（含 test_case_content 快照）
 
-> ⚠️ 工作目录说明：`.skill-parallel-verify/` 是运行时产物目录，位于项目根目录，已在 `.gitignore` 中排除，不会被提交到 Git。
+> ⚠️ 工作目录说明：`tmp/` 是运行时产物目录，已在 `.gitignore` 中排除，不会被提交到 Git。
 
 **如果是断点恢复**（verification.json 存在且 status = "running"）：
 - 读取 verification.json，根据 last_checkpoint 判断断点位置
@@ -2103,9 +2111,11 @@ Skill 专家修复 prompt 模板：
 **报告保存路径**：`.skill-parallel-verify/report.html`
 
 **设计原则**：
-- **对比优先**：3 个测试专家输出直接内联渲染在页面中，支持双面板对比，差异高亮
+- **Tab 切换**：3 个测试专家输出用 T1/T2/T3 标签页切换查看，非垂直堆叠
+- **文件引用**：HTML 类型输出用 `iframe src` 引用相对路径文件（`round-{N}/tester-{i}/output.html`），禁止用 `srcdoc`（大文件转义易出错且 display:none 时 iframe 不加载）。用 `data-src` + 懒加载：首次切换到该 tab 时才赋值 `iframe.src`
+- **缩放预览**：1920×1080 等 fixed-size 输出用 CSS `transform: scale()` 缩放适配容器宽度
+- **对比优先**：支持双面板并排对比，可选不同测试专家
 - **一眼判定**：暗色主题 + 渐变 + 动画，核心状态无需阅读文字即可感知
-- **零依赖**：所有 CSS/JS 内联，单文件可直接在浏览器打开
 - **完整展示**：测试专家输出不截断，方便人工逐条确认
 
 **HTML 报告模板**：
@@ -2211,26 +2221,32 @@ pre{font-family:var(--font-mono);white-space:pre-wrap;word-wrap:break-word}
 .verdict-info-card h4{font-size:0.8rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:8px}
 .verdict-info-card p{font-size:0.9rem;color:var(--text-secondary);line-height:1.7;white-space:pre-wrap}
 
-/* ===== 输出区域（垂直堆叠） ===== */
+/* ===== 输出区域（Tab 切换） ===== */
 .output-header-section{display:flex;align-items:center;justify-content:space-between;margin:24px 0 16px;flex-wrap:wrap;gap:12px}
 .output-header-section h3{font-size:1rem;color:var(--text-primary)}
 .gallery-btn{padding:6px 14px;border-radius:6px;font-size:0.8rem;font-weight:600;border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;transition:all var(--transition)}
 .gallery-btn:hover{border-color:var(--accent);color:var(--text-primary);background:var(--accent-bg)}
 
-.output-section{border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;transition:all var(--transition)}
-.output-section.fail{border-color:rgba(239,68,68,0.5)}
-.output-section.pass{border-color:rgba(34,197,94,0.3)}
+/* 测试专家 Tab 切换 */
+.tester-tabs{display:flex;gap:6px;margin-bottom:16px}
+.tester-tab{padding:10px 24px;border-radius:10px;font-size:0.9rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);transition:all var(--transition);user-select:none;display:flex;align-items:center;gap:10px}
+.tester-tab:hover{border-color:var(--accent);color:var(--text-primary)}
+.tester-tab.active{background:var(--accent-bg);border-color:var(--accent);color:var(--text-primary);box-shadow:0 0 20px var(--accent-glow)}
+.tester-tab .tid{background:var(--accent);color:#fff;padding:2px 10px;border-radius:6px;font-size:0.8rem}
+.tester-tab .tstatus{font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px}
+.tester-tab .tstatus.pass{background:var(--pass-bg);color:var(--pass)}
+.tester-tab .tstatus.fail{background:var(--fail-bg);color:var(--fail)}
 
-.output-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;background:var(--bg-secondary);border-bottom:1px solid var(--border)}
-.output-title{font-weight:700;font-size:0.95rem;color:var(--text-primary)}
-.output-title .tester-id{color:var(--accent);margin-right:4px;background:var(--accent-bg);padding:2px 8px;border-radius:4px;font-size:0.85rem}
-.output-status{font-size:0.7rem;font-weight:700;padding:3px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:0.05em}
-.output-status.pass{background:var(--pass-bg);color:var(--pass)}
-.output-status.fail{background:var(--fail-bg);color:var(--fail)}
+.tester-panel{display:none;animation:fadeIn 0.25s ease}
+.tester-panel.active{display:block}
 
-.output-content{min-height:200px;max-height:600px;overflow:auto;background:var(--bg-primary)}
-.output-content pre{margin:0;padding:16px;background:var(--bg-output);color:var(--text-secondary);font-family:var(--font-mono);font-size:0.85rem;line-height:1.7;word-wrap:break-word;white-space:pre-wrap}
-.output-content iframe{width:100%;min-height:500px;border:none;background:#fff;display:block}
+/* iframe 缩放预览 */
+.preview-frame-wrapper{position:relative;width:100%;background:#000;border-radius:var(--radius);overflow:hidden;border:1.5px solid var(--border)}
+.preview-frame-scaler{width:1920px;height:1080px;transform-origin:top left;pointer-events:auto}
+.preview-frame-scaler iframe{width:1920px;height:1080px;border:none;background:#fff}
+/* TEXT 类型输出 */
+.text-output{min-height:200px;max-height:600px;overflow:auto;background:var(--bg-primary);padding:16px}
+.text-output pre{margin:0;background:var(--bg-output);color:var(--text-secondary);font-family:var(--font-mono);font-size:0.85rem;line-height:1.7;word-wrap:break-word;white-space:pre-wrap}
 
 /* ===== 对比模式 Overlay ===== */
 .compare-overlay{display:none;position:fixed;inset:0;background:var(--bg-overlay);z-index:1000;backdrop-filter:blur(8px)}
@@ -2371,44 +2387,41 @@ pre{font-family:var(--font-mono);white-space:pre-wrap;word-wrap:break-word}
     </div>
   </div>
 
-  <!-- 测试专家输出区域（垂直堆叠） -->
+  <!-- 测试专家输出区域（Tab 切换） -->
   <div class="output-header-section">
     <h3>测试专家输出</h3>
     <button class="gallery-btn" onclick="enterCompareMode({N})">对比模式</button>
   </div>
 
-  <!-- 测试专家 1 -->
-  <div class="output-section {pass/fail}">
-    <div class="output-header">
-      <span class="output-title"><span class="tester-id">T1</span> 测试专家 1</span>
-      <span class="output-status {pass/fail}">{status}</span>
+  <!-- T1/T2/T3 切换 Tabs -->
+  <div class="tester-tabs">
+    <div class="tester-tab active" onclick="switchTester(1)" data-tester="1">
+      <span class="tid">T1</span> 测试专家 1 <span class="tstatus {pass/fail}">{status}</span>
     </div>
-    <div class="output-content" id="output-t1-{N}">
-      <!-- HTML 类型：<iframe srcdoc="{content}" onload="autoResizeIframe(this)"></iframe> -->
-      <!-- TEXT 类型：<pre>{content}</pre> -->
+    <div class="tester-tab" onclick="switchTester(2)" data-tester="2">
+      <span class="tid">T2</span> 测试专家 2 <span class="tstatus {pass/fail}">{status}</span>
     </div>
-  </div>
-
-  <!-- 测试专家 2 -->
-  <div class="output-section {pass/fail}">
-    <div class="output-header">
-      <span class="output-title"><span class="tester-id">T2</span> 测试专家 2</span>
-      <span class="output-status {pass/fail}">{status}</span>
-    </div>
-    <div class="output-content" id="output-t2-{N}">
-      <!-- 输出内容 -->
+    <div class="tester-tab" onclick="switchTester(3)" data-tester="3">
+      <span class="tid">T3</span> 测试专家 3 <span class="tstatus {pass/fail}">{status}</span>
     </div>
   </div>
 
-  <!-- 测试专家 3 -->
-  <div class="output-section {pass/fail}">
-    <div class="output-header">
-      <span class="output-title"><span class="tester-id">T3</span> 测试专家 3</span>
-      <span class="output-status {pass/fail}">{status}</span>
-    </div>
-    <div class="output-content" id="output-t3-{N}">
-      <!-- 输出内容 -->
-    </div>
+  <!-- T1 预览 -->
+  <div class="tester-panel active" id="tester-panel-1">
+    <!-- HTML 类型：<iframe data-src="round-{N}/tester-1/output.html" src="round-{N}/tester-1/output.html">（首 tab 直接加载） -->
+    <!-- TEXT 类型：<div class="text-output"><pre>{content}</pre></div> -->
+  </div>
+
+  <!-- T2 预览 -->
+  <div class="tester-panel" id="tester-panel-2">
+    <!-- HTML 类型：<iframe data-src="round-{N}/tester-2/output.html">（懒加载，切换时设 src） -->
+    <!-- TEXT 类型：<div class="text-output"><pre>{content}</pre></div> -->
+  </div>
+
+  <!-- T3 预览 -->
+  <div class="tester-panel" id="tester-panel-3">
+    <!-- HTML 类型：<iframe data-src="round-{N}/tester-3/output.html">（懒加载，切换时设 src） -->
+    <!-- TEXT 类型：<div class="text-output"><pre>{content}</pre></div> -->
   </div>
 
 </div>
@@ -2492,6 +2505,13 @@ pre{font-family:var(--font-mono);white-space:pre-wrap;word-wrap:break-word}
 
 <!-- ===== 交互脚本 ===== -->
 <script>
+// 测试专家文件路径映射
+const testerSrc = {
+  1: 'round-{N}/tester-1/output.html',
+  2: 'round-{N}/tester-2/output.html',
+  3: 'round-{N}/tester-3/output.html'
+};
+
 // 轮次切换
 function switchRound(n) {
   document.querySelectorAll('.round-tab').forEach(t => t.classList.remove('active'));
@@ -2502,133 +2522,93 @@ function switchRound(n) {
   if (panel) panel.classList.add('active');
 }
 
-// 测试数据（生成时填充）
-const testerData = {
-  {N}: {
-    1: { type: '{tester_1_output_type}', content: '{tester_1_output_content}', status: '{status}' },
-    2: { type: '{tester_2_output_type}', content: '{tester_2_output_content}', status: '{status}' },
-    3: { type: '{tester_3_output_type}', content: '{tester_3_output_content}', status: '{status}' }
+// 测试专家 Tab 切换（懒加载 iframe）
+function switchTester(n) {
+  document.querySelectorAll('.tester-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tester-panel').forEach(p => p.classList.remove('active'));
+  const tab = document.querySelector('.tester-tab[data-tester="'+n+'"]');
+  if (tab) tab.classList.add('active');
+  const panel = document.getElementById('tester-panel-'+n);
+  if (panel) panel.classList.add('active');
+  // 懒加载：首次激活时设置 iframe src
+  const iframe = panel ? panel.querySelector('iframe') : null;
+  if (iframe && !iframe.src && iframe.dataset.src) {
+    iframe.src = iframe.dataset.src;
   }
-};
-
-let currentRound = 1;
-let isCompareMode = false;
-
-// 渲染内联输出
-function renderInlineOutput(round) {
-  for (let i = 1; i <= 3; i++) {
-    const data = testerData[round][i];
-    const container = document.getElementById('output-t' + i + '-' + round);
-    if (container && data) {
-      if (data.type === 'html') {
-        container.innerHTML = '<iframe srcdoc="' + escapeHtml(data.content) + '" onload="autoResizeIframe(this)"></iframe>';
-      } else {
-        container.innerHTML = '<pre>' + escapeHtml(data.content) + '</pre>';
-      }
-    }
-  }
+  rescaleIframes();
 }
 
-// iframe 自动调整高度
-function autoResizeIframe(iframe) {
-  try {
-    iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
-  } catch (e) {
-    // 跨域限制时保持默认高度
-    iframe.style.height = '500px';
-  }
-}
-
-// 渲染对比面板
-function renderComparePanel(panelId, data) {
-  const panel = document.getElementById(panelId);
-  if (data.type === 'html') {
-    panel.innerHTML = '<iframe srcdoc="' + escapeHtml(data.content) + '" onload="autoResizeIframe(this)"></iframe>';
-  } else {
-    panel.innerHTML = '<pre>' + escapeHtml(data.content) + '</pre>';
-  }
+// iframe 缩放适配容器宽度（适用于 1920x1080 fixed-size 输出）
+function rescaleIframes() {
+  [1,2,3].forEach(n => {
+    const scaler = document.getElementById('scaler-'+n);
+    if (!scaler) return;
+    const wrapper = scaler.parentElement;
+    const w = wrapper.clientWidth;
+    if (!w) return;
+    const scale = w / 1920;
+    scaler.style.transform = 'scale(' + scale + ')';
+    wrapper.style.height = (1080 * scale) + 'px';
+  });
 }
 
 // 进入对比模式
 function enterCompareMode(round) {
-  currentRound = round;
   isCompareMode = true;
-
-  const overlay = document.getElementById('compare-overlay');
-
-  // 默认左边选T1，右边选T2
   document.getElementById('compare-left-selector').value = '1';
   document.getElementById('compare-right-selector').value = '2';
   updateComparePanel('left', '1');
   updateComparePanel('right', '2');
-
-  overlay.classList.add('active');
+  document.getElementById('compare-overlay').classList.add('active');
   document.body.style.overflow = 'hidden';
 }
 
 // 关闭对比模式
 function closeCompare() {
   isCompareMode = false;
-  const overlay = document.getElementById('compare-overlay');
-  overlay.classList.remove('active');
+  document.getElementById('compare-overlay').classList.remove('active');
   document.body.style.overflow = '';
 }
 
 // 更新对比面板
 function updateComparePanel(side, testerId) {
-  const data = testerData[currentRound][testerId];
-  const panelId = 'compare-' + side + '-content';
-  const statusId = 'compare-' + side + '-status';
-
-  renderComparePanel(panelId, data);
-
-  const statusEl = document.getElementById(statusId);
-  statusEl.textContent = data.status.toUpperCase();
-  statusEl.className = 'compare-panel-status ' + data.status;
+  const container = document.getElementById('compare-'+side+'-content');
+  const src = testerSrc[testerId];
+  if (!src) return;
+  const w = container.clientWidth || 700;
+  const scale = w / 1920;
+  container.innerHTML =
+    '<div class="preview-frame-wrapper" style="flex:1">' +
+    '<div class="preview-frame-scaler" style="transform:scale('+scale+')">' +
+    '<iframe src="'+src+'" style="width:1920px;height:1080px;border:none"></iframe>' +
+    '</div></div>';
+  const wrapper = container.querySelector('.preview-frame-wrapper');
+  if (wrapper) wrapper.style.height = (1080 * scale) + 'px';
+  const statusEl = document.getElementById('compare-'+side+'-status');
+  // status 在生成时填充
 }
 
-// 转义 HTML
-function escapeHtml(text) {
-  if (!text) return '';
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
-// 对比视图同步滚动
-let syncScrollEnabled = true;
-document.getElementById('sync-scroll-checkbox')?.addEventListener('change', function(e) {
-  syncScrollEnabled = e.target.checked;
-});
-
-document.addEventListener('scroll', function(e) {
-  if (!syncScrollEnabled || !isCompareMode) return;
-  const el = e.target;
-  if (!el.hasAttribute('data-sync-scroll')) return;
-  const group = el.getAttribute('data-sync-scroll');
-  if (group !== 'compare') return;
-
-  const siblings = document.querySelectorAll('[data-sync-scroll="compare"]');
-  if (el.tagName === 'PRE') {
-    const ratio = el.scrollTop / (el.scrollHeight - el.clientHeight || 1);
-    siblings.forEach(s => {
-      if (s !== el && s.tagName === 'PRE') {
-        s.scrollTop = ratio * (s.scrollHeight - s.clientHeight);
-      }
-    });
-  }
-}, true);
+let isCompareMode = false;
 
 // ESC 关闭对比
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape' && isCompareMode) closeCompare();
 });
 
-// 页面加载时渲染所有内联输出
+// 窗口 resize 重算缩放
+window.addEventListener('resize', function() {
+  rescaleIframes();
+  if (isCompareMode) {
+    var leftId = document.getElementById('compare-left-selector').value;
+    var rightId = document.getElementById('compare-right-selector').value;
+    updateComparePanel('left', leftId);
+    updateComparePanel('right', rightId);
+  }
+});
+
+// 页面加载时缩放首 tab 的 iframe
 window.addEventListener('load', function() {
-  // 获取所有轮次并渲染
-  const rounds = Object.keys(testerData);
-  rounds.forEach(round => renderInlineOutput(round));
+  rescaleIframes();
 });
 </script>
 

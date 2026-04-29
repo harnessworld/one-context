@@ -677,6 +677,7 @@ Do not duplicate the same intent in vendor-specific formats. If a tool needs a s
 | 作者 | ✅ | 原作者或组织 |
 | 发布日期 | ✅ | 原文发布日期 |
 | 收录日期 | 建议 | 写入知识库的日期 |
+| SHA256 | 建议 | 源文档内容 hash（用于增量编译检测，`kb-compile` 自动填充） |
 
 示例：
 
@@ -685,6 +686,7 @@ Do not duplicate the same intent in vendor-specific formats. If a tool needs a s
 > 作者：Author Name (Organization)
 > 发布日期：2026-04-15
 > 收录日期：2026-04-17
+> SHA256：a1b2c3d4e5f6
 ```
 
 不标注出处的外部资料不得合入 `knowledge/`。
@@ -776,6 +778,85 @@ This strategy requires:
 - Oracle and test implementation interfaces must be compatible, otherwise mixing is impossible
 - Interaction bugs (requiring multiple files/modules combined to appear) need delta debugging or other additional methods
 
+<!-- source: knowledge/prompts/grill-me.md -->
+# Grill Me — 决策树追问策略
+
+> 来源：[Matt Pocock — "Grill Me" Skill](https://gist.github.com/mattpocockuk/f4f0f579a415063b7c4f4b07bfc8cd5a)
+> 作者：Matt Pocock
+> 发布日期：2025-06
+> 收录日期：2026-04-29
+
+逐分支遍历设计决策树，通过连续追问将模糊意图收敛为共识。
+
+## 何时使用
+
+- 用户主动要求"grill me"、"追问我"、"压力测试我的方案"
+- Reviewer 进入 duel 模式前，先对方案发起方执行一轮 grill-me 以暴露未决分支
+- Architect 产出 tech_design.md 后、交付 Dev 前的间隙检查
+
+## 核心规则
+
+1. **逐个追问**：每次只问一个问题，等待回答后再问下一个。不要一次列出所有问题。
+2. **提供推荐答案**：每个问题附带你的推荐答案及理由，但明确标注"推荐"而非"结论"——用户可以选择推翻。
+3. **决策树遍历**：将方案视为一棵依赖树，从根节点（最核心约束）开始，沿依赖边向下遍历。每个分支解决后再进入下一个分支，避免跨分支并行讨论导致混乱。
+4. **可探查则探查**：如果某个问题可以通过读取代码库、文档或现有设计来回答，就先自行探查，把发现作为追问的前提而非空白提问。
+5. **识别隐含依赖**：当用户的回答隐含了一个未声明的前置决策时，立即回溯到那个前置节点优先解决。
+
+## 追问流程
+
+```
+1. 定位根节点
+   └─ 方案的最核心约束或目标是什么？
+   └─ 如果存在多个并列根节点，要求用户排序。
+
+2. 遍历当前节点
+   └─ 问："关于 [当前决策点]，你倾向于 [推荐答案 A] 还是 [替代 B]？"
+   └─ 若用户选择与推荐不同，记录偏差但不阻止，继续追问该选择引发的下游影响。
+
+3. 回溯隐含依赖
+   └─ 若回答中暴露未声明假设（如"我们用 PostgreSQL"但未讨论选型），暂停当前分支，
+      回溯到该假设节点重新开始追问。
+
+4. 标记已决 / 未决
+   └─ 每个节点解决后简短记录：✅ 已决：[决策] — [理由]
+   └─ 若节点暂时无法决定，记录：⏸ 待定：[节点] — [阻塞原因]
+
+5. 终止条件
+   └─ 所有叶子节点均已标记为 ✅ 或 ⏸
+   └─ 或用户主动喊停
+```
+
+## 输出格式
+
+每轮追问使用以下模板：
+
+```
+### Q{n}: [决策点标题]
+
+**背景**：为什么这个决策重要，它影响哪些下游分支。
+
+**推荐**：[推荐答案] — [理由]
+
+**你的选择**：（等待用户回答）
+```
+
+全部追问结束后，输出决策摘要：
+
+```markdown
+## Grill 决策摘要
+
+| # | 决策点 | 结论 | 理由 |
+|---|--------|------|------|
+| 1 | ...    | ✅ ... | ... |
+| 2 | ...    | ⏸ ... | 阻塞于：... |
+```
+
+## 与 Reviewer Duel 模式的关系
+
+- Grill Me 是 **追问收敛**，目标是让方案发起方自己厘清思路。
+- Duel 模式是 **对抗质疑**，目标是让方案经受住挑战者的压力测试。
+- 推荐顺序：**先 Grill → 再 Duel**。Grill 清理完低级模糊后，Duel 可以聚焦于真正的设计争议。
+
 <!-- source: features/INDEX.md -->
 # Features index
 
@@ -805,6 +886,7 @@ This strategy requires:
 | trend-radar-integration        | TrendRadar 趋势雷达集成 — 热点情报 + MCP + 微信推送                         | integrations | in_progress | `features/integrations/trend-radar/`      | trend-radar    |
 | short-video-reporting-paradigm | 短视频式汇报范式 — 用内容创作思路重塑职场汇报                             | content-pipeline | draft | `features/content-pipeline/short-video-reporting-paradigm/` | one-context |
 | hyperframes-video              | HyperFrames WAV-to-Video — HTML Native 动画视频制作技能              | content-pipeline | draft | `features/content-pipeline/hyperframes-video/` | one-context |
+| sandbox-agent-era-mid-video    | Agent时代下最被低估的技术——沙箱（中视频口播）                    | content-pipeline | draft | `features/content-pipeline/sandbox-agent-era-mid-video/` | one-context |
 
 
 **Columns**

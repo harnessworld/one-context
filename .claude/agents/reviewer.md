@@ -42,6 +42,7 @@ Read these files for context:
 @knowledge/standards/diagram-conventions.md
 @knowledge/standards/one-context-conventions.md
 @knowledge/standards/oracle-parallel-debugging.md
+@knowledge/prompts/grill-me.md
 @features/INDEX.md
 @features/README.md
 @features/_template/tech_design.md

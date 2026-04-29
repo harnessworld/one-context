@@ -134,6 +134,8 @@ canvas-philosophy.md
 
 # Local one-context config (sensitive word lists, etc.)
 .onecxt/sensitive-words.yaml
+# Adapt cache (incremental build state)
+.onecxt/adapt-cache.json
 
 # Claude Code local settings (personal, not shared)
 .claude/settings.json

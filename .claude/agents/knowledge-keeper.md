@@ -68,6 +68,7 @@ Read these files for context:
 @knowledge/prompts/diagram/prompt-7-knowledge-base-intro.md
 @knowledge/prompts/diagram/prompt-8-hermes-agent-runtime-architecture.md
 @knowledge/prompts/diagram/prompt-9-hermes-multi-entry-unified-core.md
+@knowledge/prompts/grill-me.md
 @knowledge/references/README.md
 @knowledge/references/anthropic-managed-agents.md
 @knowledge/references/claudecode-architecture-patterns.md

@@ -167,8 +167,9 @@ node cli.js wav-auto --project "path\to\你的素材目录"
    - **简体中文**：`language="zh"` 的 Whisper 仍常输出**繁体或繁简混用**。`align_wav_slides.py` 在写出 SRT、以及用词级时间轴与幻灯对齐前，会**尽量**做繁体→简体（依赖 **`opencc-python-reimplemented`**，见上文 pip）；并对转写加了 `initial_prompt` 引导简体。未装 OpenCC 时会在日志里提示，字幕可能仍带繁体。已有 `sub.srt` 可事后统一简体：`python skills/html-video-from-slides/t2s_srt.py path/to/sub.srt`（在仓库根下执行时按实际路径调整）。
    - **错别字校对**：流水线本身**不会**用 LLM 或词典纠错。Whisper 常把 **Claude 听成 Cloud** 等，可通过以下方式减轻：① **`whisperHotwords`**（空格分隔）交给 faster-whisper 的 **hotwords** 偏向正确拼写；② **`srtReplacements`** 在**烧录前**对文案做批量替换（如 `Cloud`→`Claude`，**长词组写在短词前面**）。二者均在 `video-input.json` 配置，见 `video-input.example.json`。**SRT 生成后，推荐使用 `skills/srt-proofread/SKILL.md` 进行校对**——该 skill 通过比对参考文案（讲稿/幻灯）逐段修正同音错字，并将确定的替换积累到 `srtReplacements`。
    - **对 AI 代理（推荐）**：`wav-auto` 或任何步骤**一旦写出/更新了项目根 `sub.srt`**，代理在交付成片前**推荐**按 **`skills/srt-proofread/SKILL.md`** 完成字幕校对——不得只跑完流水线就结束。该校对 skill 定义了完整的比对、修正、确认与 `srtReplacements` 积累流程。若**仅改字、不改时间轴**，可保留 `wav-durations.json` 中的 `slideDurationsSec`，在 `wav-durations.json` 中写好 **`burnSubtitles`** / **`srtFile`** / **`subtitle`** 与 **`srtReplacements`** 后执行 **`node cli.js wav --project <dir>`** 快速重烧，**无需**重跑 Whisper。
-   - **单行字幕过长超出画面**：烧录阶段默认 **`wrapSubtitles: true`**，按 **`subtitle.charsPerLine`**（默认 28，口播密可改为 **22～24**）对每条字幕**折成多行**再交给 libass（实现于 `lib/srt_postprocess.js`）。若关闭 `wrapSubtitles` 则只做替换不折行。
-   - 也可设 `"subtitle": { "fontSize": 18, "marginV": 18, "fontName": "Microsoft YaHei", "bold": true, "primaryColour": "#FFFF00", "primaryAlpha": 108, "charsPerLine": 24 }` 自定义样式（默认即黄字偏小字号；`primaryAlpha` 为 ASS 透明度：**0** 不透明，**255** 全透明）。tts 模式始终烧录字幕。
+   - **单行字幕过长超出画面**：烧录阶段默认 **`wrapSubtitles: true`**，按 **`subtitle.charsPerLine`**（默认 42，口播密可改为 **36**）对每条字幕**折成多行**再交给 libass（实现于 `lib/srt_postprocess.js`）。若关闭 `wrapSubtitles` 则只做替换不折行。
+   - **字幕不遮挡 PPT 内容**：开启 `"barHeight": 80` 后，FFmpeg 会在视频底部画一条半透明黑带（`barAlpha` 默认 0.45），字幕自动落在这条带子里；PPT 本身不需要做任何改动。设为 0 则关闭此行为。
+   - 也可设 `"subtitle": { "fontSize": 18, "marginV": 18, "fontName": "Microsoft YaHei", "bold": true, "primaryColour": "#FFFF00", "primaryAlpha": 108, "charsPerLine": 42, "barHeight": 80, "backAlpha": 255, "shadow": 0, "outline": 1 }` 自定义样式（默认即黄字偏小字号；`primaryAlpha` 为 ASS 透明度：**0** 不透明，**255** 全透明）。tts 模式始终烧录字幕。
 
 ## 代理与网络（下载失败时先看这里）
 
