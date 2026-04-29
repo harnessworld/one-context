@@ -7,7 +7,15 @@ from pathlib import Path
 
 import pytest
 
-from one_context.validate import DoctorResult, doctor
+from one_context.validate import (
+    DoctorResult,
+    doctor,
+    _collect_all_knowledge_references,
+    _expand_directory_refs,
+    _check_at_references,
+    generate_knowledge_graph,
+    AT_REF_PATTERN,
+)
 
 
 class TestDoctor:
@@ -460,3 +468,265 @@ class TestDoctorDeployYaml:
         (repo_dir / ".git").mkdir()
         result = doctor(tmp_root)
         assert not any("deploy.yaml" in e for e in result.errors)
+
+
+class TestDoctorKnowledgeIntegrity:
+    """Doctor checks for knowledge reference integrity."""
+
+    def test_workspace_knowledge_path_not_found(self, tmp_root: Path):
+        """Workspace referencing a non-existent knowledge path should warn."""
+        (tmp_root / "meta" / "workspaces.yaml").write_text(
+            textwrap.dedent("""\
+                workspaces:
+                  - id: ws1
+                    context:
+                      knowledge:
+                        - knowledge/nonexistent/
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any("knowledge path not found" in w and "ws1" in w for w in result.warnings)
+
+    def test_orphan_knowledge_file(self, tmp_root: Path):
+        """Knowledge .md file not referenced by any agent/workspace should warn."""
+        # Create a knowledge file that no one references
+        kdir = tmp_root / "knowledge" / "standards"
+        kdir.mkdir(parents=True)
+        (kdir / "referenced.md").write_text("referenced", encoding="utf-8")
+        (kdir / "orphan.md").write_text("orphan", encoding="utf-8")
+
+        # Agent only references one file
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: dev
+                    name: Dev
+                    role: dev
+                    knowledge:
+                      - knowledge/standards/referenced.md
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        assert any(w.startswith("knowledge: orphan") and "orphan.md" in w for w in result.warnings)
+        assert not any(w.startswith("knowledge: orphan") and "referenced.md" in w for w in result.warnings)
+
+    def test_directory_ref_covers_all_files(self, tmp_root: Path):
+        """Directory reference like knowledge/ should cover all files under it."""
+        kdir = tmp_root / "knowledge" / "standards"
+        kdir.mkdir(parents=True)
+        (kdir / "a.md").write_text("a", encoding="utf-8")
+        (kdir / "b.md").write_text("b", encoding="utf-8")
+
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: keeper
+                    name: Keeper
+                    role: knowledge-keeper
+                    knowledge:
+                      - knowledge/
+            """),
+            encoding="utf-8",
+        )
+        result = doctor(tmp_root)
+        # No orphans since knowledge/ covers everything
+        assert not any(w.startswith("knowledge: orphan") for w in result.warnings)
+
+    def test_no_orphan_warning_when_no_knowledge_dir(self, tmp_root: Path):
+        """No orphan knowledge file warnings when knowledge/ directory doesn't exist."""
+        result = doctor(tmp_root)
+        # Use a more specific pattern to avoid false positives from temp dir paths
+        # that may contain the word "orphan" in the test function name.
+        orphan_knowledge_warnings = [
+            w for w in result.warnings
+            if w.startswith("knowledge: orphan")
+        ]
+        assert orphan_knowledge_warnings == []
+
+    def test_at_reference_pattern(self):
+        """AT_REF_PATTERN should match file refs and exclude email/CSS."""
+        text = (
+            "See @knowledge/standards/agent-framework.md for details.\n"
+            "Also @docs/architecture.md and @features/README.md.\n"
+            "Email: user@example.com should NOT match.\n"
+            "CSS: @keyframes pulse should NOT match.\n"
+        )
+        matches = AT_REF_PATTERN.findall(text)
+        assert matches == [
+            "knowledge/standards/agent-framework.md",
+            "docs/architecture.md",
+            "features/README.md",
+        ]
+
+    def test_dangling_at_reference_warning(self, tmp_root: Path):
+        """Dangling @-reference in a .md file should produce a warning."""
+        kdir = tmp_root / "knowledge" / "standards"
+        kdir.mkdir(parents=True)
+        (kdir / "existing.md").write_text("exists", encoding="utf-8")
+        # File with a dangling @-reference
+        (kdir / "broken.md").write_text(
+            "See @knowledge/standards/nonexistent.md for details.\n",
+            encoding="utf-8",
+        )
+
+        # Ensure the agent references knowledge/ so no orphan warnings
+        (tmp_root / "meta" / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: keeper
+                    name: Keeper
+                    role: knowledge-keeper
+                    knowledge:
+                      - knowledge/
+            """),
+            encoding="utf-8",
+        )
+
+        warnings: list[str] = []
+        _check_at_references(tmp_root, warnings)
+        assert any("dangling" in w and "nonexistent.md" in w for w in warnings)
+
+    def test_valid_at_reference_no_warning(self, tmp_root: Path):
+        """Valid @-reference should not produce a warning."""
+        kdir = tmp_root / "knowledge" / "standards"
+        kdir.mkdir(parents=True)
+        (kdir / "target.md").write_text("target content", encoding="utf-8")
+        (kdir / "source.md").write_text(
+            "See @knowledge/standards/target.md for details.\n",
+            encoding="utf-8",
+        )
+
+        warnings: list[str] = []
+        _check_at_references(tmp_root, warnings)
+        assert not any("target.md" in w for w in warnings)
+
+    def test_collect_all_knowledge_references(self):
+        """_collect_all_knowledge_references collects from both workspaces and agents."""
+        workspaces = [
+            {
+                "id": "ws1",
+                "context": {
+                    "knowledge": ["knowledge/standards/", "docs/architecture.md"],
+                },
+            }
+        ]
+        agents = [
+            {
+                "id": "dev",
+                "knowledge": ["knowledge/standards/agent-framework.md", "meta/repos.yaml"],
+            }
+        ]
+        refs = _collect_all_knowledge_references(workspaces, agents)
+        assert "knowledge/standards/" in refs
+        assert "docs/architecture.md" in refs
+        assert "knowledge/standards/agent-framework.md" in refs
+        assert "meta/repos.yaml" in refs
+
+    def test_expand_directory_refs(self, tmp_root: Path):
+        """_expand_directory_refs expands directories to individual .md files."""
+        kdir = tmp_root / "knowledge" / "standards"
+        kdir.mkdir(parents=True)
+        (kdir / "a.md").write_text("a", encoding="utf-8")
+        (kdir / "b.md").write_text("b", encoding="utf-8")
+        # Non-markdown file should be excluded
+        (kdir / "c.txt").write_text("c", encoding="utf-8")
+
+        refs = {"knowledge/standards/", "docs/architecture.md"}
+        expanded = _expand_directory_refs(tmp_root, refs)
+        assert "knowledge/standards/a.md" in expanded
+        assert "knowledge/standards/b.md" in expanded
+        assert "knowledge/standards/c.txt" not in expanded
+        # Non-directory ref passes through unchanged
+        assert "docs/architecture.md" in expanded
+
+
+class TestKnowledgeGraph:
+    """Tests for generate_knowledge_graph."""
+
+    def _setup_graph_root(self, tmp_path: Path) -> Path:
+        """Create a minimal one-context root with knowledge files and agents."""
+        meta = tmp_path / "meta"
+        meta.mkdir()
+
+        (meta / "repos.yaml").write_text(
+            "repos:\n  - url: git@test.local:acme/alpha.git\n    category: develop\n",
+            encoding="utf-8",
+        )
+        (meta / "workspaces.yaml").write_text(
+            textwrap.dedent("""\
+                workspaces:
+                  - id: dev
+                    name: Dev
+                    context:
+                      knowledge:
+                        - knowledge/standards/
+            """),
+            encoding="utf-8",
+        )
+        (meta / "agents.yaml").write_text(
+            textwrap.dedent("""\
+                agents:
+                  - id: dev
+                    name: Dev
+                    role: dev
+                    knowledge:
+                      - knowledge/standards/conventions.md
+                  - id: pm
+                    name: PM
+                    role: pm
+                    knowledge:
+                      - knowledge/playbooks/add-feature.md
+            """),
+            encoding="utf-8",
+        )
+
+        # Create knowledge files
+        kdir = tmp_path / "knowledge" / "standards"
+        kdir.mkdir(parents=True)
+        (kdir / "conventions.md").write_text("# Conventions\n", encoding="utf-8")
+        (kdir / "testing.md").write_text("See @knowledge/standards/conventions.md\n", encoding="utf-8")
+
+        pdir = tmp_path / "knowledge" / "playbooks"
+        pdir.mkdir(parents=True)
+        (pdir / "add-feature.md").write_text("# Add Feature\n", encoding="utf-8")
+
+        return tmp_path
+
+    def test_graph_contains_mermaid_block(self, tmp_path: Path):
+        root = self._setup_graph_root(tmp_path)
+        graph = generate_knowledge_graph(root)
+        assert graph.startswith("```mermaid")
+        assert graph.endswith("```")
+
+    def test_graph_contains_agents(self, tmp_path: Path):
+        root = self._setup_graph_root(tmp_path)
+        graph = generate_knowledge_graph(root)
+        assert "agent_dev" in graph
+        assert "agent_pm" in graph
+
+    def test_graph_contains_knowledge_nodes(self, tmp_path: Path):
+        root = self._setup_graph_root(tmp_path)
+        graph = generate_knowledge_graph(root)
+        # conventions.md is referenced by dev agent
+        assert "conventions" in graph
+        # add-feature.md is referenced by pm agent
+        assert "add_feature" in graph or "add-feature" in graph
+
+    def test_graph_contains_edges(self, tmp_path: Path):
+        root = self._setup_graph_root(tmp_path)
+        graph = generate_knowledge_graph(root)
+        # Agent → knowledge edges should be present
+        assert "reads" in graph
+
+    def test_graph_contains_workspace(self, tmp_path: Path):
+        root = self._setup_graph_root(tmp_path)
+        graph = generate_knowledge_graph(root)
+        assert "ws_dev" in graph
+
+    def test_graph_at_ref_edge(self, tmp_path: Path):
+        root = self._setup_graph_root(tmp_path)
+        graph = generate_knowledge_graph(root)
+        # testing.md references conventions.md via @-ref
+        assert "@ref" in graph

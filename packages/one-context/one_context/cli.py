@@ -16,7 +16,7 @@ from one_context.profiles import load_mixins, load_profiles, resolve_profile
 from one_context.repos import load_repos
 from one_context.root import find_root
 from one_context.sync import sync_repositories
-from one_context.validate import doctor, workspace_context_summary
+from one_context.validate import doctor, generate_knowledge_graph, workspace_context_summary
 from one_context.workspaces import load_workspaces
 
 logger = logging.getLogger("one_context.cli")
@@ -39,13 +39,20 @@ def _resolve_root(path: Path | None) -> Path:
 # Command handlers — each returns an int exit code
 # ---------------------------------------------------------------------------
 
-def _cmd_doctor(root: Path, _args: argparse.Namespace) -> int:
+def _cmd_doctor(root: Path, args: argparse.Namespace) -> int:
     load_dotenv(root / ".env")
+
+    if getattr(args, "graph", False):
+        print(generate_knowledge_graph(root))
+        return 0
+
     result = doctor(root)
     for msg in result.errors:
         print(f"error: {msg}", file=sys.stderr)
     for msg in result.warnings:
         print(f"warning: {msg}")
+    for msg in result.info:
+        print(f"info: {msg}")
     return 1 if result.errors else 0
 
 
@@ -258,8 +265,18 @@ def _print_dry_run_block(rel_path: str, description: str, body: str) -> None:
         sys.stdout.buffer.write(block.encode("utf-8", errors="replace"))
 
 
-def _emit_file(root: Path, gf, dry_run: bool) -> None:
-    """Write a generated file to disk, or print in dry-run mode."""
+def _emit_file(root: Path, gf, dry_run: bool, cache: dict[str, str] | None = None) -> bool:
+    """Write a generated file to disk, or print in dry-run mode.
+
+    When *cache* is provided, skip files whose content hash matches the
+    cached value.  Returns True if the file was written (or would have
+    been in dry-run), False if skipped due to cache hit.
+    """
+    if cache is not None and not dry_run:
+        from one_context.cache import needs_write, update_cache
+        if not needs_write(gf.rel_path, gf.content, cache):
+            return False
+
     if dry_run:
         _print_dry_run_block(gf.rel_path, gf.description, gf.content)
     else:
@@ -267,6 +284,10 @@ def _emit_file(root: Path, gf, dry_run: bool) -> None:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(gf.content, encoding="utf-8")
         print(f"wrote: {gf.rel_path} ({gf.description})")
+        if cache is not None:
+            update_cache(gf.rel_path, gf.content, cache)
+
+    return True
 
 
 def _check_generated(root: Path, files: list) -> int:
@@ -404,10 +425,28 @@ def _cmd_adapt(root: Path, args: argparse.Namespace) -> int:
     if check_mode:
         return _check_generated(root, all_generated)
 
-    # Normal mode: report dirty files, then emit
+    # Load content cache for incremental writes
+    from one_context.cache import load_cache, save_cache
+    cache = load_cache(root)
+
+    # Normal mode: report dirty files, then emit (with cache-aware writes)
     _report_dirty_files(root, all_generated)
+    written = 0
+    skipped = 0
     for gf in all_generated:
-        _emit_file(root, gf, dry_run)
+        did_write = _emit_file(root, gf, dry_run, cache=cache)
+        if did_write:
+            written += 1
+        else:
+            skipped += 1
+
+    # Persist updated cache
+    if not dry_run:
+        save_cache(root, cache)
+        if skipped:
+            print(f"cache: {skipped} file(s) unchanged (skipped), "
+                  f"{written} file(s) written, "
+                  f"cache saved to {'.onecxt/adapt-cache.json'}")
 
     return 0
 
@@ -552,6 +591,12 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_doctor = sub.add_parser("doctor", help="Validate manifests and local clone state")
+    p_doctor.add_argument(
+        "--graph",
+        action="store_true",
+        default=False,
+        help="Output a Mermaid knowledge graph instead of running checks",
+    )
     p_doctor.set_defaults(func=_cmd_doctor)
 
     p_sync = sub.add_parser(
