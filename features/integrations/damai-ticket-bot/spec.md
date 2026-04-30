@@ -2,7 +2,7 @@
 id: damai-ticket-bot
 title: 大麦抢票助手
 status: draft
-category: develop
+category: integrations
 primary_repo_id: one-context
 owner: ""
 updated: "2026-04-11"

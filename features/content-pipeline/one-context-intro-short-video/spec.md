@@ -45,7 +45,7 @@ updated: "2026-04-02"
 # 关联
 
 - **Workspace**（如有）: —
-- **对标框架**: 参考 `features/develop/claudecode-source-analysis/` 的文档风格；口播结构可参考「架构拆解」类爆款节奏（前 3 秒炸场、15 秒小高潮）。
+- **对标框架**: 参考 `features/knowledge/claudecode-source-analysis/` 的文档风格；口播结构可参考「架构拆解」类爆款节奏（前 3 秒炸场、15 秒小高潮）。
 
 # 开放问题
 

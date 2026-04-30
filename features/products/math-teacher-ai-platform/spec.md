@@ -107,8 +107,8 @@ updated: "2026-04-09"
   - `repos/develop/FunctionCanvas/src/` — 前端主应用
   - `repos/develop/FunctionCanvas/src/components/` — Math Canvas 可视化组件
   - `repos/develop/FunctionCanvas/src/App.tsx` — 入口，需演进为多模块路由
-  - `features/develop/math-teacher-ai-platform/spec.md` — 本文档
-  - `features/develop/math-teacher-ai-platform/tech_design.md` — 技术设计
+  - `features/products/math-teacher-ai-platform/spec.md` — 本文档
+  - `features/products/math-teacher-ai-platform/tech_design.md` — 技术设计
 
 ---
 

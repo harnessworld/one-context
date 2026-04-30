@@ -36,7 +36,7 @@ updated: 2026-04-05
 
 - **仓库 id**: one-context
 - **分支**: superno
-- **主要路径**: `features/develop/claude-caveman-mode/production/`
+- **主要路径**: `features/experiments/claude-caveman-mode/`（历史成片路径可能仍为相对 `production/`）
 - **音频**: `production/用穴居人模式让+Claude+省+Token.wav`
 
 # 关联

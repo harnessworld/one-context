@@ -2,6 +2,7 @@
 id: skill-merge-to-main
 title: 选择性合并到主干（Agent Skill）
 status: done
+category: core
 primary_repo_id: one-context
 ---
 
