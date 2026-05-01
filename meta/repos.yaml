@@ -65,3 +65,7 @@ repos:
     category: reference
     id: hyperframes
     description: HeyGen 开源 HTML→视频合成框架（CLI、Puppeteer+FFmpeg、Agent skills）；与本仓 html-video-from-slides 并行参考，不替换。
+  - url: https://github.com/nexu-io/open-design
+    category: reference
+    id: open-design
+    description: Local-first Claude Design 开源替代 — Next.js Web + 本地 daemon、31 Skills、72 DESIGN.md 体系、沙箱预览与 HTML/PDF/PPTX 导出；复用本机编码 Agent CLI（Apache-2.0）。
