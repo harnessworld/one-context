@@ -22,11 +22,11 @@
   "outputFile": "final_auto.mp4",
   "burnSubtitles": true,
   "subtitle": {
-    "fontSize": 18,
+    "fontSize": 24,
     "marginV": 18,
     "fontName": "Microsoft YaHei",
     "bold": true,
-    "charsPerLine": 42,
+    "charsPerLine": 36,
     "primaryColour": "#FFFF00",
     "primaryAlpha": 108,
     "backAlpha": 255,

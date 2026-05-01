@@ -51,7 +51,7 @@ function hexToAssWithAlpha(hex, alpha255) {
 
 /** wav-auto / wav 烧录与 tts 共用的默认字幕外观 */
 const DEFAULT_SUBTITLE_STYLE = {
-  fontSize: 48,
+  fontSize: 60,
   marginV: 8,
   primaryColour: '#FFD700',
   fontName: 'Microsoft YaHei',
