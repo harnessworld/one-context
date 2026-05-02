@@ -1,0 +1,9 @@
+# Content pipeline production — untracked directories
+media/
+tmp/
+*.wav
+*.mp4
+*.png
+*.jpg
+*.jpeg
+*.DS_Store

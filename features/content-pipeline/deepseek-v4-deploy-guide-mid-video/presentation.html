@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>DeepSeek V4 部署与使用详解</title>
+  <style>
+    /* === Fonts === */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    /* === Base Tokens === */
+    :root {
+      --slide-w: 1920px; --slide-h: 1080px;
+      --fs-hero: 160px; --fs-page-title: 84px; --fs-subtitle: 56px;
+      --fs-body: 42px; --fs-caption: 32px; --fs-card-title: 46px;
+      --fs-card-body: 40px; --fs-stat: 150px; --fs-pill: 34px; --fs-footer: 32px;
+      --lh-tight: 1.15; --lh-normal: 1.4; --lh-relaxed: 1.6;
+      --c-bg: #0b1220; --c-surface: #111d2f; --c-surface-2: #1a2d4a;
+      --c-text-1: #f0f4f8; --c-text-2: #8b9db8;
+      --c-accent-a: #38bdf8; --c-accent-b: #818cf8; --c-accent-c: #a78bfa;
+      --c-accent-d: #ff6b9d; --c-accent-e: #ffd93d;
+      --c-border: rgba(255,255,255,0.08); --c-overlay: rgba(11,18,32,0.7);
+      --sp-xs: 8px; --sp-sm: 16px; --sp-md: 24px; --sp-lg: 32px; --sp-xl: 48px; --sp-2xl: 64px;
+      --slide-pad: 28px 44px; --card-pad: 22px 26px;
+      --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 24px; --r-full: 9999px;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.25); --shadow-md: 0 4px 16px rgba(0,0,0,0.35); --shadow-lg: 0 8px 32px rgba(0,0,0,0.45);
+      --card-gap: 20px;
+    }
+
+    /* === Layout === */
+    html, body { margin:0; padding:0; overflow:hidden; background:#000; height:100%; }
+    #P { width: var(--slide-w); height: var(--slide-h); overflow:hidden; position:relative; background: var(--c-bg); font-family: var(--font-sans); color: var(--c-text-1); }
+    .s.slide { width:100%; height:100%; display:none; flex-direction:column; padding: var(--slide-pad); box-sizing:border-box; position:relative; }
+    .s.slide.is-active { display:flex; }
+    .slide-header { flex-shrink:0; margin-bottom: var(--sp-sm); }
+    .slide-header .badge { display:inline-block; font-size: var(--fs-pill); padding: 4px 16px; border-radius: var(--r-full); background: var(--c-accent-a); color: var(--c-bg); font-weight:700; margin-bottom: var(--sp-sm); }
+    .slide-header h2 { font-size: var(--fs-page-title); font-weight:800; line-height: var(--lh-tight); margin:0; }
+    .col.slide-main { flex:1; min-height:0; display:flex; flex-direction:column; }
+    .slide-main.fill-deck { flex:1; min-height:0; flex-direction:column; }
+    .slide-main.fill-deck .slide-cards { flex: 1 1 0; min-height:0; display:flex; gap: var(--card-gap); align-items:stretch; }
+    .slide-main.fill-deck .slide-cards > .g { align-self:stretch; height:100%; min-height:0; }
+    .slide-main.v-center { justify-content:center; align-items:center; }
+    .slide-footer { flex-shrink:0; margin-top: var(--sp-sm); padding-top: var(--sp-xs); border-top:1px solid var(--c-border); font-size: var(--fs-footer); color: var(--c-text-2); display:flex; justify-content:space-between; }
+    .g { background: var(--c-surface); border-radius: var(--r-md); padding: var(--card-pad); display:flex; flex-direction:column; box-shadow: var(--shadow-sm); border:1px solid var(--c-border); }
+    .g .g-title { font-size: var(--fs-card-title); font-weight:700; margin:0 0 var(--sp-xs) 0; flex-shrink:0; }
+    .g .g-body { font-size: var(--fs-card-body); line-height: var(--lh-normal); margin:0; flex-shrink:0; }
+    .card-diagram { flex:1; min-height: 200px; margin-top: var(--sp-sm); }
+    .card-diagram svg { width:100%; height:100%; }
+    .stat-value { font-size: var(--fs-stat); font-weight:800; line-height:1; color: var(--c-accent-a); }
+    .stat-label { font-size: var(--fs-body); color: var(--c-text-2); margin-top: var(--sp-xs); }
+    .pill { display:inline-block; font-size: var(--fs-pill); padding: 6px 18px; border-radius: var(--r-full); background: var(--c-surface-2); color: var(--c-text-1); font-weight:600; }
+    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: var(--card-gap); }
+    .grid-2x2 { display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: var(--card-gap); }
+    .split { display:flex; gap: var(--card-gap); }
+    .split > * { flex: 1 1 0; min-width:0; }
+    .process-flow { display:flex; align-items:center; gap: var(--sp-md); flex:1; min-height:0; }
+    .process-flow .step { flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; }
+    .process-flow .arrow { font-size: var(--fs-body); color: var(--c-accent-a); flex-shrink:0; }
+    .emoji-xl { font-size: 80px; line-height:1; }
+
+    /* === Info-density helpers === */
+    .code-block { background:#060e1a; border:1px solid rgba(56,189,248,0.2); border-radius: var(--r-sm); padding: 12px 16px; font-family: var(--font-mono); font-size: 28px; line-height:1.5; color:#cbe3ff; overflow:auto; margin-top: var(--sp-sm); }
+    .code-block .k { color: var(--c-accent-a); } /* keyword */ .code-block .s { color: var(--c-accent-e); } /* string */ .code-block .c { color:#5a708a; } /* comment */ .code-block .n { color:#a78bfa; } /* number */
+    .param-table { width:100%; border-collapse:collapse; margin-top: var(--sp-sm); font-size: 34px; }
+    .param-table th { text-align:left; padding: 10px 12px; background: var(--c-surface-2); font-weight:700; border-bottom:2px solid var(--c-accent-a); }
+    .param-table td { padding: 10px 12px; border-bottom:1px solid var(--c-border); color: var(--c-text-2); }
+    .param-table td:first-child { color: var(--c-text-1); font-weight:600; }
+    .tag { display:inline-block; font-size: 26px; padding: 2px 10px; border-radius: var(--r-sm); background: rgba(56,189,248,0.12); color: var(--c-accent-a); font-weight:600; margin-right: 6px; }
+    .tag.warn { background: rgba(255,217,61,0.12); color: var(--c-accent-e); }
+    .tag.ok { background: rgba(129,140,248,0.12); color: var(--c-accent-b); }
+    .check-list { list-style:none; padding:0; margin: var(--sp-sm) 0 0 0; }
+    .check-list li { padding: 8px 0 8px 32px; position:relative; font-size: 34px; line-height:1.45; color: var(--c-text-2); }
+    .check-list li::before { content:"\2713"; position:absolute; left:0; color: var(--c-accent-b); font-weight:800; }
+    .callout { background: rgba(56,189,248,0.08); border-left:4px solid var(--c-accent-a); padding: 12px 16px; border-radius: 0 var(--r-sm) var(--r-sm) 0; margin-top: var(--sp-sm); font-size: 32px; line-height:1.5; }
+    .formula { font-family: var(--font-mono); background: rgba(129,140,248,0.08); padding: 2px 8px; border-radius: var(--r-sm); color: var(--c-accent-b); font-size: 30px; }
+    .row-stat { display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom:1px solid var(--c-border); font-size: 36px; }
+    .row-stat .lbl { color: var(--c-text-1); font-weight:600; }
+    .row-stat .val { color: var(--c-accent-a); font-weight:700; }
+    .accent-box { display:flex; flex-direction:column; gap: var(--sp-xs); margin-top: var(--sp-sm); }
+    .accent-box .item { background: var(--c-surface-2); padding: 10px 14px; border-radius: var(--r-sm); font-size: 32px; line-height:1.4; }
+    .small-note { font-size: 28px; color:#5a708a; margin-top: var(--sp-xs); }
+    .wa { /* whisper anchor, no visual style */ }
+  </style>
+</head>
+<body>
+<div id="P">
+
+  <!-- Slide 1: Cover -->
+  <section class="s slide is-active" id="s1">
+    <div class="col slide-main v-center">
+      <div style="text-align:center">
+        <div class="emoji-xl">🚀</div>
+        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:20px 0 10px;letter-spacing:-2px">DeepSeek V4</h1>
+        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 24px">部署与调用实战指南</p>
+        <div style="margin-bottom:36px">
+          <span class="pill">100万Token上下文</span> <span class="pill">MoE稀疏路由</span> <span class="pill">全栈API兼容</span>
+        </div>
+        <div style="font-size:var(--fs-caption);color:var(--c-text-2)">运维部署 → 开发调用 → 生产调优</div>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>AI Infra Team · 水猿</span>
+      <span>01</span>
+    </div>
+    <div class="wa">DeepSeek V4部署与使用详解</div>
+  </section>
+
+  <!-- Slide 2: V4三大技术突破 -->
+  <section class="s slide" id="s2">
+    <div class="slide-header">
+      <span class="badge">认识 V4</span>
+      <h2>三大技术突破</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g">
+          <h3 class="g-title">上下文与效率</h3>
+          <div class="accent-box">
+            <div class="item"><span class="tag">上下文</span>1M Token 窗口（行业顶级），支持整书/超长对话放入单请求</div>
+            <div class="item"><span class="tag ok">MoE</span>混合专家架构：推理时仅激活部分参数，降低单次计算量</div>
+            <div class="item"><span class="tag">成本</span>推理成本显著低于前代，批量处理 ROI 提升</div>
+            <div class="item"><span class="tag ok">显存</span>KV Cache 离散管理（PagedAttention），长序列不浪费</div>
+          </div>
+          <div class="callout" style="margin-top:auto">关键：1M 不等于 64K×2 显存——有固定开销，PagedAttention 缓解但不消除</div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">注意力机制创新</h3>
+          <div class="accent-box">
+            <div class="item"><span class="tag">压缩吸收</span>丢弃低权重注意力头，降低不关键信息计算量</div>
+            <div class="item"><span class="tag ok">高度压缩</span>长序列分块定位关键信息，保持低延迟推理</div>
+            <div class="item"><span class="tag">国产芯片</span>昇腾/含5G 深度适配，端到端高效运行</div>
+            <div class="item"><span class="tag ok">Prefix</span>Prefix Caching：相同前缀请求复用 KV Cache</div>
+          </div>
+          <div class="callout" style="margin-top:auto;border-color:var(--c-accent-b)">长上下文核心信息放首尾（Lost in the Middle 通用技巧）</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>认识 V4</span><span>02</span></div>
+    <div class="wa">上下文窗口直接拉到了100万token</div>
+  </section>
+
+  <!-- Slide 3: MoE与注意力压缩 -->
+  <section class="s slide" id="s3">
+    <div class="slide-header">
+      <span class="badge">架构</span>
+      <h2>MoE 稀疏激活 + 注意力压缩</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards">
+        <div class="g" style="flex:1">
+          <h3 class="g-title">MoE 路由 + 注意力压缩原理</h3>
+          <p class="g-body" style="margin-bottom:var(--sp-sm)">V4 推理时仅激活部分专家，注意力层压缩不关键头信息，两者结合实现长上下文低延迟。</p>
+          <div class="card-diagram">
+            <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg">
+              <!-- Input -->
+              <rect x="10" y="110" width="90" height="60" rx="8" fill="var(--c-surface-2)" stroke="var(--c-border)"/>
+              <text x="55" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="13" font-weight="700">Input</text>
+              <!-- Router -->
+              <rect x="130" y="80" width="110" height="120" rx="8" fill="rgba(56,189,248,0.12)" stroke="var(--c-accent-a)"/>
+              <text x="185" y="120" text-anchor="middle" fill="var(--c-accent-a)" font-size="13" font-weight="700">Router</text>
+              <text x="185" y="145" text-anchor="middle" fill="var(--c-text-2)" font-size="11">Top-K 选择</text>
+              <text x="185" y="165" text-anchor="middle" fill="var(--c-text-2)" font-size="11">2~4 专家</text>
+              <!-- Experts -->
+              <rect x="280" y="40" width="90" height="55" rx="8" fill="var(--c-accent-b)" opacity="0.25"/>
+              <text x="325" y="72" text-anchor="middle" fill="var(--c-text-1)" font-size="12" font-weight="700">Expert A</text>
+              <rect x="280" y="112" width="90" height="55" rx="8" fill="var(--c-accent-b)" opacity="0.45"/>
+              <text x="325" y="144" text-anchor="middle" fill="var(--c-text-1)" font-size="12" font-weight="700">Expert B</text>
+              <rect x="280" y="184" width="90" height="55" rx="8" fill="var(--c-accent-b)" opacity="0.15"/>
+              <text x="325" y="216" text-anchor="middle" fill="var(--c-text-2)" font-size="12">Expert C</text>
+              <!-- Merge -->
+              <rect x="410" y="110" width="90" height="60" rx="8" fill="var(--c-surface-2)" stroke="var(--c-border)"/>
+              <text x="455" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="13" font-weight="700">Merge</text>
+              <!-- Attention Compression -->
+              <rect x="540" y="40" width="140" height="85" rx="8" fill="rgba(167,139,250,0.12)" stroke="var(--c-accent-c)"/>
+              <text x="610" y="68" text-anchor="middle" fill="var(--c-accent-c)" font-size="12" font-weight="700">压缩吸收</text>
+              <text x="610" y="90" text-anchor="middle" fill="var(--c-text-2)" font-size="11">丢弃低权重头</text>
+              <text x="610" y="108" text-anchor="middle" fill="var(--c-text-2)" font-size="11">降低计算量</text>
+              <rect x="540" y="145" width="140" height="85" rx="8" fill="rgba(167,139,250,0.12)" stroke="var(--c-accent-c)"/>
+              <text x="610" y="176" text-anchor="middle" fill="var(--c-accent-c)" font-size="12" font-weight="700">高度压缩</text>
+              <text x="610" y="198" text-anchor="middle" fill="var(--c-text-2)" font-size="11">分块定位关键</text>
+              <text x="610" y="216" text-anchor="middle" fill="var(--c-text-2)" font-size="11">长输入保持低延迟</text>
+              <!-- Output -->
+              <rect x="720" y="110" width="95" height="60" rx="8" fill="var(--c-surface-2)" stroke="var(--c-border)"/>
+              <text x="767" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="13" font-weight="700">Output</text>
+              <!-- Arrows -->
+              <line x1="100" y1="140" x2="125" y2="140" stroke="var(--c-accent-a)" stroke-width="2"/><polygon points="125,140 118,136 118,144" fill="var(--c-accent-a)"/>
+              <line x1="240" y1="140" x2="275" y2="80" stroke="var(--c-accent-b)" stroke-width="1.5" opacity="0.6"/><polygon points="275,80 268,78 272,86" fill="var(--c-accent-b)" opacity="0.6"/>
+              <line x1="240" y1="140" x2="275" y2="140" stroke="var(--c-accent-b)" stroke-width="2"/><polygon points="275,140 268,136 268,144" fill="var(--c-accent-b)"/>
+              <line x1="240" y1="140" x2="275" y2="210" stroke="var(--c-accent-b)" stroke-width="1.5" opacity="0.4"/><polygon points="275,210 268,208 272,216" fill="var(--c-accent-b)" opacity="0.4"/>
+              <line x1="370" y1="80" x2="405" y2="120" stroke="var(--c-accent-b)" stroke-width="1.5" opacity="0.6"/><polygon points="405,120 399,114 407,118" fill="var(--c-accent-b)" opacity="0.6"/>
+              <line x1="370" y1="140" x2="405" y2="140" stroke="var(--c-accent-b)" stroke-width="2"/><polygon points="405,140 398,136 398,144" fill="var(--c-accent-b)"/>
+              <line x1="370" y1="210" x2="405" y2="160" stroke="var(--c-accent-b)" stroke-width="1.5" opacity="0.4"/><polygon points="405,160 399,154 407,158" fill="var(--c-accent-b)" opacity="0.4"/>
+              <line x1="500" y1="140" x2="535" y2="80" stroke="var(--c-accent-c)" stroke-width="1.5"/><polygon points="535,80 528,78 532,86" fill="var(--c-accent-c)"/>
+              <line x1="500" y1="140" x2="535" y2="185" stroke="var(--c-accent-c)" stroke-width="1.5"/><polygon points="535,185 528,183 532,191" fill="var(--c-accent-c)"/>
+              <line x1="680" y1="82" x2="715" y2="120" stroke="var(--c-accent-c)" stroke-width="1.5"/><polygon points="715,120 709,114 717,118" fill="var(--c-accent-c)"/>
+              <line x1="680" y1="185" x2="715" y2="160" stroke="var(--c-accent-c)" stroke-width="1.5"/><polygon points="715,160 709,154 717,158" fill="var(--c-accent-c)"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>技术架构</span><span>03</span></div>
+    <div class="wa">混合专家架构和高度压缩注意力</div>
+  </section>
+
+  <!-- Slide 4: 推理效率与Agent能力 -->
+  <section class="s slide" id="s4">
+    <div class="slide-header">
+      <span class="badge">能力概览</span>
+      <h2>推理效率与 Agent 能力</h2>
+    </div>
+    <div class="col slide-main v-center">
+      <div style="text-align:center;max-width:1400px">
+        <div class="stat-value" style="margin-bottom:8px">1,000,000</div>
+        <div class="stat-label" style="font-size:var(--fs-subtitle);margin-bottom:40px">Token 上下文窗口</div>
+        <div style="display:flex;gap:32px;justify-content:center;margin-bottom:32px">
+          <div style="text-align:center;padding:28px 40px;background:var(--c-surface);border-radius:var(--r-lg);min-width:280px;border:1px solid var(--c-border)">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-b);line-height:1">↓ 成本</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">推理成本显著低于前代</div>
+          </div>
+          <div style="text-align:center;padding:28px 40px;background:var(--c-surface);border-radius:var(--r-lg);min-width:280px;border:1px solid var(--c-border)">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-c);line-height:1">Agent</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">工具调用闭环 + 多轮对话升级</div>
+          </div>
+          <div style="text-align:center;padding:28px 40px;background:var(--c-surface);border-radius:var(--r-lg);min-width:280px;border:1px solid var(--c-border)">
+            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-a);line-height:1">FP8</div>
+            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">H100/H20 原生精度零损加速</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;justify-content:center">
+          <span class="pill">推理模式可配置</span>
+          <span class="pill">JSON Mode 结构化</span>
+          <span class="pill">国产芯片适配</span>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>能力概览</span><span>04</span></div>
+    <div class="wa">推理成本也比上一代要低很多</div>
+  </section>
+
+  <!-- Slide 5: API新设计 -->
+  <section class="s slide" id="s5">
+    <div class="slide-header">
+      <span class="badge">调用篇</span>
+      <h2>API 新设计与消息角色</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g">
+          <h3 class="g-title">OpenAI 兼容 + 新特性</h3>
+          <div class="accent-box" style="margin-top:var(--sp-xs)">
+            <div class="item">全面兼容 OpenAI API，SDK 可直接复用</div>
+            <div class="item">流式输出 SSE 升级，推理过程实时可见</div>
+            <div class="item"><span class="tag warn">注意</span>自托管时 model 字段需匹配 <span class="formula">--served-model-name</span></div>
+            <div class="item"><span class="tag">新</span>新增 <span class="formula">context</span> / <span class="formula">to</span> 角色，支持精细权限与路由</div>
+          </div>
+          <div class="callout" style="margin-top:auto">官方 model: deepseek-chat / deepseek-reasoner</div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">Temperature 场景速查</h3>
+          <table class="param-table">
+            <tr><th>场景</th><th>推荐值</th><th>说明</th></tr>
+            <tr><td>代码 / 数学推理</td><td><span class="val" style="color:var(--c-accent-a);font-weight:700">0.0 – 0.3</span></td><td>确定性优先</td></tr>
+            <tr><td>通用对话 / RAG</td><td><span class="val" style="color:var(--c-accent-b);font-weight:700">0.5 – 0.7</span></td><td>平衡自然与准确</td></tr>
+            <tr><td>创意写作 / 头脑风暴</td><td><span class="val" style="color:var(--c-accent-c);font-weight:700">0.8 – 1.2</span></td><td>发散探索</td></tr>
+          </table>
+          <div class="callout" style="margin-top:auto;border-color:var(--c-accent-e)">V4 温度敏感度比 GPT 低，建议下调 0.1–0.2 后测试</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>调用篇</span><span>05</span></div>
+    <div class="wa">全面兼容 OpenAI 的 API 的格式</div>
+  </section>
+
+  <!-- Slide 6: 开发对接四大注意点 -->
+  <section class="s slide" id="s6">
+    <div class="slide-header">
+      <span class="badge">开发</span>
+      <h2>开发对接四大注意点</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards grid-2x2">
+        <div class="g">
+          <h3 class="g-title">① 多轮对话结构</h3>
+          <ul class="check-list">
+            <li>assistant <span class="formula">reasoning_content</span> 需显式回传</li>
+            <li>stream_options 合理配置，避免异常流</li>
+            <li>长上下文缓存 Prefix Caching 复用 KV</li>
+          </ul>
+          <div class="small-note">reasoning 模式：默认关闭，需要时打开 enable_thinking</div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">② 并发与资源</h3>
+          <ul class="check-list">
+            <li>结合机器资源与模型版本动态调整</li>
+            <li>单卡 A100 80G 裸跑约 <strong>10~20 并发</strong></li>
+            <li>压测公式：<span class="formula">(总显存−权重) / 单请求KV / 1024³ × 0.7</span></li>
+          </ul>
+          <div class="small-note">几百并发不可能，需要 engine 层批处理 + 多卡</div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">③ 视觉功能（灰度）</h3>
+          <ul class="check-list">
+            <li>当前处于灰度阶段，关注状态更新</li>
+            <li>跟进官方文档确认可用区域与版本</li>
+            <li>多模态输入格式可能与纯文本不同</li>
+          </ul>
+        </div>
+        <div class="g">
+          <h3 class="g-title">④ JSON Mode + 计费</h3>
+          <ul class="check-list">
+            <li>Schema 严格匹配，Prompt 引导要到位</li>
+            <li>reasoning_tokens 计入 total_tokens，不计入 completion_tokens</li>
+            <li>计费基数务必用 <span class="formula">total_tokens</span></li>
+          </ul>
+          <div class="code-block" style="font-size:24px;padding:8px 12px">
+            <span class="c"># 兼容 V3/V4 计费</span>
+            <span class="k">billable</span> = usage.total_tokens
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>开发</span><span>06</span></div>
+    <div class="wa">多轮对话的时候你要注意assistant里面的</div>
+  </section>
+
+  <!-- Slide 7: 部署框架选型指南 -->
+  <section class="s slide" id="s7">
+    <div class="slide-header">
+      <span class="badge">部署</span>
+      <h2>部署框架选型指南</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards split">
+        <div class="g">
+          <h3 class="g-title">生产环境 → vLLM</h3>
+          <div class="accent-box">
+            <div class="item"><span class="tag">首选</span>Continuous Batching + PagedAttention</div>
+            <div class="item"><span class="tag">显存</span>配置化注意力节省 60%+ 显存</div>
+            <div class="item"><span class="tag">并行</span>多卡并行，稀疏 MoE 专用调度</div>
+            <div class="item"><span class="tag">量化</span>FP8 / AWQ 现成 tag，直接加载</div>
+          </div>
+          <div class="callout" style="margin-top:auto">TensorRT-LLM 吞吐更高但构建复杂，先用 vLLM 跑通再考虑换</div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">轻量 / 极端场景</h3>
+          <table class="param-table" style="font-size:30px">
+            <tr><th>场景</th><th>框架</th><th>特点</th></tr>
+            <tr><td>本地开发</td><td>Ollama / Llama.cpp</td><td>轻量灵活，快速验证</td></tr>
+            <tr><td>极致低延迟</td><td>SGLang</td><td>面向低延迟优化</td></tr>
+            <tr><td>国产芯片</td><td>K-Transformers</td><td>昇腾等异构适配</td></tr>
+          </table>
+          <div class="callout" style="margin-top:auto;border-color:var(--c-accent-d)"><strong>⚠️ 不同框架模型格式和量化方式不兼容</strong>，切换需重新转换权重</div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>部署</span><span>07</span></div>
+    <div class="wa">生产环境强烈推荐使用vLLM</div>
+  </section>
+
+  <!-- Slide 8: 硬件配置速查表 -->
+  <section class="s slide" id="s8">
+    <div class="slide-header">
+      <span class="badge">硬件</span>
+      <h2>硬件配置速查表</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards" style="flex-direction:column">
+        <div class="g" style="flex:1">
+          <div class="process-flow" style="align-items:stretch">
+            <div class="step" style="background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);border:1px solid var(--c-border);align-items:flex-start;text-align:left;height:100%;box-sizing:border-box;">
+              <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-a);margin-bottom:8px">Step 1</div>
+              <div style="font-size:36px;font-weight:700;margin-bottom:8px">精度选型</div>
+              <div style="font-size:30px;color:var(--c-text-2);line-height:1.5">
+                全精度 FP16<br/>
+                → 量化 FP8<br/>
+                → 4-bit AWQ
+              </div>
+            </div>
+            <div class="arrow" style="align-self:center">▶</div>
+            <div class="step" style="background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);border:1px solid var(--c-border);align-items:flex-start;text-align:left;height:100%;box-sizing:border-box;">
+              <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-b);margin-bottom:8px">Step 2</div>
+              <div style="font-size:36px;font-weight:700;margin-bottom:8px">GPU选型</div>
+              <div style="font-size:30px;color:var(--c-text-2);line-height:1.5">
+                FP16: 8×H100<br/>
+                → FP8: 4×H100<br/>
+                → 4-bit: 2×H100
+              </div>
+            </div>
+            <div class="arrow" style="align-self:center">▶</div>
+            <div class="step" style="background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);border:1px solid var(--c-border);align-items:flex-start;text-align:left;height:100%;box-sizing:border-box;">
+              <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-c);margin-bottom:8px">Step 3</div>
+              <div style="font-size:36px;font-weight:700;margin-bottom:8px">内存/存储</div>
+              <div style="font-size:30px;color:var(--c-text-2);line-height:1.5">
+                每卡 256GB 内存<br/>
+                7G/s+ NVMe SSD<br/>
+                模型文件巨大需预留
+              </div>
+            </div>
+            <div class="arrow" style="align-self:center">▶</div>
+            <div class="step" style="background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);border:1px solid var(--c-border);align-items:flex-start;text-align:left;height:100%;box-sizing:border-box;">
+              <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-d);margin-bottom:8px">Step 4</div>
+              <div style="font-size:36px;font-weight:700;margin-bottom:8px">系统环境</div>
+              <div style="font-size:30px;color:var(--c-text-2);line-height:1.5">
+                Ubuntu 22.04<br/>
+                CUDA 12.1+ / Driver 535+<br/>
+                Python 3.10–3.11<br/>
+                NUMA 绑定
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>硬件</span><span>08</span></div>
+    <div class="wa">全精度推理多块高端GPU</div>
+  </section>
+
+  <!-- Slide 9: 运维必查清单 -->
+  <section class="s slide" id="s9">
+    <div class="slide-header">
+      <span class="badge">运维</span>
+      <h2>运维必查清单</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="slide-cards grid-2x2">
+        <div class="g">
+          <h3 class="g-title">① 模型文件对齐</h3>
+          <ul class="check-list">
+            <li>权重与 Tokenizer 配置严格一致</li>
+            <li>不同框架模型 <strong>不可混用</strong></li>
+            <li>vLLM / TensorRT-LLM / TGI 各用其格式</li>
+          </ul>
+          <div class="callout" style="margin-top:auto;border-color:var(--c-accent-d)">混用会导致无声错误或异常生成</div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">② 环境参数</h3>
+          <ul class="check-list">
+            <li>MaxModelLen 设够大，否则长上下文被 <strong>静默截断</strong></li>
+            <li>max_num_seqs 压测定上限，勿无脑开</li>
+            <li>按业务 95 分位长度预留余量</li>
+          </ul>
+          <div class="callout" style="margin-top:auto">128K 设满 ≠ 最优，过度预留会挤占并发</div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">③ 显存管理</h3>
+          <ul class="check-list">
+            <li>Ingram 缓存开启</li>
+            <li>DevSHM 权限给够</li>
+            <li>吸收注意力 + 专家并行环境变量打开</li>
+            <li>防止 OOM 是第一条纪律</li>
+          </ul>
+          <div class="small-note">max_num_seqs 过大触发 preemption，吞吐反跌</div>
+        </div>
+        <div class="g">
+          <h3 class="g-title">④ 部署规范</h3>
+          <ul class="check-list">
+            <li>Docker + 官方镜像 + 健康检查 + 自动重启</li>
+            <li>vLLM Router 做负载均衡</li>
+            <li>推理强度合理配置，避免过度计算</li>
+            <li>监控：GPU Util / 显存 Alloc vs Reserved / P99</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>运维</span><span>09</span></div>
+    <div class="wa">模型的文件和Tokenizer的配置要对齐</div>
+  </section>
+
+  <!-- Slide 10: 快速启动建议 -->
+  <section class="s slide" id="s10">
+    <div class="slide-header">
+      <span class="badge">总结</span>
+      <h2>快速启动建议</h2>
+    </div>
+    <div class="col slide-main v-center">
+      <div style="text-align:center;max-width:1400px">
+        <div style="display:flex;gap:20px;justify-content:center;margin-bottom:36px">
+          <div style="background:var(--c-surface);padding:24px 32px;border-radius:var(--r-lg);text-align:left;min-width:420px;border:1px solid var(--c-border)">
+            <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-a);margin-bottom:12px">开发</div>
+            <div style="font-size:32px;color:var(--c-text-2);line-height:1.6">
+              先跑通 OpenAI 兼容 API<br/>
+              核对 model 字段与 reasoning 开关<br/>
+              计费用 total_tokens<br/>
+              JSON Mode 场景对号入座
+            </div>
+          </div>
+          <div style="background:var(--c-surface);padding:24px 32px;border-radius:var(--r-lg);text-align:left;min-width:420px;border:1px solid var(--c-border)">
+            <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-b);margin-bottom:12px">运维</div>
+            <div style="font-size:32px;color:var(--c-text-2);line-height:1.6">
+              Docker + vLLM 起步<br/>
+              监控显存 &amp; P99 延迟<br/>
+              max_model_len 按 95 分位设<br/>
+              量化路径：FP8 → AWQ → 加卡
+            </div>
+          </div>
+        </div>
+        <div style="background: linear-gradient(90deg, rgba(56,189,248,0.08), rgba(129,140,248,0.08)); padding:22px 40px; border-radius: var(--r-lg); border: 1px solid rgba(56,189,248,0.2); display:inline-block;">
+          <div style="font-size:var(--fs-body);font-weight:700;color:var(--c-accent-a)">今晚就能做的下一步</div>
+          <div style="font-size:32px;color:var(--c-text-2);margin-top:6px">打开你的 vLLM 配置，对照三条检查清单——今晚就能少改一轮配置</div>
+        </div>
+        <p style="font-size:var(--fs-caption);color:var(--c-text-2);margin-top:28px">如果想深入了解量化陷阱，关注下期：INT8 为什么比 FP8 还慢</p>
+      </div>
+    </div>
+    <div class="slide-footer">
+      <span>AI Infra Team · 水猿</span>
+      <span>10</span>
+    </div>
+    <div class="wa">希望能够帮助大家少踩坑</div>
+  </section>
+
+</div>
+<script>
+function go(n) {
+  const slides = [...document.querySelectorAll('.s.slide')];
+  slides.forEach((s, idx) => {
+    if (idx === n) { s.classList.add('is-active'); s.style.display = 'flex'; }
+    else { s.classList.remove('is-active'); s.style.display = 'none'; }
+  });
+}
+document.addEventListener('keydown', e => {
+  const slides = [...document.querySelectorAll('.s.slide')];
+  const idx = slides.findIndex(s => s.classList.contains('is-active'));
+  if (e.key === 'ArrowRight' || e.key === ' ') { go(Math.min(idx + 1, slides.length - 1)); }
+  if (e.key === 'ArrowLeft') { go(Math.max(idx - 1, 0)); }
+});
+</script>
+</body>
+</html>

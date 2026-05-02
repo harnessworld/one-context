@@ -27,6 +27,7 @@
 | short-video-reporting-paradigm | 短视频式汇报范式 — 用内容创作思路重塑职场汇报                             | content-pipeline | draft | `features/content-pipeline/short-video-reporting-paradigm/` | one-context |
 | hyperframes-video              | HyperFrames WAV-to-Video — HTML Native 动画视频制作技能              | content-pipeline | draft | `features/content-pipeline/hyperframes-video/` | one-context |
 | sandbox-agent-era-mid-video    | Agent时代下最被低估的技术——沙箱（中视频口播）                    | content-pipeline | draft | `features/content-pipeline/sandbox-agent-era-mid-video/` | one-context |
+| deepseek-v4-deploy-guide-mid-video | DeepSeek V4 部署与调用指南（中视频）                        | content-pipeline | planning | `features/content-pipeline/deepseek-v4-deploy-guide-mid-video/` | one-context |
 
 
 **Columns**

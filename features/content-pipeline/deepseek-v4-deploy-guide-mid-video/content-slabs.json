@@ -1,0 +1,117 @@
+{
+  "pageCount": 10,
+  "theme": "mobile-tech",
+  "pages": [
+    {
+      "id": 0,
+      "role": "cover",
+      "layout": "Cover",
+      "title": "DeepSeek V4部署与使用详解",
+      "body": "100万Token上下文 · MoE稀疏激活 · 全工具调用",
+      "wa": "DeepSeek V4部署与使用详解",
+      "srtRange": [1, 12],
+      "durationSec": 22.0,
+      "accentColor": "g-hi"
+    },
+    {
+      "id": 1,
+      "role": "content",
+      "layout": "Split 50/50",
+      "title": "V4三大技术突破",
+      "body": "上下文窗口→1M Token（行业最长级）。MoE混合专家+高度压缩注意力，降低计算量同时保持长输入推理速度。多轮对话、工具调用与Agent能力全面升级，推理成本显著低于上一代。",
+      "wa": "上下文窗口直接拉到了100万token",
+      "srtRange": [13, 30],
+      "durationSec": 45.0,
+      "accentColor": "g-gn"
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "layout": "Card + Diagram",
+      "title": "MoE与注意力压缩",
+      "body": "MoE：只激活部分专家网络，降低单次推理计算量。压缩注意力：在长输入中快速定位关键信息，避免全量计算。两者结合实现长上下文下的低延迟推理。",
+      "wa": "混合专家架构和高度压缩注意力",
+      "srtRange": [31, 52],
+      "durationSec": 50.0,
+      "accentColor": "g-or"
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "layout": "Stat Highlight",
+      "title": "推理效率与Agent能力",
+      "body": "推理成本比上一代低。多轮对话结构升级，支持复杂Agent任务。真正的工具调用闭环，可处理需要外部系统配合的复杂工作流。",
+      "wa": "推理成本也比上一代要低很多",
+      "srtRange": [53, 72],
+      "durationSec": 55.0,
+      "accentColor": "g-sk"
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "layout": "Split 50/50",
+      "title": "API新设计与消息角色",
+      "body": "全面兼容OpenAI格式。流式输出升级，实时可见推理过程。新增context/to角色，支持更精细的权限和路由控制。思考模式可配置，JSON Mode保障结构化输出。",
+      "wa": "全面兼容 OpenAI 的 API 的格式",
+      "srtRange": [73, 92],
+      "durationSec": 55.0,
+      "accentColor": "g-rd"
+    },
+    {
+      "id": 5,
+      "role": "content",
+      "layout": "Grid 2x2",
+      "title": "开发对接四大注意点",
+      "body": "①多轮对话：注意assistant消息结构变化。②并发控制：结合机器资源与模型版本动态调整。③视觉功能：灰度阶段，关注状态更新。④JSON Mode：确保prompt引导与schema严格匹配。",
+      "wa": "多轮对话的时候你要注意assistant里面的",
+      "srtRange": [93, 112],
+      "durationSec": 45.0,
+      "accentColor": "g-purple"
+    },
+    {
+      "id": 6,
+      "role": "content",
+      "layout": "Split 50/50",
+      "title": "部署框架选型指南",
+      "body": "生产环境→vLLM（超长上下文优化、显存压缩、多卡并行）。本地开发→Ollama/Llama.cpp（轻量灵活）。极致低延迟/国产芯片→SGLang/K-Transformers。",
+      "wa": "生产环境强烈推荐使用vLLM",
+      "srtRange": [113, 135],
+      "durationSec": 45.0,
+      "accentColor": "g-hi"
+    },
+    {
+      "id": 7,
+      "role": "content",
+      "layout": "Process Flow",
+      "title": "硬件配置速查表",
+      "body": "全精度推理：8×H100 或 4×B200。量化版本：GPU数量可减半。内存：每卡256G。存储：7G+读速NVMe SSD。系统：Ubuntu 22.04、CUDA 12.1+、NUMA绑定。",
+      "wa": "全精度推理多块高端GPU",
+      "srtRange": [136, 158],
+      "durationSec": 40.0,
+      "accentColor": "g-gn"
+    },
+    {
+      "id": 8,
+      "role": "content",
+      "layout": "Grid 2x2",
+      "title": "运维必查清单",
+      "body": "①文件对齐：模型权重与Tokenizer配置严格一致。②环境参数：MaxModelLen设够大，否则长上下文被静默截断。③显存管理：开启相关环境变量，防止OOM。④部署规范：Docker+健康检查+自动重启+vLLM Router负载均衡。",
+      "wa": "模型的文件和Tokenizer的配置要对齐",
+      "srtRange": [159, 180],
+      "durationSec": 50.0,
+      "accentColor": "g-or"
+    },
+    {
+      "id": 9,
+      "role": "thanks",
+      "layout": "Thanks",
+      "title": "快速启动建议",
+      "body": "开发：先跑通OpenAI兼容API，关注并发与JSON Mode。运维：Docker+vLLM起步，监控显存与P99延迟。框架选型按场景匹配，不盲目堆卡。",
+      "wa": "希望能够帮助大家少踩坑",
+      "srtRange": [181, 195],
+      "durationSec": 36.0,
+      "accentColor": "g-sk"
+    }
+  ],
+  "layoutStats": {"Cover":1,"Split 50/50":3,"Card + Diagram":1,"Stat Highlight":1,"Grid 2x2":2,"Process Flow":1,"Thanks":1}
+}
