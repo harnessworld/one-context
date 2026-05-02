@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI Agent 平台架构图 - JointJS Demo</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@joint/core@4.0.4/dist/joint.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; overflow: hidden; }
+  #paper { width: 100vw; height: 100vh; }
+  .toolbar { position: fixed; top: 16px; right: 16px; z-index: 10; display: flex; flex-direction: column; gap: 6px; }
+  .toolbar button { padding: 8px 16px; border: 1px solid #d9d9d9; background: #fff; border-radius: 6px; cursor: pointer; font-size: 13px; color: #333; }
+  .toolbar button:hover { border-color: #1890ff; color: #1890ff; }
+  .badge { position: fixed; top: 16px; left: 16px; z-index: 10; background: #fff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); font-size: 16px; font-weight: 600; color: #1d2129; }
+</style>
+</head>
+<body>
+<div class="badge">AI Agent 平台技术架构图 — JointJS</div>
+<div class="toolbar">
+  <button onclick="paperObj.scale(paperObj.scale().sx * 1.15)">放大 +</button>
+  <button onclick="paperObj.scale(paperObj.scale().sx * 0.85)">缩小 -</button>
+  <button onclick="paperObj.scaleContentToFit({padding:60})">适应画布</button>
+</div>
+<div id="paper"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@joint/core@4.0.4/dist/joint.js"></script>
+<script>
+const { dia, shapes, routers, connectors } = joint;
+
+const graph = new dia.Graph({}, { cellNamespace: shapes });
+const paperObj = new dia.Paper({
+  el: document.getElementById('paper'),
+  model: graph,
+  width: window.innerWidth,
+  height: window.innerHeight,
+  gridSize: 10,
+  drawGrid: { name: 'dot', args: { color: '#e0e0e0' } },
+  background: { color: '#fafafa' },
+  cellViewNamespace: shapes,
+  defaultRouter: { name: 'manhattan', args: { step: 12, padding: 15 } },
+  defaultConnector: { name: 'rounded', args: { radius: 8 } },
+  interactive: true,
+});
+
+/* ── Enable pan & zoom ── */
+let isPanning = false, panStart = {};
+paperObj.on('blank:pointerdown', (evt) => { isPanning = true; panStart = { x: evt.clientX, y: evt.clientY, tx: paperObj.translate().tx, ty: paperObj.translate().ty }; });
+document.addEventListener('pointermove', (evt) => { if (!isPanning) return; paperObj.translate(panStart.tx + evt.clientX - panStart.x, panStart.ty + evt.clientY - panStart.y); });
+document.addEventListener('pointerup', () => { isPanning = false; });
+document.getElementById('paper').addEventListener('wheel', (evt) => {
+  evt.preventDefault();
+  const delta = evt.deltaY > 0 ? 0.92 : 1.08;
+  const s = paperObj.scale().sx * delta;
+  if (s > 0.2 && s < 3) paperObj.scale(s);
+}, { passive: false });
+
+/* ── Colors ── */
+const C = {
+  user:   { bg: '#e6f7ff', border: '#69c0ff', fill: '#1890ff' },
+  agent:  { bg: '#f0f5ff', border: '#85a5ff', fill: '#2f54eb' },
+  model:  { bg: '#f9f0ff', border: '#b37feb', fill: '#722ed1' },
+  tool:   { bg: '#f6ffed', border: '#95de64', fill: '#52c41a' },
+  infra:  { bg: '#fff7e6', border: '#ffc069', fill: '#fa8c16' },
+  govern: { bg: '#fff1f0', border: '#ffa39e', fill: '#f5222d' },
+};
+
+/* ── Helper: group rect ── */
+function makeGroup(x, y, w, h, label, colors) {
+  return new shapes.standard.Rectangle({
+    position: { x, y }, size: { width: w, height: h },
+    z: 0,
+    attrs: {
+      body: { fill: colors.bg, stroke: colors.border, strokeWidth: 2, rx: 12, ry: 12 },
+      label: { text: label, fontSize: 14, fontWeight: 'bold', fill: '#333', refX: 20, refY: 20, textAnchor: 'start', textVerticalAnchor: 'top' },
+    },
+  });
+}
+
+/* ── Helper: node ── */
+function makeNode(x, y, label, colors) {
+  return new shapes.standard.Rectangle({
+    position: { x, y }, size: { width: 140, height: 40 },
+    z: 1,
+    attrs: {
+      body: { fill: colors.fill, stroke: colors.border, strokeWidth: 1.5, rx: 6, ry: 6 },
+      label: { text: label, fontSize: 12, fontWeight: '500', fill: '#fff' },
+    },
+  });
+}
+
+/* ── Helper: link ── */
+function makeLink(src, tgt, labelText, dashed) {
+  const link = new shapes.standard.Link({
+    source: { id: src.id }, target: { id: tgt.id },
+    z: 2,
+    attrs: {
+      line: { stroke: '#8c8c8c', strokeWidth: 1.5, strokeDasharray: dashed ? '6 4' : '', targetMarker: { type: 'path', d: 'M 8 -4 0 0 8 4 z', fill: '#8c8c8c' } },
+    },
+  });
+  if (labelText) {
+    link.appendLabel({ attrs: { text: { text: labelText, fontSize: 10, fill: '#666' }, rect: { fill: '#fff', rx: 3, ry: 3 } } });
+  }
+  return link;
+}
+
+/* ============ Layout ============ */
+const LX = 60, GW = 1100, NW = 140, NH = 40, GVGAP = 24;
+let gy = 40;
+
+/* 1. 用户接入层 */
+const gUser = makeGroup(LX, gy, GW, 90, '用户接入层 (Access Layer)', C.user);
+const uNodes = ['Web UI', 'API Gateway', 'SDK / CLI', 'Webhook', 'WebSocket'].map((l, i) =>
+  makeNode(LX + 24 + i * (NW + 24), gy + 38, l, C.user));
+
+/* 2. Agent 编排层 */
+gy += 90 + GVGAP;
+const gAgent = makeGroup(LX, gy, GW, 130, 'Agent 编排层 (Orchestration Layer)', C.agent);
+const aLabels = ['Agent Runtime', 'Workflow Engine', 'State Manager', 'Task Planner', 'Memory Store', 'RAG Pipeline'];
+const aNodes = aLabels.map((l, i) => {
+  const row = Math.floor(i / 4), col = i % 4;
+  return makeNode(LX + 24 + col * (NW + 24), gy + 38 + row * (NH + 12), l, C.agent);
+});
+
+/* 3. 模型服务层 */
+gy += 130 + GVGAP;
+const gModel = makeGroup(LX, gy, GW, 130, '模型服务层 (Model Service Layer)', C.model);
+const mLabels = ['LLM Router', 'GPT-4o', 'Claude 3.5', 'Qwen-Max', 'Embedding Svc', 'Reranker'];
+const mNodes = mLabels.map((l, i) => {
+  const row = Math.floor(i / 4), col = i % 4;
+  return makeNode(LX + 24 + col * (NW + 24), gy + 38 + row * (NH + 12), l, C.model);
+});
+
+/* 4. 工具层 */
+gy += 130 + GVGAP;
+const gTool = makeGroup(LX, gy, GW, 130, '工具层 (Tool Layer)', C.tool);
+const tLabels = ['Tool Registry', 'Code Executor', 'Web Search', 'DB Connector', 'File System', 'API Caller'];
+const tNodes = tLabels.map((l, i) => {
+  const row = Math.floor(i / 4), col = i % 4;
+  return makeNode(LX + 24 + col * (NW + 24), gy + 38 + row * (NH + 12), l, C.tool);
+});
+
+/* 5. 基础设施层 */
+gy += 130 + GVGAP;
+const gInfra = makeGroup(LX, gy, GW, 130, '基础设施层 (Infrastructure Layer)', C.infra);
+const iLabels = ['Message Queue', 'Redis Cache', 'PostgreSQL', 'Object Storage', 'Monitor / APM', 'Log Center'];
+const iNodes = iLabels.map((l, i) => {
+  const row = Math.floor(i / 4), col = i % 4;
+  return makeNode(LX + 24 + col * (NW + 24), gy + 38 + row * (NH + 12), l, C.infra);
+});
+
+/* 6. 安全治理（右侧竖向） */
+const govX = LX + GW + 40;
+const govH = gy + 130 - 40;
+const gGov = makeGroup(govX, 40, 170, govH, '安全与治理', C.govern);
+const gLabels = ['Auth Service', 'Rate Limiter', 'Audit Log', 'Cost Control', 'Encryption'];
+const gNodes = gLabels.map((l, i) =>
+  makeNode(govX + 15, 80 + i * (NH + 18), l, C.govern));
+
+/* ── Add all cells ── */
+const allCells = [gUser, gAgent, gModel, gTool, gInfra, gGov, ...uNodes, ...aNodes, ...mNodes, ...tNodes, ...iNodes, ...gNodes];
+
+/* ── Edges ── */
+const edges = [
+  // User → Agent
+  makeLink(uNodes[0], aNodes[0], '请求'),
+  makeLink(uNodes[1], aNodes[0], ''),
+  makeLink(uNodes[2], aNodes[1], ''),
+  makeLink(uNodes[3], aNodes[1], ''),
+  makeLink(uNodes[4], aNodes[2], ''),
+  // Agent → Model
+  makeLink(aNodes[0], mNodes[0], 'LLM 调用'),
+  makeLink(aNodes[1], mNodes[0], ''),
+  makeLink(aNodes[3], mNodes[0], ''),
+  makeLink(aNodes[5], mNodes[4], 'embedding'),
+  makeLink(aNodes[5], mNodes[5], ''),
+  makeLink(mNodes[0], mNodes[1], ''),
+  makeLink(mNodes[0], mNodes[2], ''),
+  makeLink(mNodes[0], mNodes[3], ''),
+  // Agent → Tool
+  makeLink(aNodes[0], tNodes[0], '工具调用'),
+  makeLink(tNodes[0], tNodes[1], ''),
+  makeLink(tNodes[0], tNodes[2], ''),
+  makeLink(tNodes[0], tNodes[3], ''),
+  makeLink(tNodes[0], tNodes[4], ''),
+  makeLink(tNodes[0], tNodes[5], ''),
+  // Infra
+  makeLink(aNodes[2], iNodes[1], 'cache'),
+  makeLink(aNodes[4], iNodes[2], 'persist'),
+  makeLink(aNodes[2], iNodes[0], 'event', true),
+  makeLink(tNodes[3], iNodes[2], ''),
+  makeLink(tNodes[4], iNodes[3], ''),
+  makeLink(iNodes[4], iNodes[5], '', true),
+  // Governance (cross-cutting)
+  makeLink(uNodes[1], gNodes[0], 'auth', true),
+  makeLink(uNodes[1], gNodes[1], 'limit', true),
+  makeLink(aNodes[0], gNodes[2], 'log', true),
+  makeLink(mNodes[0], gNodes[3], 'cost', true),
+  makeLink(iNodes[2], gNodes[4], 'encrypt', true),
+];
+
+allCells.push(...edges);
+graph.addCells(allCells);
+
+setTimeout(() => paperObj.scaleContentToFit({ padding: 60 }), 200);
+</script>
+</body>
+</html>

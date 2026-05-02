@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI Agent 平台架构图 - AntV X6 Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; }
+  #container { width: 100vw; height: 100vh; }
+  .toolbar { position: fixed; top: 16px; right: 16px; z-index: 10; display: flex; flex-direction: column; gap: 6px; }
+  .toolbar button { padding: 8px 16px; border: 1px solid #d9d9d9; background: #fff; border-radius: 6px; cursor: pointer; font-size: 13px; color: #333; }
+  .toolbar button:hover { border-color: #1890ff; color: #1890ff; }
+  .badge { position: fixed; top: 16px; left: 16px; z-index: 10; background: #fff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); font-size: 16px; font-weight: 600; color: #1d2129; }
+</style>
+</head>
+<body>
+<div class="badge">AI Agent 平台技术架构图 — AntV X6</div>
+<div class="toolbar">
+  <button onclick="graph.zoomTo(graph.zoom()+0.1)">放大 +</button>
+  <button onclick="graph.zoomTo(graph.zoom()-0.1)">缩小 -</button>
+  <button onclick="graph.zoomToFit({padding:60})">适应画布</button>
+  <button onclick="graph.centerContent()">居中</button>
+</div>
+<div id="container"></div>
+
+<script src="https://unpkg.com/@antv/x6@2/dist/x6.js"></script>
+<script>
+const { Graph, Shape } = X6;
+
+const graph = new Graph({
+  container: document.getElementById('container'),
+  width: window.innerWidth,
+  height: window.innerHeight,
+  background: { color: '#f7f8fa' },
+  grid: { visible: true, type: 'dot', args: { color: '#ddd', thickness: 1 } },
+  panning: { enabled: true, modifiers: [] },
+  mousewheel: { enabled: true, modifiers: [], factor: 1.08 },
+  connecting: { router: 'orth' },
+});
+
+window.addEventListener('resize', () => graph.resize(window.innerWidth, window.innerHeight));
+
+/* ── Color palette per layer ── */
+const C = {
+  user:   { bg: '#e6f7ff', border: '#69c0ff', node: '#1890ff', text: '#fff' },
+  agent:  { bg: '#f0f5ff', border: '#85a5ff', node: '#2f54eb', text: '#fff' },
+  model:  { bg: '#f9f0ff', border: '#b37feb', node: '#722ed1', text: '#fff' },
+  tool:   { bg: '#f6ffed', border: '#95de64', node: '#52c41a', text: '#fff' },
+  infra:  { bg: '#fff7e6', border: '#ffc069', node: '#fa8c16', text: '#fff' },
+  govern: { bg: '#fff1f0', border: '#ffa39e', node: '#f5222d', text: '#fff' },
+};
+
+/* ── Helper: create group ── */
+function addGroup(id, label, x, y, w, h, colors) {
+  graph.addNode({
+    id, x, y, width: w, height: h,
+    zIndex: 0,
+    attrs: {
+      body: { fill: colors.bg, stroke: colors.border, strokeWidth: 2, rx: 12, ry: 12 },
+      label: { text: label, fill: '#333', fontSize: 15, fontWeight: 600, refX: 20, refY: 18, textAnchor: 'start' },
+    },
+  });
+}
+
+/* ── Helper: create node inside group ── */
+function addNode(id, label, x, y, w, h, colors, parentId) {
+  graph.addNode({
+    id, x, y, width: w, height: h,
+    zIndex: 1,
+    attrs: {
+      body: { fill: colors.node, stroke: colors.border, strokeWidth: 1.5, rx: 6, ry: 6 },
+      label: { text: label, fill: colors.text, fontSize: 12, fontWeight: 500 },
+    },
+    ...(parentId ? {} : {}),
+  });
+}
+
+/* ── Helper: create edge ── */
+function addEdge(src, tgt, label, dashed) {
+  graph.addEdge({
+    source: src, target: tgt,
+    router: { name: 'orth', args: { padding: 15 } },
+    connector: { name: 'rounded', args: { radius: 6 } },
+    attrs: {
+      line: {
+        stroke: '#8c8c8c', strokeWidth: 1.5,
+        strokeDasharray: dashed ? '6 4' : '',
+        targetMarker: { name: 'block', width: 8, height: 6 },
+      },
+    },
+    labels: label ? [{ attrs: { text: { text: label, fontSize: 10, fill: '#666' }, rect: { fill: '#fff', rx: 3, ry: 3 } } }] : [],
+  });
+}
+
+/* ============================
+   Layout constants
+   ============================ */
+const LX = 60;       // left margin
+const GW = 1200;     // group width
+const NH = 42;       // node height
+const NW = 150;      // node width
+const GH = 90;       // group height
+const GVGAP = 24;    // vertical gap between groups
+
+let gy = 40; // current y
+
+/* ── 1. 用户接入层 ── */
+addGroup('g-user', '用户接入层 (Access Layer)', LX, gy, GW, GH, C.user);
+const userNodes = [
+  ['n-webui',    'Web UI'],
+  ['n-apigw',    'API Gateway'],
+  ['n-sdk',      'SDK / CLI'],
+  ['n-webhook',  'Webhook'],
+  ['n-ws',       'WebSocket'],
+];
+userNodes.forEach(([id, label], i) => {
+  addNode(id, label, LX + 30 + i * (NW + 30), gy + 35, NW, NH, C.user);
+});
+
+/* ── 2. Agent 编排层 ── */
+gy += GH + GVGAP;
+addGroup('g-agent', 'Agent 编排层 (Orchestration Layer)', LX, gy, GW, GH + 50, C.agent);
+const agentNodes = [
+  ['n-runtime',  'Agent Runtime'],
+  ['n-workflow', 'Workflow Engine'],
+  ['n-state',    'State Manager'],
+  ['n-planner',  'Task Planner'],
+  ['n-memory',   'Memory Store'],
+  ['n-rag',      'RAG Pipeline'],
+];
+agentNodes.forEach(([id, label], i) => {
+  const row = Math.floor(i / 4);
+  const col = i % 4;
+  addNode(id, label, LX + 30 + col * (NW + 30), gy + 35 + row * (NH + 14), NW, NH, C.agent);
+});
+
+/* ── 3. 模型服务层 ── */
+gy += GH + 50 + GVGAP;
+addGroup('g-model', '模型服务层 (Model Service Layer)', LX, gy, GW, GH + 50, C.model);
+const modelNodes = [
+  ['n-router',   'LLM Router'],
+  ['n-gpt4',     'GPT-4o'],
+  ['n-claude',   'Claude 3.5'],
+  ['n-qwen',     'Qwen-Max'],
+  ['n-embed',    'Embedding Svc'],
+  ['n-rerank',   'Reranker'],
+];
+modelNodes.forEach(([id, label], i) => {
+  const row = Math.floor(i / 4);
+  const col = i % 4;
+  addNode(id, label, LX + 30 + col * (NW + 30), gy + 35 + row * (NH + 14), NW, NH, C.model);
+});
+
+/* ── 4. 工具层 ── */
+gy += GH + 50 + GVGAP;
+addGroup('g-tool', '工具层 (Tool Layer)', LX, gy, GW, GH + 50, C.tool);
+const toolNodes = [
+  ['n-toolreg',  'Tool Registry'],
+  ['n-codeexec', 'Code Executor'],
+  ['n-search',   'Web Search'],
+  ['n-dbconn',   'DB Connector'],
+  ['n-filesys',  'File System'],
+  ['n-apicall',  'API Caller'],
+];
+toolNodes.forEach(([id, label], i) => {
+  const row = Math.floor(i / 4);
+  const col = i % 4;
+  addNode(id, label, LX + 30 + col * (NW + 30), gy + 35 + row * (NH + 14), NW, NH, C.tool);
+});
+
+/* ── 5. 基础设施层 ── */
+gy += GH + 50 + GVGAP;
+addGroup('g-infra', '基础设施层 (Infrastructure Layer)', LX, gy, GW, GH + 50, C.infra);
+const infraNodes = [
+  ['n-mq',       'Message Queue'],
+  ['n-redis',    'Redis Cache'],
+  ['n-pg',       'PostgreSQL'],
+  ['n-oss',      'Object Storage'],
+  ['n-monitor',  'Monitor / APM'],
+  ['n-log',      'Log Center'],
+];
+infraNodes.forEach(([id, label], i) => {
+  const row = Math.floor(i / 4);
+  const col = i % 4;
+  addNode(id, label, LX + 30 + col * (NW + 30), gy + 35 + row * (NH + 14), NW, NH, C.infra);
+});
+
+/* ── 6. 安全治理层 (右侧竖向) ── */
+const govX = LX + GW + 40;
+const govY = 40;
+const govH = gy + GH + 50 - govY;
+addGroup('g-govern', '安全与治理 (Governance)', govX, govY, 180, govH, C.govern);
+const govNodes = [
+  ['n-auth',     'Auth Service'],
+  ['n-ratelim',  'Rate Limiter'],
+  ['n-audit',    'Audit Log'],
+  ['n-cost',     'Cost Control'],
+  ['n-encrypt',  'Encryption'],
+];
+govNodes.forEach(([id, label], i) => {
+  addNode(id, label, govX + 15, govY + 40 + i * (NH + 20), NW, NH, C.govern);
+});
+
+/* ── Edges: layer-to-layer ── */
+// User → Agent
+addEdge('n-webui',   'n-runtime',  '请求');
+addEdge('n-apigw',   'n-runtime',  '');
+addEdge('n-sdk',     'n-workflow', '');
+addEdge('n-webhook', 'n-workflow', '');
+addEdge('n-ws',      'n-state',    '');
+
+// Agent → Model
+addEdge('n-runtime',  'n-router',  'LLM 调用');
+addEdge('n-workflow', 'n-router',  '');
+addEdge('n-planner',  'n-router',  '');
+addEdge('n-rag',      'n-embed',   'embedding');
+addEdge('n-rag',      'n-rerank',  '');
+addEdge('n-router',   'n-gpt4',    '');
+addEdge('n-router',   'n-claude',  '');
+addEdge('n-router',   'n-qwen',    '');
+
+// Agent → Tool
+addEdge('n-runtime', 'n-toolreg',  '工具调用');
+addEdge('n-toolreg', 'n-codeexec', '');
+addEdge('n-toolreg', 'n-search',   '');
+addEdge('n-toolreg', 'n-dbconn',   '');
+addEdge('n-toolreg', 'n-filesys',  '');
+addEdge('n-toolreg', 'n-apicall',  '');
+
+// Agent / Tool → Infra
+addEdge('n-state',   'n-redis',   'cache');
+addEdge('n-memory',  'n-pg',      'persist');
+addEdge('n-state',   'n-mq',     'event', true);
+addEdge('n-dbconn',  'n-pg',      '');
+addEdge('n-filesys', 'n-oss',     '');
+addEdge('n-monitor', 'n-log',     '', true);
+
+// Governance (dashed, cross-cutting)
+addEdge('n-apigw',   'n-auth',    'auth',    true);
+addEdge('n-apigw',   'n-ratelim', 'limit',   true);
+addEdge('n-runtime', 'n-audit',   'log',     true);
+addEdge('n-router',  'n-cost',    'cost',    true);
+addEdge('n-pg',      'n-encrypt', 'encrypt', true);
+
+/* ── Fit ── */
+setTimeout(() => { graph.zoomToFit({ padding: 60 }); }, 100);
+</script>
+</body>
+</html>

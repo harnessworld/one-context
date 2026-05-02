@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI Agent 平台架构图 - GoJS Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f0f2f5; overflow: hidden; }
+  #myDiagramDiv { width: 100vw; height: 100vh; background: #fafafa; }
+  .toolbar { position: fixed; top: 16px; right: 16px; z-index: 10; display: flex; flex-direction: column; gap: 6px; }
+  .toolbar button { padding: 8px 16px; border: 1px solid #d9d9d9; background: #fff; border-radius: 6px; cursor: pointer; font-size: 13px; color: #333; transition: all .15s; }
+  .toolbar button:hover { border-color: #1890ff; color: #1890ff; }
+  .toolbar button.active { background: #1890ff; color: #fff; border-color: #1890ff; }
+  .badge { position: fixed; top: 16px; left: 16px; z-index: 10; background: #fff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); font-size: 16px; font-weight: 600; color: #1d2129; }
+</style>
+</head>
+<body>
+<div class="badge">AI Agent 平台技术架构图 — GoJS</div>
+<div class="toolbar">
+  <button onclick="diagram.commandHandler.increaseZoom()">放大 +</button>
+  <button onclick="diagram.commandHandler.decreaseZoom()">缩小 -</button>
+  <button onclick="diagram.zoomToFit()">适应画布</button>
+  <button onclick="diagram.commandHandler.resetZoom()">重置</button>
+  <div style="margin-top:8px; display:flex; gap:4px;">
+    <button id="btnDirect" class="active" onclick="setHighlightMode('direct')">直连</button>
+    <button id="btnChain" onclick="setHighlightMode('chain')">全链路</button>
+  </div>
+  <button onclick="clearHighlights()" style="margin-top:4px; border-color:#f5222d; color:#f5222d;">清除高亮</button>
+</div>
+<div id="myDiagramDiv"></div>
+
+<script src="https://unpkg.com/gojs@3/release/go.js"></script>
+<script>
+const $ = go.GraphObject.make;
+
+/* ============================================================
+   Use a fixed-position (non-automatic) layout so we can
+   precisely control layer placement and keep links tidy.
+   ============================================================ */
+const diagram = $(go.Diagram, 'myDiagramDiv', {
+  'undoManager.isEnabled': true,
+  'animationManager.isEnabled': false,
+  initialAutoScale: go.AutoScale.Uniform,
+  padding: 50,
+  // No global layout — we place everything manually
+});
+
+/* ── Color palette ── */
+const C = {
+  user:   { bg: '#1890ff', text: '#fff', gBg: '#e6f7ff', gBd: '#91caff' },
+  agent:  { bg: '#2f54eb', text: '#fff', gBg: '#f0f5ff', gBd: '#adc6ff' },
+  model:  { bg: '#722ed1', text: '#fff', gBg: '#f9f0ff', gBd: '#d3adf7' },
+  tool:   { bg: '#389e0d', text: '#fff', gBg: '#f6ffed', gBd: '#b7eb8f' },
+  infra:  { bg: '#d46b08', text: '#fff', gBg: '#fff7e6', gBd: '#ffd591' },
+  govern: { bg: '#cf1322', text: '#fff', gBg: '#fff1f0', gBd: '#ffa39e' },
+};
+
+/* ── Group template ── */
+diagram.groupTemplate = $(go.Group, 'Auto',
+  {
+    isSubGraphExpanded: true,
+    computesBoundsAfterDrag: true,
+    handlesDragDropForMembers: true,
+    movable: true,
+  },
+  $(go.Shape, 'RoundedRectangle', {
+    fill: '#e6f7ff', stroke: '#91caff', strokeWidth: 2, parameter1: 14,
+  },
+    new go.Binding('fill', 'gBg'),
+    new go.Binding('stroke', 'gBd')
+  ),
+  $(go.Panel, 'Vertical',
+    { margin: 12, defaultAlignment: go.Spot.Left },
+    $(go.TextBlock, {
+      font: 'bold 15px sans-serif', stroke: '#1d2129',
+      margin: new go.Margin(2, 0, 10, 6),
+    }, new go.Binding('text', 'text')),
+    $(go.Placeholder, { padding: new go.Margin(0, 10, 10, 10) })
+  )
+);
+
+/* ── Node template ── */
+diagram.nodeTemplate = $(go.Node, 'Auto',
+  new go.Binding('position', 'pos', go.Point.parse),
+  {
+    width: 148, height: 42,
+    fromSpot: go.Spot.Bottom,
+    toSpot: go.Spot.Top,
+    cursor: 'pointer',
+    // Shadow glow — invisible by default, turned on for highlighted nodes
+    isShadowed: false,
+    shadowOffset: new go.Point(0, 0),
+    shadowBlur: 16,
+    shadowColor: 'rgba(24, 144, 255, 0.65)',
+    // Tooltip on hover
+    toolTip: $('ToolTip',
+      $(go.TextBlock, { margin: 8, font: '12px sans-serif' },
+        new go.Binding('text', '', d => d.text + '\n(' + (d.group || '').replace('g-', '') + ' layer)'))
+    ),
+  },
+  // Glow on/off via isHighlighted
+  new go.Binding('isShadowed', 'isHighlighted', h => h === true).ofObject(),
+  $(go.Shape, 'RoundedRectangle', {
+    strokeWidth: 1.5, parameter1: 7, name: 'SHAPE',
+  },
+    new go.Binding('fill', 'bg'),
+    new go.Binding('stroke', 'bd'),
+    // Highlighted: thicker glowing border
+    new go.Binding('strokeWidth', 'isHighlighted', h => h ? 3 : 1.5).ofObject(),
+    new go.Binding('stroke', 'isHighlighted', function(h) {
+      // When highlighted, use a bright accent; otherwise keep original
+      return h ? '#1890ff' : (this.part && this.part.data && this.part.data.bd) || '#d9d9d9';
+    }).ofObject()
+  ),
+  $(go.TextBlock, {
+    margin: 7, font: '500 12.5px sans-serif', textAlign: 'center',
+  },
+    new go.Binding('text', 'text'),
+    new go.Binding('stroke', 'fg')
+  )
+);
+
+/* ── Link template ── */
+diagram.linkTemplate = $(go.Link,
+  {
+    routing: go.Routing.AvoidsNodes,
+    corner: 10,
+    curve: go.Curve.JumpOver,
+    fromSpot: go.Spot.Bottom,
+    toSpot: go.Spot.Top,
+  },
+  $(go.Shape, {
+    stroke: '#8c8c8c', strokeWidth: 1.6, name: 'LINKSHAPE',
+  },
+    new go.Binding('strokeDashArray', 'dash'),
+    // Highlighted links: bright blue, thicker
+    new go.Binding('stroke', 'isHighlighted', h => h ? '#1890ff' : '#8c8c8c').ofObject(),
+    new go.Binding('strokeWidth', 'isHighlighted', h => h ? 3.5 : 1.6).ofObject()
+  ),
+  $(go.Shape, { toArrow: 'Triangle', fill: '#8c8c8c', stroke: null, scale: 0.85 },
+    new go.Binding('fill', 'isHighlighted', h => h ? '#1890ff' : '#8c8c8c').ofObject()
+  ),
+  $(go.Panel, 'Auto',
+    { visible: true },
+    new go.Binding('visible', 'label', l => !!l),
+    $(go.Shape, 'RoundedRectangle', { fill: '#fff', stroke: null, parameter1: 3 }),
+    $(go.TextBlock, { margin: new go.Margin(2, 5, 2, 5), font: '10px sans-serif', stroke: '#666' },
+      new go.Binding('text', 'label'))
+  )
+);
+
+/* ============================================================
+   Manual layout coordinates
+   ============================================================ */
+const NW = 148, NH = 42, HGAP = 24, VGAP = 18;
+const LX = 0; // left edge of main area
+
+// Row helper: given a base Y and array of labels, return nodes
+function row(labels, baseX, baseY, cat) {
+  return labels.map((text, i) => ({
+    key: text,
+    text,
+    group: 'g-' + cat,
+    pos: (baseX + i * (NW + HGAP)) + ' ' + baseY,
+    bg: C[cat].bg,
+    fg: C[cat].text,
+    bd: C[cat].gBd,
+  }));
+}
+
+// Layer Y positions
+const Y0 = 0;    // User layer
+const Y1 = 130;  // Agent layer (2 rows)
+const Y2 = 340;  // Model layer (2 rows)
+const Y3 = 550;  // Tool layer (2 rows)
+const Y4 = 760;  // Infra layer (2 rows)
+
+// Governance: right side column
+const GOV_X = 5 * (NW + HGAP) + 80;
+
+const nodeDataArray = [
+  // ── Groups ──
+  { key: 'g-user',   text: '用户接入层  Access Layer',          isGroup: true, gBg: C.user.gBg,   gBd: C.user.gBd },
+  { key: 'g-agent',  text: 'Agent 编排层  Orchestration Layer', isGroup: true, gBg: C.agent.gBg,  gBd: C.agent.gBd },
+  { key: 'g-model',  text: '模型服务层  Model Service Layer',   isGroup: true, gBg: C.model.gBg,  gBd: C.model.gBd },
+  { key: 'g-tool',   text: '工具层  Tool Layer',                isGroup: true, gBg: C.tool.gBg,   gBd: C.tool.gBd },
+  { key: 'g-infra',  text: '基础设施层  Infrastructure Layer',  isGroup: true, gBg: C.infra.gBg,  gBd: C.infra.gBd },
+  { key: 'g-govern', text: '安全与治理  Governance',             isGroup: true, gBg: C.govern.gBg, gBd: C.govern.gBd },
+
+  // ── 1. User Layer ──
+  ...row(['Web UI', 'API Gateway', 'SDK / CLI', 'Webhook', 'WebSocket'], LX, Y0, 'user'),
+
+  // ── 2. Agent Layer (2 rows) ──
+  ...row(['Agent Runtime', 'Workflow Engine', 'State Manager', 'Task Planner'], LX, Y1, 'agent'),
+  ...row(['Memory Store', 'RAG Pipeline'], LX, Y1 + NH + VGAP, 'agent'),
+
+  // ── 3. Model Layer (2 rows) ──
+  ...row(['LLM Router', 'GPT-4o', 'Claude 3.5', 'Qwen-Max'], LX, Y2, 'model'),
+  ...row(['Embedding Svc', 'Reranker'], LX, Y2 + NH + VGAP, 'model'),
+
+  // ── 4. Tool Layer (2 rows) ──
+  ...row(['Tool Registry', 'Code Executor', 'Web Search', 'DB Connector'], LX, Y3, 'tool'),
+  ...row(['File System', 'API Caller'], LX, Y3 + NH + VGAP, 'tool'),
+
+  // ── 5. Infra Layer (2 rows) ──
+  ...row(['Message Queue', 'Redis Cache', 'PostgreSQL', 'Object Storage'], LX, Y4, 'infra'),
+  ...row(['Monitor / APM', 'Log Center'], LX, Y4 + NH + VGAP, 'infra'),
+
+  // ── 6. Governance (right column) ──
+  ...['Auth Service', 'Rate Limiter', 'Audit Log', 'Cost Control', 'Encryption'].map((text, i) => ({
+    key: text,
+    text,
+    group: 'g-govern',
+    pos: GOV_X + ' ' + (Y0 + i * (NH + 26)),
+    bg: C.govern.bg,
+    fg: C.govern.text,
+    bd: C.govern.gBd,
+  })),
+];
+
+const linkDataArray = [
+  // ── User → Agent (straight down, no crossings) ──
+  { from: 'Web UI',      to: 'Agent Runtime',    label: '请求' },
+  { from: 'API Gateway', to: 'Agent Runtime' },
+  { from: 'SDK / CLI',   to: 'Workflow Engine' },
+  { from: 'Webhook',     to: 'Workflow Engine' },
+  { from: 'WebSocket',   to: 'State Manager' },
+
+  // ── Agent → Model (mainly through LLM Router) ──
+  { from: 'Agent Runtime',    to: 'LLM Router',    label: 'LLM 调用' },
+  { from: 'Workflow Engine',  to: 'LLM Router' },
+  { from: 'Task Planner',     to: 'LLM Router' },
+  { from: 'RAG Pipeline',     to: 'Embedding Svc',  label: 'embedding' },
+  { from: 'RAG Pipeline',     to: 'Reranker' },
+  // Router fans out
+  { from: 'LLM Router', to: 'GPT-4o' },
+  { from: 'LLM Router', to: 'Claude 3.5' },
+  { from: 'LLM Router', to: 'Qwen-Max' },
+
+  // ── Agent → Tool ──
+  { from: 'Agent Runtime', to: 'Tool Registry',  label: '工具调用' },
+  { from: 'Tool Registry', to: 'Code Executor' },
+  { from: 'Tool Registry', to: 'Web Search' },
+  { from: 'Tool Registry', to: 'DB Connector' },
+  { from: 'Tool Registry', to: 'File System' },
+  { from: 'Tool Registry', to: 'API Caller' },
+
+  // ── Tool / Agent → Infra (keep links short, same-column preferred) ──
+  { from: 'State Manager',  to: 'Redis Cache',    label: 'cache' },
+  { from: 'Memory Store',   to: 'PostgreSQL',     label: 'persist' },
+  { from: 'State Manager',  to: 'Message Queue',  label: 'event', dash: [6, 4] },
+  { from: 'DB Connector',   to: 'PostgreSQL' },
+  { from: 'File System',    to: 'Object Storage' },
+  { from: 'Monitor / APM',  to: 'Log Center',     dash: [6, 4] },
+
+  // ── Governance cross-cutting (dashed, from right side) ──
+  { from: 'API Gateway',    to: 'Auth Service',   label: 'auth',    dash: [6, 4] },
+  { from: 'API Gateway',    to: 'Rate Limiter',   label: 'limit',   dash: [6, 4] },
+  { from: 'Agent Runtime',  to: 'Audit Log',      label: 'log',     dash: [6, 4] },
+  { from: 'LLM Router',     to: 'Cost Control',   label: 'cost',    dash: [6, 4] },
+  { from: 'PostgreSQL',     to: 'Encryption',     label: 'encrypt', dash: [6, 4] },
+];
+
+diagram.model = new go.GraphLinksModel(nodeDataArray, linkDataArray);
+
+/* ============================================================
+   Interactive highlighting:
+   "Additive glow" — everything stays normal, clicked path glows.
+   Two modes: "direct" (immediate neighbors) / "chain" (full BFS)
+   ============================================================ */
+let highlightMode = 'direct'; // 'direct' | 'chain'
+
+function setHighlightMode(mode) {
+  highlightMode = mode;
+  document.getElementById('btnDirect').className = mode === 'direct' ? 'active' : '';
+  document.getElementById('btnChain').className = mode === 'chain' ? 'active' : '';
+  clearHighlights();
+}
+
+function clearHighlights() {
+  diagram.startTransaction('clearHL');
+  diagram.nodes.each(n => { n.isHighlighted = false; });
+  diagram.links.each(l => { l.isHighlighted = false; });
+  diagram.commitTransaction('clearHL');
+}
+
+/* Direct neighbors only */
+function highlightDirect(rootNode) {
+  diagram.startTransaction('hlDirect');
+  rootNode.isHighlighted = true;
+  rootNode.findLinksOutOf().each(link => {
+    link.isHighlighted = true;
+    if (link.toNode) link.toNode.isHighlighted = true;
+  });
+  rootNode.findLinksInto().each(link => {
+    link.isHighlighted = true;
+    if (link.fromNode) link.fromNode.isHighlighted = true;
+  });
+  diagram.commitTransaction('hlDirect');
+}
+
+/* Full upstream + downstream chain (BFS) */
+function highlightChain(rootNode) {
+  const visited = new Set();
+  const visitedLinks = new Set();
+
+  // BFS downstream
+  const qDown = [rootNode];
+  visited.add(rootNode.key);
+  while (qDown.length > 0) {
+    const node = qDown.shift();
+    node.findLinksOutOf().each(link => {
+      visitedLinks.add(link);
+      const target = link.toNode;
+      if (target && !visited.has(target.key)) {
+        visited.add(target.key);
+        qDown.push(target);
+      }
+    });
+  }
+
+  // BFS upstream
+  const qUp = [rootNode];
+  const visitedUp = new Set([rootNode.key]);
+  while (qUp.length > 0) {
+    const node = qUp.shift();
+    node.findLinksInto().each(link => {
+      visitedLinks.add(link);
+      const source = link.fromNode;
+      if (source && !visitedUp.has(source.key)) {
+        visitedUp.add(source.key);
+        visited.add(source.key);
+        qUp.push(source);
+      }
+    });
+  }
+
+  // Apply
+  diagram.startTransaction('hlChain');
+  diagram.nodes.each(n => {
+    n.isHighlighted = visited.has(n.key);
+  });
+  diagram.links.each(l => {
+    l.isHighlighted = visitedLinks.has(l);
+  });
+  diagram.commitTransaction('hlChain');
+}
+
+// Click on a node
+diagram.addDiagramListener('ObjectSingleClicked', (e) => {
+  const part = e.subject.part;
+  if (part instanceof go.Node && !(part instanceof go.Group)) {
+    clearHighlights();
+    if (highlightMode === 'direct') {
+      highlightDirect(part);
+    } else {
+      highlightChain(part);
+    }
+  }
+});
+
+// Click on blank area → reset
+diagram.addDiagramListener('BackgroundSingleClicked', () => {
+  clearHighlights();
+});
+
+// Position groups manually after model load
+diagram.addDiagramListener('InitialLayoutCompleted', () => {
+  diagram.zoomToFit();
+});
+</script>
+</body>
+</html>
