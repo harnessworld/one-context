@@ -1,0 +1,17 @@
+{
+  "wavFile": "media/narration.wav",
+  "outputFile": "final.mp4",
+  "burnSubtitles": true,
+  "subtitle": {
+    "charsPerLine": 24,
+    "fontSize": 58,
+    "marginV": 14,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "primaryColour": "#FFE066",
+    "primaryAlpha": 0,
+    "outline": 0,
+    "barHeight": 78,
+    "barAlpha": 0.52
+  }
+}
