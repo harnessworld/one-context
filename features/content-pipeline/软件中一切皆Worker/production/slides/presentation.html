@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重新定义AI时代的软件 · Open Design Guizang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ============ 主题色(默认:🖋 墨水经典) ============
+       切换主题:从 references/themes.md 复制对应的 :root 块
+       整体替换这几行(--ink / --ink-rgb / --paper / --paper-rgb)
+       其他地方散落的 rgba() 都走 var(--ink-rgb) / var(--paper-rgb),无需逐处改 */
+    --ink:#0a0a0b;
+    --ink-rgb:10,10,11;
+    --paper:#f1efea;
+    --paper-rgb:241,239,234;
+    --paper-tint:#e8e5de;
+    --ink-tint:#18181a;
+
+    /* ============ 字体(跨主题固定) ============ */
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display","Source Serif 4",Georgia,serif;
+    --serif-body-en:"Source Serif 4",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  /* ============ WebGL 双背景 ============ */
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+
+  /* ============ Deck 容器 + 翻页 ============ */
+  /* width: NSLIDES * 100vw，会在 JS 里动态矫正 */
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink)}
+  .slide.dark{color:var(--paper)}
+
+  /* 默认页：遮罩较厚，保证文字可读 */
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  /* Hero 页：遮罩大幅降低，让 WebGL 背景明显透出 */
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  /* Hero 页顶底微弱渐隐，保证 chrome/foot 区域可读 */
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  /* ============ Magazine chrome：顶部 meta + 底部 foot ============ */
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+
+  .tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;padding:6px 14px;border:1px solid currentColor;opacity:.85}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.25;margin:3vh 0}
+  .rule.v{width:1px;height:100%;margin:0}
+
+  /* ============ 字体规则 ============
+     · 衬线（Noto Serif SC / Playfair）：大标题、重点金句、数字
+     · 非衬线（Noto Sans SC）：正文描述、body、补充说明
+     · 等宽（IBM Plex Mono）：kicker、meta 小标签、foot 右侧
+  */
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .display{font-family:var(--serif-en);font-weight:700;font-size:11vw;line-height:.92;letter-spacing:-.025em}
+  .display-zh{font-family:var(--serif-zh);font-weight:700;font-size:7.8vw;line-height:1.04;letter-spacing:-.005em}
+  .h1-zh{font-family:var(--serif-zh);font-weight:700;font-size:4.6vw;line-height:1.12;letter-spacing:-.005em}
+  .h2-zh{font-family:var(--serif-zh);font-weight:600;font-size:3.2vw;line-height:1.2;letter-spacing:0}
+  .h3-zh{font-family:var(--serif-zh);font-weight:500;font-size:1.9vw;line-height:1.35}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .body-serif{font-family:var(--serif-zh);font-weight:400;font-size:max(15px,1.3vw);line-height:1.65;opacity:.88}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.9vw;line-height:1.4;opacity:.85}
+  .meta{font-family:var(--mono);font-size:max(11px,.88vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+  .big-num{font-family:var(--serif-en);font-weight:800;font-size:10vw;line-height:.85;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .mid-num{font-family:var(--serif-en);font-weight:700;font-size:5.5vw;line-height:.88;letter-spacing:-.02em;font-feature-settings:"tnum"}
+  .ghost{font-family:var(--serif-en);font-weight:900;font-size:34vw;line-height:.8;opacity:.06;letter-spacing:-.04em;position:absolute;font-feature-settings:"tnum"}
+  em{font-style:italic;font-family:var(--serif-en)}
+  .en{font-family:var(--serif-en);font-style:italic;font-weight:500}
+
+  /* ============ 布局工具 ============ */
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .grid-6{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:4vw 6vw;flex:1;align-content:center;padding:2vh 0}
+  .grid-9{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:3vh 4vw;flex:1;align-content:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:4vw;flex:1;align-content:center}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .bottom-left{position:absolute;left:6vw;bottom:9vh;max-width:50vw}
+  .bottom-right{position:absolute;right:6vw;bottom:9vh;max-width:50vw;text-align:right}
+  .top-right{position:absolute;right:6vw;top:6vh;text-align:right}
+
+  /* ============ Stat（数字矩阵） ============ */
+  .stat{display:flex;flex-direction:column;gap:1vh;align-items:flex-start}
+  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:8vw;line-height:.88;letter-spacing:-.03em;font-feature-settings:"tnum"}
+  .stat .l{font-family:var(--sans-zh);font-size:max(13px,1.05vw);opacity:.7;margin-top:1vh;font-weight:400;line-height:1.5}
+  .stat .m{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.5;margin-bottom:.2vh}
+
+  /* ============ Callout（引用框） ============ */
+  .callout{padding:3vh 2.4vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .callout .q-big{font-family:var(--serif-zh);font-weight:600;font-size:max(17px,1.6vw);line-height:1.42}
+
+  /* ============ Platform（平台卡） ============ */
+  .plat{display:flex;flex-direction:column;justify-content:flex-end;padding:2vh 0;border-top:1px solid currentColor;border-color:rgba(127,127,127,.35)}
+  .plat .name{font-family:var(--serif-zh);font-weight:700;font-size:1.8vw;margin-bottom:.6vh}
+  .plat .nb{font-family:var(--serif-en);font-weight:700;font-size:3.2vw;letter-spacing:-.02em;line-height:1;font-feature-settings:"tnum"}
+  .plat .sub{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;opacity:.55;margin-top:.6vh}
+  .plat .fill{font-family:var(--sans-zh);font-weight:300;font-size:2.4vw;opacity:.28;letter-spacing:-.01em;line-height:1}
+
+  /* ============ Rowline（表格行） ============ */
+  .rowline{display:grid;grid-template-columns:1fr 2fr 1fr;gap:2vw;padding:2.2vh 0;border-top:1px solid currentColor;align-items:center;border-color:rgba(127,127,127,.25)}
+  .rowline:last-child{border-bottom:1px solid currentColor;border-color:rgba(127,127,127,.25)}
+  .rowline .k{font-family:var(--serif-zh);font-weight:700;font-size:1.7vw}
+  .rowline .v{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.2vw);opacity:.85;line-height:1.55}
+  .rowline .m{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;justify-self:end}
+
+  /* ============ Pillar（支柱卡片） ============ */
+  .pillar{display:flex;flex-direction:column;gap:1.8vh}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400}
+  .pillar .ic svg{width:2.8vw;height:2.8vw;stroke-width:1.2;opacity:.7}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
+
+  /* ============ Signature / Highlight ============ */
+  .sign{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:2vw;opacity:.7}
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+
+  /* ============ Icons（Lucide via CDN） ============ */
+  .ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .ico-lg,.ico-md,.ico-sm{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+  .ico-lg{width:2.6vw;height:2.6vw;stroke-width:1.2;display:inline-block}
+  .ico-md{width:1.8vw;height:1.8vw;stroke-width:1.3;display:inline-block;vertical-align:-.4em}
+  .ico-sm{width:1.1vw;height:1.1vw;stroke-width:1.4;display:inline-block;vertical-align:-.15em;opacity:.7}
+
+  /* ============ 图片占位（虚线框，提示设计师位置） ============ */
+  .img-slot{border:1.5px dashed rgba(127,127,127,.4);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1vh;padding:2vh 2vw;font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;opacity:.55;position:relative;aspect-ratio:16/9;width:100%;max-height:56vh;margin-inline:auto;box-sizing:border-box}
+  .img-slot::before{content:"";position:absolute;inset:8px;border:1px solid currentColor;opacity:.2}
+  .img-slot .plus{font-size:2vw;font-weight:300;opacity:.5;letter-spacing:0}
+  .img-slot .label{position:relative;z-index:2;text-align:center}
+  .img-slot.r-4x3{aspect-ratio:4/3}
+  .img-slot.r-3x2{aspect-ratio:3/2}
+  .img-slot.r-1x1{aspect-ratio:1/1}
+
+  /* ============ 图片实填框（关键：固定高度 + 只裁底部） ============
+     重要约束：高度用内联 height:Nvh 精确控制，不要用 aspect-ratio（会撑破布局）
+     object-position:top center 保证严禁裁剪顶部和左右，只裁剪底部
+  */
+  .frame-img{overflow:hidden;position:relative;background:rgba(0,0,0,.04);box-sizing:border-box;width:100%;border-radius:4px}
+  .slide.dark .frame-img{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .frame-cap{display:flex;justify-content:space-between;align-items:baseline;gap:1vw;margin-top:.8vh;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.72}
+  .frame-cap .pf{font-family:var(--serif-zh);font-weight:600;font-size:max(13px,1vw);letter-spacing:.04em;text-transform:none;opacity:.94}
+  .frame-cap .nb{font-family:var(--serif-en);font-style:italic;font-size:max(15px,1.2vw);letter-spacing:.02em;text-transform:none;opacity:.88}
+  .frame-cap .idx{font-family:var(--mono);opacity:.5}
+  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
+  figure.tile > .frame-img{flex:0 0 auto}
+
+  /* ============ 导航 ============ */
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+
+  /* ============================================================
+     ============ LAYOUTS API · 面向 agent 的类（v2）============
+     所有 layouts.md 中的骨架都基于下面这套命名。
+     如果你在 layouts.md 里看到某个类，它必须在下面有定义。
+     ============================================================ */
+
+  /* ---------- .frame：每页主内容容器 ---------- */
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0}
+  /* 当 .frame 同时加了 grid 类时，grid 的 display:grid 覆盖 flex */
+  .frame.grid-2-7-5,
+  .frame.grid-2-6-6,
+  .frame.grid-2-8-4,
+  .frame.grid-3-3,
+  .frame.grid-6{display:grid}
+
+  /* ---------- 标题层级（API 名称，衬线为主） ---------- */
+  .h-hero{
+    font-family:var(--serif-zh);
+    font-weight:900;
+    font-size:10vw;
+    line-height:.96;
+    letter-spacing:-.02em;
+  }
+  .h-xl{
+    font-family:var(--serif-zh);
+    font-weight:700;
+    font-size:6.2vw;
+    line-height:1.08;
+    letter-spacing:-.01em;
+  }
+  .h-sub{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:3.1vw;
+    line-height:1.25;
+    letter-spacing:0;
+    opacity:.7;
+  }
+  .h-md{
+    font-family:var(--serif-zh);
+    font-weight:600;
+    font-size:2.3vw;
+    line-height:1.3;
+  }
+  /* 英文标题专用（Playfair 衬线） */
+  .h-hero-en,.h-xl-en{font-family:var(--serif-en);letter-spacing:-.025em}
+
+  /* ---------- lead 引语 ---------- */
+  .lead{
+    font-family:var(--serif-zh);
+    font-weight:400;
+    font-size:1.75vw;
+    line-height:1.5;
+    opacity:.86;
+  }
+
+  /* ---------- meta-row 底部元数据 ---------- */
+  .meta-row{
+    display:flex;
+    gap:1.2em;
+    align-items:baseline;
+    flex-wrap:wrap;
+    font-family:var(--mono);
+    font-size:max(12px,.92vw);
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- stat-card（数据大字报用） ---------- */
+  .stat-card{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    align-items:flex-start;
+    padding-top:1.6vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.3);
+  }
+  .stat-card .stat-label{
+    font-family:var(--mono);
+    font-size:max(10px,.78vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.55;
+  }
+  .stat-card .stat-nb{
+    font-family:var(--serif-en);
+    font-weight:800;
+    font-size:5.8vw;
+    line-height:.9;
+    letter-spacing:-.03em;
+    font-feature-settings:"tnum";
+    margin-top:.4vh;
+  }
+  .stat-card .stat-nb .stat-unit{
+    font-family:var(--serif-zh);
+    font-weight:500;
+    font-size:.38em;
+    letter-spacing:0;
+    opacity:.72;
+    margin-left:.14em;
+  }
+  .stat-card .stat-note{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(13px,1.05vw);
+    line-height:1.5;
+    opacity:.72;
+    margin-top:.6vh;
+  }
+  /* 当 stat-card 用于 grid-4（2x2），数字可以更大 */
+  .grid-4 .stat-card .stat-nb{font-size:7.5vw}
+  /* 当只有 3 个，字也可以稍大 */
+  .grid-3 .stat-card .stat-nb{font-size:6.8vw}
+
+  /* ---------- pipeline（流水线） ---------- */
+  .pipeline-section{
+    margin-top:4.4vh;
+    padding-top:2.8vh;
+    border-top:1px dashed rgba(127,127,127,.32);
+  }
+  .pipeline-section:first-of-type{
+    border-top:0;
+    padding-top:0;
+    margin-top:3vh;
+  }
+  .pipeline-label{
+    font-family:var(--mono);
+    font-size:max(11px,.85vw);
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    opacity:.62;
+    margin-bottom:2.2vh;
+  }
+  .pipeline{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:1.2vw;
+  }
+  .pipeline[data-cols="3"]{grid-template-columns:repeat(3,1fr)}
+  .pipeline[data-cols="4"]{grid-template-columns:repeat(4,1fr)}
+  .pipeline[data-cols="6"]{grid-template-columns:repeat(6,1fr)}
+  .step{
+    display:flex;
+    flex-direction:column;
+    gap:.8vh;
+    padding-top:1.4vh;
+    border-top:1px solid currentColor;
+    border-color:rgba(127,127,127,.35);
+  }
+  .step-nb{
+    font-family:var(--serif-en);
+    font-style:italic;
+    font-weight:500;
+    font-size:1.15vw;
+    opacity:.45;
+  }
+  .step-title{
+    font-family:var(--sans-zh);
+    font-weight:700;
+    font-size:1.55vw;
+    letter-spacing:.01em;
+    line-height:1.2;
+  }
+  .step-desc{
+    font-family:var(--sans-zh);
+    font-weight:400;
+    font-size:max(12px,.95vw);
+    line-height:1.45;
+    opacity:.72;
+  }
+
+  /* ---------- 网格（layouts.md 所用） ---------- */
+  /* 这些类独立挂到任何容器上都能生效，不依赖 .frame 复合选择器 */
+  .grid-2-7-5{display:grid;grid-template-columns:7fr 5fr;gap:3vw 4vh;align-items:start}
+  .grid-2-6-6{display:grid;grid-template-columns:1fr 1fr;gap:3vw 4vh;align-items:start}
+  .grid-2-8-4{display:grid;grid-template-columns:8fr 4fr;gap:3vw 4vh;align-items:start}
+  .grid-3-3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-auto-rows:minmax(0,1fr);
+    gap:2.4vh 2vw;
+  }
+  /* grid-6 已在旧样式里定义为 3x2，这里仅补 align */
+
+  /* ---------- 图片 frame-img（layouts.md 主命名） ---------- */
+  /* 在旧样式里已定义，这里补 img-cap 命名别名与增强 */
+  figure.frame-img{margin:0;display:flex;flex-direction:column;min-width:0}
+  .img-cap{
+    display:block;
+    margin-top:.8vh;
+    font-family:var(--mono);
+    font-size:max(10px,.8vw);
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+  /* callout src 命名别名 */
+  .callout-src{
+    display:block;
+    margin-top:1.6vh;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    opacity:.6;
+  }
+
+  /* ---------- chrome & foot 补位（layouts.md 简单写法） ---------- */
+  .chrome{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.2em;text-transform:uppercase;opacity:.62}
+  .foot{font-family:var(--mono);font-size:max(11px,.78vw);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+  /* ---------- 响应式降级 ---------- */
+  @media (max-width:900px){
+    .display{font-size:16vw}
+    .display-zh{font-size:12vw}
+    .h1-zh{font-size:7vw}
+    .h-hero{font-size:14vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .grid-2-7-5,.grid-2-6-6,.grid-2-8-4{grid-template-columns:1fr}
+  }
+
+  /* one-context wav pipeline: whisper anchor */
+  .wa{position:absolute;bottom:10vh;left:6vw;right:6vw;font-family:var(--mono);font-size:max(10px,.78vw);letter-spacing:.12em;opacity:.42;z-index:25;pointer-events:none;line-height:1.45}
+
+</style>
+</head>
+<body>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ============================================================
+     SLIDES 插入区 · 在此处填充所有 <section class="slide ..."> 页面
+     每页模板参考 references/page-patterns.md
+     页面组件参考 references/components.md
+     ============================================================ -->
+
+<section class="slide s hero dark" id="s0">
+  <div class="chrome"><div>斗包 AI 播客</div><div>Vol · Agent 后端</div></div>
+  <div class="frame" style="display:grid;gap:4vh;align-content:center;min-height:78vh">
+    <div class="kicker">Harness · Worker / Trigger / Function</div>
+    <h1 class="h-hero">重新定义AI时代的软件</h1>
+    <h2 class="h-sub">用统一原语把传统软件与 Agent 后端对齐</h2>
+    <p class="lead" style="max-width:62vw">Mike Piccolo 视角下的复杂度收敛：先把一切落成 Worker，再用 Trigger 驱动、用 Function 封装能力。</p>
+    <div class="meta-row"><span>斗包</span><span>·</span><span>AI 播客</span><span>·</span><span>01 / 15</span></div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Cover</div></div>
+  <span class="wa">欢迎收听斗包 AI 播客节目</span>
+</section>
+
+<section class="slide s light" id="s1">
+  <div class="chrome"><div>开篇</div><div>02 / 15</div></div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker">为什么现在必须谈后端</div>
+    <h2 class="h-xl">Agent 系统的复杂度爆炸</h2>
+    <p class="lead" style="margin-bottom:4vh">AI Agent 正在重塑软件边界；难点在编排、状态与可观测性，而不是单次推理。</p>
+    <div class="grid-4">
+      <div class="pillar"><span class="ic">①</span><div class="t">复杂度指数上升</div><div class="d">链路更长、故障面更广</div></div>
+      <div class="pillar"><span class="ic">②</span><div class="t">Harness 理念</div><div class="d">统一运行时与语义</div></div>
+      <div class="pillar"><span class="ic">③</span><div class="t">生产困境</div><div class="d">真实业务里的失控感</div></div>
+      <div class="pillar"><span class="ic">④</span><div class="t">本期脉络</div><div class="d">误区 → 本质 → 演进</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Intro</div></div>
+  <span class="wa">我们先从复杂度爆炸与 Harness 理念谈起</span>
+</section>
+
+<section class="slide s dark" id="s2">
+  <div class="chrome"><div>误区 ①</div><div>03 / 15</div></div>
+  <div class="frame grid-2-6-6" style="padding-top:5vh">
+    <div class="col" style="gap:3vh">
+      <div class="kicker">Myth</div>
+      <h2 class="h-xl">大模型万能？</h2>
+      <p class="lead">堆更大模型就能做好 Agent 系统、就能解决工程问题——这是常见错觉。</p>
+      <div class="callout"><span class="q-big">误区</span><br>把「推理」当成「系统」的全部。</div>
+    </div>
+    <div class="col" style="gap:3vh;justify-content:center">
+      <div class="tag">现实</div>
+      <p class="body-zh">难点在任务编排、状态、流程与可观测性；模型只是零件，<span class="hi">后端才是系统</span>。</p>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Myth 1</div></div>
+  <span class="wa">模型只是零件，后端才是系统</span>
+</section>
+
+<section class="slide s light" id="s3">
+  <div class="chrome"><div>误区 ②</div><div>04 / 15</div></div>
+  <div class="frame" style="padding-top:5vh">
+    <div class="kicker">协作成本</div>
+    <h2 class="h-xl">多 Agent = 天然提效？</h2>
+    <div class="grid-4" style="margin-top:4vh">
+      <div class="pillar"><span class="ic">↔</span><div class="t">协作开销</div><div class="d">角色越多，同步越贵</div></div>
+      <div class="pillar"><span class="ic">◎</span><div class="t">状态分裂</div><div class="d">上下文与边界更难控</div></div>
+      <div class="pillar"><span class="ic">?</span><div class="t">排障地狱</div><div class="d">分布式链路定位变难</div></div>
+      <div class="pillar"><span class="ic">∑</span><div class="t">收益不确定</div><div class="d">抽象不对可能更慢更贵</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Myth 2</div></div>
+  <span class="wa">多 Agent 不是银弹，抽象不对照样崩</span>
+</section>
+
+<section class="slide s dark" id="s4">
+  <div class="chrome"><div>本质</div><div>05 / 15</div></div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker">三原语</div>
+    <h2 class="h-xl">Worker · Trigger · Function</h2>
+    <div class="fill" style="min-height:52vh;display:flex;align-items:center;justify-content:center">
+      <svg viewBox="0 0 1600 420" preserveAspectRatio="xMidYMid meet" style="width:100%;max-height:52vh">
+        <defs><marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(241,239,234,.85)"/></marker></defs>
+        <rect x="40" y="110" width="440" height="220" rx="16" fill="rgba(241,239,234,.08)" stroke="rgba(241,239,234,.45)" stroke-width="2"/>
+        <text x="260" y="200" text-anchor="middle" fill="rgba(241,239,234,.95)" font-size="36" font-weight="700" font-family="Noto Serif SC,serif">Worker</text>
+        <text x="260" y="250" text-anchor="middle" fill="rgba(241,239,234,.75)" font-size="22">运行单元 · 服务 / Agent / 任务</text>
+        <line x1="480" y1="220" x2="580" y2="220" stroke="rgba(241,239,234,.5)" stroke-width="2" marker-end="url(#arr)"/>
+        <rect x="580" y="110" width="440" height="220" rx="16" fill="rgba(241,239,234,.08)" stroke="rgba(241,239,234,.45)" stroke-width="2"/>
+        <text x="800" y="200" text-anchor="middle" fill="rgba(241,239,234,.95)" font-size="36" font-weight="700" font-family="Noto Serif SC,serif">Trigger</text>
+        <text x="800" y="250" text-anchor="middle" fill="rgba(241,239,234,.75)" font-size="22">驱动与编排 · 事件 / 定时 / 人工</text>
+        <line x1="1020" y1="220" x2="1120" y2="220" stroke="rgba(241,239,234,.5)" stroke-width="2" marker-end="url(#arr)"/>
+        <rect x="1120" y="110" width="440" height="220" rx="16" fill="rgba(241,239,234,.08)" stroke="rgba(241,239,234,.45)" stroke-width="2"/>
+        <text x="1340" y="200" text-anchor="middle" fill="rgba(241,239,234,.95)" font-size="36" font-weight="700" font-family="Noto Serif SC,serif">Function</text>
+        <text x="1340" y="250" text-anchor="middle" fill="rgba(241,239,234,.75)" font-size="22">能力边界 · 工具 / API / 领域能力</text>
+        <text x="800" y="380" text-anchor="middle" fill="rgba(241,239,234,.9)" font-size="26" font-weight="600">统一原语 → 复杂度收敛</text>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Primitives</div></div>
+  <span class="wa">Walker Trigger Function 口播常混，工程上写作 Worker</span>
+</section>
+
+<section class="slide s light" id="s5">
+  <div class="chrome"><div>痛点</div><div>06 / 15</div></div>
+  <div class="frame grid-2-6-6" style="padding-top:5vh">
+    <div>
+      <div class="kicker">表面</div>
+      <h2 class="h-md">集成很忙</h2>
+      <p class="body-zh">外部对接、胶水代码、联调与协议适配……时间被占满。</p>
+    </div>
+    <div>
+      <div class="kicker">真正要命</div>
+      <h2 class="h-md">内部混乱</h2>
+      <p class="body-zh">Agent 内部状态与流程失控；边界不清、重试补偿混乱；缺少统一语义与 Tracing——<span class="hi">比集成更致命</span>。</p>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Risk</div></div>
+  <span class="wa">很多人盯着集成难题，内部混乱更要命</span>
+</section>
+
+<section class="slide s dark" id="s6">
+  <div class="chrome"><div>三模型</div><div>07 / 15</div></div>
+  <div class="frame" style="padding-top:4vh">
+    <h2 class="h-xl">革命性特性</h2>
+    <p class="lead" style="margin-bottom:3vh">用同一套语言描述 Agent 与后端：Agent 本身也是 Worker；与微服务并列扩展；任意语言实现 Function。</p>
+    <div class="grid-3">
+      <div class="stat"><span class="m">Unified</span><span class="n">1 套语义</span><span class="l">调度、观测、排障对齐</span></div>
+      <div class="stat"><span class="m">Scale</span><span class="n">水平扩展</span><span class="l">动态扩缩与治理一体化</span></div>
+      <div class="stat"><span class="m">Interop</span><span class="n">多语言</span><span class="l">Function 边界清晰可替换</span></div>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Features</div></div>
+  <span class="wa">用 worker、trigger、function 构建整个系统</span>
+</section>
+
+<section class="slide s light" id="s7">
+  <div class="chrome"><div>对比</div><div>08 / 15</div></div>
+  <div class="frame grid-2-6-6" style="padding-top:5vh">
+    <div class="callout">
+      <div class="kicker">传统</div>
+      <p class="body-zh">Agent 与业务两套语言；桥接厚重；Tracing 割裂；状态分散。</p>
+    </div>
+    <div class="callout">
+      <div class="kicker">三模型</div>
+      <p class="body-zh">Agent 与后端无缝融合；统一语义与全链路追踪；一切先落成 Worker 再组合。</p>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Compare</div></div>
+  <span class="wa">把 agent 与后端服务真正融在一起，复杂度才不再爆炸</span>
+</section>
+
+<section class="slide s hero dark" id="s8">
+  <div class="chrome"><div>影响</div><div>09 / 15</div></div>
+  <div class="frame center" style="min-height:72vh">
+    <div class="kicker">范式迁移</div>
+    <div class="big-num" style="font-size:12vw">1st-class</div>
+    <h2 class="h-sub" style="margin-top:3vh">Agent 成为后端一等公民</h2>
+    <p class="lead" style="max-width:70vw;margin-top:2vh">与微服务、批任务并列的第一类负载：调度、配额、发布与治理走同一套平台。</p>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Citizen</div></div>
+  <span class="wa">Agent 不再是外挂脚本，而是正式工作负载</span>
+</section>
+
+<section class="slide s light" id="s9">
+  <div class="chrome"><div>基础设施</div><div>10 / 15</div></div>
+  <div class="frame" style="padding-top:5vh">
+    <h2 class="h-xl">AI 基础设施新范式</h2>
+    <div class="pipeline-section"><div class="pipeline-label">三根支柱</div>
+    <div class="pipeline" data-cols="3">
+      <div class="step"><div class="step-nb">01</div><div class="step-title">统一调度</div><div class="step-desc">GPU/CPU 与队列策略可组合</div></div>
+      <div class="step"><div class="step-nb">02</div><div class="step-title">统一观测</div><div class="step-desc">指标、日志、链路同源</div></div>
+      <div class="step"><div class="step-nb">03</div><div class="step-title">统一治理</div><div class="step-desc">配额、审计、成本与合规</div></div>
+    </div></div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Infra</div></div>
+  <span class="wa">AI 基础设施从拼模型走向拼平台与治理</span>
+</section>
+
+<section class="slide s dark" id="s10">
+  <div class="chrome"><div>争论</div><div>11 / 15</div></div>
+  <div class="frame grid-2-6-6" style="padding-top:5vh">
+    <div>
+      <div class="tag">薄 Harness</div>
+      <h2 class="h-md">连接与编排壳</h2>
+      <p class="body-zh" style="margin-top:2vh">业务语义下沉到 Worker；迭代快、边界清晰。</p>
+    </div>
+    <div>
+      <div class="tag">厚 Harness</div>
+      <h2 class="h-md">策略与状态上收</h2>
+      <p class="body-zh" style="margin-top:2vh">易成新的单体瓶颈；升级与测试成本高。</p>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Harness</div></div>
+  <span class="wa">Harness 厚薄没有绝对答案，要看团队边界</span>
+</section>
+
+<section class="slide s light" id="s11">
+  <div class="chrome"><div>边界</div><div>12 / 15</div></div>
+  <div class="frame" style="padding-top:4vh">
+    <h2 class="h-xl">底层抽象正在对齐</h2>
+    <p class="lead">Harness 层与业务后端：同一套积木 —— Worker、Trigger、Function。</p>
+    <div class="fill" style="display:flex;align-items:center;justify-content:center;min-height:46vh">
+      <svg viewBox="0 0 1400 320" preserveAspectRatio="xMidYMid meet" style="width:100%">
+        <rect x="80" y="60" width="520" height="200" rx="14" fill="rgba(10,10,11,.06)" stroke="rgba(10,10,11,.35)" stroke-width="2"/>
+        <text x="340" y="130" text-anchor="middle" font-size="28" font-weight="700" fill="#0a0a0b">Harness</text>
+        <text x="340" y="180" text-anchor="middle" font-size="20" fill="#18181a">W / T / F</text>
+        <text x="700" y="200" font-size="48" fill="#0a0a0b" font-weight="800">=</text>
+        <rect x="800" y="60" width="520" height="200" rx="14" fill="rgba(10,10,11,.06)" stroke="rgba(10,10,11,.35)" stroke-width="2"/>
+        <text x="1060" y="130" text-anchor="middle" font-size="28" font-weight="700" fill="#0a0a0b">业务后端</text>
+        <text x="1060" y="180" text-anchor="middle" font-size="20" fill="#18181a">W / T / F</text>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Align</div></div>
+  <span class="wa">底层都是 Worker、Trigger、Function 三块积木</span>
+</section>
+
+<section class="slide s dark" id="s12">
+  <div class="chrome"><div>融合</div><div>13 / 15</div></div>
+  <div class="frame" style="padding-top:5vh">
+    <h2 class="h-xl">Harness 退居配置层</h2>
+    <p class="lead">声明 Agent 与触发策略；后端实现 Function；平台统一发布、配额与审计——核心能力沉到 Worker 与 Function。</p>
+    <div class="rowline" style="margin-top:4vh;border-top:0">
+      <span class="k">配置</span><span class="v">Harness 配 Worker、配 Trigger</span><span class="m">YAML</span>
+    </div>
+    <div class="rowline">
+      <span class="k">运行时</span><span class="v">统一 Worker 语义与观测</span><span class="m">Ops</span>
+    </div>
+    <div class="rowline">
+      <span class="k">业务</span><span class="v">领域服务即 Function</span><span class="m">Code</span>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Fusion</div></div>
+  <span class="wa">Harness 更像配置层，核心能力在 Worker 与 Function</span>
+</section>
+
+<section class="slide s light" id="s13">
+  <div class="chrome"><div>未来</div><div>14 / 15</div></div>
+  <div class="frame" style="padding-top:5vh">
+    <h2 class="h-xl">动态权衡与持续演进</h2>
+    <div class="grid-4" style="margin-top:3vh">
+      <div class="pillar"><span class="ic">$</span><div class="t">成本与延迟</div><div class="d">按峰谷伸缩与降级</div></div>
+      <div class="pillar"><span class="ic">§</span><div class="t">安全与合规</div><div class="d">策略与审计可插拔</div></div>
+      <div class="pillar"><span class="ic">◎</span><div class="t">可观测性</div><div class="d">从调用图到业务指标</div></div>
+      <div class="pillar"><span class="ic">∞</span><div class="t">工程文化</div><div class="d">平台工程 + 领域专家</div></div>
+    </div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Future</div></div>
+  <span class="wa">架构会迭代，但统一抽象会留下来</span>
+</section>
+
+<section class="slide s hero light" id="s14">
+  <div class="chrome"><div>致谢</div><div>15 / 15</div></div>
+  <div class="frame center" style="min-height:72vh">
+    <div class="kicker">感谢收听</div>
+    <h1 class="h-hero">下期再会</h1>
+    <p class="lead" style="max-width:62vw;margin-top:3vh">拥抱变化，把 AI Agent 做成可靠后端。</p>
+    <div class="meta-row" style="margin-top:4vh"><span>斗包 AI 播客</span><span>·</span><span>Agent 后端实践</span></div>
+  </div>
+  <div class="foot"><div>Agent 后端演进</div><div>Thanks</div></div>
+  <span class="wa">欢迎关注更多 AI Agent 后端实践</span>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL 双背景 ===============
+   深色页：Holographic Dispersion（全息色散 · 钛金暗流）—— 彩虹微扰、鼠标径向涟漪
+   浅色页：Spiral Vortex（旋转涡流 · 银色珍珠）—— domain-warp 流动、无中心
+   修改风格请参考 references/webgl-backgrounds.md
+*/
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+vec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-m);
+  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;
+  vec2 p0=p;
+  for(float i=1.0;i<4.0;i++){
+    p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;
+    p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;
+  }
+  float r=length(p);float ang=atan(p.y,p.x);
+  vec3 a=vec3(0.12,0.12,0.13);
+  vec3 b=vec3(0.03,0.04,0.05);
+  vec3 c=vec3(1.0,1.0,1.0);
+  vec3 d=vec3(0.1,0.2,0.4);
+  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,a,b,c,d);
+  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;
+  col+=vec3(disp*0.015,disp*0.01,disp*0.02);
+  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);
+  col+=hi*0.08;
+  vec3 base=vec3(0.05,0.05,0.06);
+  col=mix(base,col,0.85);
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0));
+  float c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;
+  mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;
+  vec2 md=p-m;float dl=length(md);
+  p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;
+  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));
+  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),
+              fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));
+  float f=fbm(p*2.2+r*1.5);
+  vec3 silverDark=vec3(0.86,0.85,0.84);
+  vec3 paper=vec3(0.955,0.945,0.925);
+  vec3 col=mix(silverDark,paper,f);
+  float ph=r.x*2.2+u_time*0.35;
+  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;
+  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;
+  float hl=smoothstep(0.48,0.92,f);
+  col+=hl*0.06;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+const drawDark=bootGL('bg-dark',FS_DARK);
+const drawLight=bootGL('bg-light',FS_LIGHT);
+const t0=Date.now();
+(function loop(){
+  const t=(Date.now()-t0)/1000;
+  drawDark(t);drawLight(t);
+  requestAnimationFrame(loop);
+})();
+
+// =============== 导航（翻页 / 圆点 / 键盘 / 滚轮 / 触屏） ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length;
+
+// 关键：矫正 deck 宽度为 total * 100vw，否则翻页会错位
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  idx=Math.max(0,Math.min(total-1,n));
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  /* load-bearing: .slide.active is read by Open Design's host bridge
+     (src/runtime/srcdoc.ts findActiveByClass) to drive the slide counter.
+     No CSS targets it — do not remove. */
+  slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  /* 主题切换：优先读 data-theme，其次从 class（light/dark）推断 */
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)')+';transition:border-color .2s';
+    card.onmouseenter=()=>card.style.borderColor='rgba(var(--paper-rgb),.6)';
+    card.onmouseleave=()=>card.style.borderColor=i===idx?'rgba(var(--paper-rgb),.8)':'rgba(var(--paper-rgb),.15)';
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:'+(s.classList.contains('light')?'var(--paper)':'var(--ink)');
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown')go(idx+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){go(idx+(wheelAcc>0?1:-1));wheelAcc=0;}
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(idx+(dx<0?1:-1));
+},{passive:true});
+
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

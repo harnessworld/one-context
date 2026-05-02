@@ -29,6 +29,7 @@
 | hyperframes-video              | HyperFrames WAV-to-Video — HTML Native 动画视频制作技能（目录暂无已追踪文件）              | content-pipeline | draft | `features/content-pipeline/hyperframes-video/` | one-context |
 | sandbox-agent-era-mid-video    | Agent时代下最被低估的技术——沙箱（中视频口播）                    | content-pipeline | draft | `features/content-pipeline/sandbox-agent-era-mid-video/` | one-context |
 | agent亲和架构底层原理剖析 | Agent 亲和架构底层原理剖析（口播视频） | content-pipeline | draft | `features/content-pipeline/agent亲和架构底层原理剖析/` | one-context |
+| 软件中一切皆Worker | 软件中一切皆 Worker（口播视频） | content-pipeline | draft | `features/content-pipeline/软件中一切皆Worker/` | one-context |
 
 
 **Columns**

@@ -1,0 +1,19 @@
+{
+  "wavFile": "软件中一切皆Worker.wav",
+  "slideDurationsSec": [9.0, 33.6, 40.0, 32.4, 31.0, 51.9, 52.8, 35.2, 37.9, 28.6, 44.3, 48.5, 29.6, 53.1, 28.0],
+  "outputFile": "final.mp4",
+  "burnSubtitles": true,
+  "srtFile": "sub.srt",
+  "subtitle": {
+    "charsPerLine": 24,
+    "fontSize": 58,
+    "marginV": 14,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "primaryColour": "#FFE066",
+    "primaryAlpha": 0,
+    "outline": 0,
+    "barHeight": 78,
+    "barAlpha": 0.52
+  }
+}
