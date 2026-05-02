@@ -209,7 +209,7 @@ body::before { /* 背景纹理/图案 */ }
 ### 3. 古文主题（wenyan）— 待实现
 
 仿宣纸底色（暖米黄）+ 朱砂红 + 墨绿；楷体 / 宋体；印章装饰；留白感强。  
-参考：`features/develop/claude-caveman-mode/production/presentation.html`
+参考：`features/experiments/claude-caveman-mode/`（需求文档；成片素材若存在则在对应 `production/`）
 
 ### 4. 宝宝可爱主题（kawaii）— 待实现
 

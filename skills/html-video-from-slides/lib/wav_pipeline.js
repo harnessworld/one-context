@@ -218,9 +218,17 @@ async function run(projectRoot, skillDir, options = {}) {
           s.classList.remove('is-active');
         }
       });
-      // 同步页面内部状态（页码、进度条等副作用）
+      // 同步页面内部状态（主题 / active / 导航点等）
       if (typeof go === 'function') go(n);
       else if (typeof goTo === 'function') goTo(n);
+      // 横向 strip 型 deck（Open Design 等）：配合上方「只显示一页」时 flex 宽度已坍缩为 100vw，
+      // 若仍保留 go() 写入的 translateX(-n*100vw)，会把唯一可见页移出视口 → 成片从第 2 页起黑屏/错页。
+      const deck = document.getElementById('deck');
+      if (deck) {
+        deck.style.transition = 'none';
+        deck.style.width = '100vw';
+        deck.style.transform = 'translateX(0)';
+      }
     }, i);
     await page.waitForTimeout(900);
 

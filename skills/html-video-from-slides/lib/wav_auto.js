@@ -14,6 +14,7 @@ const ffmpegStatic = require('ffmpeg-static');
 const { run: runWav } = require('./wav_pipeline');
 const { prepareSrtForBurn } = require('./srt_postprocess');
 const { resolvePath, ensureDir } = require('./path_resolver');
+const { DEFAULT_SUBTITLE_STYLE } = require('./ass_colours');
 
 async function extractSlideTexts(projectRoot) {
   const html = resolvePath(projectRoot, 'slides', 'presentation.html');
@@ -133,6 +134,20 @@ async function run(projectRoot, skillDir, options = {}) {
     }
   }
 
+  // 先叠 skill 默认字幕（避免 video-input 只写 partial 时落到错误的硬编码小字号），再叠 timing/wav-durations.json 里的 subtitle（管线预先写好时可固定成片样式）
+  subtitleCfg = { ...DEFAULT_SUBTITLE_STYLE, ...subtitleCfg };
+  const wdPath = resolvePath(projectRoot, 'timing', 'wav-durations.json');
+  if (fs.existsSync(wdPath)) {
+    try {
+      const wd = JSON.parse(fs.readFileSync(wdPath, 'utf-8'));
+      if (wd.subtitle && typeof wd.subtitle === 'object') {
+        subtitleCfg = { ...subtitleCfg, ...wd.subtitle };
+      }
+    } catch (_) {
+      /* ignore */
+    }
+  }
+
   const wavAbs = findWavPath(projectRoot, wavExplicit);
   const wavRel = path.basename(wavAbs);
 
@@ -164,7 +179,7 @@ async function run(projectRoot, skillDir, options = {}) {
   }
   const cpl = subtitleCfg.charsPerLine ?? 28;
   console.log(
-    `   烧录折行: ${wrapSubtitles ? `每行≤${cpl} 字` : '关闭（整段一行）'}\n`
+    `   字幕样式: 字号 ${subtitleCfg.fontSize}px；折行: ${wrapSubtitles ? `每行≤${cpl} 字` : '关闭（整段一行）'}\n`
   );
 
   const { slides, anchors } = await extractSlideTexts(projectRoot);
@@ -277,7 +292,8 @@ async function run(projectRoot, skillDir, options = {}) {
         prepareSrtForBurn(dest, dest, {
           charsPerLine:
             subtitleCfg.charsPerLine > 0 ? subtitleCfg.charsPerLine : undefined,
-          fontSize: subtitleCfg.fontSize ?? 18,
+          fontSize:
+            subtitleCfg.fontSize ?? DEFAULT_SUBTITLE_STYLE.fontSize,
           replacements: srtReplacements,
           wrap: wrapSubtitles,
         });

@@ -4,7 +4,7 @@
   "outputFile": "final.mp4",
   "burnSubtitles": true,
   "subtitle": {
-    "fontSize": 18,
+    "fontSize": 60,
     "marginV": 18,
     "fontName": "Microsoft YaHei",
     "bold": true,

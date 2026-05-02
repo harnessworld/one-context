@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, initial-scale=1.0">
+  <title>Agent 亲和架构底层原理剖析</title>
+  <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
+  <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
+  <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
+  <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/themes/mobile-tech.css">
+  <style>
+    /* 手机横屏阅读：在 1920×1080 画布上再抬一档，缩小投屏后仍清晰 */
+    :root {
+      --fs-hero: 204px;
+      --fs-page-title: 100px;
+      --fs-subtitle: 68px;
+      --fs-body: 50px;
+      --fs-caption: 38px;
+      --fs-card-title: 60px;
+      --fs-card-body: 50px;
+      --fs-stat: 182px;
+      --fs-pill: 40px;
+      --fs-footer: 40px;
+      --slide-pad: 36px 52px;
+      --card-pad: 28px 32px;
+    }
+    body { margin:0; background:#000; min-height:100vh; overflow:hidden; }
+    /* 与 html-video-from-slides / demo-deck 一致：fixed + fit() 才能在 headless 1920×1080 下稳定裁切、换页不重影 */
+    #P {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      z-index: 1;
+      overflow: hidden;
+    }
+    #prog { position:fixed; top:0; left:0; height:3px; background:var(--c-accent-a); z-index:100; transition:width .3s; }
+    #pn { position:fixed; bottom:16px; right:24px; color:var(--c-text-2); font-size:var(--fs-caption); font-family:var(--font-sans),system-ui,sans-serif; z-index:99; }
+    .orb { position:absolute; border-radius:50%; pointer-events:none; }
+    .grid-bg { position:absolute; inset:0; pointer-events:none; opacity:0.04; }
+    .mini-svg { display:flex; justify-content:center; align-items:center; margin:12px 0; }
+    .mini-svg svg { width:100%; max-width:1100px; min-height:150px; }
+    .card-diagram { min-height:320px; }
+    .card-diagram > svg { min-height:300px; }
+    /* 覆盖 SVG presentation 属性：整张 slide 内示意图文字一律抬高（投屏小屏可读） */
+    .s.slide svg text[font-size="16"] { font-size: 22px !important; }
+    .s.slide svg text[font-size="17"] { font-size: 23px !important; }
+    .s.slide svg text[font-size="18"] { font-size: 26px !important; }
+    .s.slide svg text[font-size="20"] { font-size: 28px !important; }
+    .s.slide svg text[font-size="21"] { font-size: 29px !important; }
+    .s.slide svg text[font-size="22"] { font-size: 30px !important; }
+    .s.slide svg text[font-size="23"] { font-size: 31px !important; }
+    .s.slide svg text[font-size="24"] { font-size: 33px !important; }
+    .s.slide svg text[font-size="26"] { font-size: 35px !important; }
+    .s.slide svg text[font-size="28"] { font-size: 37px !important; }
+    .s.slide svg text[font-size="30"] { font-size: 39px !important; }
+    .s.slide svg text[font-size="32"] { font-size: 41px !important; }
+    .s.slide svg text[font-size="34"] { font-size: 43px !important; }
+    .s.slide svg text[font-size="36"] { font-size: 45px !important; }
+    .s.slide svg text[font-size="42"] { font-size: 50px !important; }
+    .s.slide svg text[font-size="44"] { font-size: 54px !important; }
+  </style>
+</head>
+<body>
+  <div id="prog" style="width:0%"></div>
+  <div id="P">
+
+    <!-- ==================== Slide 1: Cover ==================== -->
+    <section class="s slide is-active" id="s0">
+      <div class="orb" style="width:400px;height:400px;top:-120px;right:-80px;background:radial-gradient(circle,rgba(56,189,248,0.12),transparent 70%)"></div>
+      <div class="orb" style="width:300px;height:300px;bottom:-60px;left:-40px;background:radial-gradient(circle,rgba(16,185,129,0.10),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g0" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g0)"/></svg>
+      <div class="col slide-main v-center">
+        <div style="text-align:center">
+          <div class="emoji-xl">🧠</div>
+          <h1 style="font-size:var(--fs-hero);font-weight:800;margin:24px 0 12px">Agent 亲和架构<br>底层原理剖析</h1>
+          <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 32px">从传统云到亲和调度 · 四大维度拆解</p>
+          <span class="pill">🎙️ 斗包 AI 播客</span>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Agent 亲和架构</span><span>01 / 13</span></div>
+      <span class="wa" style="display:none">Agent亲和架构底层原理</span>
+    </section>
+
+    <!-- ==================== Slide 2: Split + Comparison SVG ==================== -->
+    <section class="s slide" id="s1">
+      <div class="orb" style="width:350px;height:350px;top:-80px;left:-60px;background:radial-gradient(circle,rgba(239,68,68,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:280px;height:280px;bottom:-40px;right:-30px;background:radial-gradient(circle,rgba(16,185,129,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g1" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#g1)"/></svg>
+      <div class="slide-header">
+        <span class="badge">架构对比</span>
+        <h2>传统云 vs Agent</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+        <div class="slide-cards split" style="align-items:stretch">
+          <div class="g" style="justify-content:flex-start">
+            <div class="emoji-lg">🏭</div>
+            <h3 class="g-title">传统云</h3>
+            <p class="g-body" style="flex:1">请求→响应，无状态 · 水平扩展，CPU为主 · 高并发无状态负载</p>
+            <span class="pill">标准化运维</span>
+          </div>
+          <div class="g" style="justify-content:flex-start">
+            <div class="emoji-lg">🤖</div>
+            <h3 class="g-title">AI Agent</h3>
+            <p class="g-body" style="flex:1">有状态，历史影响输出 · 自主发起API/工具调用 · 需异构算力弹性调度</p>
+            <span class="pill">动态 + 复杂</span>
+          </div>
+        </div>
+        <!-- Before/After SVG -->
+        <div class="mini-svg">
+          <svg viewBox="0 0 900 110" style="width:100%;max-width:1000px;min-height:160px">
+            <rect x="10" y="15" width="340" height="70" rx="14" fill="rgba(239,68,68,0.08)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
+            <text x="180" y="42" text-anchor="middle" fill="var(--c-danger,#ef4444)" font-size="30" font-weight="700">❌ 无状态 · CPU 扩容</text>
+            <text x="180" y="72" text-anchor="middle" fill="var(--c-text-2)" font-size="24">请求-响应 · 批处理</text>
+            <text x="420" y="55" text-anchor="middle" fill="var(--c-accent-a)" font-size="44" font-weight="900">→</text>
+            <rect x="480" y="15" width="400" height="70" rx="14" fill="rgba(16,185,129,0.08)" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <text x="680" y="42" text-anchor="middle" fill="var(--c-accent-b)" font-size="30" font-weight="700">✅ 有状态 · GPU 亲和</text>
+            <text x="680" y="72" text-anchor="middle" fill="var(--c-text-2)" font-size="24">感知-推理-行动-记忆</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>架构差异</span><span>02 / 13</span></div>
+      <span class="wa" style="display:none">传统云请求响应无状态</span>
+    </section>
+
+    <!-- ==================== Slide 3: Card + Diagram — Agent 循环 ==================== -->
+    <section class="s slide" id="s2">
+      <div class="orb" style="width:320px;height:320px;top:-60px;right:-50px;background:radial-gradient(circle,rgba(139,92,246,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:250px;height:250px;bottom:-30px;left:30%;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g2" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g2)"/></svg>
+      <div class="slide-header">
+        <span class="badge">核心机制</span>
+        <h2>Agent 运行循环</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+        <div class="g" style="flex-shrink:0">
+          <p class="g-body" style="margin:0">Agent 不断感知环境、推理决策、执行动作并记忆，每步输出受全部历史影响，并发和依赖难以预测。</p>
+        </div>
+        <div class="card-diagram" style="min-height:340px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+          <svg viewBox="0 0 800 420" preserveAspectRatio="xMidYMid meet">
+            <defs><marker id="ar1" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker></defs>
+            <!-- 外环 -->
+            <circle cx="400" cy="210" r="150" fill="none" stroke="var(--c-accent-a)" stroke-width="2" opacity="0.08"/>
+            <circle cx="400" cy="210" r="150" fill="none" stroke="var(--c-accent-a)" stroke-width="3" stroke-dasharray="50 900" stroke-dashoffset="-5" stroke-linecap="round" opacity="0.25"/>
+            <!-- 感知 -->
+            <rect x="310" y="20" width="180" height="70" rx="16" fill="rgba(139,92,246,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2.5"/>
+            <text x="400" y="52" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-purple,#8b5cf6)">💭 感知</text>
+            <text x="400" y="78" text-anchor="middle" font-size="24" fill="var(--c-text-2)">环境 & 上下文</text>
+            <!-- 推理 -->
+            <rect x="560" y="150" width="180" height="70" rx="16" fill="rgba(56,189,248,0.12)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
+            <text x="650" y="182" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-sky,#38bdf8)">🧠 推理</text>
+            <text x="650" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">LLM 决策</text>
+            <!-- 行动 -->
+            <rect x="310" y="310" width="180" height="70" rx="16" fill="rgba(16,185,129,0.12)" stroke="var(--c-accent-b)" stroke-width="2.5"/>
+            <text x="400" y="342" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-b)">⚡ 行动</text>
+            <text x="400" y="370" text-anchor="middle" font-size="24" fill="var(--c-text-2)">API / 工具调用</text>
+            <!-- 记忆 -->
+            <rect x="60" y="150" width="180" height="70" rx="16" fill="rgba(251,191,36,0.12)" stroke="var(--c-warn,#fbbf24)" stroke-width="2.5"/>
+            <text x="150" y="182" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-warn,#fbbf24)">💾 记忆</text>
+            <text x="150" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">历史状态</text>
+            <!-- Loop arrows -->
+            <path d="M460 50 L560 165" fill="none" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#ar1)" opacity="0.6"/>
+            <path d="M580 220 L490 320" fill="none" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#ar1)" opacity="0.6"/>
+            <path d="M310 345 L220 220" fill="none" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#ar1)" opacity="0.6"/>
+            <path d="M160 150 L300 60" fill="none" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#ar1)" opacity="0.6"/>
+            <!-- Center label -->
+            <text x="400" y="220" text-anchor="middle" fill="var(--c-accent-a)" font-size="42" font-weight="900" opacity="0.15">LOOP</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>Agent 循环</span><span>03 / 13</span></div>
+      <span class="wa" style="display:none">感知推理行动记忆循环</span>
+    </section>
+
+    <!-- ==================== Slide 4: Grid 2×2 + mini-SVGs — 四大核心障碍 ==================== -->
+    <section class="s slide" id="s3">
+      <div class="orb" style="width:300px;height:300px;top:10%;right:-40px;background:radial-gradient(circle,rgba(239,68,68,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:220px;height:220px;bottom:5%;left:10%;background:radial-gradient(circle,rgba(251,191,36,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g3" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="none" stroke="var(--c-text-2)" stroke-width="0.3"/></pattern></defs><rect width="100%" height="100%" fill="url(#g3)"/></svg>
+      <div class="slide-header">
+        <span class="badge">核心障碍</span>
+        <h2>传统云跑不了 Agent</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-xs)">
+        <div class="slide-cards grid-2x2" style="flex:0.92;min-height:0">
+          <div class="g" style="justify-content:flex-start;padding:var(--sp-sm)">
+            <div class="emoji-lg">🌪️</div>
+            <h3 class="g-title">并发失控</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">突发子任务浪涌 · 惊群 / 冷启动风暴</p>
+            <div class="mini-svg" style="flex:1;width:100%;align-items:stretch;min-height:0">
+              <svg viewBox="0 0 420 120" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
+                <polyline points="20,85 80,78 140,70 200,25 260,12 320,45 380,82 400,78" fill="none" stroke="var(--c-danger,#ef4444)" stroke-width="4" stroke-linecap="round"/>
+                <line x1="200" y1="25" x2="200" y2="95" stroke="var(--c-danger,#ef4444)" stroke-width="2" stroke-dasharray="6,4"/>
+                <text x="210" y="22" fill="var(--c-danger,#ef4444)" font-size="28" font-weight="800">峰值 QPS</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g" style="justify-content:flex-start;padding:var(--sp-sm)">
+            <div class="emoji-lg">📦</div>
+            <h3 class="g-title">协调缺失</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">弹性跟不上 · 黑盒 Agent 难观测</p>
+            <div class="mini-svg" style="flex:1;width:100%;min-height:0">
+              <svg viewBox="0 0 420 120" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
+                <circle cx="120" cy="55" r="38" fill="none" stroke="var(--c-sky,#38bdf8)" stroke-width="3"/>
+                <circle cx="300" cy="55" r="38" fill="none" stroke="var(--c-sky,#38bdf8)" stroke-width="3"/>
+                <line x1="158" y1="55" x2="262" y2="55" stroke="var(--c-danger,#ef4444)" stroke-width="3" stroke-dasharray="8,6"/>
+                <text x="210" y="48" text-anchor="middle" fill="var(--c-danger,#ef4444)" font-size="36" font-weight="900">✗</text>
+                <text x="120" y="62" text-anchor="middle" fill="var(--c-sky,#38bdf8)" font-size="26" font-weight="700">Pod A</text>
+                <text x="300" y="62" text-anchor="middle" fill="var(--c-sky,#38bdf8)" font-size="26" font-weight="700">Pod B</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g" style="justify-content:flex-start;padding:var(--sp-sm)">
+            <div class="emoji-lg">🔒</div>
+            <h3 class="g-title">安全不适配</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">动态跨服务调用 · 静态策略挡不住</p>
+            <div class="mini-svg" style="flex:1;width:100%;min-height:0">
+              <svg viewBox="0 0 420 120" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
+                <rect x="130" y="18" width="160" height="65" rx="12" fill="none" stroke="var(--c-danger,#ef4444)" stroke-width="3"/>
+                <line x1="150" y1="28" x2="270" y2="88" stroke="var(--c-danger,#ef4444)" stroke-width="4"/>
+                <text x="210" y="108" text-anchor="middle" fill="var(--c-text-2)" font-size="24" font-weight="700">静态边界失效</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g" style="justify-content:flex-start;padding:var(--sp-sm)">
+            <div class="emoji-lg">🔋</div>
+            <h3 class="g-title">算力错配</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">CPU 集群 vs Agent 要 GPU · 能耗失控</p>
+            <div class="mini-svg" style="flex:1;width:100%;min-height:0">
+              <svg viewBox="0 0 420 120" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
+                <rect x="30" y="40" width="70" height="55" rx="8" fill="var(--c-sky,#38bdf8)" opacity="0.35" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
+                <text x="65" y="78" text-anchor="middle" fill="var(--c-sky,#38bdf8)" font-size="22" font-weight="800">CPU</text>
+                <rect x="120" y="25" width="95" height="70" rx="8" fill="var(--c-accent-b)" opacity="0.35" stroke="var(--c-accent-b)" stroke-width="2"/>
+                <text x="167" y="70" text-anchor="middle" fill="var(--c-accent-b)" font-size="22" font-weight="800">GPU</text>
+                <rect x="235" y="12" width="165" height="88" rx="10" fill="var(--c-purple,#8b5cf6)" opacity="0.28" stroke="var(--c-purple,#8b5cf6)" stroke-width="2.5"/>
+                <text x="317" y="58" text-anchor="middle" fill="var(--c-purple,#8b5cf6)" font-size="26" font-weight="800">Agent 算力</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="card-diagram" style="flex:0.22;min-height:220px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);flex-shrink:0">
+          <svg viewBox="0 0 1600 200" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:200px">
+            <text x="800" y="44" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-text-1)">传统云四维承压 → 亲和架构逐项消解</text>
+            <rect x="40" y="88" width="340" height="88" rx="16" fill="rgba(239,68,68,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
+            <text x="210" y="142" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-danger,#ef4444)">浪涌 · 协同</text>
+            <rect x="430" y="88" width="340" height="88" rx="16" fill="rgba(239,68,68,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
+            <text x="600" y="142" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-danger,#ef4444)">观测 · 调度</text>
+            <rect x="820" y="88" width="340" height="88" rx="16" fill="rgba(239,68,68,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
+            <text x="990" y="142" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-danger,#ef4444)">安全 · 权限</text>
+            <rect x="1210" y="88" width="350" height="88" rx="16" fill="rgba(239,68,68,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
+            <text x="1385" y="142" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-danger,#ef4444)">异构 · 功耗</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>四大障碍</span><span>04 / 13</span></div>
+      <span class="wa" style="display:none">超高并发自任务浪涌</span>
+    </section>
+
+    <!-- ==================== Slide 5: Split + Architecture SVG — 推理亲和 ==================== -->
+    <section class="s slide" id="s4">
+      <div class="orb" style="width:360px;height:360px;top:-80px;left:-60px;background:radial-gradient(circle,rgba(16,185,129,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:240px;height:240px;bottom:5%;right:5%;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g4" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g4)"/></svg>
+      <div class="slide-header">
+        <span class="badge">推理亲和</span>
+        <h2>什么是推理亲和</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+        <div class="slide-cards split" style="align-items:stretch;flex-shrink:0;max-height:38%">
+          <div class="g" style="justify-content:flex-start">
+            <div class="emoji-lg">🎯</div>
+            <h3 class="g-title">核心目标</h3>
+            <p class="g-body" style="flex:1;font-size:var(--fs-body)">请求调度到最合适的 GPU · 吞吐+延迟+利用率最优</p>
+            <span class="pill">请求级智能分发</span>
+          </div>
+          <div class="g" style="justify-content:flex-start">
+            <div class="emoji-lg">🧩</div>
+            <h3 class="g-title">关键能力</h3>
+            <p class="g-body" style="flex:1;font-size:var(--fs-body)">感知模型与并发 · 动态 batch · 优先级+弹性扩缩</p>
+            <span class="pill">自适应调度</span>
+          </div>
+        </div>
+        <div class="card-diagram" style="flex:1;min-height:420px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+          <svg viewBox="0 0 1580 320" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;min-height:380px">
+            <defs><marker id="ar5" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><polygon points="0 0,14 5,0 10" fill="var(--c-accent-b)"/></marker></defs>
+            <text x="790" y="42" text-anchor="middle" font-size="36" font-weight="800" fill="var(--c-text-1)">推理亲和：请求 → 调度 → GPU 拓扑匹配</text>
+            <rect x="40" y="88" width="260" height="190" rx="18" fill="rgba(251,191,36,0.14)" stroke="var(--c-warn,#fbbf24)" stroke-width="3"/>
+            <text x="170" y="165" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-warn,#fbbf24)">📥 请求</text>
+            <text x="170" y="218" text-anchor="middle" font-size="28" fill="var(--c-text-2)">多模型 / QoS</text>
+            <line x1="305" y1="183" x2="368" y2="183" stroke="var(--c-warn,#fbbf24)" stroke-width="6" marker-end="url(#ar5)"/>
+            <rect x="378" y="72" width="320" height="222" rx="20" fill="rgba(16,185,129,0.14)" stroke="var(--c-accent-b)" stroke-width="3"/>
+            <text x="538" y="155" text-anchor="middle" font-size="36" font-weight="800" fill="var(--c-accent-b)">🧠 亲和调度</text>
+            <text x="538" y="210" text-anchor="middle" font-size="28" fill="var(--c-text-2)">感知负载 · 选卡决策</text>
+            <line x1="703" y1="183" x2="766" y2="183" stroke="var(--c-accent-b)" stroke-width="6" marker-end="url(#ar5)"/>
+            <rect x="776" y="68" width="784" height="232" rx="20" fill="rgba(56,189,248,0.08)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5" stroke-dasharray="10,6"/>
+            <text x="1168" y="112" text-anchor="middle" font-size="32" font-weight="700" fill="var(--c-sky,#38bdf8)">GPU 集群（异构拓扑）</text>
+            <rect x="810" y="138" width="242" height="118" rx="14" fill="rgba(16,185,129,0.12)" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <text x="931" y="195" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-accent-b)">GPU-A</text>
+            <text x="931" y="235" text-anchor="middle" font-size="26" fill="var(--c-text-2)">A100 80G</text>
+            <rect x="1074" y="138" width="242" height="118" rx="14" fill="rgba(56,189,248,0.12)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
+            <text x="1195" y="195" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-sky,#38bdf8)">GPU-B</text>
+            <text x="1195" y="235" text-anchor="middle" font-size="26" fill="var(--c-text-2)">H100 80G</text>
+            <rect x="1338" y="138" width="200" height="118" rx="14" fill="rgba(139,92,246,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
+            <text x="1438" y="195" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-purple,#8b5cf6)">GPU-C</text>
+            <text x="1438" y="235" text-anchor="middle" font-size="26" fill="var(--c-text-2)">T4 16G</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>推理亲和</span><span>05 / 13</span></div>
+      <span class="wa" style="display:none">推理请求调度到最合适的GPU</span>
+    </section>
+
+    <!-- ==================== Slide 6: Card + Diagram — 调度器信息层级 ==================== -->
+    <section class="s slide" id="s5">
+      <div class="orb" style="width:280px;height:280px;top:-50px;right:-30px;background:radial-gradient(circle,rgba(139,92,246,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:200px;height:200px;bottom:10%;left:5%;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g5" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#g5)"/></svg>
+      <div class="slide-header">
+        <span class="badge">推理亲和</span>
+        <h2>调度器需要什么信息</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+        <div class="g" style="flex-shrink:0">
+          <p class="g-body" style="margin:0">理想调度器需同时掌握请求侧和节点侧信息，综合判断才能做到智能调度。</p>
+        </div>
+        <div class="card-diagram" style="min-height:320px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+          <svg viewBox="0 0 1400 400" preserveAspectRatio="xMidYMid meet">
+            <defs><marker id="ar2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker></defs>
+            <!-- 请求侧 -->
+            <rect x="30" y="30" width="380" height="340" rx="16" fill="var(--c-accent-a)" opacity="0.08" stroke="var(--c-accent-a)" stroke-width="2"/>
+            <text x="220" y="70" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-accent-a)">📋 请求侧</text>
+            <rect x="60" y="90" width="320" height="44" rx="8" fill="var(--c-surface)" opacity="0.6"/><text x="220" y="118" text-anchor="middle" font-size="18" fill="var(--c-text-1)">🎯 模型类型 / Token 长度</text>
+            <rect x="60" y="145" width="320" height="44" rx="8" fill="var(--c-surface)" opacity="0.6"/><text x="220" y="173" text-anchor="middle" font-size="18" fill="var(--c-text-1)">📊 计算量 / 内存读写</text>
+            <rect x="60" y="200" width="320" height="44" rx="8" fill="var(--c-surface)" opacity="0.6"/><text x="220" y="228" text-anchor="middle" font-size="18" fill="var(--c-text-1)">⚡ 优先级 / QoS</text>
+            <rect x="60" y="255" width="320" height="44" rx="8" fill="var(--c-surface)" opacity="0.6"/><text x="220" y="283" text-anchor="middle" font-size="18" fill="var(--c-text-1)">🔗 依赖链 / 延迟敏感</text>
+            <!-- 节点侧 -->
+            <rect x="520" y="30" width="380" height="340" rx="16" fill="var(--c-accent-b)" opacity="0.08" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <text x="710" y="70" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-accent-b)">🖥️ 节点侧</text>
+            <rect x="550" y="90" width="320" height="44" rx="8" fill="var(--c-surface)" opacity="0.6"/><text x="710" y="118" text-anchor="middle" font-size="18" fill="var(--c-text-1)">📈 GPU 负载 / 显存占用</text>
+            <rect x="550" y="145" width="320" height="44" rx="8" fill="var(--c-surface)" opacity="0.6"/><text x="710" y="173" text-anchor="middle" font-size="18" fill="var(--c-text-1)">🌐 网络拓扑 / 跨节点延迟</text>
+            <rect x="550" y="200" width="320" height="44" rx="8" fill="var(--c-surface)" opacity="0.6"/><text x="710" y="228" text-anchor="middle" font-size="18" fill="var(--c-text-1)">📦 批次状态 / 队列深度</text>
+            <rect x="550" y="255" width="320" height="44" rx="8" fill="var(--c-surface)" opacity="0.6"/><text x="710" y="283" text-anchor="middle" font-size="18" fill="var(--c-text-1)">🔋 功耗 / 散热状态</text>
+            <!-- 综合决策 -->
+            <rect x="1000" y="80" width="370" height="240" rx="18" fill="var(--c-accent-c)" opacity="0.12" stroke="var(--c-accent-c)" stroke-width="2.5"/>
+            <text x="1185" y="155" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-c)">⚡ 综合调度</text>
+            <text x="1185" y="200" text-anchor="middle" font-size="18" fill="var(--c-text-2)">请求 → 最优 GPU</text>
+            <text x="1185" y="235" text-anchor="middle" font-size="18" fill="var(--c-text-2)">吞吐 + 延迟双赢</text>
+            <text x="1185" y="270" text-anchor="middle" font-size="18" fill="var(--c-text-2)">利用率最大化</text>
+            <!-- Arrows -->
+            <line x1="410" y1="200" x2="520" y2="200" stroke="var(--c-accent-a)" stroke-width="2.5" marker-end="url(#ar2)"/>
+            <line x1="900" y1="200" x2="1000" y2="200" stroke="var(--c-accent-b)" stroke-width="2.5" marker-end="url(#ar2)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>调度器信息</span><span>06 / 13</span></div>
+      <span class="wa" style="display:none">综合请求侧和节点侧信息</span>
+    </section>
+
+    <!-- ==================== Slide 7: Stat Highlight + Gauge SVG — 调度核心矛盾 ==================== -->
+    <section class="s slide" id="s6">
+      <div class="orb" style="width:400px;height:400px;top:-100px;right:-80px;background:radial-gradient(circle,rgba(239,68,68,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:260px;height:260px;bottom:5%;left:-40px;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g6" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g6)"/></svg>
+      <div class="slide-header">
+        <span class="badge">推理亲和</span>
+        <h2>调度核心矛盾</h2>
+      </div>
+      <div class="col slide-main fill-deck">
+        <div class="slide-cards split" style="align-items:stretch">
+          <div class="g" style="justify-content:center;align-items:center;text-align:center">
+            <div class="emoji-xl">⏳</div>
+            <div class="stat-value">GPU<span style="font-size:var(--fs-page-title)"> 空闲</span></div>
+            <div class="stat-label">资源浪费</div>
+            <!-- 浪费环 -->
+            <svg viewBox="0 0 140 140" style="width:180px;margin:8px auto">
+              <circle cx="70" cy="70" r="55" fill="none" stroke="var(--c-bdr)" stroke-width="10"/>
+              <circle cx="70" cy="70" r="55" fill="none" stroke="var(--c-danger,#ef4444)" stroke-width="10" stroke-linecap="round" stroke-dasharray="138 346" transform="rotate(-90 70 70)"/>
+              <text x="70" y="75" text-anchor="middle" fill="var(--c-danger,#ef4444)" font-size="24" font-weight="900">40%</text>
+            </svg>
+            <p style="font-size:var(--fs-caption);color:var(--c-text-2);margin:0">静态批处理 → 显存空转</p>
+          </div>
+          <div class="g" style="justify-content:center;align-items:center;text-align:center">
+            <div class="emoji-xl">📨</div>
+            <div class="stat-value">请求<span style="font-size:var(--fs-page-title)"> 排队</span></div>
+            <div class="stat-label">饥饿等待</div>
+            <!-- 等待环 -->
+            <svg viewBox="0 0 140 140" style="width:180px;margin:8px auto">
+              <circle cx="70" cy="70" r="55" fill="none" stroke="var(--c-bdr)" stroke-width="10"/>
+              <circle cx="70" cy="70" r="55" fill="none" stroke="var(--c-warn,#fbbf24)" stroke-width="10" stroke-linecap="round" stroke-dasharray="332 346" transform="rotate(-90 70 70)"/>
+              <text x="70" y="75" text-anchor="middle" fill="var(--c-warn,#fbbf24)" font-size="24" font-weight="900">96%</text>
+            </svg>
+            <p style="font-size:var(--fs-caption);color:var(--c-text-2);margin:0">异构需求 → 单队列阻塞</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span>调度矛盾</span><span>07 / 13</span></div>
+      <span class="wa" style="display:none">GPU空闲但请求还在排队</span>
+    </section>
+
+    <!-- ==================== Slide 8: Process Flow + Pipeline SVG ==================== -->
+    <section class="s slide" id="s7">
+      <div class="orb" style="width:320px;height:320px;top:-50px;left:-40px;background:radial-gradient(circle,rgba(16,185,129,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:240px;height:240px;bottom:-30px;right:5%;background:radial-gradient(circle,rgba(139,92,246,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g7" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#g7)"/></svg>
+      <div class="slide-header">
+        <span class="badge">推理亲和</span>
+        <h2>Continuous Batching</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+        <div class="process-flow" style="padding:var(--sp-sm) 0;flex-shrink:0">
+          <div class="g step" style="flex:1">
+            <div class="emoji-lg">📥</div>
+            <h3 class="g-title" style="margin-top:var(--sp-sm)">动态组批</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">多请求合成 batch</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="g step" style="flex:1">
+            <div class="emoji-lg">🏷️</div>
+            <h3 class="g-title" style="margin-top:var(--sp-sm)">优先级</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">高优先行填空</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="g step" style="flex:1">
+            <div class="emoji-lg">🔀</div>
+            <h3 class="g-title" style="margin-top:var(--sp-sm)">拓扑感知</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">就近降延迟</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="g step" style="flex:1">
+            <div class="emoji-lg">📈</div>
+            <h3 class="g-title" style="margin-top:var(--sp-sm)">弹性扩缩</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">GPU 饱和最优</p>
+          </div>
+        </div>
+        <div class="card-diagram" style="flex:1;min-height:380px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+          <svg viewBox="0 0 1680 340" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;min-height:360px">
+            <defs><marker id="ar6cb" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><polygon points="0 0,14 5,0 10" fill="var(--c-accent-b)"/></marker></defs>
+            <text x="840" y="38" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-text-1)">Continuous Batching：请求流 → 组批 → GPU → 最优输出</text>
+            <rect x="40" y="72" width="140" height="52" rx="10" fill="rgba(251,191,36,0.18)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
+            <text x="110" y="106" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-warn,#fbbf24)">Req-A</text>
+            <rect x="40" y="138" width="140" height="52" rx="10" fill="rgba(139,92,246,0.18)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
+            <text x="110" y="172" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-purple,#8b5cf6)">Req-B</text>
+            <rect x="40" y="204" width="140" height="52" rx="10" fill="rgba(56,189,248,0.18)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
+            <text x="110" y="238" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-sky,#38bdf8)">Req-C</text>
+            <line x1="185" y1="164" x2="248" y2="164" stroke="var(--c-accent-a)" stroke-width="5" marker-end="url(#ar6cb)"/>
+            <rect x="258" y="110" width="220" height="168" rx="16" fill="rgba(16,185,129,0.14)" stroke="var(--c-accent-b)" stroke-width="3"/>
+            <text x="368" y="165" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-accent-b)">动态组批</text>
+            <text x="368" y="212" text-anchor="middle" font-size="26" fill="var(--c-text-2)">优先级队列</text>
+            <line x1="483" y1="194" x2="548" y2="194" stroke="var(--c-accent-a)" stroke-width="5" marker-end="url(#ar6cb)"/>
+            <rect x="558" y="68" width="380" height="252" rx="18" fill="rgba(139,92,246,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="3"/>
+            <text x="748" y="112" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-purple,#8b5cf6)">Batch 组装</text>
+            <rect x="588" y="138" width="150" height="58" rx="10" fill="rgba(251,191,36,0.22)"/><text x="663" y="176" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-warn,#fbbf24)">A</text>
+            <rect x="758" y="138" width="150" height="58" rx="10" fill="rgba(139,92,246,0.22)"/><text x="833" y="176" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-purple,#8b5cf6)">B</text>
+            <rect x="588" y="212" width="150" height="58" rx="10" fill="rgba(56,189,248,0.22)"/><text x="663" y="250" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-sky,#38bdf8)">C</text>
+            <rect x="758" y="212" width="150" height="58" rx="10" fill="rgba(16,185,129,0.22)"/><text x="833" y="250" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-b)">D</text>
+            <line x1="943" y1="194" x2="1008" y2="194" stroke="var(--c-accent-a)" stroke-width="5" marker-end="url(#ar6cb)"/>
+            <rect x="1018" y="96" width="240" height="196" rx="18" fill="rgba(56,189,248,0.12)" stroke="var(--c-sky,#38bdf8)" stroke-width="3"/>
+            <text x="1138" y="165" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-sky,#38bdf8)">GPU</text>
+            <text x="1138" y="218" text-anchor="middle" font-size="26" fill="var(--c-text-2)">拓扑感知执行</text>
+            <line x1="1263" y1="194" x2="1328" y2="194" stroke="var(--c-accent-a)" stroke-width="5" marker-end="url(#ar6cb)"/>
+            <rect x="1338" y="108" width="302" height="172" rx="18" fill="rgba(16,185,129,0.14)" stroke="var(--c-accent-b)" stroke-width="3"/>
+            <text x="1489" y="175" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-accent-b)">📈 最优</text>
+            <text x="1489" y="228" text-anchor="middle" font-size="26" fill="var(--c-text-2)">吞吐 + 延迟双赢</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>动态调度算法</span><span>08 / 13</span></div>
+      <span class="wa" style="display:none">Continuous Batching动态组合批次</span>
+    </section>
+
+    <!-- ==================== Slide 9: Card + Diagram — 工具执行亲和 ==================== -->
+    <section class="s slide" id="s8">
+      <div class="orb" style="width:300px;height:300px;top:-60px;left:-40px;background:radial-gradient(circle,rgba(56,189,248,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:200px;height:200px;bottom:10%;right:5%;background:radial-gradient(circle,rgba(16,185,129,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g8" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g8)"/></svg>
+      <div class="slide-header">
+        <span class="badge">工具亲和</span>
+        <h2>工具执行亲和</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+        <div class="g" style="flex-shrink:0">
+          <p class="g-body" style="margin:0">Agent 与频繁调用的工具部署在同一本地环境，本地函数调用替代外部 RPC，极大减少等待时间。</p>
+        </div>
+        <div class="card-diagram" style="min-height:300px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+          <svg viewBox="0 0 1200 350" preserveAspectRatio="xMidYMid meet">
+            <defs><marker id="ar3" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker></defs>
+            <!-- 本地环境框 -->
+            <rect x="40" y="30" width="700" height="290" rx="20" fill="var(--c-accent-a)" opacity="0.06" stroke="var(--c-accent-a)" stroke-width="2.5" stroke-dasharray="10,6"/>
+            <text x="390" y="65" text-anchor="middle" font-size="22" font-weight="700" fill="var(--c-accent-a)">🏢 本地环境（同可用区）</text>
+            <!-- Agent -->
+            <rect x="80" y="110" width="200" height="80" rx="14" fill="var(--c-accent-b)" opacity="0.15" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <text x="180" y="145" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-accent-b)">🤖 Agent</text>
+            <text x="180" y="175" text-anchor="middle" font-size="16" fill="var(--c-text-2)">本地调用</text>
+            <!-- 工具集群 -->
+            <rect x="460" y="90" width="240" height="120" rx="14" fill="var(--c-accent-c)" opacity="0.08" stroke="var(--c-accent-c)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="580" y="115" text-anchor="middle" font-size="16" font-weight="700" fill="var(--c-accent-c)">🔧 工具集群</text>
+            <rect x="475" y="125" width="100" height="35" rx="6" fill="var(--c-accent-c)" opacity="0.12"/><text x="525" y="148" text-anchor="middle" font-size="22" fill="var(--c-accent-c)">搜索</text>
+            <rect x="585" y="125" width="100" height="35" rx="6" fill="var(--c-accent-c)" opacity="0.12"/><text x="635" y="148" text-anchor="middle" font-size="22" fill="var(--c-accent-c)">代码</text>
+            <rect x="475" y="168" width="100" height="35" rx="6" fill="var(--c-accent-c)" opacity="0.12"/><text x="525" y="191" text-anchor="middle" font-size="22" fill="var(--c-accent-c)">数据库</text>
+            <rect x="585" y="168" width="100" height="35" rx="6" fill="var(--c-accent-c)" opacity="0.12"/><text x="635" y="191" text-anchor="middle" font-size="22" fill="var(--c-accent-c)">API</text>
+            <!-- Arrow Agent→工具 -->
+            <line x1="280" y1="150" x2="460" y2="150" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#ar3)"/>
+            <text x="370" y="140" text-anchor="middle" font-size="23" fill="var(--c-accent-a)" font-weight="700">⚡ μs 级</text>
+            <!-- 外部对比 -->
+            <rect x="860" y="110" width="280" height="80" rx="14" fill="var(--c-surface-2)" stroke="var(--c-danger,#ef4444)" stroke-width="1.5" stroke-dasharray="6,4"/>
+            <text x="1000" y="145" text-anchor="middle" font-size="20" fill="var(--c-danger,#ef4444)">🌐 外部 RPC</text>
+            <text x="1000" y="175" text-anchor="middle" font-size="23" fill="var(--c-text-2)">ms 级延迟 · 不稳定</text>
+            <!-- Cross -->
+            <line x1="740" y1="250" x2="860" y2="160" stroke="var(--c-danger,#ef4444)" stroke-width="2" stroke-dasharray="5,5"/>
+            <text x="830" y="225" text-anchor="middle" font-size="23" fill="var(--c-danger,#ef4444)">❌ 避免</text>
+            <!-- 绑定策略 -->
+            <rect x="80" y="250" width="660" height="55" rx="10" fill="var(--c-surface-2)"/>
+            <text x="410" y="282" text-anchor="middle" font-size="17" fill="var(--c-text-1)">🎯 策略：工具实例与 Agent 绑定 + 智能负载均衡 + 流控</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>工具执行亲和</span><span>09 / 13</span></div>
+      <span class="wa" style="display:none">Agent和工具部署在同一本地环境</span>
+    </section>
+
+    <!-- ==================== Slide 10: Split + Network SVG — 网络延迟优化 ==================== -->
+    <section class="s slide" id="s9">
+      <div class="orb" style="width:280px;height:280px;top:-60px;right:-40px;background:radial-gradient(circle,rgba(56,189,248,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:220px;height:220px;bottom:10%;left:5%;background:radial-gradient(circle,rgba(251,191,36,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g9" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#g9)"/></svg>
+      <div class="slide-header">
+        <span class="badge">工具亲和</span>
+        <h2>网络延迟优化</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+        <div class="slide-cards split" style="align-items:stretch;flex-shrink:0;max-height:36%">
+          <div class="g" style="justify-content:flex-start">
+            <div class="emoji-lg">🔗</div>
+            <h3 class="g-title">调度策略</h3>
+            <p class="g-body" style="flex:1;font-size:var(--fs-body)">实例绑定 Agent · 负载均衡 · 最优路径</p>
+            <span class="pill">绑核调度</span>
+          </div>
+          <div class="g" style="justify-content:flex-start">
+            <div class="emoji-lg">⚡</div>
+            <h3 class="g-title">网络栈优化</h3>
+            <p class="g-body" style="flex:1;font-size:var(--fs-body)">连接钉核 · 少上下文切换 · 延迟触底</p>
+            <span class="pill">CPU 亲和</span>
+          </div>
+        </div>
+        <div class="card-diagram" style="flex:1;min-height:420px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+          <svg viewBox="0 0 1580 320" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;min-height:380px">
+            <defs><marker id="ar10net" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><polygon points="0 0,14 5,0 10" fill="var(--c-accent-b)"/></marker></defs>
+            <text x="790" y="40" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-text-1)">绑核 + NIC 亲和：Agent → Core → 零拷贝 → 工具（微秒路径）</text>
+            <circle cx="140" cy="175" r="52" fill="var(--c-accent-b)" opacity="0.18" stroke="var(--c-accent-b)" stroke-width="3"/>
+            <text x="140" y="188" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-b)">Agent</text>
+            <rect x="260" y="118" width="200" height="114" rx="14" fill="rgba(251,191,36,0.14)" stroke="var(--c-warn,#fbbf24)" stroke-width="2.5"/>
+            <text x="360" y="165" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-warn,#fbbf24)">CPU Core</text>
+            <text x="360" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">绑核 #3 · 少切换</text>
+            <line x1="195" y1="175" x2="258" y2="175" stroke="var(--c-accent-b)" stroke-width="5" marker-end="url(#ar10net)"/>
+            <rect x="510" y="118" width="200" height="114" rx="14" fill="rgba(56,189,248,0.14)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
+            <text x="610" y="165" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-sky,#38bdf8)">NIC</text>
+            <text x="610" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">零拷贝 / RDMA</text>
+            <line x1="463" y1="175" x2="508" y2="175" stroke="var(--c-warn,#fbbf24)" stroke-width="5" marker-end="url(#ar10net)"/>
+            <rect x="760" y="125" width="120" height="100" rx="14" fill="var(--c-surface-2)" stroke="var(--c-text-2)" stroke-width="2"/>
+            <text x="820" y="185" text-anchor="middle" font-size="44">🔀</text>
+            <line x1="715" y1="175" x2="758" y2="175" stroke="var(--c-sky,#38bdf8)" stroke-width="5" marker-end="url(#ar10net)"/>
+            <circle cx="1010" cy="125" r="42" fill="var(--c-accent-c)" opacity="0.18" stroke="var(--c-accent-c)" stroke-width="2.5"/>
+            <text x="1010" y="135" text-anchor="middle" font-size="26" font-weight="800" fill="var(--c-accent-c)">工具A</text>
+            <circle cx="1010" cy="235" r="42" fill="var(--c-accent-c)" opacity="0.18" stroke="var(--c-accent-c)" stroke-width="2.5"/>
+            <text x="1010" y="245" text-anchor="middle" font-size="26" font-weight="800" fill="var(--c-accent-c)">工具B</text>
+            <line x1="883" y1="155" x2="968" y2="125" stroke="var(--c-accent-c)" stroke-width="4" marker-end="url(#ar10net)"/>
+            <line x1="883" y1="195" x2="968" y2="235" stroke="var(--c-accent-c)" stroke-width="4" marker-end="url(#ar10net)"/>
+            <rect x="1120" y="95" width="420" height="160" rx="18" fill="rgba(16,185,129,0.10)" stroke="var(--c-accent-b)" stroke-width="2.5"/>
+            <text x="1330" y="145" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-b)">端到端延迟</text>
+            <text x="1330" y="190" text-anchor="middle" font-size="28" fill="var(--c-danger,#ef4444)">改造前 ~12 ms</text>
+            <text x="1330" y="235" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-b)">改造后 ~0.3 ms ⚡</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>网络优化</span><span>10 / 13</span></div>
+      <span class="wa" style="display:none">连接固定在特定CPU核心上</span>
+    </section>
+
+    <!-- ==================== Slide 11: Card + Diagram — 状态分层管理 ==================== -->
+    <section class="s slide" id="s10">
+      <div class="orb" style="width:340px;height:340px;top:-80px;right:-50px;background:radial-gradient(circle,rgba(139,92,246,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:220px;height:220px;bottom:5%;left:5%;background:radial-gradient(circle,rgba(16,185,129,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g10" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g10)"/></svg>
+      <div class="slide-header">
+        <span class="badge">状态亲和</span>
+        <h2>分层状态管理</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+        <div class="g" style="flex-shrink:0">
+          <p class="g-body" style="margin:0">按访问频率和重要性分层存储，常用数据放最近，同一 Agent 会话落在同一实例。</p>
+        </div>
+        <div class="card-diagram" style="min-height:300px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad)">
+          <svg viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid meet">
+            <defs><marker id="ar4" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker></defs>
+            <!-- L1 本地缓存 -->
+            <rect x="300" y="20" width="600" height="90" rx="14" fill="var(--c-accent-a)" opacity="0.2" stroke="var(--c-accent-a)" stroke-width="2.5"/>
+            <text x="600" y="55" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-accent-a)">⚡ L1 本地缓存</text>
+            <text x="600" y="85" text-anchor="middle" font-size="18" fill="var(--c-text-2)">高频读写 · μs 级延迟 · 会话绑定</text>
+            <!-- 速度指示 -->
+            <rect x="920" y="35" width="80" height="60" rx="10" fill="rgba(16,185,129,0.15)" stroke="var(--c-accent-b)" stroke-width="1.5"/>
+            <text x="960" y="60" text-anchor="middle" font-size="20" font-weight="900" fill="var(--c-accent-b)">μs</text>
+            <text x="960" y="80" text-anchor="middle" font-size="21" fill="var(--c-text-2)">最快</text>
+            <!-- L2 远程存储 -->
+            <rect x="200" y="140" width="800" height="90" rx="14" fill="var(--c-accent-b)" opacity="0.12" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <text x="600" y="175" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-accent-b)">🗄️ L2 远程存储</text>
+            <text x="600" y="205" text-anchor="middle" font-size="18" fill="var(--c-text-2)">中等频率 · ms 级延迟 · 跨节点同步</text>
+            <rect x="920" y="155" width="80" height="60" rx="10" fill="rgba(56,189,248,0.15)" stroke="var(--c-sky,#38bdf8)" stroke-width="1.5"/>
+            <text x="960" y="180" text-anchor="middle" font-size="20" font-weight="900" fill="var(--c-sky,#38bdf8)">ms</text>
+            <text x="960" y="200" text-anchor="middle" font-size="21" fill="var(--c-text-2)">均衡</text>
+            <!-- L3 备份存储 -->
+            <rect x="100" y="260" width="1000" height="90" rx="14" fill="var(--c-surface-2)" stroke="var(--c-text-2)" stroke-width="1.5"/>
+            <text x="600" y="295" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">☁️ L3 备份存储</text>
+            <text x="600" y="325" text-anchor="middle" font-size="18" fill="var(--c-text-2)">低频访问 · 持久化 · 异步同步 + 数据预取</text>
+            <rect x="920" y="275" width="80" height="60" rx="10" fill="rgba(251,191,36,0.15)" stroke="var(--c-warn,#fbbf24)" stroke-width="1.5"/>
+            <text x="960" y="300" text-anchor="middle" font-size="18" font-weight="900" fill="var(--c-warn,#fbbf24)">s</text>
+            <text x="960" y="320" text-anchor="middle" font-size="21" fill="var(--c-text-2)">可靠</text>
+            <!-- Arrows -->
+            <line x1="600" y1="110" x2="600" y2="140" stroke="var(--c-accent-a)" stroke-width="2.5" marker-end="url(#ar4)"/>
+            <line x1="600" y1="230" x2="600" y2="260" stroke="var(--c-accent-b)" stroke-width="2.5" marker-end="url(#ar4)"/>
+            <!-- 左侧标签 -->
+            <text x="60" y="70" text-anchor="middle" fill="var(--c-accent-a)" font-size="23" font-weight="700">热数据</text>
+            <text x="60" y="190" text-anchor="middle" fill="var(--c-accent-b)" font-size="23" font-weight="700">温数据</text>
+            <text x="60" y="310" text-anchor="middle" fill="var(--c-text-2)" font-size="23" font-weight="700">冷数据</text>
+            <!-- 调度策略条 -->
+            <rect x="50" y="370" width="1100" height="28" rx="8" fill="var(--c-surface)"/>
+            <text x="600" y="390" text-anchor="middle" font-size="24" fill="var(--c-accent-c)">🎯 同一Agent会话→同一实例 ｜ 跨节点迁移→数据预取+异步同步 ｜ 状态一致+高可用</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>状态亲和</span><span>11 / 13</span></div>
+      <span class="wa" style="display:none">分层状态管理本地缓存远程存储</span>
+    </section>
+
+    <!-- ==================== Slide 12: Grid 2×2 + mini-SVGs — 安全亲和四维度 ==================== -->
+    <section class="s slide" id="s11">
+      <div class="orb" style="width:350px;height:350px;top:-80px;left:-50px;background:radial-gradient(circle,rgba(239,68,68,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:250px;height:250px;bottom:5%;right:5%;background:radial-gradient(circle,rgba(16,185,129,0.08),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g11" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="none" stroke="var(--c-text-2)" stroke-width="0.3"/></pattern></defs><rect width="100%" height="100%" fill="url(#g11)"/></svg>
+      <div class="slide-header">
+        <span class="badge">安全亲和</span>
+        <h2>全链路安全隔离</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+        <div class="slide-cards grid-2x2" style="flex:1;min-height:0">
+          <div class="g" style="justify-content:flex-start;padding:var(--sp-sm)">
+            <div class="emoji-lg">🏠</div>
+            <h3 class="g-title">命名空间隔离</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">配额 · 网络策略 · 会话沙箱</p>
+            <div class="mini-svg" style="flex:1;width:100%;min-height:0">
+              <svg viewBox="0 0 440 130" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
+                <rect x="30" y="28" width="170" height="82" rx="12" fill="rgba(139,92,246,0.14)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2.5"/>
+                <text x="115" y="68" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-purple,#8b5cf6)">NS-A</text>
+                <text x="115" y="102" text-anchor="middle" font-size="22" fill="var(--c-text-2)">Policy 隔离</text>
+                <rect x="230" y="28" width="170" height="82" rx="12" fill="rgba(56,189,248,0.14)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
+                <text x="315" y="68" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-sky,#38bdf8)">NS-B</text>
+                <text x="315" y="102" text-anchor="middle" font-size="22" fill="var(--c-text-2)">独立 VPC</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g" style="justify-content:flex-start;padding:var(--sp-sm)">
+            <div class="emoji-lg">🔑</div>
+            <h3 class="g-title">动态密钥</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">运行时签发 · Agent ⟷ 工具加密通道</p>
+            <div class="mini-svg" style="flex:1;width:100%;min-height:0">
+              <svg viewBox="0 0 440 130" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
+                <rect x="70" y="30" width="110" height="88" rx="12" fill="rgba(251,191,36,0.16)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
+                <text x="125" y="88" text-anchor="middle" font-size="40">🔑</text>
+                <text x="220" y="82" text-anchor="middle" font-size="36" font-weight="800" fill="var(--c-accent-a)">TLS</text>
+                <rect x="260" y="30" width="110" height="88" rx="12" fill="rgba(16,185,129,0.14)" stroke="var(--c-accent-b)" stroke-width="2"/>
+                <text x="315" y="88" text-anchor="middle" font-size="40">🔧</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g" style="justify-content:flex-start;padding:var(--sp-sm)">
+            <div class="emoji-lg">📋</div>
+            <h3 class="g-title">强制审计</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">敏感访问必留痕 · 全链路追溯</p>
+            <div class="mini-svg" style="flex:1;width:100%;min-height:0">
+              <svg viewBox="0 0 440 130" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
+                <rect x="40" y="22" width="360" height="92" rx="12" fill="var(--c-surface-2)" stroke="var(--c-text-2)" stroke-width="2"/>
+                <text x="70" y="58" font-size="24" font-weight="700" fill="var(--c-accent-b)">read ✓</text>
+                <text x="70" y="92" font-size="24" font-weight="700" fill="var(--c-warn,#fbbf24)">write ⚠</text>
+                <text x="240" y="58" font-size="24" font-weight="700" fill="var(--c-accent-b)">exec ✓</text>
+                <text x="240" y="92" font-size="24" font-weight="700" fill="var(--c-danger,#ef4444)">deny ✗</text>
+              </svg>
+            </div>
+          </div>
+          <div class="g" style="justify-content:flex-start;padding:var(--sp-sm)">
+            <div class="emoji-lg">🛡️</div>
+            <h3 class="g-title">运行时检测</h3>
+            <p class="g-body" style="font-size:var(--fs-body)">异常即隔离 / 自愈 · 闭环防护</p>
+            <div class="mini-svg" style="flex:1;width:100%;min-height:0">
+              <svg viewBox="0 0 440 130" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
+                <circle cx="220" cy="65" r="48" fill="none" stroke="var(--c-accent-b)" stroke-width="3"/>
+                <circle cx="220" cy="65" r="48" fill="none" stroke="var(--c-accent-b)" stroke-width="5" stroke-dasharray="45 256" transform="rotate(-90 220 65)"/>
+                <text x="220" y="78" text-anchor="middle" font-size="36">🛡️</text>
+                <text x="90" y="118" font-size="26" font-weight="700" fill="var(--c-accent-b)">健康</text>
+                <text x="290" y="118" font-size="26" font-weight="800" fill="var(--c-danger,#ef4444)">→ 熔断隔离</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="card-diagram" style="min-height:200px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);flex-shrink:0">
+          <svg viewBox="0 0 1600 180" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:190px">
+            <text x="800" y="42" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-text-1)">安全纵深：隔离 → 密钥 → 审计 → 运行时响应</text>
+            <line x1="120" y1="115" x2="440" y2="115" stroke="var(--c-accent-a)" stroke-width="4"/>
+            <polygon points="440,115 430,108 430,122" fill="var(--c-accent-a)"/>
+            <line x1="520" y1="115" x2="840" y2="115" stroke="var(--c-accent-a)" stroke-width="4"/>
+            <polygon points="840,115 830,108 830,122" fill="var(--c-accent-a)"/>
+            <line x1="920" y1="115" x2="1240" y2="115" stroke="var(--c-accent-a)" stroke-width="4"/>
+            <polygon points="1240,115 1230,108 1230,122" fill="var(--c-accent-a)"/>
+            <rect x="60" y="78" width="280" height="74" rx="14" fill="rgba(139,92,246,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
+            <text x="200" y="124" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-purple,#8b5cf6)">边界</text>
+            <rect x="460" y="78" width="280" height="74" rx="14" fill="rgba(251,191,36,0.12)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
+            <text x="600" y="124" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-warn,#fbbf24)">信道</text>
+            <rect x="860" y="78" width="280" height="74" rx="14" fill="rgba(16,185,129,0.12)" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <text x="1000" y="124" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-accent-b)">证据</text>
+            <rect x="1260" y="78" width="280" height="74" rx="14" fill="rgba(239,68,68,0.10)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
+            <text x="1400" y="124" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-danger,#ef4444)">处置</text>
+          </svg>
+        </div>
+      </div>
+      <div class="slide-footer"><span>安全亲和</span><span>12 / 13</span></div>
+      <span class="wa" style="display:none">安全隔离命名空间动态密钥</span>
+    </section>
+
+    <!-- ==================== Slide 13: Thanks — 满屏收束 ==================== -->
+    <section class="s slide" id="s12">
+      <div class="orb" style="width:420px;height:420px;top:-100px;right:-60px;background:radial-gradient(circle,rgba(16,185,129,0.14),transparent 70%)"></div>
+      <div class="orb" style="width:320px;height:320px;bottom:-40px;left:-30px;background:radial-gradient(circle,rgba(56,189,248,0.12),transparent 70%)"></div>
+      <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g12" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g12)"/></svg>
+      <div class="slide-header">
+        <span class="badge">收束</span>
+        <h2>四大亲和 · 一张图记住</h2>
+      </div>
+      <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+        <div class="slide-cards grid-2x2" style="flex:1;min-height:0">
+          <div class="g" style="justify-content:center">
+            <div class="emoji-lg">⚡</div>
+            <h3 class="g-title">推理亲和</h3>
+            <p class="g-body">请求级 GPU 匹配 · 吞吐与延迟双赢</p>
+          </div>
+          <div class="g" style="justify-content:center">
+            <div class="emoji-lg">🔧</div>
+            <h3 class="g-title">工具亲和</h3>
+            <p class="g-body">Agent 与工具就近部署 · 微秒级调用</p>
+          </div>
+          <div class="g" style="justify-content:center">
+            <div class="emoji-lg">💾</div>
+            <h3 class="g-title">状态亲和</h3>
+            <p class="g-body">分层存储 · 会话绑实例 · 迁移预取</p>
+          </div>
+          <div class="g" style="justify-content:center">
+            <div class="emoji-lg">🛡️</div>
+            <h3 class="g-title">安全亲和</h3>
+            <p class="g-body">命名空间隔离 · 密钥 · 审计 · 运行时防护</p>
+          </div>
+        </div>
+        <div class="card-diagram" style="min-height:280px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);flex-shrink:0">
+          <svg viewBox="0 0 1600 220" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:200px">
+            <defs>
+              <marker id="mk12" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><polygon points="0 0,12 4,0 8" fill="var(--c-accent-a)"/></marker>
+              <linearGradient id="lg12" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="var(--c-accent-b)" stop-opacity="0.35"/><stop offset="100%" stop-color="var(--c-accent-a)" stop-opacity="0.35"/></linearGradient>
+            </defs>
+            <rect x="40" y="150" width="1520" height="56" rx="14" fill="url(#lg12)" stroke="var(--c-accent-a)" stroke-width="1.5" opacity="0.9"/>
+            <text x="800" y="124" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-text-1)">端到端：调度 · 工具 · 状态 · 安全</text>
+            <rect x="80" y="158" width="300" height="40" rx="10" fill="rgba(16,185,129,0.2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <text x="230" y="186" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-accent-b)">推理亲和</text>
+            <text x="400" y="186" text-anchor="middle" font-size="36" fill="var(--c-accent-a)">→</text>
+            <rect x="440" y="158" width="300" height="40" rx="10" fill="rgba(56,189,248,0.15)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
+            <text x="590" y="186" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-sky,#38bdf8)">工具亲和</text>
+            <text x="760" y="186" text-anchor="middle" font-size="36" fill="var(--c-accent-a)">→</text>
+            <rect x="800" y="158" width="300" height="40" rx="10" fill="rgba(139,92,246,0.15)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
+            <text x="950" y="186" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-purple,#8b5cf6)">状态亲和</text>
+            <text x="1120" y="186" text-anchor="middle" font-size="36" fill="var(--c-accent-a)">→</text>
+            <rect x="1160" y="158" width="360" height="40" rx="10" fill="rgba(239,68,68,0.12)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
+            <text x="1340" y="186" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-danger,#ef4444)">安全亲和</text>
+            <line x1="80" y1="80" x2="1520" y2="80" stroke="var(--c-text-2)" stroke-width="1" stroke-dasharray="10 8" opacity="0.35"/>
+          </svg>
+        </div>
+        <div style="text-align:center;padding-bottom:8px">
+          <p style="font-size:var(--fs-subtitle);font-weight:800;margin:0 0 14px;color:var(--c-text-1)">感谢收听 · 订阅转发支持本期节目</p>
+          <div style="display:flex;gap:var(--sp-md);justify-content:center;flex-wrap:wrap">
+            <span class="pill">🎙️ 斗包 AI 播客</span>
+            <span class="pill">Agent 工程</span>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer"><span>下期再见</span><span>13 / 13</span></div>
+      <span class="wa" style="display:none">让AI应用跑得又快又稳</span>
+    </section>
+
+  </div>
+
+  <div id="pn"></div>
+  <script>
+  (function(){
+    var PW=1920,PH=1080;
+    function fit(){
+      var el=document.getElementById('P');
+      if(!el)return;
+      var r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;
+      el.style.transform='scale('+r+')';
+      el.style.transformOrigin='0 0';
+      el.style.left=x+'px';
+      el.style.top=y+'px';
+    }
+    window.addEventListener('resize',fit);
+    requestAnimationFrame(function(){ fit(); });
+    var slides=document.querySelectorAll('.s.slide'),total=slides.length,cur=0;
+    function ui(){
+      document.getElementById('pn').textContent=(cur+1)+' / '+total;
+      var b=document.getElementById('prog');
+      if(b)b.style.width=(total<=1?100:(cur/(total-1)*100))+'%';
+    }
+    function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('is-active');cur=i;slides[cur].classList.add('is-active');ui()}
+    document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1)}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}});
+    document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1)});
+    window.go=go;
+    window.fit=fit;
+    ui();
+  })();
+  </script>
+</body>
+</html>

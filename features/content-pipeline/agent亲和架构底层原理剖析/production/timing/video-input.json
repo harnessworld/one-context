@@ -1,0 +1,21 @@
+{
+  "_comment": "wavFile 相对 production/ 根目录。请将口播放入 production/media/ 并改成对应文件名。",
+  "wavFile": "media/narration.wav",
+  "whisperModel": "small",
+  "noSpeechThreshold": 0.85,
+  "vadFilter": false,
+  "burnSubtitles": true,
+  "srtFile": "subtitles/sub.srt",
+  "outputFile": "final.mp4",
+  "subtitle": {
+    "fontSize": 58,
+    "marginV": 14,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 24,
+    "primaryColour": "#FFE066",
+    "outline": 0,
+    "barHeight": 78,
+    "barAlpha": 0.52
+  }
+}

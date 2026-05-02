@@ -552,7 +552,7 @@ steps:
              "outputFile": "final.mp4",
              "burnSubtitles": true,
              "srtFile": "sub.srt",
-             "subtitle": {"charsPerLine": 28, "fontSize": 48, "marginV": 8, "fontName": "Microsoft YaHei", "bold": false, "primaryColour": "#FFD700", "primaryAlpha": 0, "outline": 0, "barHeight": 0, "barAlpha": 0.55}
+             "subtitle": {"charsPerLine": 24, "fontSize": 58, "marginV": 14, "fontName": "Microsoft YaHei", "bold": true, "primaryColour": "#FFE066", "primaryAlpha": 0, "outline": 0, "barHeight": 78, "barAlpha": 0.52}
            }
            ```
            subtitle 字段优先复用 video-input.json 中已有的 subtitle，缺省项用上方推荐值填充。
@@ -563,8 +563,9 @@ steps:
            - `barHeight: 0`（默认）：不绘制底栏，字幕直接浮于画面底部，保持画面干净。适合深色主题 PPT 或播客类视频。
            - 如需底栏保护（浅色/复杂背景时），可设 `barHeight: 60` + `barAlpha: 0.55`，由 ffmpeg drawBox 绘制干净半透明矩形。比 ASS 描边更干净。
            - `primaryAlpha: 0`：字本身完全不透明，对比度由底栏负责，避免字发灰。
-           - `fontSize: 48`：保证字幕清晰醒目，与正文拉开层级但不抢画面主体。
-           - `marginV: 8`：字幕贴紧底栏内部，视觉更紧凑。
+           - `fontSize: 56–60`：移动端成片优先偏大；若仍嫌小可加到 64。
+           - `barHeight: 70–90`：底栏托住字幕，避免与幻灯正文打架。
+           - `marginV: 12–16`：字幕在底栏内留白。
 
         5. 自检并输出摘要（markdown 表格）：
            页码 | 布局 | 标题 | 正文字数 | 锚文字

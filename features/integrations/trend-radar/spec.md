@@ -103,7 +103,7 @@ TrendRadar MCP server 暴露的工具包括：
 | 相关需求 | 关系 |
 |---------|------|
 | `skills/stock-sentiment/` | 并行：股吧舆情（散户视角）vs TrendRadar 热点（媒体/机构视角）|
-| `features/develop/damai-ticket-bot/` | 同级：外部工具集成 |
+| `features/integrations/damai-ticket-bot/` | 同级：外部工具集成 |
 | `features/integrations/trend-radar/` | 本文档 |
 
 ## 已知限制

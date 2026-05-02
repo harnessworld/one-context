@@ -1,5 +1,5 @@
 {
-  "wavFile": "media/voiceover.wav",
+  "wavFile": "audio/AI+Agent+沙箱的核心价值.wav",
   "slideDurationsSec": [47.6, 70.2, 66.7, 60.1, 107.5, 66.1, 58.3, 46.9, 82.5],
   "outputFile": "final.mp4",
   "burnSubtitles": true,
