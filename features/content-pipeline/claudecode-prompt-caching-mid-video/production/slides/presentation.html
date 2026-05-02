@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Caching Is Everything · Magazine Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@400;600&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#0a0a0b;--ink-rgb:10,10,11;--paper:#f1efea;--paper-rgb:241,239,234;--paper-tint:#e8e5de;
+    --mono:"IBM Plex Mono",monospace;--serif-en:"Playfair Display",serif;--serif-zh:"Noto Serif SC",serif;--sans-zh:"Noto Sans SC",sans-serif;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased}
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}canvas#bg-dark{opacity:1}body.light-bg canvas#bg-light{opacity:1}body.light-bg canvas#bg-dark{opacity:0}
+  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:3.5vh 4vw 5.5vh 4vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink)}.slide.dark{color:var(--paper)}
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.82);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.82);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.18);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.14);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.32) 0%,rgba(var(--paper-rgb),0) 12%,rgba(var(--paper-rgb),0) 88%,rgba(var(--paper-rgb),.32) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.36) 0%,rgba(var(--ink-rgb),0) 12%,rgba(var(--ink-rgb),0) 88%,rgba(var(--ink-rgb),.36) 100%)}
+
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:clamp(44px,9vw,140px);line-height:.95;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:clamp(32px,5.5vw,90px);line-height:1.05;letter-spacing:-.01em}
+  .h2{font-family:var(--serif-zh);font-weight:700;font-size:clamp(26px,4vw,64px);line-height:1.1}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:clamp(20px,2.4vw,44px);line-height:1.25}
+  .body{font-family:var(--sans-zh);font-weight:400;font-size:clamp(16px,1.5vw,32px);line-height:1.6;opacity:.82;letter-spacing:.01em}
+  .body-lg{font-family:var(--serif-zh);font-weight:400;font-size:clamp(18px,1.8vw,36px);line-height:1.55;opacity:.88}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:clamp(18px,1.9vw,38px);line-height:1.45;opacity:.82}
+  .kicker{font-family:var(--mono);font-size:clamp(11px,.9vw,16px);letter-spacing:.28em;text-transform:uppercase;opacity:.5;margin-bottom:1.5vh}
+  .meta{font-family:var(--mono);font-size:clamp(11px,.85vw,15px);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+  .col{display:flex;flex-direction:column;gap:1.5vh}
+  .row{display:flex;align-items:center;gap:2vw}
+  .fill{flex:1;min-height:0}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:2.5vw;flex:1;align-items:start}
+  .split-64{display:grid;grid-template-columns:6fr 4fr;gap:2.5vw;flex:1;align-items:start}
+  .split-46{display:grid;grid-template-columns:4fr 6fr;gap:2.5vw;flex:1;align-items:start}
+  .grid-4{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.5vh 2vw;flex:1}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:2vw;flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0;gap:1.5vh}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:clamp(10px,.85vw,15px);letter-spacing:.2em;text-transform:uppercase;opacity:.55;margin-bottom:.5vh;flex-shrink:0}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:clamp(10px,.85vw,15px);letter-spacing:.16em;text-transform:uppercase;opacity:.45;flex-shrink:0}
+
+  .card{padding:2.2vh 2.4vw;border-radius:5px;display:flex;flex-direction:column;gap:1vh}
+  .slide.light .card{background:rgba(var(--ink-rgb),.04)}
+  .slide.dark .card{background:rgba(var(--paper-rgb),.06)}
+  .card-bd{padding:2vh 2.4vw;border-radius:5px;display:flex;flex-direction:column;gap:1vh;border:1px solid rgba(127,127,127,.22)}
+  .card-rd{border-left:4px solid #ef4444}
+  .card-gn{border-left:4px solid #22c55e}
+
+  .band{display:flex;align-items:center;gap:1.2vw;padding:1.4vh 1.8vw;border-radius:4px}
+  .band .emoji{font-size:clamp(22px,2.5vw,42px);line-height:1}
+
+  .stat{display:flex;flex-direction:column;gap:.6vh}
+  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:clamp(64px,9vw,150px);line-height:.92;letter-spacing:-.03em}
+  .stat .l{font-family:var(--mono);font-size:clamp(12px,1vw,18px);letter-spacing:.2em;text-transform:uppercase;opacity:.45}
+  .stat .d{font-family:var(--sans-zh);font-size:clamp(16px,1.4vw,26px);opacity:.65;line-height:1.5;margin-top:.8vh}
+
+  .callout{padding:1.8vh 1.8vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:clamp(16px,1.4vw,28px);line-height:1.5;opacity:.9}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.03)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.05)}
+  .callout-src{display:block;margin-top:1.2vh;font-family:var(--mono);font-size:clamp(10px,.75vw,14px);letter-spacing:.2em;text-transform:uppercase;opacity:.45}
+
+  .pill{display:inline-block;font-family:var(--mono);font-size:clamp(11px,.9vw,16px);letter-spacing:.2em;text-transform:uppercase;padding:.5vh 1vw;border:1px solid currentColor;opacity:.6}
+  .rule{width:100%;height:1px;background:currentColor;opacity:.15}
+
+  .frame-img{overflow:hidden;position:relative;width:100%;border-radius:4px;display:flex;flex-direction:column}
+  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .frame-img-fit{background:#fff}
+  .frame-img-fit > img{object-fit:contain}
+  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
+  .img-cap{display:flex;justify-content:space-between;gap:1vw;margin-top:.6vh;font-family:var(--mono);font-size:clamp(10px,.75vw,14px);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
+
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.08em;right:-.08em;bottom:-.04em;height:.25em;background:rgba(var(--paper-rgb),.16);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.08em;right:-.08em;bottom:-.04em;height:.25em;background:rgba(var(--ink-rgb),.1);z-index:-1}
+  .dim{opacity:.5}
+
+  /* 缓存条可视化 */
+  .cache-bar{display:flex;height:clamp(40px,6vh,70px);border-radius:4px;overflow:hidden;position:relative}
+  .cache-seg{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:clamp(11px,1vw,16px);color:#fff;font-weight:600;opacity:.9}
+  .cache-seg.sys{background:#6366f1}
+  .cache-seg.tool{background:#8b5cf6}
+  .cache-seg.proj{background:#06b6d4}
+  .cache-seg.sess{background:#10b981}
+  .cache-seg.msg{background:#f59e0b}
+  .cache-seg.brk{background:transparent;width:4px;flex:none}
+  .cache-seg.broken{background:#ef4444}
+  .cache-seg.renew{background:#22c55e}
+  .flow{display:flex;align-items:center;gap:1vw}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.2);backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.3)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.3)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:2.8vh;right:3vw;z-index:30;font-family:var(--mono);font-size:clamp(10px,.85vw,14px);letter-spacing:.2em;text-transform:uppercase;opacity:.3;mix-blend-mode:difference;color:#aaa}
+</style>
+</head>
+<body>
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · ESC 索引</div>
+<div id="deck">
+
+<!-- ============================================================ -->
+<!-- s0 · Hero Cover -->
+<!-- ============================================================ -->
+<section class="slide hero dark">
+  <div class="chrome"><div>Anthropic Blog · 2026.04.30</div><div>01 / 08</div></div>
+  <div class="frame" style="display:grid;gap:2.5vh;align-content:center;min-height:68vh">
+    <div class="kicker">Claude Code 工程经验深度解读</div>
+    <h1 class="h-hero" style="font-size:clamp(42px,9.5vw,140px)">Prompt Caching<br>Is Everything</h1>
+    <p class="lead" style="max-width:68vw">
+      长上下文 Agent 的经济可行性，核心取决于一个反直觉的架构决策：<strong class="hi">提示缓存</strong>。<br>
+      Claude Code 团队将命中率当作 SEV 处理。
+    </p>
+    <div class="row" style="gap:1.5vw;flex-wrap:wrap;margin-top:.5vh">
+      <div class="pill">成本 ↓ 90%</div>
+      <div class="pill">延迟 < 5ms</div>
+      <div class="pill">前缀匹配</div>
+      <div class="pill">Cache-safe Forking</div>
+    </div>
+  </div>
+  <div class="foot"><div>顺序即架构，缓存即经济</div><div>Source: anthropic.com/blog</div></div>
+</section>
+
+<!-- ============================================================ -->
+<!-- s1 · 数据冲击 -->
+<!-- ============================================================ -->
+<section class="slide light">
+  <div class="chrome"><div>Impact · 实测数据</div><div>02 / 08</div></div>
+  <div class="frame" style="display:grid;gap:2vh;align-content:center">
+    <div class="kicker">Claude Code Internal Metrics</div>
+    <h2 class="h-xl">一个数量级的变化</h2>
+    <div class="grid-4" style="gap:3vh 2.5vw;margin-top:1vh">
+      <div class="stat"><div class="l">Cost Reduction</div><div class="n" style="color:#ef4444">90<span style="font-size:.38em;opacity:.7">%</span></div><div class="d">缓存命中后输入费用 1/10</div></div>
+      <div class="stat"><div class="l">Latency TTFT</div><div class="n" style="color:#22c55e">< 5<span style="font-size:.38em;opacity:.7">ms</span></div><div class="d">首 token 延迟降至毫秒级</div></div>
+      <div class="stat"><div class="l">Alert Level</div><div class="n" style="color:#f59e0b">SEV</div><div class="d">命中率异常 = 系统事件</div></div>
+      <div class="stat"><div class="l">Cache Breakpoints</div><div class="n" style="color:#8b5cf6">≤ 4</div><div class="d">每请求最多 cache_control 断点</div></div>
+    </div>
+    <div class="callout" style="margin-top:.5vh">
+      没有 caching 的长上下文 Agent 在经济模型上不可持续。
+      <div class="callout-src">— Anthropic Engineering Team</div>
+    </div>
+  </div>
+  <div class="foot"><div>缓存命中率 = 经济生命线</div><div>Impact</div></div>
+</section>
+
+<!-- ============================================================ -->
+<!-- s2 · 前缀匹配机制（重度图形化） -->
+<!-- ============================================================ -->
+<section class="slide dark">
+  <div class="chrome"><div>Mechanism · 核心机制</div><div>03 / 08</div></div>
+  <div class="frame" style="gap:1.5vh">
+    <div class="kicker">Prefix Matching</div>
+    <h2 class="h-xl">前缀匹配，<span class="dim">一字不差</span></h2>
+    <div class="body-lg" style="max-width:75vw">
+      API 缓存的是 <b class="hi">token 序列的精确哈希</b>，不是语义。从第一个 token 到 cache_control 断点，<b>前缀字节完全一致</b>才会命中。
+    </div>
+
+    <!-- 可视化：前缀条对比 -->
+    <div class="split" style="gap:2.5vw;margin-top:.5vh;align-items:stretch">
+      <!-- 错误 -->
+      <div class="col" style="gap:1.2vh">
+        <div class="h-md" style="color:#ef4444">❌ 中间修改 = 全段作废</div>
+        <div class="cache-bar" style="border:2px solid rgba(239,68,68,.3)">
+          <div class="cache-seg sys" style="width:28%">SYS</div>
+          <div class="cache-seg tool" style="width:22%">TOOLS</div>
+          <div class="cache-seg broken" style="width:50%">💥 CHANGED → FULL MISS</div>
+        </div>
+        <div class="body dim">改时间戳 / 调工具序 / 改 system prompt → 后缀全部重算</div>
+      </div>
+      <!-- 正确 -->
+      <div class="col" style="gap:1.2vh">
+        <div class="h-md" style="color:#22c55e">✅ 静态前置，动态追加</div>
+        <div class="cache-bar" style="border:2px solid rgba(34,197,94,.3)">
+          <div class="cache-seg sys" style="width:25%">SYS</div>
+          <div class="cache-seg tool" style="width:20%">TOOLS</div>
+          <div class="cache-seg proj" style="width:15%">CONF</div>
+          <div class="cache-seg sess" style="width:15%">SESS</div>
+          <div class="cache-seg renew" style="width:25%">+ NEW MSG</div>
+        </div>
+        <div class="body dim">稳定内容放最前，变化追加到末尾 → 前缀永远复用</div>
+      </div>
+    </div>
+
+    <div class="rule" style="margin-top:.5vh"></div>
+    <!-- 底部 5 层条带 -->
+    <div class="col" style="gap:.8vh">
+      <div class="cache-bar" style="height:clamp(34px,4.5vh,58px)">
+        <div class="cache-seg sys" style="width:25%"><span style="font-size:.85em">⚙️ Global System</span></div>
+        <div class="cache-seg tool" style="width:20%"><span style="font-size:.85em">🔧 Tools</span></div>
+        <div class="cache-seg proj" style="width:15%"><span style="font-size:.85em">📁 Project</span></div>
+        <div class="cache-seg sess" style="width:15%"><span style="font-size:.85em">🗣️ Session</span></div>
+        <div class="cache-seg msg" style="width:25%"><span style="font-size:.85em">✨ Messages</span></div>
+      </div>
+      <div class="row" style="justify-content:space-between;opacity:.45"><span class="meta">静态 ← 全局缓存</span><span class="meta">动态 → 逐轮增长</span></div>
+    </div>
+  </div>
+  <div class="foot"><div>顺序即架构</div><div>Mechanism</div></div>
+</section>
+
+<!-- ============================================================ -->
+<!-- s3 · 提示结构 + 大图 -->
+<!-- ============================================================ -->
+<section class="slide light">
+  <div class="chrome"><div>Structure · 提示分层</div><div>04 / 08</div></div>
+  <div class="frame" style="gap:1.2vh">
+    <div class="kicker">5-Layer Architecture</div>
+    <h2 class="h-xl" style="font-size:clamp(28px,5vw,80px)">五层结构，从静到动</h2>
+
+    <!-- 大图全宽展示 -->
+    <figure class="tile" style="flex:1;min-height:0;display:flex;flex-direction:column">
+      <div class="frame-img frame-img-fit" style="flex:1;background:#fff;border:1px solid rgba(0,0,0,.08)">
+        <img src="../media/Lay%20out%20your%20prompt%20for%20caching.png" alt="Lay out your prompt for caching">
+      </div>
+      <div class="img-cap"><span style="font-weight:600">图1</span><span>Anthropic 官方 · 提示分层示意</span></div>
+    </figure>
+
+    <!-- 底部 5 层标签 -->
+    <div class="row" style="gap:1vw;flex-wrap:wrap;margin-top:.3vh">
+      <div class="band" style="background:rgba(99,102,241,.1)"><span class="emoji">⚙️</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#4f46e5">Global System</span><span class="meta dim">全局缓存</span></div>
+      <div class="band" style="background:rgba(139,92,246,.1)"><span class="emoji">🔧</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#7c3aed">Tools</span><span class="meta dim">全局缓存</span></div>
+      <div class="band" style="background:rgba(6,182,212,.1)"><span class="emoji">📁</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#0891b2">CLAUDE.md</span><span class="meta dim">项目缓存</span></div>
+      <div class="band" style="background:rgba(16,185,129,.1)"><span class="emoji">🗣️</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#059669">Session</span><span class="meta dim">会话缓存</span></div>
+      <div class="band" style="background:rgba(245,158,11,.1)"><span class="emoji">✨</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#d97706">Messages</span><span class="meta dim">动态</span></div>
+    </div>
+  </div>
+  <div class="foot"><div>稳定的在上，变化的在下</div><div>Structure</div></div>
+</section>
+
+<!-- ============================================================ -->
+<!-- s4 · 三大陷阱（更简洁） -->
+<!-- ============================================================ -->
+<section class="slide dark">
+  <div class="chrome"><div>Pitfalls · 反直觉法则</div><div>05 / 08</div></div>
+  <div class="frame" style="gap:1.5vh">
+    <div class="kicker">Counter-intuitive Rules</div>
+    <h2 class="h-xl">三大陷阱</h2>
+    <div class="grid-3" style="gap:1.5vw;margin-top:.5vh">
+      <div class="card card-rd">
+        <div style="font-size:clamp(36px,4vw,64px);line-height:1">📨</div>
+        <div class="h-md" style="color:#fca5a5">不要改 System Prompt</div>
+        <div class="body">变化信息通过 <strong>user message</strong> 传递，不动前缀。</div>
+        <div class="body dim" style="font-size:.9em">Claude Code 用 &lt;system-reminder&gt; 注入更新</div>
+      </div>
+      <div class="card" style="border-left:4px solid #f59e0b">
+        <div style="font-size:clamp(36px,4vw,64px);line-height:1">🚫</div>
+        <div class="h-md" style="color:#fcd34d">不要换模型</div>
+        <div class="body">缓存<strong>模型绑定</strong>。100k Opus 换 Haiku 反而全价重算。</div>
+        <div class="body dim" style="font-size:.9em">用 subagent fork 独立缓存路径</div>
+      </div>
+      <div class="card card-gn">
+        <div style="font-size:clamp(36px,4vw,64px);line-height:1">🔧</div>
+        <div class="h-md" style="color:#86efac">不要换工具集</div>
+        <div class="body">加减工具 = 前缀失效。用 <strong>defer_loading stubs</strong> 替代移除。</div>
+        <div class="body dim" style="font-size:.9em">Plan Mode 是工具，不是换工具集</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:.5vh">
+      用 message 更新，用工具建模状态，用 subagent 切换路径。
+      <div class="callout-src">维系前缀 = 维系成本</div>
+    </div>
+  </div>
+  <div class="foot"><div>前缀不变，成本永低</div><div>Pitfalls</div></div>
+</section>
+
+<!-- ============================================================ -->
+<!-- s5 · Compaction + 大图 -->
+<!-- ============================================================ -->
+<section class="slide light">
+  <div class="chrome"><div>Compaction · 上下文压缩</div><div>06 / 08</div></div>
+  <div class="frame" style="gap:1.2vh">
+    <div class="kicker">Cache-safe Forking</div>
+    <h2 class="h-xl" style="font-size:clamp(28px,5vw,84px)">最隐蔽的成本陷阱</h2>
+
+    <!-- 大图主视觉 -->
+    <figure class="tile" style="flex:1.8;min-height:0;display:flex;flex-direction:column">
+      <div class="frame-img frame-img-fit" style="flex:1;background:#fff;border:1px solid rgba(0,0,0,.08)">
+        <img src="../media/Compacting%20without%20breaking%20the%20cache.png" alt="Compacting without breaking the cache">
+      </div>
+      <div class="img-cap"><span style="font-weight:600">图2</span><span>Anthropic 官方 · Cache-safe Forking</span></div>
+    </figure>
+
+    <!-- 极简对比 -->
+    <div class="split" style="gap:2vw;margin-top:.3vh;flex:0.75">
+      <div class="col" style="gap:.8vh">
+        <div class="h-md" style="color:#dc2626">❌ 错误：不同 system prompt</div>
+        <div class="body dim">独立 API 调用 → 前缀不匹配 → 全价付费</div>
+        <div class="cache-bar" style="height:clamp(28px,3.5vh,48px);border:1px solid rgba(239,68,68,.25)">
+          <div class="cache-seg broken" style="width:100%;font-size:.9em">NEW SYSTEM → FULL MISS 💸</div>
+        </div>
+      </div>
+      <div class="col" style="gap:.8vh">
+        <div class="h-md" style="color:#16a34a">✅ 正确：复用前缀，追加 message</div>
+        <div class="body dim">相同前缀 + compaction prompt → 成本 1/10</div>
+        <div class="cache-bar" style="height:clamp(28px,3.5vh,48px);border:1px solid rgba(34,197,94,.25)">
+          <div class="cache-seg sys" style="width:30%;font-size:.9em">PREFIX</div>
+          <div class="cache-seg renew" style="width:70%;font-size:.9em">+ COMPACTION MSG → HIT ✅</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>复用前缀，追加消息</div><div>Compaction</div></div>
+</section>
+
+<!-- ============================================================ -->
+<!-- s6 · 设计原则（更轻） -->
+<!-- ============================================================ -->
+<section class="slide light">
+  <div class="chrome"><div>Principles · 设计原则</div><div>07 / 08</div></div>
+  <div class="frame" style="gap:2vh;align-content:center">
+    <div class="kicker">Design Principles</div>
+    <h2 class="h-xl" style="font-size:clamp(30px,5.5vw,90px)">Architecture as Caching</h2>
+    <div class="grid-4" style="gap:2.5vh 3vw;margin-top:.8vh">
+      <div class="card" style="padding:3vh 2.6vw"><div class="h-md" style="font-size:clamp(22px,2.6vw,46px)">🎯 顺序 = 架构</div><div class="body" style="font-size:clamp(16px,1.5vw,28px);margin-top:.6vh">前缀匹配约束决定系统设计，顺序不是细节。</div></div>
+      <div class="card" style="padding:3vh 2.6vw"><div class="h-md" style="font-size:clamp(22px,2.6vw,46px)">📨 Message 传变化</div><div class="body" style="font-size:clamp(16px,1.5vw,28px);margin-top:.6vh">所有变动通过 message 追加，不动 system prompt。</div></div>
+      <div class="card" style="padding:3vh 2.6vw"><div class="h-md" style="font-size:clamp(22px,2.6vw,46px)">🔧 工具建状态</div><div class="body" style="font-size:clamp(16px,1.5vw,28px);margin-top:.6vh">Plan Mode / defer_loading 是工具行为，非工具集变更。</div></div>
+      <div class="card" style="padding:3vh 2.6vw"><div class="h-md" style="font-size:clamp(22px,2.6vw,46px)">📊 命中率 = Uptime</div><div class="body" style="font-size:clamp(16px,1.5vw,28px);margin-top:.6vh">缓存命中率与在线率同级，波动即告警。</div></div>
+    </div>
+    <div class="callout" style="margin-top:.5vh">
+      Claude Code 从 day one 就以 caching 为架构基础。
+      <div class="callout-src">Lessons from building Claude Code, 2026.04</div>
+    </div>
+  </div>
+  <div class="foot"><div>缓存不是补丁，是第一性原理</div><div>Principles</div></div>
+</section>
+
+<!-- ============================================================ -->
+<!-- s7 · CTA -->
+<!-- ============================================================ -->
+<section class="slide hero light">
+  <div class="chrome"><div>Closing</div><div>08 / 08</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:68vh">
+    <div class="kicker">Prompt Caching Is Everything</div>
+    <h1 class="h-hero" style="font-size:clamp(38px,8.5vw,130px)">从 Day One<br>开始设计。</h1>
+    <p class="lead" style="max-width:60vw">
+      静态前置 · 动态后置 · 分层隔离 · 前缀复用<br>
+      Prompt caching 不是补丁，是<strong class="hi">Agent 经济模型的第一性原理</strong>。
+    </p>
+    <div class="row" style="gap:1.5vw;flex-wrap:wrap;margin-top:1vh">
+      <div class="pill">Follow</div><div class="pill">Star</div><div class="pill">Share</div>
+    </div>
+    <div class="meta" style="opacity:.4">anthropic.com/blog · Lessons from building Claude Code</div>
+  </div>
+  <div class="foot"><div>缓存命中率是经济生命线</div><div>— Fin —</div></div>
+</section>
+
+</div>
+<div id="nav"></div>
+
+<script>
+const VS=`attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+const FS_DARK=`precision highp float;\nuniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;\nvec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}\nvoid main(){\n  vec2 uv=gl_FragCoord.xy/u_resolution.xy;\n  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;\n  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;\n  float md=length(p-m);\n  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;\n  vec2 p0=p;\n  for(float i=1.0;i<4.0;i++){p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;}\n  float r=length(p);float ang=atan(p.y,p.x);\n  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,vec3(0.12,0.12,0.13),vec3(0.03,0.04,0.05),vec3(1.0,1.0,1.0),vec3(0.1,0.2,0.4));\n  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;\n  col+=vec3(disp*0.015,disp*0.01,disp*0.02);\n  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);\n  col+=hi*0.08;\n  col=mix(vec3(0.05,0.05,0.06),col,0.85);\n  gl_FragColor=vec4(col,1.0);\n}`;
+const FS_LIGHT=`precision highp float;\nuniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;}\nfloat fbm(vec2 p){float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}return v;}\nvoid main(){\n  vec2 uv=gl_FragCoord.xy/u_resolution.xy;\n  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;\n  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;\n  vec2 md=p-m;float dl=length(md);p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;\n  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));\n  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));\n  float f=fbm(p*2.2+r*1.5);\n  vec3 silverDark=vec3(0.86,0.85,0.84);vec3 paper=vec3(0.955,0.945,0.925);\n  vec3 col=mix(silverDark,paper,f);\n  float ph=r.x*2.2+u_time*0.35;\n  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;\n  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;\n  float hl=smoothstep(0.48,0.92,f);col+=hl*0.06;\n  gl_FragColor=vec4(col,1.0);\n}`;
+const mouse={x:.5,y:.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+function bootGL(cid,fs){const c=document.getElementById(cid);const gl=c.getContext('webgl',{alpha:false,antialias:true});if(!gl)return;const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,VS));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);gl.useProgram(p);const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const pl=gl.getAttribLocation(p,"position");gl.enableVertexAttribArray(pl);gl.vertexAttribPointer(pl,2,gl.FLOAT,false,0,0);const uR=gl.getUniformLocation(p,"u_resolution"),uT=gl.getUniformLocation(p,"u_time"),uM=gl.getUniformLocation(p,"u_mouse");function rs(){c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;gl.viewport(0,0,c.width,c.height);}rs();addEventListener('resize',rs);let st=performance.now();function lp(now){gl.uniform2f(uR,c.width,c.height);gl.uniform1f(uT,(now-st)*.001);gl.uniform2f(uM,mouse.x,mouse.y);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(lp);}requestAnimationFrame(lp);}
+bootGL('bg-dark',FS_DARK);bootGL('bg-light',FS_LIGHT);
+const deck=document.getElementById('deck'),slides=[...document.querySelectorAll('.slide')];let idx=0;
+function upd(){deck.style.transform=`translateX(${-idx*100}vw)`;const s=slides[idx];s.classList.contains('light')?document.body.classList.add('light-bg'):document.body.classList.remove('light-bg');renderDots();}
+function renderDots(){const nav=document.getElementById('nav');nav.innerHTML=slides.map((_,i)=>`<button class="dot ${i===idx?'active':''}" onclick="go(${i})" aria-label="slide ${i+1}"></button>`).join('');}
+function go(n){idx=Math.max(0,Math.min(slides.length-1,n));upd();}
+addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1);if(e.key==='Escape'){alert('Slides:\n'+slides.map((s,i)=>`${i+1}. `+(s.querySelector('.chrome div:first-child')?.textContent||'Slide')).join('\n'));}});
+addEventListener('touchstart',e=>{const t=e.changedTouches[0];window._tx=t.clientX;window._ty=t.clientY;});
+addEventListener('touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-window._tx;if(Math.abs(dx)>50)dx<0?go(idx+1):go(idx-1);});
+upd();
+</script>
+</body>
+</html>
