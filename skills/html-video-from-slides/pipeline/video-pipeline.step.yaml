@@ -1,6 +1,8 @@
+# 仅在与 /step 类编排器配合时使用；默认成片见 SKILL.md 的 node cli.js。
+# Step 12–15 为可选封面尾巴；多数项目改用 skills/cover-design + cli.js cover。
 version: "1.0"
 session_id: "video-pipeline"
-goal: "WAV → 校对SRT → 幻灯 → 带烧录字幕的 MP4（端到端混合流水线）"
+goal: "可选 01-script→火山播客WAV → Whisper字幕 → 校对SRT → 幻灯 → 带烧录字幕的 MP4（端到端混合流水线）"
 status: pending
 current_step: 1
 options:
@@ -41,8 +43,9 @@ steps:
 
         state = {"project_dir": str(PROJECT_DIR), "skill_dir": str(SKILL_DIR)}
 
-        # 1. 检查必要命令
-        for cmd in ["node", "python3", "ffmpeg"]:
+        # 1. 检查必要命令（Whisper/t2s 子进程用当前解释器 sys.executable，不要求 PATH 必有 python3）
+        state["python_exe"] = sys.executable
+        for cmd in ["node", "ffmpeg"]:
             if not shutil.which(cmd):
                 print(f"[ERROR] 未找到命令: {cmd}")
                 sys.exit(1)
@@ -71,25 +74,143 @@ steps:
             print("[WARN] opencc-python-reimplemented 未安装，繁简转换将跳过")
             state["has_opencc"] = False
 
-        # 5. 检查素材目录结构
-        wav_files = list(PROJECT_DIR.glob("*.wav"))
-        state["wav_count"] = len(wav_files)
-        if len(wav_files) == 0:
-            print(f"[ERROR] {PROJECT_DIR} 下未找到 .wav 文件")
-            sys.exit(1)
-        if len(wav_files) > 1:
-            print(f"[WARN] 找到 {len(wav_files)} 个 WAV，默认使用第一个: {wav_files[0].name}")
-            print("        如需指定，请在 video-input.json 中设置 wavFile")
+        # 5. 合并 video-input：根目录先、timing/ 后（后者覆盖前者，与 production/timing 为权威一致）
+        video_input = {}
+        for vi_path in (PROJECT_DIR / "video-input.json", PROJECT_DIR / "timing" / "video-input.json"):
+            if vi_path.exists():
+                with open(vi_path, "r", encoding="utf-8") as f:
+                    video_input.update(json.load(f))
 
-        wav_file = wav_files[0]
+        # 5b. 字幕输出路径（Whisper / t2s / 校对共用）：与 wav 成片 burn 的 srtFile 对齐
+        sub_srt_rel = (video_input.get("srtFile") or "").strip()
+        if not sub_srt_rel:
+            wd_json = PROJECT_DIR / "timing" / "wav-durations.json"
+            if wd_json.exists():
+                try:
+                    wd = json.loads(wd_json.read_text(encoding="utf-8"))
+                    sub_srt_rel = (wd.get("srtFile") or "").strip()
+                except json.JSONDecodeError:
+                    pass
+        if not sub_srt_rel:
+            sub_srt_rel = (
+                "subtitles/sub.srt"
+                if (PROJECT_DIR / "subtitles").is_dir()
+                else "sub.srt"
+            )
+        state["sub_srt_rel"] = sub_srt_rel
+
+        # 5c. 可选：content/01-script.md → 火山互动播客 API → wavFile（action 默认 0）
+        pt = video_input.get("podcastTts")
+        if not isinstance(pt, dict):
+            pt = {}
+        env_podcast = os.environ.get("VOLC_PODCAST_FROM_SCRIPT", "").strip().lower() in (
+            "1",
+            "true",
+            "yes",
+        )
+        podcast_enabled = bool(pt.get("enabled")) or env_podcast
+        wr = video_input.get("wavFile")
+
+        if podcast_enabled:
+            if not wr:
+                print(
+                    "[ERROR] podcastTts.enabled 时请在 video-input.json 设置 wavFile（如 media/voiceover.wav）"
+                )
+                sys.exit(1)
+            git_ret = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"],
+                capture_output=True,
+                text=True,
+            )
+            if git_ret.returncode != 0:
+                print("[ERROR] podcastTts 需要 git 仓库根以定位 skills/volc-podcast-tts/cli.py")
+                sys.exit(1)
+            git_root = Path(git_ret.stdout.strip())
+            volc_cli = git_root / "skills" / "volc-podcast-tts" / "cli.py"
+            if not volc_cli.is_file():
+                print(f"[ERROR] 未找到火山播客 CLI: {volc_cli}")
+                sys.exit(1)
+            script_rel = pt.get("scriptPath", "content/01-script.md")
+            script_abs = (PROJECT_DIR / script_rel).resolve()
+            if not script_abs.is_file():
+                print(f"[ERROR] 讲稿不存在: {script_abs}")
+                sys.exit(1)
+            wav_abs = (PROJECT_DIR / wr).resolve()
+            wav_abs.parent.mkdir(parents=True, exist_ok=True)
+            force = bool(pt.get("forceRegenerate"))
+            if force or not wav_abs.is_file():
+                action_v = int(pt.get("action", 0))
+                speakers_s = pt.get(
+                    "speakers",
+                    "zh_male_dayixiansheng_v2_saturn_bigtts,zh_female_mizaitongxue_v2_saturn_bigtts",
+                )
+                timeout_v = int(pt.get("timeoutSec", 900))
+                speech_rate = int(pt.get("speechRate", 0))
+                pcm_cmd = [
+                    sys.executable,
+                    str(volc_cli),
+                    "--action",
+                    str(action_v),
+                    "-i",
+                    str(script_abs),
+                    "-o",
+                    str(wav_abs),
+                    "--format",
+                    "pcm",
+                    "--speakers",
+                    str(speakers_s),
+                    "--timeout",
+                    str(timeout_v),
+                    "--speech-rate",
+                    str(speech_rate),
+                ]
+                if pt.get("fixedSpeakerOrder"):
+                    pcm_cmd.append("--fixed-speaker-order")
+                if pt.get("headMusic"):
+                    pcm_cmd.append("--head-music")
+                if pt.get("tailMusic"):
+                    pcm_cmd.append("--tail-music")
+                ise = pt.get("interSpeakerSilenceMs")
+                if ise is not None:
+                    pcm_cmd.extend(["--inter-speaker-silence-ms", str(int(ise))])
+                meta_pod = PROJECT_DIR / "tmp" / "podcast-tts-meta.json"
+                meta_pod.parent.mkdir(parents=True, exist_ok=True)
+                pcm_cmd.extend(["--meta-out", str(meta_pod)])
+                print(f"[RUN] 火山播客 TTS（action={action_v}）→ {wav_abs.name}")
+                pr = subprocess.run(pcm_cmd, cwd=str(git_root))
+                if pr.returncode != 0:
+                    print(f"[ERROR] 火山播客合成失败，退出码 {pr.returncode}")
+                    sys.exit(pr.returncode)
+                print("[OK] 播客 WAV 已写入:", wav_abs.relative_to(PROJECT_DIR))
+            else:
+                print(f"[SKIP] 已有 WAV，跳过播客合成: {wr}（podcastTts.forceRegenerate=true 可强制重跑）")
+
+        # 5d. 解析 WAV 路径
+        wav_file = None
+        if wr:
+            wp = PROJECT_DIR / wr
+            if wp.is_file():
+                wav_file = wp
+        if wav_file is None:
+            wav_files = list(PROJECT_DIR.glob("*.wav"))
+            if not wav_files and (PROJECT_DIR / "media").is_dir():
+                wav_files = list((PROJECT_DIR / "media").glob("*.wav"))
+            state["wav_count"] = len(wav_files)
+            if len(wav_files) == 0:
+                print(f"[ERROR] {PROJECT_DIR} 下未找到 .wav（根目录、media/ 或 video-input.json 的 wavFile）")
+                if podcast_enabled:
+                    print("       若刚启用 podcastTts，请确认 VOLCENGINE_PODCAST_API_KEY 与 wavFile 路径正确")
+                sys.exit(1)
+            if len(wav_files) > 1:
+                print(f"[WARN] 找到 {len(wav_files)} 个 WAV，默认使用第一个: {wav_files[0].name}")
+                print("        如需指定，请在 video-input.json 中设置 wavFile")
+            wav_file = wav_files[0]
+        else:
+            state["wav_count"] = 1
+            print(f"     使用配置 wavFile: {wav_file.relative_to(PROJECT_DIR)}")
         state["wav_file"] = str(wav_file.relative_to(PROJECT_DIR))
 
-        # 6. 读取/合并 video-input.json（可选配置）
-        vi_path = PROJECT_DIR / "video-input.json"
-        video_input = {}
-        if vi_path.exists():
-            with open(vi_path, "r", encoding="utf-8") as f:
-                video_input = json.load(f)
+        # 6. video-input 已在步骤 5 合并读取
         state["video_input"] = video_input
 
         # 7. 检测已有 presentation.html（复用候选）
@@ -120,7 +241,7 @@ steps:
 
         # 8. 预期产出路径
         state["expected"] = {
-            "sub_srt": str((PROJECT_DIR / "sub.srt").relative_to(PROJECT_DIR)),
+            "sub_srt": sub_srt_rel,
             "presentation_html": str((PROJECT_DIR / "presentation.html").relative_to(PROJECT_DIR)),
             "wav_durations": str((PROJECT_DIR / "wav-durations.json").relative_to(PROJECT_DIR)),
             "output_mp4": video_input.get("outputFile", "final_auto.mp4"),
@@ -133,10 +254,11 @@ steps:
         print(f"[OK] 环境预检通过")
         print(f"     PROJECT_DIR: {PROJECT_DIR}")
         print(f"     WAV: {wav_file.name}")
+        print(f"     Whisper 字幕输出: {sub_srt_rel}")
         print(f"     faster-whisper: {'OK' if state['has_faster_whisper'] else 'MISSING'}")
         print(f"     OpenCC: {'OK' if state['has_opencc'] else 'MISSING'}")
         print(f"     预期输出: {state['expected']['output_mp4']}")
-      timeout: 60
+      timeout: 1200
     output_file: outputs/step-1.txt
 
   # ─────────────── Step 2: 确定性 ───────────────
@@ -157,7 +279,9 @@ steps:
         PROJECT_DIR = Path(state["project_dir"]).resolve()
         SKILL_DIR = Path(state["skill_dir"]).resolve()
         wav_file = PROJECT_DIR / state["wav_file"]
-        sub_out = PROJECT_DIR / "sub.srt"
+        sub_rel = state.get("sub_srt_rel", "sub.srt")
+        sub_out = PROJECT_DIR / sub_rel
+        sub_out.parent.mkdir(parents=True, exist_ok=True)
         vi = state.get("video_input", {})
 
         model = vi.get("whisperModel", "medium")
@@ -168,7 +292,8 @@ steps:
         hotwords = vi.get("whisperHotwords", "")
 
         cmd = [
-            "python3", str(SKILL_DIR / "align_wav_slides.py"),
+            sys.executable,
+            str(SKILL_DIR / "scripts" / "align_wav_slides.py"),
             "--wav", str(wav_file),
             "--srt-out", str(sub_out),
             "--srt-only",
@@ -231,10 +356,11 @@ steps:
 
         PROJECT_DIR = Path(state["project_dir"]).resolve()
         SKILL_DIR = Path(state["skill_dir"]).resolve()
-        sub_file = PROJECT_DIR / "sub.srt"
+        sub_rel = state.get("sub_srt_rel", "sub.srt")
+        sub_file = PROJECT_DIR / sub_rel
 
         result = subprocess.run(
-            ["python3", str(SKILL_DIR / "t2s_srt.py"), str(sub_file)],
+            [sys.executable, str(SKILL_DIR / "scripts" / "t2s_srt.py"), str(sub_file)],
             capture_output=True, text=True
         )
         print(result.stdout)
@@ -318,7 +444,7 @@ steps:
             json.dump(state, f, indent=2, ensure_ascii=False)
 
         print("[OK] 繁简转换 + 预处理完成")
-        print("--- sub.srt 前 120 行预览 ---")
+        print(f"--- {sub_file.relative_to(PROJECT_DIR)} 前 120 行预览 ---")
         print("\n".join(lines))
       timeout: 60
     output_file: outputs/step-3.txt
@@ -339,8 +465,8 @@ steps:
         </user_data>
 
         请按以下流程执行：
-        1. 用 Read 工具读取项目目录（从 state.json 中获取 project_dir）下的 `sub.srt`。
-        2. 如果存在 `production/content/01-script.md` 或 `讲稿.md`，也读取它作为参考文案。
+        1. 用 Read 工具读取项目目录下的 Whisper 字幕文件：优先 `.step/video-pipeline/state.json` 中的 `sub_srt_rel`（通常为 `subtitles/sub.srt` 或 `sub.srt`），路径为 `{project_dir}/{sub_srt_rel}`。
+        2. 如果存在 `content/01-script.md` 或 `讲稿.md`，也读取它作为参考文案。
         3. 对照参考文案，逐条检查 `sub.srt` 中的同音错字、专名错误、中英切换处异常、数字偏差。
         4. 输出变更清单（格式：条目号、原句、修改后、原因）。
         5. 对拿不准的地方标记 `[?]`，不要猜测。
@@ -598,7 +724,7 @@ steps:
            - **仅当 `existing_presentation` 为空时**，额外读取视觉参考资料：
              * `skills/html-deck-layout/examples/demo-deck/index.html`（画质基准）
              * `skills/html-deck-layout/templates/single-page/` 下的布局模板
-             * `skills/html-video-from-slides/base.css`、`TEMPLATES.md`、`svg-snippets.md`
+             * `skills/html-video-from-slides/assets/base.css`、`references/TEMPLATES.md`、`references/svg-snippets.md`
 
         2. 分支判断 — 模板复用优先：
            - 计算 pageCount（content-slabs.json）。
@@ -622,12 +748,12 @@ steps:
              * 新页数 > 现有页数：复制最后一页（或最后一两页）的 DOM 结构，填入新 slide 的内容，追加到末尾
              * 新页数 < 现有页数：删除末尾多余的 slide 节点
              * 更新 #pn 和 #prog 中的 total 页数
-           - 写回同一文件路径。分支 A **不需要**参考 TEMPLATES.md、demo-deck 或 base.css。
+           - 写回同一文件路径。分支 A **不需要**参考 references/TEMPLATES.md、demo-deck 或 assets/base.css。
 
         3B. 分支 B — 从零生成：
            - 确定主题 CSS：mobile-tech → theme-tech.css；默认 mobile-tech。
            - 生成完整 HTML：参考 html-video-from-slides SKILL.md 的参考 skeleton。
-           - 布局结构：每页从 TEMPLATES.md 选对应布局。
+           - 布局结构：每页从 references/TEMPLATES.md 选对应布局。
            - 相邻页不重复（无三连同布局），≥3 种不同布局。
            - 装饰：每页 ≥1 orb + ≥1 网格背景。
            - SVG 内联：Card+Diagram 页≥2 页含内联 SVG。
@@ -676,10 +802,12 @@ steps:
                 slabs = json.load(f)
             state["slab_count"] = slabs.get("pageCount", 0)
 
-        # 2. 检查 presentation.html
+        # 2. 检查 presentation.html（与 wav_pipeline.js 一致：根目录优先，否则 slides/）
         pres = PROJECT_DIR / "presentation.html"
         if not pres.exists():
-            errors.append("缺失 presentation.html")
+            pres = PROJECT_DIR / "slides" / "presentation.html"
+        if not pres.exists():
+            errors.append("缺失 presentation.html（根目录或 slides/presentation.html）")
         else:
             content = pres.read_text(encoding="utf-8")
             if "function go(n)" not in content:
@@ -690,10 +818,12 @@ steps:
                 actual = len(re.findall(r'<div\s+class="s\s+slide', content))
             state["slide_count"] = actual
 
-        # 3. 检查 wav-durations.json
-        dur_file = PROJECT_DIR / "wav-durations.json"
+        # 3. 检查 wav-durations.json（优先 timing/，与 cli.js 一致）
+        dur_file = PROJECT_DIR / "timing" / "wav-durations.json"
         if not dur_file.exists():
-            errors.append("缺失 wav-durations.json")
+            dur_file = PROJECT_DIR / "wav-durations.json"
+        if not dur_file.exists():
+            errors.append("缺失 wav-durations.json（timing/wav-durations.json 或根目录）")
         else:
             with open(dur_file, "r", encoding="utf-8") as f:
                 dur = json.load(f)
@@ -742,6 +872,7 @@ steps:
             print(f"     HTML Slides:   {state.get('slide_count', 'unknown')} 页")
             print(f"     时长数组长度:  {len(state.get('slide_durations', []))}")
             print(f"     总时长:        {sum(state.get('slide_durations', [])):.1f}s")
+            print("     翻页语义：请在 skills/html-video-from-slides 下执行 timing-check（默认识别「下一页 .wa 句起点」高危对齐）")
 
         state["step10_verified"] = True
         with open(STATE_FILE, "w", encoding="utf-8") as f:
@@ -778,7 +909,12 @@ steps:
             print(f"[ERROR] 视频渲染失败，退出码 {result.returncode}")
             sys.exit(result.returncode)
 
-        dur_file = PROJECT_DIR / "wav-durations.json"
+        dur_file = PROJECT_DIR / "timing" / "wav-durations.json"
+        if not dur_file.exists():
+            dur_file = PROJECT_DIR / "wav-durations.json"
+        if not dur_file.exists():
+            print("[ERROR] 找不到 wav-durations.json（timing/ 或根目录）")
+            sys.exit(1)
         with open(dur_file, "r", encoding="utf-8") as f:
             dur = json.load(f)
         output = PROJECT_DIR / dur.get("outputFile", "final_auto.mp4")
@@ -810,6 +946,8 @@ steps:
         with open(STATE_FILE, "r", encoding="utf-8") as f:
             state = json.load(f)
         PROJECT_DIR = Path(state["project_dir"]).resolve()
+        SKILL_DIR = Path(state["skill_dir"]).resolve()
+        cover_template = SKILL_DIR.parent / "cover-design" / "template.html"
         HTML_DECK = PROJECT_DIR / "html-deck"
 
         # 1. 从 content-slabs.json 提取关键内容
@@ -847,7 +985,7 @@ steps:
         meta = {
             "project_dir": str(PROJECT_DIR),
             "html_deck_dir": str(HTML_DECK),
-            "template_path": "/Users/superno/Documents/code/creative/one-context/features/content-pipeline/short-video-reporting-paradigm/production/html-deck/cover.html",
+            "template_path": str(cover_template) if cover_template.is_file() else "",
             "user_cover_v": user_cover_v,
             "user_cover_h": user_cover_h,
             "slabs": slabs_data,
@@ -988,8 +1126,9 @@ steps:
             if design.get("from_h"):
                 shutil.copy(Path(design["from_h"]), HTML_DECK / "cover_h.html")
         else:
-            # 读取参考模板（完整 15K，不走 reasoning 截断）
-            template_path = Path(design.get("template_path", "/Users/superno/Documents/code/creative/one-context/features/content-pipeline/short-video-reporting-paradigm/production/html-deck/cover.html"))
+            # 读取参考模板（默认 skills/cover-design/template.html）
+            _default_tpl = SKILL_DIR.parent / "cover-design" / "template.html"
+            template_path = Path(design.get("template_path") or _default_tpl)
             if not template_path.exists():
                 print("[ERROR] 未找到参考模板")
                 sys.exit(1)
@@ -1076,9 +1215,15 @@ steps:
             state = json.load(f)
 
         PROJECT_DIR = Path(state["project_dir"]).resolve()
-        dur_file = PROJECT_DIR / "wav-durations.json"
-        with open(dur_file, "r", encoding="utf-8") as f:
-            dur = json.load(f)
+        dur_file = PROJECT_DIR / "timing" / "wav-durations.json"
+        if not dur_file.exists():
+            dur_file = PROJECT_DIR / "wav-durations.json"
+        if not dur_file.exists():
+            print("[WARN] 找不到 wav-durations.json，跳过 MP4 元信息")
+            dur = {"outputFile": "final.mp4"}
+        else:
+            with open(dur_file, "r", encoding="utf-8") as f:
+                dur = json.load(f)
 
         mp4 = PROJECT_DIR / dur.get("outputFile", "final.mp4")
         # 封面统一约定: html-deck/videos/
@@ -1110,7 +1255,7 @@ steps:
             print(f"封面(横): {cover_h}")
         print("-" * 50)
         print(" artifacts:")
-        for f in ["slides/presentation.html", "wav-durations.json", "content-slabs.json", "sub.srt", "html-deck/cover.html"]:
+        for f in ["slides/presentation.html", "timing/wav-durations.json", "wav-durations.json", "content-slabs.json", "subtitles/sub.srt", "sub.srt", "html-deck/cover.html"]:
             p = PROJECT_DIR / f
             if p.exists():
                 print(f"   ✓ {f}")

@@ -11,7 +11,18 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 - **一处维护**：代码只在 `skills/html-video-from-slides/`；选题目录**只放素材**，不复制脚本。
 - **自动发现**：各 IDE 对「技能」索引不同；未自动加载时，在规则里**链到本文件**或粘贴下方命令。
 
-## 模式一览
+## 从哪里开始
+
+| 目标 | 入口 |
+|------|------|
+| **端到端流水线**（可选 `01-script`→火山播客 WAV→字幕校对→拆页→幻灯→成片/封面） | **`pipeline/video-pipeline.step.yaml`** + **`references/VIDEO_PIPELINE.md`**（`video-input.json` 里 `podcastTts`） |
+| **只跑某一环**（只对齐、只烧录、只截图封面等） | **`node cli.js <子命令>`**（见下表）；与 step 计划共用同一套 `lib/`、`scripts/`，不是另一套实现 |
+
+无 **`/step`** 时无法用 YAML 一键跑全程：按下表逐段执行，或用 **`skills/srt-proofread`** / **`skills/srt-to-deck`** 等 skill 手工替代计划里的 reasoning 步骤。
+
+幻灯按 **1920×1080** 视口截图。
+
+## cli.js 子命令一览（单步成片）
 
 | 模式 | 命令 | 输入 | 质量要点 |
 |------|------|------|----------|
@@ -19,9 +30,19 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 | **wav** | `node cli.js wav --project <dir>` | `presentation.html`、`wav-durations.json`、`.wav` | 时长由你精确指定 |
 | **tts** | `node cli.js tts --project <dir>` | `presentation.html`、`讲稿.md`、可选 `config.json` | 机器念稿 + 自动字幕 |
 | **srt-map** | `node cli.js srt-map --project <dir>`（可选 `--boundaries "0:0-0,1:1-2,..."`） | `sub.srt`、`presentation.html` | Whisper 对齐失败时，手动映射 SRT 条目→幻灯片，生成 `wav-durations.json` |
+| **timing-check** | `node cli.js timing-check --project <dir>`（可选 `--json`、`--audit-cue-starts`） | `timing/wav-durations.json`、`subtitles/sub.srt`、`slides/presentation.html` | 默认只报高危：**翻页落在「下一页 .wa」所在字幕条的起点**（句首陷阱）；`--audit-cue-starts` 列出所有「翻页≈字幕起点」供人工扫；**wav 成片前**命中高危则打印（`--skip-timing-check` 跳过）；高危存在时退出码 **2** |
 | **cover** | `node cli.js cover --project <dir>`（可选 `--horizontal`） | `cover.html` / `cover_h.html` | Playwright 截图 → `videos/cover.png` 或 `videos/cover_h.png` |
 
-幻灯按 **1920×1080** 视口截图。
+### 翻页边界语义（机制 · 防「句首陷阱」）
+
+人工或脚本从 **SRT 时间轴**推导 `slideDurationsSec` 时，常见错误是把某条字幕的 **`start` 当作「进入下一页」的时刻**。口语里条首常为**过渡语**（「然后……」「接下来……」），语义上仍属于**上一页**画面要讲完的块；画面过早切换就会出现「还在讲混合注意力却翻到路线图」。
+
+**约定（优先级高于死记时间点）**
+
+1. **翻页时刻**优先取：**上一话题最后一条字幕结束之后**，或 **下一话题已独立成句的起点**（而非过渡句的起点）。
+2. 使用 **`srt-map --boundaries`** 时：范围为 `first-last` 条目时，本条时长延伸到 **`last` 的结束**（到下一条的 `start`）；不要用「看见某句就切」在脑中对应 `start` 直接写进累计边界而不复核。
+3. 幻灯上的 **`.wa` 锚**：用于 Whisper 对齐时，勿把**承接上一主题的过渡句**放在「下一页」仅为了在技术上命中音频——若必须保留锚字，**翻页时刻仍应落在该句结束之后**（由 `slideDurationsSec` 体现）。
+4. **自检**：`node cli.js timing-check --project <素材目录>`。若报 **`FLIP_AT_NEXT_WA_SENTENCE_START`**，按上面规则延后对应累计边界并重跑（无需重跑 Whisper）。需要全盘核对可加 `--audit-cue-starts`。
 
 **版式与防空白（字号、示意图、`fill-deck`、避免半屏空）**：见 **`skills/html-deck-layout/references/spec-cheatsheet.md`**。改 `presentation.html` 布局/密度时**先读该文件**，与本文（成片与口播流程）配合使用。如需从零生成移动端幻灯，使用 `skills/html-deck-layout/SKILL.md`（已升级为生成式 skill）。
 
@@ -35,18 +56,18 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 
 | 层 | 来源 | 作用 |
 |----|------|------|
-| **砖头** | `base.css` | 共享类名（玻璃卡 / chip / 字号 / orb / 光晕）——不需要写 CSS |
-| **图纸** | `TEMPLATES.md` | 5 种布局骨架——每张 slide 选不同布局 |
-| **插图** | `svg-snippets.md` | 8 种 SVG 图形——每张 slide 选不同图形 |
-| **皮色** | `theme-*.css` | 3 套配色/纹理——整期视频统一气质 |
+| **砖头** | `assets/base.css` | 共享类名（玻璃卡 / chip / 字号 / orb / 光晕）——不需要写 CSS |
+| **图纸** | `references/TEMPLATES.md` | 5 种布局骨架——每张 slide 选不同布局 |
+| **插图** | `references/svg-snippets.md` | 8 种 SVG 图形——每张 slide 选不同图形 |
+| **皮色** | `assets/theme-*.css` | 3 套配色/纹理——整期视频统一气质 |
 
 ### 第一步：准备 CSS 文件
 
 ```bash
-cp skills/html-video-from-slides/base.css <素材目录>/
-cp skills/html-video-from-slides/theme-tech.css <素材目录>/   # 三选一
-# cp skills/html-video-from-slides/theme-animal.css <素材目录>/
-# cp skills/html-video-from-slides/theme-wenyan.css <素材目录>/
+cp skills/html-video-from-slides/assets/base.css <素材目录>/
+cp skills/html-video-from-slides/assets/theme-tech.css <素材目录>/   # 三选一
+# cp skills/html-video-from-slides/assets/theme-animal.css <素材目录>/
+# cp skills/html-video-from-slides/assets/theme-wenyan.css <素材目录>/
 ```
 
 CSS 文件与 presentation.html 放同一目录，`<link>` 用相对路径。
@@ -63,15 +84,15 @@ CSS 文件与 presentation.html 放同一目录，`<link>` 用相对路径。
 
 通读 SRT/讲稿，划分话题段落（建议 10–14 张，每张 30–50s）。**每张 slide 单独选择**：
 
-1. **选布局**（TEMPLATES.md）：Cover / Split / Grid 2×2 / Slim+大卡 / 两大卡 —— **相邻 slide 不要用同一布局**
-2. **选图形**（svg-snippets.md）：架构分层图 / 循环图 / 对比面板 / 数据环 / 时间线 / 流程图 / 数值箭头 / 矩阵堆叠 —— **同一期视频尽量不重复用同一种**
-3. **选卡片/芯片配色**（base.css）：每张 slide 用不同的 `g-*`（g-hi/g-gn/g-or/g-sk/g-rd/g-purple）+ `ch-*`（ch-a/ch-b/ch-c/ch-sk/ch-rd/ch-gn/ch-purple/ch-g）组合
+1. **选布局**（`references/TEMPLATES.md`）：Cover / Split / Grid 2×2 / Slim+大卡 / 两大卡 —— **相邻 slide 不要用同一布局**
+2. **选图形**（`references/svg-snippets.md`）：架构分层图 / 循环图 / 对比面板 / 数据环 / 时间线 / 流程图 / 数值箭头 / 矩阵堆叠 —— **同一期视频尽量不重复用同一种**
+3. **选卡片/芯片配色**（`assets/base.css`）：每张 slide 用不同的 `g-*`（g-hi/g-gn/g-or/g-sk/g-rd/g-purple）+ `ch-*`（ch-a/ch-b/ch-c/ch-sk/ch-rd/ch-gn/ch-purple/ch-g）组合
 4. **填内容**：标题、正文（≤120 汉字）、`.wa` 锚文字
 5. **加装饰**：每张 slide 至少 1 个 orb 光晕 + 1 个 `.gd` 或 `.gf` 网格背景
 
 ### 第四步：组装 HTML
 
-每个 presentation.html 必须包含以下骨架（`reference.html` 展示了完整示例，仅作结构参考，**不要直接复制后填空**）：
+每个 presentation.html 必须包含以下骨架（`assets/reference.html` 展示了完整示例，仅作结构参考，**不要直接复制后填空**）：
 
 ```html
 <!DOCTYPE html>
@@ -87,7 +108,7 @@ CSS 文件与 presentation.html 放同一目录，`<link>` 用相对路径。
 <body>
 <div id="prog" style="width:0%"></div>
 <div id="P">
-  <!-- 每张 slide 用 TEMPLATES.md 布局 + svg-snippets.md 图形 组合 -->
+  <!-- 每张 slide 用 references/TEMPLATES.md 布局 + references/svg-snippets.md 图形 组合 -->
   <div class="s on" id="s0">...</div>
   <div class="s" id="s1">...</div>
   ...
@@ -112,8 +133,8 @@ ui();
 
 ### 第五步：验证核心约束
 
-- 每张 slide 画面覆盖率 ≥ 85%（对照 TEMPLATES.md Minimum Fill Table）；**flex / 卡片拉高 / `fill-deck` / 避免「半屏空」** 的落地细则见 **`skills/html-deck-layout/references/spec-cheatsheet.md`**（与 base.css 模板流互补）。
-- **TEMPLATES + base.css 路径**：卡片/大图布局按 `TEMPLATES.md`；若文中要求 `space-between`，以 **TEMPLATES / DESIGN-STANDARD** 为准。**自包含 inline deck** 内 `.g-fill` 等勿与 **`html-deck-layout/references/spec-cheatsheet.md`** 中的反模式冲突（见「根因」）。
+- 每张 slide 画面覆盖率 ≥ 85%（对照 `references/TEMPLATES.md` Minimum Fill Table）；**flex / 卡片拉高 / `fill-deck` / 避免「半屏空」** 的落地细则见 **`skills/html-deck-layout/references/spec-cheatsheet.md`**（与 `assets/base.css` 模板流互补）。
+- **TEMPLATES + base.css 路径**：卡片/大图布局按 `references/TEMPLATES.md`；若文中要求 `space-between`，以 **TEMPLATES / DESIGN-STANDARD** 为准。**自包含 inline deck** 内 `.g-fill` 等勿与 **`html-deck-layout/references/spec-cheatsheet.md`** 中的反模式冲突（见「根因」）。
 - 禁止 `<br>` 空行当间距，禁止内容区用 `position:absolute`
 - 总字数 ≤ 120 汉字/张
 - 相邻 slide 布局不同、图形不重复
@@ -123,12 +144,12 @@ ui();
 
 | 文档 | 作用 |
 |------|------|
-| `base.css` | 类名词典——所有可用 class 及其效果 |
-| `TEMPLATES.md` | 5 种布局骨架 + Minimum Fill Table + AI Checklist |
-| `svg-snippets.md` | 8 种可复用 SVG 图形片段 |
-| `theme-*.css` | 主题变量包（颜色 / 字体 / 背景 / orb 辉光 / chip 色） |
-| `reference.html` | 完整 HTML 结构示范（仅参考，不直接复制） |
-| `DESIGN-STANDARD.md` | 字号规范、信息密度、反模式列表 |
+| `assets/base.css` | 类名词典——所有可用 class 及其效果 |
+| `references/TEMPLATES.md` | 5 种布局骨架 + Minimum Fill Table + AI Checklist |
+| `references/svg-snippets.md` | 8 种可复用 SVG 图形片段 |
+| `assets/theme-*.css` | 主题变量包（颜色 / 字体 / 背景 / orb 辉光 / chip 色） |
+| `assets/reference.html` | 完整 HTML 结构示范（仅参考，不直接复制） |
+| `references/DESIGN-STANDARD.md` | 字号规范、信息密度、反模式列表 |
 
 ---
 
@@ -160,8 +181,8 @@ node cli.js wav-auto --project "path\to\你的素材目录"
    - wav-auto **默认不烧录**；在 `video-input.json` 中设 `"burnSubtitles": true` 才会把字幕烧进 MP4。
    - **字幕样式合并（wav-auto）**：`subtitle` 先与 skill 默认（`lib/ass_colours.js` 的 `DEFAULT_SUBTITLE_STYLE`，含较大字号）合并，再读 **`timing/wav-durations.json`** 里的 `subtitle` 覆盖同名键——避免 `video-input.json` 只配了部分字段时落到过小的硬编码兜底；管线若在 Step 8 已写好 `wav-durations.json` 的字幕块，`wav-auto` 会与之一致。
    - **与口播时间轴一致**：SRT 时间码来自 Whisper 对 WAV 的分段（`align_wav_slides.py` 的 `--srt-out`）。若在 `video-input.json` 里写了 **`srtFile`** 指向已有文件，则会**跳过** Whisper 写 SRT，烧录沿用该文件的时间码——若该文件是手改/旧版，就会**和语音对不上**。需要重新对齐时任选其一：**去掉 `srtFile` 字段**后重跑 `wav-auto`；或保留配置但本次强制用 Whisper 时间轴：`node cli.js wav-auto --project <dir> --whisper-srt`。跑完后项目里的 `sub.srt` 会与口播同源；之后**只改错别字、不要改时间轴**（除非再跑一次上述命令）。
-   - **简体中文**：`language="zh"` 的 Whisper 仍常输出**繁体或繁简混用**。`align_wav_slides.py` 在写出 SRT、以及用词级时间轴与幻灯对齐前，会**尽量**做繁体→简体（依赖 **`opencc-python-reimplemented`**，见上文 pip）；并对转写加了 `initial_prompt` 引导简体。未装 OpenCC 时会在日志里提示，字幕可能仍带繁体。已有 `sub.srt` 可事后统一简体：`python skills/html-video-from-slides/t2s_srt.py path/to/sub.srt`（在仓库根下执行时按实际路径调整）。
-   - **错别字校对**：流水线本身**不会**用 LLM 或词典纠错。Whisper 常把 **Claude 听成 Cloud** 等，可通过以下方式减轻：① **`whisperHotwords`**（空格分隔）交给 faster-whisper 的 **hotwords** 偏向正确拼写；② **`srtReplacements`** 在**烧录前**对文案做批量替换（如 `Cloud`→`Claude`，**长词组写在短词前面**）。二者均在 `video-input.json` 配置，见 `video-input.example.json`。**SRT 生成后，推荐使用 `skills/srt-proofread/SKILL.md` 进行校对**——该 skill 通过比对参考文案（讲稿/幻灯）逐段修正同音错字，并将确定的替换积累到 `srtReplacements`。
+   - **简体中文**：`language="zh"` 的 Whisper 仍常输出**繁体或繁简混用**。`align_wav_slides.py` 在写出 SRT、以及用词级时间轴与幻灯对齐前，会**尽量**做繁体→简体（依赖 **`opencc-python-reimplemented`**，见上文 pip）；并对转写加了 `initial_prompt` 引导简体。未装 OpenCC 时会在日志里提示，字幕可能仍带繁体。已有 `sub.srt` 可事后统一简体：`python skills/html-video-from-slides/scripts/t2s_srt.py path/to/sub.srt`（在仓库根下执行时按实际路径调整）。
+   - **错别字校对**：流水线本身**不会**用 LLM 或词典纠错。Whisper 常把 **Claude 听成 Cloud** 等，可通过以下方式减轻：① **`whisperHotwords`**（空格分隔）交给 faster-whisper 的 **hotwords** 偏向正确拼写；② **`srtReplacements`** 在**烧录前**对文案做批量替换（如 `Cloud`→`Claude`，**长词组写在短词前面**）。二者均在 `video-input.json` 配置，见 `examples/video-input.example.json`。**SRT 生成后，推荐使用 `skills/srt-proofread/SKILL.md` 进行校对**——该 skill 通过比对参考文案（讲稿/幻灯）逐段修正同音错字，并将确定的替换积累到 `srtReplacements`。
    - **对 AI 代理（推荐）**：`wav-auto` 或任何步骤**一旦写出/更新了项目根 `sub.srt`**，代理在交付成片前**推荐**按 **`skills/srt-proofread/SKILL.md`** 完成字幕校对——不得只跑完流水线就结束。该校对 skill 定义了完整的比对、修正、确认与 `srtReplacements` 积累流程。若**仅改字、不改时间轴**，可保留 `wav-durations.json` 中的 `slideDurationsSec`，在 `wav-durations.json` 中写好 **`burnSubtitles`** / **`srtFile`** / **`subtitle`** 与 **`srtReplacements`** 后执行 **`node cli.js wav --project <dir>`** 快速重烧，**无需**重跑 Whisper。
    - **单行字幕过长超出画面**：烧录阶段默认 **`wrapSubtitles: true`**，按 **`subtitle.charsPerLine`**（默认 36，口播稀可改为 **42**）对每条字幕**折成多行**再交给 libass（实现于 `lib/srt_postprocess.js`）。若关闭 `wrapSubtitles` 则只做替换不折行。
    - **字幕不遮挡 PPT 内容**：开启 `"barHeight": 80` 后，FFmpeg 会在视频底部画一条半透明黑带（`barAlpha` 默认 0.45），字幕自动落在这条带子里；PPT 本身不需要做任何改动。设为 0 则关闭此行为。
@@ -220,7 +241,8 @@ node path/to/one-context/skills/html-video-from-slides/cli.js wav-auto --project
 
 ## 故障排除
 
-- **日志出现「全文无匹配，均分音频」或 `whisper_align_partial` 且各页 `slideDurationsSec` 几乎完全相等**：说明 Whisper 转写**没能**把口播和 HTML 里 `.slide` 的可见文字对上，成片会按**平均时长**切页，画面与讲解往往**不同步**。处理：让每页幻灯上的字尽量接近该段**真实口播用语**（不必逐字相同，但要能前缀/关键词匹配）；或把 `video-input.json` 里 `whisperModel` 改为 **`medium`**（机器吃得消时）；或放弃自动对齐，改用 **`wav` 模式** + 手写 `wav-durations.json` 的 `slideDurationsSec`。若日志已提示 **`whisper_align_partial`**，CLI 也会打出额外说明，请优先检查幻灯文案与口播是否同源。
+- **日志出现「全文无匹配，均分音频」或 `whisper_align_partial` 且各页 `slideDurationsSec` 几乎完全相等**：说明 Whisper 转写**没能**把口播和 HTML 里 `.slide` 的可见文字完全对上。Skill 会在「部分页匹配、部分页依赖插值」时，对**未匹配页的连续区间**按 **SRT/语音覆盖密度**重分配时长（减轻线性插值导致的翻页脱节）；若仍几乎均分，说明匹配仍极差。处理：让每页幻灯上的字尽量接近该段**真实口播用语**（不必逐字相同，但要能前缀/关键词匹配）；或把 `video-input.json` 里 `whisperModel` 改为 **`medium`**（机器吃得消时）；或放弃自动对齐，改用 **`wav` 模式** + 手写 `wav-durations.json` 的 `slideDurationsSec`。若日志已提示 **`whisper_align_partial`**，CLI 也会打出额外说明，请优先检查幻灯文案与口播是否同源。
+- **`subtitle.fontSize` 过小**：`wav-auto` 合并样式后若字号 **小于 42**，会自动提升到 **42**（1080p 可读下限），除非 `subtitle.allowBelowRecommendedFontSize: true`。
 - **SRT 出现大片段无字幕、但 WAV 里明明有清晰说话**：先检查 **`noSpeechThreshold`**（默认已提高到 **0.85**，高于库默认 **0.6**）。若仍漏，可提到 **0.9** 或 **`null`** 关闭该过滤。另可排查是否误开 **VAD**（`vadFilter: true`）、或换更大 **`whisperModel`**，或手动补 `sub.srt`。
 - **`strict-subtitles` / `strictSubtitles` 中止**：表示存在超过 **`maxSubtitleGapSec`** 的无字幕区间。补全 `sub.srt`、关 **`vadFilter`**、或放宽 **`maxSubtitleGapSec`** / 关闭 **`strictSubtitles`** 后再跑。
 - **字幕和口播对不上**：几乎总是用了外部 `srtFile` 或手改了时间轴。按上文「与口播时间轴一致」处理：去掉 `srtFile` 或加 `--whisper-srt` 后重跑 `wav-auto`。
@@ -231,7 +253,7 @@ node path/to/one-context/skills/html-video-from-slides/cli.js wav-auto --project
 - **Hugging Face 下载中断**（`IncompleteRead` / `ChunkedEncodingError`）：多数是没走代理或链路不稳——先设 **`HTTPS_PROXY`/`HTTP_PROXY`**（见上文「代理与网络」），再重跑；仍失败可多跑几次续传；或把 `whisperModel` 改为 **`base`** / **`small`** 减小体积；国内可加 **`HF_ENDPOINT=https://hf-mirror.com`**。
 - **TTS**：`pip install edge-tts` + 网络。
 
-示例配置：`config.json.example`、`wav-durations.example.json`、`video-input.example.json`。
+示例配置：`examples/config.json.example`、`examples/wav-durations.example.json`、`examples/video-input.example.json`。
 
 ---
 

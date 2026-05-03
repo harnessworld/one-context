@@ -42,10 +42,10 @@
 ### 第一步：准备 CSS 文件
 
 ```bash
-cp skills/html-video-from-slides/base.css <素材目录>/
-cp skills/html-video-from-slides/theme-tech.css <素材目录>/   # 三选一
-# cp skills/html-video-from-slides/theme-animal.css <素材目录>/
-# cp skills/html-video-from-slides/theme-wenyan.css <素材目录>/
+cp skills/html-video-from-slides/assets/base.css <素材目录>/
+cp skills/html-video-from-slides/assets/theme-tech.css <素材目录>/   # 三选一
+# cp skills/html-video-from-slides/assets/theme-animal.css <素材目录>/
+# cp skills/html-video-from-slides/assets/theme-wenyan.css <素材目录>/
 ```
 
 CSS 文件与 presentation.html 放同一目录，`<link>` 用相对路径。
@@ -158,7 +158,7 @@ node cli.js wav-auto --project "path\to\你的素材目录"
    - **字幕缺口告警**：对齐结束会检测「无字幕区间」；超过 **`maxSubtitleGapSec`**（默认 **2.5**）会写入日志/`warnings`。需要「宁可不导出也不能烧残缺字幕」时，设 **`"strictSubtitles": true`**：存在超长缺口则 **中止成片**（退出码 4），先补 `sub.srt` 或换更大 `whisperModel` 再跑。
    - wav-auto **默认不烧录**；在 `video-input.json` 中设 `"burnSubtitles": true` 才会把字幕烧进 MP4。
    - **与口播时间轴一致**：SRT 时间码来自 Whisper 对 WAV 的分段（`align_wav_slides.py` 的 `--srt-out`）。若在 `video-input.json` 里写了 **`srtFile`** 指向已有文件，则会**跳过** Whisper 写 SRT，烧录沿用该文件的时间码——若该文件是手改/旧版，就会**和语音对不上**。需要重新对齐时任选其一：**去掉 `srtFile` 字段**后重跑 `wav-auto`；或保留配置但本次强制用 Whisper 时间轴：`node cli.js wav-auto --project <dir> --whisper-srt`。跑完后项目里的 `sub.srt` 会与口播同源；之后**只改错别字、不要改时间轴**（除非再跑一次上述命令）。
-   - **简体中文**：`language="zh"` 的 Whisper 仍常输出**繁体或繁简混用**。`align_wav_slides.py` 在写出 SRT、以及用词级时间轴与幻灯对齐前，会**尽量**做繁体→简体（依赖 **`opencc-python-reimplemented`**，见上文 pip）；并对转写加了 `initial_prompt` 引导简体。未装 OpenCC 时会在日志里提示，字幕可能仍带繁体。已有 `sub.srt` 可事后统一简体：`python skills/html-video-from-slides/t2s_srt.py path/to/sub.srt`（在仓库根下执行时按实际路径调整）。
+   - **简体中文**：`language="zh"` 的 Whisper 仍常输出**繁体或繁简混用**。`align_wav_slides.py` 在写出 SRT、以及用词级时间轴与幻灯对齐前，会**尽量**做繁体→简体（依赖 **`opencc-python-reimplemented`**，见上文 pip）；并对转写加了 `initial_prompt` 引导简体。未装 OpenCC 时会在日志里提示，字幕可能仍带繁体。已有 `sub.srt` 可事后统一简体：`python skills/html-video-from-slides/scripts/t2s_srt.py path/to/sub.srt`（在仓库根下执行时按实际路径调整）。
    - **错别字校对**：流水线本身**不会**用 LLM 或词典纠错。Whisper 常把 **Claude 听成 Cloud** 等，可通过以下方式减轻：① **`whisperHotwords`**（空格分隔）交给 faster-whisper 的 **hotwords** 偏向正确拼写；② **`srtReplacements`** 在**烧录前**对文案做批量替换（如 `Cloud`→`Claude`，**长词组写在短词前面**）。二者均在 `video-input.json` 配置，见 `video-input.example.json`。**SRT 生成后，推荐使用 `skills/srt-proofread/SKILL.md` 进行校对**——该 skill 通过比对参考文案（讲稿/幻灯）逐段修正同音错字，并将确定的替换积累到 `srtReplacements`。
    - **对 AI 代理（推荐）**：`wav-auto` 或任何步骤**一旦写出/更新了项目根 `sub.srt`**，代理在交付成片前**推荐**按 **`skills/srt-proofread/SKILL.md`** 完成字幕校对——不得只跑完流水线就结束。该校对 skill 定义了完整的比对、修正、确认与 `srtReplacements` 积累流程。若**仅改字、不改时间轴**，可保留 `wav-durations.json` 中的 `slideDurationsSec`，在 `wav-durations.json` 中写好 **`burnSubtitles`** / **`srtFile`** / **`subtitle`** 与 **`srtReplacements`** 后执行 **`node cli.js wav --project <dir>`** 快速重烧，**无需**重跑 Whisper。
    - **单行字幕过长超出画面**：烧录阶段默认 **`wrapSubtitles: true`**，按 **`subtitle.charsPerLine`**（默认 42，口播密可改为 **36**）对每条字幕**折成多行**再交给 libass（实现于 `lib/srt_postprocess.js`）。若关闭 `wrapSubtitles` 则只做替换不折行。

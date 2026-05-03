@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, initial-scale=1.0">
   <title>Agent 亲和架构底层原理剖析</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
   <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
   <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
-  <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/themes/mobile-tech.css">
+  <link rel="stylesheet" href="theme-claude.css">
   <style>
     /* 手机横屏阅读：在 1920×1080 画布上再抬一档，缩小投屏后仍清晰 */
     :root {
@@ -24,7 +27,7 @@
       --slide-pad: 36px 52px;
       --card-pad: 28px 32px;
     }
-    body { margin:0; background:#000; min-height:100vh; overflow:hidden; }
+    body { margin:0; background:#0a0908; min-height:100vh; overflow:hidden; }
     /* 与 html-video-from-slides / demo-deck 一致：fixed + fit() 才能在 headless 1920×1080 下稳定裁切、换页不重影 */
     #P {
       position: fixed;
@@ -69,8 +72,8 @@
 
     <!-- ==================== Slide 1: Cover ==================== -->
     <section class="s slide is-active" id="s0">
-      <div class="orb" style="width:400px;height:400px;top:-120px;right:-80px;background:radial-gradient(circle,rgba(56,189,248,0.12),transparent 70%)"></div>
-      <div class="orb" style="width:300px;height:300px;bottom:-60px;left:-40px;background:radial-gradient(circle,rgba(16,185,129,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:400px;height:400px;top:-120px;right:-80px;background:radial-gradient(circle,rgba(224,143,99,0.11),transparent 70%)"></div>
+      <div class="orb" style="width:300px;height:300px;bottom:-60px;left:-40px;background:radial-gradient(circle,rgba(111,160,144,0.10),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g0" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g0)"/></svg>
       <div class="col slide-main v-center">
         <div style="text-align:center">
@@ -86,8 +89,8 @@
 
     <!-- ==================== Slide 2: Split + Comparison SVG ==================== -->
     <section class="s slide" id="s1">
-      <div class="orb" style="width:350px;height:350px;top:-80px;left:-60px;background:radial-gradient(circle,rgba(239,68,68,0.08),transparent 70%)"></div>
-      <div class="orb" style="width:280px;height:280px;bottom:-40px;right:-30px;background:radial-gradient(circle,rgba(16,185,129,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:350px;height:350px;top:-80px;left:-60px;background:radial-gradient(circle,rgba(176,96,86,0.09),transparent 70%)"></div>
+      <div class="orb" style="width:280px;height:280px;bottom:-40px;right:-30px;background:radial-gradient(circle,rgba(111,160,144,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g1" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#g1)"/></svg>
       <div class="slide-header">
         <span class="badge">架构对比</span>
@@ -111,11 +114,11 @@
         <!-- Before/After SVG -->
         <div class="mini-svg">
           <svg viewBox="0 0 900 110" style="width:100%;max-width:1000px;min-height:160px">
-            <rect x="10" y="15" width="340" height="70" rx="14" fill="rgba(239,68,68,0.08)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
+            <rect x="10" y="15" width="340" height="70" rx="14" fill="rgba(176,96,86,0.09)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
             <text x="180" y="42" text-anchor="middle" fill="var(--c-danger,#ef4444)" font-size="30" font-weight="700">❌ 无状态 · CPU 扩容</text>
             <text x="180" y="72" text-anchor="middle" fill="var(--c-text-2)" font-size="24">请求-响应 · 批处理</text>
             <text x="420" y="55" text-anchor="middle" fill="var(--c-accent-a)" font-size="44" font-weight="900">→</text>
-            <rect x="480" y="15" width="400" height="70" rx="14" fill="rgba(16,185,129,0.08)" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <rect x="480" y="15" width="400" height="70" rx="14" fill="rgba(111,160,144,0.08)" stroke="var(--c-accent-b)" stroke-width="2"/>
             <text x="680" y="42" text-anchor="middle" fill="var(--c-accent-b)" font-size="30" font-weight="700">✅ 有状态 · GPU 亲和</text>
             <text x="680" y="72" text-anchor="middle" fill="var(--c-text-2)" font-size="24">感知-推理-行动-记忆</text>
           </svg>
@@ -127,8 +130,8 @@
 
     <!-- ==================== Slide 3: Card + Diagram — Agent 循环 ==================== -->
     <section class="s slide" id="s2">
-      <div class="orb" style="width:320px;height:320px;top:-60px;right:-50px;background:radial-gradient(circle,rgba(139,92,246,0.10),transparent 70%)"></div>
-      <div class="orb" style="width:250px;height:250px;bottom:-30px;left:30%;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:320px;height:320px;top:-60px;right:-50px;background:radial-gradient(circle,rgba(158,142,184,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:250px;height:250px;bottom:-30px;left:30%;background:radial-gradient(circle,rgba(224,143,99,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g2" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g2)"/></svg>
       <div class="slide-header">
         <span class="badge">核心机制</span>
@@ -145,19 +148,19 @@
             <circle cx="400" cy="210" r="150" fill="none" stroke="var(--c-accent-a)" stroke-width="2" opacity="0.08"/>
             <circle cx="400" cy="210" r="150" fill="none" stroke="var(--c-accent-a)" stroke-width="3" stroke-dasharray="50 900" stroke-dashoffset="-5" stroke-linecap="round" opacity="0.25"/>
             <!-- 感知 -->
-            <rect x="310" y="20" width="180" height="70" rx="16" fill="rgba(139,92,246,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2.5"/>
+            <rect x="310" y="20" width="180" height="70" rx="16" fill="rgba(158,142,184,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2.5"/>
             <text x="400" y="52" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-purple,#8b5cf6)">💭 感知</text>
             <text x="400" y="78" text-anchor="middle" font-size="24" fill="var(--c-text-2)">环境 & 上下文</text>
             <!-- 推理 -->
-            <rect x="560" y="150" width="180" height="70" rx="16" fill="rgba(56,189,248,0.12)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
+            <rect x="560" y="150" width="180" height="70" rx="16" fill="rgba(224,143,99,0.11)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
             <text x="650" y="182" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-sky,#38bdf8)">🧠 推理</text>
             <text x="650" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">LLM 决策</text>
             <!-- 行动 -->
-            <rect x="310" y="310" width="180" height="70" rx="16" fill="rgba(16,185,129,0.12)" stroke="var(--c-accent-b)" stroke-width="2.5"/>
+            <rect x="310" y="310" width="180" height="70" rx="16" fill="rgba(111,160,144,0.12)" stroke="var(--c-accent-b)" stroke-width="2.5"/>
             <text x="400" y="342" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-b)">⚡ 行动</text>
             <text x="400" y="370" text-anchor="middle" font-size="24" fill="var(--c-text-2)">API / 工具调用</text>
             <!-- 记忆 -->
-            <rect x="60" y="150" width="180" height="70" rx="16" fill="rgba(251,191,36,0.12)" stroke="var(--c-warn,#fbbf24)" stroke-width="2.5"/>
+            <rect x="60" y="150" width="180" height="70" rx="16" fill="rgba(196,156,88,0.12)" stroke="var(--c-warn,#fbbf24)" stroke-width="2.5"/>
             <text x="150" y="182" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-warn,#fbbf24)">💾 记忆</text>
             <text x="150" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">历史状态</text>
             <!-- Loop arrows -->
@@ -176,8 +179,8 @@
 
     <!-- ==================== Slide 4: Grid 2×2 + mini-SVGs — 四大核心障碍 ==================== -->
     <section class="s slide" id="s3">
-      <div class="orb" style="width:300px;height:300px;top:10%;right:-40px;background:radial-gradient(circle,rgba(239,68,68,0.10),transparent 70%)"></div>
-      <div class="orb" style="width:220px;height:220px;bottom:5%;left:10%;background:radial-gradient(circle,rgba(251,191,36,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:300px;height:300px;top:10%;right:-40px;background:radial-gradient(circle,rgba(176,96,86,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:220px;height:220px;bottom:5%;left:10%;background:radial-gradient(circle,rgba(196,168,90,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g3" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="none" stroke="var(--c-text-2)" stroke-width="0.3"/></pattern></defs><rect width="100%" height="100%" fill="url(#g3)"/></svg>
       <div class="slide-header">
         <span class="badge">核心障碍</span>
@@ -243,13 +246,13 @@
         <div class="card-diagram" style="flex:0.22;min-height:220px;background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);flex-shrink:0">
           <svg viewBox="0 0 1600 200" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:200px">
             <text x="800" y="44" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-text-1)">传统云四维承压 → 亲和架构逐项消解</text>
-            <rect x="40" y="88" width="340" height="88" rx="16" fill="rgba(239,68,68,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
+            <rect x="40" y="88" width="340" height="88" rx="16" fill="rgba(176,96,86,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
             <text x="210" y="142" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-danger,#ef4444)">浪涌 · 协同</text>
-            <rect x="430" y="88" width="340" height="88" rx="16" fill="rgba(239,68,68,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
+            <rect x="430" y="88" width="340" height="88" rx="16" fill="rgba(176,96,86,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
             <text x="600" y="142" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-danger,#ef4444)">观测 · 调度</text>
-            <rect x="820" y="88" width="340" height="88" rx="16" fill="rgba(239,68,68,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
+            <rect x="820" y="88" width="340" height="88" rx="16" fill="rgba(176,96,86,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
             <text x="990" y="142" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-danger,#ef4444)">安全 · 权限</text>
-            <rect x="1210" y="88" width="350" height="88" rx="16" fill="rgba(239,68,68,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
+            <rect x="1210" y="88" width="350" height="88" rx="16" fill="rgba(176,96,86,0.14)" stroke="var(--c-danger,#ef4444)" stroke-width="2.5"/>
             <text x="1385" y="142" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-danger,#ef4444)">异构 · 功耗</text>
           </svg>
         </div>
@@ -260,8 +263,8 @@
 
     <!-- ==================== Slide 5: Split + Architecture SVG — 推理亲和 ==================== -->
     <section class="s slide" id="s4">
-      <div class="orb" style="width:360px;height:360px;top:-80px;left:-60px;background:radial-gradient(circle,rgba(16,185,129,0.10),transparent 70%)"></div>
-      <div class="orb" style="width:240px;height:240px;bottom:5%;right:5%;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:360px;height:360px;top:-80px;left:-60px;background:radial-gradient(circle,rgba(111,160,144,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:240px;height:240px;bottom:5%;right:5%;background:radial-gradient(circle,rgba(224,143,99,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g4" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g4)"/></svg>
       <div class="slide-header">
         <span class="badge">推理亲和</span>
@@ -286,23 +289,23 @@
           <svg viewBox="0 0 1580 320" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;min-height:380px">
             <defs><marker id="ar5" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><polygon points="0 0,14 5,0 10" fill="var(--c-accent-b)"/></marker></defs>
             <text x="790" y="42" text-anchor="middle" font-size="36" font-weight="800" fill="var(--c-text-1)">推理亲和：请求 → 调度 → GPU 拓扑匹配</text>
-            <rect x="40" y="88" width="260" height="190" rx="18" fill="rgba(251,191,36,0.14)" stroke="var(--c-warn,#fbbf24)" stroke-width="3"/>
+            <rect x="40" y="88" width="260" height="190" rx="18" fill="rgba(196,156,88,0.14)" stroke="var(--c-warn,#fbbf24)" stroke-width="3"/>
             <text x="170" y="165" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-warn,#fbbf24)">📥 请求</text>
             <text x="170" y="218" text-anchor="middle" font-size="28" fill="var(--c-text-2)">多模型 / QoS</text>
             <line x1="305" y1="183" x2="368" y2="183" stroke="var(--c-warn,#fbbf24)" stroke-width="6" marker-end="url(#ar5)"/>
-            <rect x="378" y="72" width="320" height="222" rx="20" fill="rgba(16,185,129,0.14)" stroke="var(--c-accent-b)" stroke-width="3"/>
+            <rect x="378" y="72" width="320" height="222" rx="20" fill="rgba(111,160,144,0.12)" stroke="var(--c-accent-b)" stroke-width="3"/>
             <text x="538" y="155" text-anchor="middle" font-size="36" font-weight="800" fill="var(--c-accent-b)">🧠 亲和调度</text>
             <text x="538" y="210" text-anchor="middle" font-size="28" fill="var(--c-text-2)">感知负载 · 选卡决策</text>
             <line x1="703" y1="183" x2="766" y2="183" stroke="var(--c-accent-b)" stroke-width="6" marker-end="url(#ar5)"/>
-            <rect x="776" y="68" width="784" height="232" rx="20" fill="rgba(56,189,248,0.08)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5" stroke-dasharray="10,6"/>
+            <rect x="776" y="68" width="784" height="232" rx="20" fill="rgba(224,143,99,0.08)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5" stroke-dasharray="10,6"/>
             <text x="1168" y="112" text-anchor="middle" font-size="32" font-weight="700" fill="var(--c-sky,#38bdf8)">GPU 集群（异构拓扑）</text>
-            <rect x="810" y="138" width="242" height="118" rx="14" fill="rgba(16,185,129,0.12)" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <rect x="810" y="138" width="242" height="118" rx="14" fill="rgba(111,160,144,0.12)" stroke="var(--c-accent-b)" stroke-width="2"/>
             <text x="931" y="195" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-accent-b)">GPU-A</text>
             <text x="931" y="235" text-anchor="middle" font-size="26" fill="var(--c-text-2)">A100 80G</text>
-            <rect x="1074" y="138" width="242" height="118" rx="14" fill="rgba(56,189,248,0.12)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
+            <rect x="1074" y="138" width="242" height="118" rx="14" fill="rgba(224,143,99,0.11)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
             <text x="1195" y="195" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-sky,#38bdf8)">GPU-B</text>
             <text x="1195" y="235" text-anchor="middle" font-size="26" fill="var(--c-text-2)">H100 80G</text>
-            <rect x="1338" y="138" width="200" height="118" rx="14" fill="rgba(139,92,246,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
+            <rect x="1338" y="138" width="200" height="118" rx="14" fill="rgba(158,142,184,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
             <text x="1438" y="195" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-purple,#8b5cf6)">GPU-C</text>
             <text x="1438" y="235" text-anchor="middle" font-size="26" fill="var(--c-text-2)">T4 16G</text>
           </svg>
@@ -314,8 +317,8 @@
 
     <!-- ==================== Slide 6: Card + Diagram — 调度器信息层级 ==================== -->
     <section class="s slide" id="s5">
-      <div class="orb" style="width:280px;height:280px;top:-50px;right:-30px;background:radial-gradient(circle,rgba(139,92,246,0.10),transparent 70%)"></div>
-      <div class="orb" style="width:200px;height:200px;bottom:10%;left:5%;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:280px;height:280px;top:-50px;right:-30px;background:radial-gradient(circle,rgba(158,142,184,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:200px;height:200px;bottom:10%;left:5%;background:radial-gradient(circle,rgba(224,143,99,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g5" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#g5)"/></svg>
       <div class="slide-header">
         <span class="badge">推理亲和</span>
@@ -360,8 +363,8 @@
 
     <!-- ==================== Slide 7: Stat Highlight + Gauge SVG — 调度核心矛盾 ==================== -->
     <section class="s slide" id="s6">
-      <div class="orb" style="width:400px;height:400px;top:-100px;right:-80px;background:radial-gradient(circle,rgba(239,68,68,0.08),transparent 70%)"></div>
-      <div class="orb" style="width:260px;height:260px;bottom:5%;left:-40px;background:radial-gradient(circle,rgba(56,189,248,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:400px;height:400px;top:-100px;right:-80px;background:radial-gradient(circle,rgba(176,96,86,0.09),transparent 70%)"></div>
+      <div class="orb" style="width:260px;height:260px;bottom:5%;left:-40px;background:radial-gradient(circle,rgba(224,143,99,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g6" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g6)"/></svg>
       <div class="slide-header">
         <span class="badge">推理亲和</span>
@@ -401,8 +404,8 @@
 
     <!-- ==================== Slide 8: Process Flow + Pipeline SVG ==================== -->
     <section class="s slide" id="s7">
-      <div class="orb" style="width:320px;height:320px;top:-50px;left:-40px;background:radial-gradient(circle,rgba(16,185,129,0.10),transparent 70%)"></div>
-      <div class="orb" style="width:240px;height:240px;bottom:-30px;right:5%;background:radial-gradient(circle,rgba(139,92,246,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:320px;height:320px;top:-50px;left:-40px;background:radial-gradient(circle,rgba(111,160,144,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:240px;height:240px;bottom:-30px;right:5%;background:radial-gradient(circle,rgba(158,142,184,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g7" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#g7)"/></svg>
       <div class="slide-header">
         <span class="badge">推理亲和</span>
@@ -438,29 +441,29 @@
           <svg viewBox="0 0 1680 340" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;min-height:360px">
             <defs><marker id="ar6cb" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><polygon points="0 0,14 5,0 10" fill="var(--c-accent-b)"/></marker></defs>
             <text x="840" y="38" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-text-1)">Continuous Batching：请求流 → 组批 → GPU → 最优输出</text>
-            <rect x="40" y="72" width="140" height="52" rx="10" fill="rgba(251,191,36,0.18)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
+            <rect x="40" y="72" width="140" height="52" rx="10" fill="rgba(196,156,88,0.18)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
             <text x="110" y="106" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-warn,#fbbf24)">Req-A</text>
-            <rect x="40" y="138" width="140" height="52" rx="10" fill="rgba(139,92,246,0.18)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
+            <rect x="40" y="138" width="140" height="52" rx="10" fill="rgba(158,142,184,0.18)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
             <text x="110" y="172" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-purple,#8b5cf6)">Req-B</text>
-            <rect x="40" y="204" width="140" height="52" rx="10" fill="rgba(56,189,248,0.18)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
+            <rect x="40" y="204" width="140" height="52" rx="10" fill="rgba(118,172,188,0.18)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
             <text x="110" y="238" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-sky,#38bdf8)">Req-C</text>
             <line x1="185" y1="164" x2="248" y2="164" stroke="var(--c-accent-a)" stroke-width="5" marker-end="url(#ar6cb)"/>
-            <rect x="258" y="110" width="220" height="168" rx="16" fill="rgba(16,185,129,0.14)" stroke="var(--c-accent-b)" stroke-width="3"/>
+            <rect x="258" y="110" width="220" height="168" rx="16" fill="rgba(111,160,144,0.12)" stroke="var(--c-accent-b)" stroke-width="3"/>
             <text x="368" y="165" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-accent-b)">动态组批</text>
             <text x="368" y="212" text-anchor="middle" font-size="26" fill="var(--c-text-2)">优先级队列</text>
             <line x1="483" y1="194" x2="548" y2="194" stroke="var(--c-accent-a)" stroke-width="5" marker-end="url(#ar6cb)"/>
-            <rect x="558" y="68" width="380" height="252" rx="18" fill="rgba(139,92,246,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="3"/>
+            <rect x="558" y="68" width="380" height="252" rx="18" fill="rgba(158,142,184,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="3"/>
             <text x="748" y="112" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-purple,#8b5cf6)">Batch 组装</text>
-            <rect x="588" y="138" width="150" height="58" rx="10" fill="rgba(251,191,36,0.22)"/><text x="663" y="176" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-warn,#fbbf24)">A</text>
-            <rect x="758" y="138" width="150" height="58" rx="10" fill="rgba(139,92,246,0.22)"/><text x="833" y="176" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-purple,#8b5cf6)">B</text>
-            <rect x="588" y="212" width="150" height="58" rx="10" fill="rgba(56,189,248,0.22)"/><text x="663" y="250" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-sky,#38bdf8)">C</text>
-            <rect x="758" y="212" width="150" height="58" rx="10" fill="rgba(16,185,129,0.22)"/><text x="833" y="250" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-b)">D</text>
+            <rect x="588" y="138" width="150" height="58" rx="10" fill="rgba(196,156,88,0.22)"/><text x="663" y="176" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-warn,#fbbf24)">A</text>
+            <rect x="758" y="138" width="150" height="58" rx="10" fill="rgba(158,142,184,0.22)"/><text x="833" y="176" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-purple,#8b5cf6)">B</text>
+            <rect x="588" y="212" width="150" height="58" rx="10" fill="rgba(118,172,188,0.22)"/><text x="663" y="250" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-sky,#38bdf8)">C</text>
+            <rect x="758" y="212" width="150" height="58" rx="10" fill="rgba(111,160,144,0.22)"/><text x="833" y="250" text-anchor="middle" font-size="28" font-weight="700" fill="var(--c-accent-b)">D</text>
             <line x1="943" y1="194" x2="1008" y2="194" stroke="var(--c-accent-a)" stroke-width="5" marker-end="url(#ar6cb)"/>
-            <rect x="1018" y="96" width="240" height="196" rx="18" fill="rgba(56,189,248,0.12)" stroke="var(--c-sky,#38bdf8)" stroke-width="3"/>
+            <rect x="1018" y="96" width="240" height="196" rx="18" fill="rgba(224,143,99,0.11)" stroke="var(--c-sky,#38bdf8)" stroke-width="3"/>
             <text x="1138" y="165" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-sky,#38bdf8)">GPU</text>
             <text x="1138" y="218" text-anchor="middle" font-size="26" fill="var(--c-text-2)">拓扑感知执行</text>
             <line x1="1263" y1="194" x2="1328" y2="194" stroke="var(--c-accent-a)" stroke-width="5" marker-end="url(#ar6cb)"/>
-            <rect x="1338" y="108" width="302" height="172" rx="18" fill="rgba(16,185,129,0.14)" stroke="var(--c-accent-b)" stroke-width="3"/>
+            <rect x="1338" y="108" width="302" height="172" rx="18" fill="rgba(111,160,144,0.12)" stroke="var(--c-accent-b)" stroke-width="3"/>
             <text x="1489" y="175" text-anchor="middle" font-size="32" font-weight="800" fill="var(--c-accent-b)">📈 最优</text>
             <text x="1489" y="228" text-anchor="middle" font-size="26" fill="var(--c-text-2)">吞吐 + 延迟双赢</text>
           </svg>
@@ -472,8 +475,8 @@
 
     <!-- ==================== Slide 9: Card + Diagram — 工具执行亲和 ==================== -->
     <section class="s slide" id="s8">
-      <div class="orb" style="width:300px;height:300px;top:-60px;left:-40px;background:radial-gradient(circle,rgba(56,189,248,0.10),transparent 70%)"></div>
-      <div class="orb" style="width:200px;height:200px;bottom:10%;right:5%;background:radial-gradient(circle,rgba(16,185,129,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:300px;height:300px;top:-60px;left:-40px;background:radial-gradient(circle,rgba(224,143,99,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:200px;height:200px;bottom:10%;right:5%;background:radial-gradient(circle,rgba(111,160,144,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g8" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g8)"/></svg>
       <div class="slide-header">
         <span class="badge">工具亲和</span>
@@ -522,8 +525,8 @@
 
     <!-- ==================== Slide 10: Split + Network SVG — 网络延迟优化 ==================== -->
     <section class="s slide" id="s9">
-      <div class="orb" style="width:280px;height:280px;top:-60px;right:-40px;background:radial-gradient(circle,rgba(56,189,248,0.10),transparent 70%)"></div>
-      <div class="orb" style="width:220px;height:220px;bottom:10%;left:5%;background:radial-gradient(circle,rgba(251,191,36,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:280px;height:280px;top:-60px;right:-40px;background:radial-gradient(circle,rgba(224,143,99,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:220px;height:220px;bottom:10%;left:5%;background:radial-gradient(circle,rgba(196,168,90,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g9" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#g9)"/></svg>
       <div class="slide-header">
         <span class="badge">工具亲和</span>
@@ -550,11 +553,11 @@
             <text x="790" y="40" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-text-1)">绑核 + NIC 亲和：Agent → Core → 零拷贝 → 工具（微秒路径）</text>
             <circle cx="140" cy="175" r="52" fill="var(--c-accent-b)" opacity="0.18" stroke="var(--c-accent-b)" stroke-width="3"/>
             <text x="140" y="188" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-b)">Agent</text>
-            <rect x="260" y="118" width="200" height="114" rx="14" fill="rgba(251,191,36,0.14)" stroke="var(--c-warn,#fbbf24)" stroke-width="2.5"/>
+            <rect x="260" y="118" width="200" height="114" rx="14" fill="rgba(196,156,88,0.14)" stroke="var(--c-warn,#fbbf24)" stroke-width="2.5"/>
             <text x="360" y="165" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-warn,#fbbf24)">CPU Core</text>
             <text x="360" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">绑核 #3 · 少切换</text>
             <line x1="195" y1="175" x2="258" y2="175" stroke="var(--c-accent-b)" stroke-width="5" marker-end="url(#ar10net)"/>
-            <rect x="510" y="118" width="200" height="114" rx="14" fill="rgba(56,189,248,0.14)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
+            <rect x="510" y="118" width="200" height="114" rx="14" fill="rgba(118,172,188,0.14)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
             <text x="610" y="165" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-sky,#38bdf8)">NIC</text>
             <text x="610" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">零拷贝 / RDMA</text>
             <line x1="463" y1="175" x2="508" y2="175" stroke="var(--c-warn,#fbbf24)" stroke-width="5" marker-end="url(#ar10net)"/>
@@ -567,7 +570,7 @@
             <text x="1010" y="245" text-anchor="middle" font-size="26" font-weight="800" fill="var(--c-accent-c)">工具B</text>
             <line x1="883" y1="155" x2="968" y2="125" stroke="var(--c-accent-c)" stroke-width="4" marker-end="url(#ar10net)"/>
             <line x1="883" y1="195" x2="968" y2="235" stroke="var(--c-accent-c)" stroke-width="4" marker-end="url(#ar10net)"/>
-            <rect x="1120" y="95" width="420" height="160" rx="18" fill="rgba(16,185,129,0.10)" stroke="var(--c-accent-b)" stroke-width="2.5"/>
+            <rect x="1120" y="95" width="420" height="160" rx="18" fill="rgba(111,160,144,0.10)" stroke="var(--c-accent-b)" stroke-width="2.5"/>
             <text x="1330" y="145" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-b)">端到端延迟</text>
             <text x="1330" y="190" text-anchor="middle" font-size="28" fill="var(--c-danger,#ef4444)">改造前 ~12 ms</text>
             <text x="1330" y="235" text-anchor="middle" font-size="30" font-weight="800" fill="var(--c-accent-b)">改造后 ~0.3 ms ⚡</text>
@@ -580,8 +583,8 @@
 
     <!-- ==================== Slide 11: Card + Diagram — 状态分层管理 ==================== -->
     <section class="s slide" id="s10">
-      <div class="orb" style="width:340px;height:340px;top:-80px;right:-50px;background:radial-gradient(circle,rgba(139,92,246,0.10),transparent 70%)"></div>
-      <div class="orb" style="width:220px;height:220px;bottom:5%;left:5%;background:radial-gradient(circle,rgba(16,185,129,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:340px;height:340px;top:-80px;right:-50px;background:radial-gradient(circle,rgba(158,142,184,0.10),transparent 70%)"></div>
+      <div class="orb" style="width:220px;height:220px;bottom:5%;left:5%;background:radial-gradient(circle,rgba(111,160,144,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g10" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g10)"/></svg>
       <div class="slide-header">
         <span class="badge">状态亲和</span>
@@ -599,21 +602,21 @@
             <text x="600" y="55" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-accent-a)">⚡ L1 本地缓存</text>
             <text x="600" y="85" text-anchor="middle" font-size="18" fill="var(--c-text-2)">高频读写 · μs 级延迟 · 会话绑定</text>
             <!-- 速度指示 -->
-            <rect x="920" y="35" width="80" height="60" rx="10" fill="rgba(16,185,129,0.15)" stroke="var(--c-accent-b)" stroke-width="1.5"/>
+            <rect x="920" y="35" width="80" height="60" rx="10" fill="rgba(111,160,144,0.15)" stroke="var(--c-accent-b)" stroke-width="1.5"/>
             <text x="960" y="60" text-anchor="middle" font-size="20" font-weight="900" fill="var(--c-accent-b)">μs</text>
             <text x="960" y="80" text-anchor="middle" font-size="21" fill="var(--c-text-2)">最快</text>
             <!-- L2 远程存储 -->
             <rect x="200" y="140" width="800" height="90" rx="14" fill="var(--c-accent-b)" opacity="0.12" stroke="var(--c-accent-b)" stroke-width="2"/>
             <text x="600" y="175" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-accent-b)">🗄️ L2 远程存储</text>
             <text x="600" y="205" text-anchor="middle" font-size="18" fill="var(--c-text-2)">中等频率 · ms 级延迟 · 跨节点同步</text>
-            <rect x="920" y="155" width="80" height="60" rx="10" fill="rgba(56,189,248,0.15)" stroke="var(--c-sky,#38bdf8)" stroke-width="1.5"/>
+            <rect x="920" y="155" width="80" height="60" rx="10" fill="rgba(118,172,188,0.15)" stroke="var(--c-sky,#38bdf8)" stroke-width="1.5"/>
             <text x="960" y="180" text-anchor="middle" font-size="20" font-weight="900" fill="var(--c-sky,#38bdf8)">ms</text>
             <text x="960" y="200" text-anchor="middle" font-size="21" fill="var(--c-text-2)">均衡</text>
             <!-- L3 备份存储 -->
             <rect x="100" y="260" width="1000" height="90" rx="14" fill="var(--c-surface-2)" stroke="var(--c-text-2)" stroke-width="1.5"/>
             <text x="600" y="295" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">☁️ L3 备份存储</text>
             <text x="600" y="325" text-anchor="middle" font-size="18" fill="var(--c-text-2)">低频访问 · 持久化 · 异步同步 + 数据预取</text>
-            <rect x="920" y="275" width="80" height="60" rx="10" fill="rgba(251,191,36,0.15)" stroke="var(--c-warn,#fbbf24)" stroke-width="1.5"/>
+            <rect x="920" y="275" width="80" height="60" rx="10" fill="rgba(196,156,88,0.15)" stroke="var(--c-warn,#fbbf24)" stroke-width="1.5"/>
             <text x="960" y="300" text-anchor="middle" font-size="18" font-weight="900" fill="var(--c-warn,#fbbf24)">s</text>
             <text x="960" y="320" text-anchor="middle" font-size="21" fill="var(--c-text-2)">可靠</text>
             <!-- Arrows -->
@@ -635,8 +638,8 @@
 
     <!-- ==================== Slide 12: Grid 2×2 + mini-SVGs — 安全亲和四维度 ==================== -->
     <section class="s slide" id="s11">
-      <div class="orb" style="width:350px;height:350px;top:-80px;left:-50px;background:radial-gradient(circle,rgba(239,68,68,0.08),transparent 70%)"></div>
-      <div class="orb" style="width:250px;height:250px;bottom:5%;right:5%;background:radial-gradient(circle,rgba(16,185,129,0.08),transparent 70%)"></div>
+      <div class="orb" style="width:350px;height:350px;top:-80px;left:-50px;background:radial-gradient(circle,rgba(176,96,86,0.09),transparent 70%)"></div>
+      <div class="orb" style="width:250px;height:250px;bottom:5%;right:5%;background:radial-gradient(circle,rgba(111,160,144,0.08),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g11" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="none" stroke="var(--c-text-2)" stroke-width="0.3"/></pattern></defs><rect width="100%" height="100%" fill="url(#g11)"/></svg>
       <div class="slide-header">
         <span class="badge">安全亲和</span>
@@ -650,10 +653,10 @@
             <p class="g-body" style="font-size:var(--fs-body)">配额 · 网络策略 · 会话沙箱</p>
             <div class="mini-svg" style="flex:1;width:100%;min-height:0">
               <svg viewBox="0 0 440 130" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
-                <rect x="30" y="28" width="170" height="82" rx="12" fill="rgba(139,92,246,0.14)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2.5"/>
+                <rect x="30" y="28" width="170" height="82" rx="12" fill="rgba(158,142,184,0.14)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2.5"/>
                 <text x="115" y="68" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-purple,#8b5cf6)">NS-A</text>
                 <text x="115" y="102" text-anchor="middle" font-size="22" fill="var(--c-text-2)">Policy 隔离</text>
-                <rect x="230" y="28" width="170" height="82" rx="12" fill="rgba(56,189,248,0.14)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
+                <rect x="230" y="28" width="170" height="82" rx="12" fill="rgba(118,172,188,0.14)" stroke="var(--c-sky,#38bdf8)" stroke-width="2.5"/>
                 <text x="315" y="68" text-anchor="middle" font-size="28" font-weight="800" fill="var(--c-sky,#38bdf8)">NS-B</text>
                 <text x="315" y="102" text-anchor="middle" font-size="22" fill="var(--c-text-2)">独立 VPC</text>
               </svg>
@@ -665,10 +668,10 @@
             <p class="g-body" style="font-size:var(--fs-body)">运行时签发 · Agent ⟷ 工具加密通道</p>
             <div class="mini-svg" style="flex:1;width:100%;min-height:0">
               <svg viewBox="0 0 440 130" preserveAspectRatio="xMidYMid meet" style="width:100%;min-height:150px">
-                <rect x="70" y="30" width="110" height="88" rx="12" fill="rgba(251,191,36,0.16)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
+                <rect x="70" y="30" width="110" height="88" rx="12" fill="rgba(196,156,88,0.16)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
                 <text x="125" y="88" text-anchor="middle" font-size="40">🔑</text>
                 <text x="220" y="82" text-anchor="middle" font-size="36" font-weight="800" fill="var(--c-accent-a)">TLS</text>
-                <rect x="260" y="30" width="110" height="88" rx="12" fill="rgba(16,185,129,0.14)" stroke="var(--c-accent-b)" stroke-width="2"/>
+                <rect x="260" y="30" width="110" height="88" rx="12" fill="rgba(111,160,144,0.12)" stroke="var(--c-accent-b)" stroke-width="2"/>
                 <text x="315" y="88" text-anchor="middle" font-size="40">🔧</text>
               </svg>
             </div>
@@ -711,13 +714,13 @@
             <polygon points="840,115 830,108 830,122" fill="var(--c-accent-a)"/>
             <line x1="920" y1="115" x2="1240" y2="115" stroke="var(--c-accent-a)" stroke-width="4"/>
             <polygon points="1240,115 1230,108 1230,122" fill="var(--c-accent-a)"/>
-            <rect x="60" y="78" width="280" height="74" rx="14" fill="rgba(139,92,246,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
+            <rect x="60" y="78" width="280" height="74" rx="14" fill="rgba(158,142,184,0.12)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
             <text x="200" y="124" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-purple,#8b5cf6)">边界</text>
-            <rect x="460" y="78" width="280" height="74" rx="14" fill="rgba(251,191,36,0.12)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
+            <rect x="460" y="78" width="280" height="74" rx="14" fill="rgba(196,156,88,0.12)" stroke="var(--c-warn,#fbbf24)" stroke-width="2"/>
             <text x="600" y="124" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-warn,#fbbf24)">信道</text>
-            <rect x="860" y="78" width="280" height="74" rx="14" fill="rgba(16,185,129,0.12)" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <rect x="860" y="78" width="280" height="74" rx="14" fill="rgba(111,160,144,0.12)" stroke="var(--c-accent-b)" stroke-width="2"/>
             <text x="1000" y="124" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-accent-b)">证据</text>
-            <rect x="1260" y="78" width="280" height="74" rx="14" fill="rgba(239,68,68,0.10)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
+            <rect x="1260" y="78" width="280" height="74" rx="14" fill="rgba(176,96,86,0.10)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
             <text x="1400" y="124" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-danger,#ef4444)">处置</text>
           </svg>
         </div>
@@ -728,8 +731,8 @@
 
     <!-- ==================== Slide 13: Thanks — 满屏收束 ==================== -->
     <section class="s slide" id="s12">
-      <div class="orb" style="width:420px;height:420px;top:-100px;right:-60px;background:radial-gradient(circle,rgba(16,185,129,0.14),transparent 70%)"></div>
-      <div class="orb" style="width:320px;height:320px;bottom:-40px;left:-30px;background:radial-gradient(circle,rgba(56,189,248,0.12),transparent 70%)"></div>
+      <div class="orb" style="width:420px;height:420px;top:-100px;right:-60px;background:radial-gradient(circle,rgba(111,160,144,0.12),transparent 70%)"></div>
+      <div class="orb" style="width:320px;height:320px;bottom:-40px;left:-30px;background:radial-gradient(circle,rgba(224,143,99,0.11),transparent 70%)"></div>
       <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="g12" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g12)"/></svg>
       <div class="slide-header">
         <span class="badge">收束</span>
@@ -766,16 +769,16 @@
             </defs>
             <rect x="40" y="150" width="1520" height="56" rx="14" fill="url(#lg12)" stroke="var(--c-accent-a)" stroke-width="1.5" opacity="0.9"/>
             <text x="800" y="124" text-anchor="middle" font-size="34" font-weight="800" fill="var(--c-text-1)">端到端：调度 · 工具 · 状态 · 安全</text>
-            <rect x="80" y="158" width="300" height="40" rx="10" fill="rgba(16,185,129,0.2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+            <rect x="80" y="158" width="300" height="40" rx="10" fill="rgba(111,160,144,0.2)" stroke="var(--c-accent-b)" stroke-width="2"/>
             <text x="230" y="186" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-accent-b)">推理亲和</text>
             <text x="400" y="186" text-anchor="middle" font-size="36" fill="var(--c-accent-a)">→</text>
-            <rect x="440" y="158" width="300" height="40" rx="10" fill="rgba(56,189,248,0.15)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
+            <rect x="440" y="158" width="300" height="40" rx="10" fill="rgba(118,172,188,0.15)" stroke="var(--c-sky,#38bdf8)" stroke-width="2"/>
             <text x="590" y="186" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-sky,#38bdf8)">工具亲和</text>
             <text x="760" y="186" text-anchor="middle" font-size="36" fill="var(--c-accent-a)">→</text>
-            <rect x="800" y="158" width="300" height="40" rx="10" fill="rgba(139,92,246,0.15)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
+            <rect x="800" y="158" width="300" height="40" rx="10" fill="rgba(158,142,184,0.15)" stroke="var(--c-purple,#8b5cf6)" stroke-width="2"/>
             <text x="950" y="186" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-purple,#8b5cf6)">状态亲和</text>
             <text x="1120" y="186" text-anchor="middle" font-size="36" fill="var(--c-accent-a)">→</text>
-            <rect x="1160" y="158" width="360" height="40" rx="10" fill="rgba(239,68,68,0.12)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
+            <rect x="1160" y="158" width="360" height="40" rx="10" fill="rgba(176,96,86,0.12)" stroke="var(--c-danger,#ef4444)" stroke-width="2"/>
             <text x="1340" y="186" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-danger,#ef4444)">安全亲和</text>
             <line x1="80" y1="80" x2="1520" y2="80" stroke="var(--c-text-2)" stroke-width="1" stroke-dasharray="10 8" opacity="0.35"/>
           </svg>

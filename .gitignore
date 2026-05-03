@@ -44,6 +44,10 @@ skills/.skills_store_lock.json
 # Local env (proxy, etc.); README "Network / HTTP proxy"
 .env
 
+# Doubao TTS: copy local.env.example → local.env（勿提交）
+skills/doubao-dialogue-tts/local.env
+skills/volc-podcast-tts/local.env
+
 # Features: production/ — track creative assets, ignore media & temp
 # See features/_template/content-production/ for canonical layout
 features/**/production/tmp/

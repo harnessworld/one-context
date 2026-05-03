@@ -108,6 +108,8 @@ function analyze(srtPath, htmlPath) {
 
   console.log(`\n✏️  Next: provide boundaries as "0:0-0,1:1-2,..." (slide_idx:first_entry-last_entry)`);
   console.log(`   node cli.js srt-map --project <dir> --boundaries "0:0-0,1:1-2,..."`);
+  console.log(`\n⚠️  翻页边界勿对齐「下一话题过渡句」的字幕条起点（句首陷阱）；应用 timing-check 自检：`);
+  console.log(`   node cli.js timing-check --project <dir>`);
 }
 
 // ── Phase 2: Generate wav-durations.json ────────────────────
@@ -184,4 +186,4 @@ function run(projectDir, { boundaries }) {
   }
 }
 
-module.exports = { run };
+module.exports = { run, parseSrt };

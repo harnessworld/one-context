@@ -368,10 +368,113 @@ def _keyword_match_pos(
     return (abs_start, abs_end)
 
 
+def srt_covered_duration(
+    spans: list[tuple[float, float]], t0: float, t1: float
+) -> float:
+    """字幕片段与 [t0, t1) 重叠的总时长（秒）。"""
+    if t1 <= t0:
+        return 0.0
+    total = 0.0
+    for a, b in spans:
+        lo = max(a, t0)
+        hi = min(b, t1)
+        if hi > lo:
+            total += hi - lo
+    return total
+
+
+def segment_time_spans(seg_list) -> list[tuple[float, float]]:
+    """Whisper 分段 → (start, end)，忽略空文本。"""
+    out: list[tuple[float, float]] = []
+    for seg in seg_list:
+        txt = (getattr(seg, "text", "") or "").strip()
+        if not txt:
+            continue
+        out.append((float(seg.start), float(seg.end)))
+    return out
+
+
+def refine_durations_by_speech_density(
+    durations: list[float],
+    matched: list[bool],
+    spans: list[tuple[float, float]],
+    audio_end: float,
+    warnings: list[str],
+) -> list[float]:
+    """
+    对部分匹配区间：线性插值会给「未匹配」的连续页均分时长，易导致翻页与口播脱节。
+    用同一时段内 SRT/语音覆盖密度对这批页的时长做加权重分配，端点累积时间与总长不变。
+    """
+    n = len(durations)
+    if n == 0 or not spans or not any(matched) or all(matched):
+        return durations
+
+    durs = list(durations)
+    ssum = sum(durs)
+    if ssum <= 0:
+        return durs
+    if abs(ssum - audio_end) > 0.02:
+        sf = audio_end / ssum
+        durs = [round(x * sf, 4) for x in durs]
+
+    def boundaries() -> list[float]:
+        t = [0.0]
+        for d in durs:
+            t.append(t[-1] + d)
+        t[-1] = audio_end
+        return t
+
+    T = boundaries()
+    touched = False
+    i = 0
+    while i < n:
+        if matched[i]:
+            i += 1
+            continue
+        j = i
+        while j < n and not matched[j]:
+            j += 1
+        s, e = i, j - 1
+        ta, tb = T[s], T[e + 1]
+        kcount = e - s + 1
+        if kcount <= 0 or tb - ta <= 1e-6:
+            i = j
+            continue
+        total = tb - ta
+        base = total / kcount
+        weights: list[float] = []
+        for idx in range(s, e + 1):
+            seg_start = ta + (idx - s) * base
+            seg_end = ta + (idx - s + 1) * base
+            cov = srt_covered_duration(spans, seg_start, seg_end)
+            weights.append(max(cov, 0.08 * base))
+        sw = sum(weights)
+        if sw <= 0:
+            i = j
+            continue
+        new_chunk = [total * w / sw for w in weights]
+        for idx in range(s, e + 1):
+            durs[idx] = round(new_chunk[idx - s], 4)
+        touched = True
+        T = boundaries()
+        i = j
+
+    if touched:
+        warnings.append(
+            "已对「未匹配页」的连续区间按语音/SRT 覆盖密度重分配翻页时长（减轻线性插值均分导致的脱节）"
+        )
+
+    mind = 0.12
+    durs = [max(mind, d) for d in durs]
+    sf2 = audio_end / sum(durs)
+    durs = [round(x * sf2, 4) for x in durs]
+    return durs
+
+
 def align_slides_to_timeline(
     slide_texts: list[str], big: str, times: list[tuple[float, float]], audio_end: float
-) -> tuple[list[float], list[str]]:
-    """顺序匹配每页文案在转写中的结束时刻，再插值成连续分区，得到各页时长。"""
+) -> tuple[list[float], list[str], list[bool]]:
+    """顺序匹配每页文案在转写中的结束时刻，再插值成连续分区，得到各页时长。返回 (时长, 告警, 是否匹配转写)。"""
     warnings: list[str] = []
     n = len(slide_texts)
     # 每页「口播结束」的绝对时间（秒），None 表示未匹配
@@ -418,10 +521,11 @@ def align_slides_to_timeline(
         cursor = hi + 1
 
     # 分区边界 T[0]=0 … T[n]=audio_end；T[i+1] ≈ 第 i 页口播结束时刻
+    matched = [t is not None for t in end_t]
     known_any = any(t is not None for t in end_t)
     if not known_any:
         e = audio_end / max(n, 1)
-        return [round(e, 4)] * n, warnings + ["全文无匹配，均分音频"]
+        return [round(e, 4)] * n, warnings + ["全文无匹配，均分音频"], [False] * n
 
     T: list[float | None] = [None] * (n + 1)
     T[0] = 0.0
@@ -463,7 +567,7 @@ def align_slides_to_timeline(
         scale = audio_end / ssum
         durations = [round(x * scale, 4) for x in durations]
 
-    return durations, warnings
+    return durations, warnings, matched
 
 
 def silence_split_durations(wav_path: str, n_slides: int, total: float) -> tuple[list[float], list[str]]:
@@ -780,7 +884,12 @@ def main() -> int:
         }
         return finalize_out(out)
 
-    durs, warns = align_slides_to_timeline(slides, big, times, audio_end)
+    durs, warns, matched_mask = align_slides_to_timeline(slides, big, times, audio_end)
+    spans = segment_time_spans(seg_list)
+    if any(matched_mask) and not all(matched_mask) and spans:
+        durs = refine_durations_by_speech_density(
+            durs, matched_mask, spans, audio_end, warns
+        )
     method = "whisper_align"
     if any("未找到匹配" in x for x in warns) or any("均分" in x for x in warns):
         method = "whisper_align_partial"

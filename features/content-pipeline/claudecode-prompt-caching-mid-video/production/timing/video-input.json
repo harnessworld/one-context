@@ -1,8 +1,34 @@
 {
-  "project": "claudecode-prompt-caching-mid-video",
-  "width": 1920,
-  "height": 1080,
-  "fps": 30,
-  "slides": [],
-  "srtReplacements": []
+  "wavFile": "media/voiceover.wav",
+  "srtFile": "subtitles/sub.srt",
+  "podcastTts": {
+    "enabled": false,
+    "scriptPath": "content/01-script.md",
+    "action": 0,
+    "speakers": "zh_male_dayixiansheng_v2_saturn_bigtts,zh_female_mizaitongxue_v2_saturn_bigtts",
+    "timeoutSec": 900,
+    "speechRate": 0
+  },
+  "whisperModel": "small",
+  "outputFile": "final.mp4",
+  "burnSubtitles": true,
+  "fillSrtGaps": true,
+  "strictSubtitles": false,
+  "maxSubtitleGapSec": 2.5,
+  "noSpeechThreshold": 0.85,
+  "vadFilter": false,
+  "whisperHotwords": "Anthropic Claude prompt caching agent context",
+  "srtReplacements": [],
+  "wrapSubtitles": true,
+  "subtitle": {
+    "fontSize": 48,
+    "charsPerLine": 28,
+    "fontName": "Microsoft YaHei",
+    "marginV": 8,
+    "primaryColour": "#FFD700",
+    "primaryAlpha": 0,
+    "outline": 0,
+    "barHeight": 0,
+    "barAlpha": 0.55
+  }
 }

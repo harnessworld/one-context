@@ -2,326 +2,493 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1920">
+  <meta name="viewport" content="width=1920, initial-scale=1.0">
   <title>DeepSeek V4 部署与使用详解</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
+  <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
+  <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
+  <link rel="stylesheet" href="theme-claude.css">
   <style>
-    /* === Fonts === */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
     :root {
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-      --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
-      --font-display: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+      --fs-hero: 132px;
+      --fs-page-title: 72px;
+      --fs-subtitle: 40px;
+      --fs-body: 42px;
+      --fs-caption: 32px;
+      --fs-card-title: 48px;
+      --slide-pad: 12px 22px;
+      --card-pad: 14px 18px;
+      --card-gap: 14px;
+      --viz-split-max-h: 760px;
     }
-
-    /* === Base Tokens === */
-    :root {
-      --slide-w: 1920px; --slide-h: 1080px;
-      --fs-hero: 160px; --fs-page-title: 84px; --fs-subtitle: 56px;
-      --fs-body: 42px; --fs-caption: 32px; --fs-card-title: 46px;
-      --fs-card-body: 40px; --fs-stat: 150px; --fs-pill: 34px; --fs-footer: 32px;
-      --lh-tight: 1.15; --lh-normal: 1.4; --lh-relaxed: 1.6;
-      --c-bg: #0b1220; --c-surface: #111d2f; --c-surface-2: #1a2d4a;
-      --c-text-1: #f0f4f8; --c-text-2: #8b9db8;
-      --c-accent-a: #38bdf8; --c-accent-b: #818cf8; --c-accent-c: #a78bfa;
-      --c-accent-d: #ff6b9d; --c-accent-e: #ffd93d;
-      --c-border: rgba(255,255,255,0.08); --c-overlay: rgba(11,18,32,0.7);
-      --sp-xs: 8px; --sp-sm: 16px; --sp-md: 24px; --sp-lg: 32px; --sp-xl: 48px; --sp-2xl: 64px;
-      --slide-pad: 28px 44px; --card-pad: 22px 26px;
-      --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 24px; --r-full: 9999px;
-      --shadow-sm: 0 2px 8px rgba(0,0,0,0.25); --shadow-md: 0 4px 16px rgba(0,0,0,0.35); --shadow-lg: 0 8px 32px rgba(0,0,0,0.45);
-      --card-gap: 20px;
+    body { margin:0; background:#0a0908; min-height:100vh; overflow:hidden; }
+    #P { position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; margin: 0; z-index: 1; overflow: hidden; }
+    #P .slide-header { padding: 8px 32px 4px; margin-bottom: 4px; flex-shrink: 0; }
+    #P .slide-header h2 { font-size: 48px; margin: 4px 0 0; line-height: 1.12; }
+    #P .slide-header .badge { font-size: 21px !important; padding: 4px 14px !important; }
+    #P .col.slide-main { padding: 4px 18px 8px; }
+    #P .col.slide-main.fill-deck { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+    #P .slide-footer { padding-top: 6px; padding-bottom: 6px; margin-top: 4px; font-size: var(--fs-caption); }
+    #prog { position:fixed; top:0; left:0; height:4px; z-index:100; transition:width .3s; }
+    #pn { position:fixed; bottom:16px; right:24px; color:var(--c-text-2); font-size:var(--fs-caption); font-family:var(--font-sans),system-ui,sans-serif; z-index:99; }
+    /* Whisper 锚：成片对齐用，视觉上隐藏（DESIGN-STANDARD） */
+    .wa {
+      position: absolute;
+      left: -9999px;
+      top: 0;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      font-size: 1px;
     }
-
-    /* === Layout === */
-    html, body { margin:0; padding:0; overflow:hidden; background:#000; height:100%; }
-    #P { width: var(--slide-w); height: var(--slide-h); overflow:hidden; position:relative; background: var(--c-bg); font-family: var(--font-sans); color: var(--c-text-1); }
-    .s.slide { width:100%; height:100%; display:none; flex-direction:column; padding: var(--slide-pad); box-sizing:border-box; position:relative; }
-    .s.slide.is-active { display:flex; }
-    .slide-header { flex-shrink:0; margin-bottom: var(--sp-sm); }
-    .slide-header .badge { display:inline-block; font-size: var(--fs-pill); padding: 4px 16px; border-radius: var(--r-full); background: var(--c-accent-a); color: var(--c-bg); font-weight:700; margin-bottom: var(--sp-sm); }
-    .slide-header h2 { font-size: var(--fs-page-title); font-weight:800; line-height: var(--lh-tight); margin:0; }
-    .col.slide-main { flex:1; min-height:0; display:flex; flex-direction:column; }
-    .slide-main.fill-deck { flex:1; min-height:0; flex-direction:column; }
-    .slide-main.fill-deck .slide-cards { flex: 1 1 0; min-height:0; display:flex; gap: var(--card-gap); align-items:stretch; }
-    .slide-main.fill-deck .slide-cards > .g { align-self:stretch; height:100%; min-height:0; }
-    .slide-main.v-center { justify-content:center; align-items:center; }
-    .slide-footer { flex-shrink:0; margin-top: var(--sp-sm); padding-top: var(--sp-xs); border-top:1px solid var(--c-border); font-size: var(--fs-footer); color: var(--c-text-2); display:flex; justify-content:space-between; }
-    .g { background: var(--c-surface); border-radius: var(--r-md); padding: var(--card-pad); display:flex; flex-direction:column; box-shadow: var(--shadow-sm); border:1px solid var(--c-border); }
-    .g .g-title { font-size: var(--fs-card-title); font-weight:700; margin:0 0 var(--sp-xs) 0; flex-shrink:0; }
-    .g .g-body { font-size: var(--fs-card-body); line-height: var(--lh-normal); margin:0; flex-shrink:0; }
-    .card-diagram { flex:1; min-height: 200px; margin-top: var(--sp-sm); }
-    .card-diagram svg { width:100%; height:100%; }
-    .stat-value { font-size: var(--fs-stat); font-weight:800; line-height:1; color: var(--c-accent-a); }
-    .stat-label { font-size: var(--fs-body); color: var(--c-text-2); margin-top: var(--sp-xs); }
-    .pill { display:inline-block; font-size: var(--fs-pill); padding: 6px 18px; border-radius: var(--r-full); background: var(--c-surface-2); color: var(--c-text-1); font-weight:600; }
-    .grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: var(--card-gap); }
-    .grid-2x2 { display:grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: var(--card-gap); }
-    .split { display:flex; gap: var(--card-gap); }
-    .split > * { flex: 1 1 0; min-width:0; }
-    .process-flow { display:flex; align-items:center; gap: var(--sp-md); flex:1; min-height:0; }
-    .process-flow .step { flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; }
-    .process-flow .arrow { font-size: var(--fs-body); color: var(--c-accent-a); flex-shrink:0; }
-    .emoji-xl { font-size: 80px; line-height:1; }
-
-    /* === Info-density helpers === */
-    .code-block { background:#060e1a; border:1px solid rgba(56,189,248,0.2); border-radius: var(--r-sm); padding: 12px 16px; font-family: var(--font-mono); font-size: 28px; line-height:1.5; color:#cbe3ff; overflow:auto; margin-top: var(--sp-sm); }
-    .code-block .k { color: var(--c-accent-a); } /* keyword */ .code-block .s { color: var(--c-accent-e); } /* string */ .code-block .c { color:#5a708a; } /* comment */ .code-block .n { color:#a78bfa; } /* number */
-    .param-table { width:100%; border-collapse:collapse; margin-top: var(--sp-sm); font-size: 34px; }
-    .param-table th { text-align:left; padding: 10px 12px; background: var(--c-surface-2); font-weight:700; border-bottom:2px solid var(--c-accent-a); }
-    .param-table td { padding: 10px 12px; border-bottom:1px solid var(--c-border); color: var(--c-text-2); }
-    .param-table td:first-child { color: var(--c-text-1); font-weight:600; }
-    .tag { display:inline-block; font-size: 26px; padding: 2px 10px; border-radius: var(--r-sm); background: rgba(56,189,248,0.12); color: var(--c-accent-a); font-weight:600; margin-right: 6px; }
-    .tag.warn { background: rgba(255,217,61,0.12); color: var(--c-accent-e); }
-    .tag.ok { background: rgba(129,140,248,0.12); color: var(--c-accent-b); }
-    .check-list { list-style:none; padding:0; margin: var(--sp-sm) 0 0 0; }
-    .check-list li { padding: 8px 0 8px 32px; position:relative; font-size: 34px; line-height:1.45; color: var(--c-text-2); }
-    .check-list li::before { content:"\2713"; position:absolute; left:0; color: var(--c-accent-b); font-weight:800; }
-    .callout { background: rgba(56,189,248,0.08); border-left:4px solid var(--c-accent-a); padding: 12px 16px; border-radius: 0 var(--r-sm) var(--r-sm) 0; margin-top: var(--sp-sm); font-size: 32px; line-height:1.5; }
-    .formula { font-family: var(--font-mono); background: rgba(129,140,248,0.08); padding: 2px 8px; border-radius: var(--r-sm); color: var(--c-accent-b); font-size: 30px; }
-    .row-stat { display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom:1px solid var(--c-border); font-size: 36px; }
-    .row-stat .lbl { color: var(--c-text-1); font-weight:600; }
-    .row-stat .val { color: var(--c-accent-a); font-weight:700; }
-    .accent-box { display:flex; flex-direction:column; gap: var(--sp-xs); margin-top: var(--sp-sm); }
-    .accent-box .item { background: var(--c-surface-2); padding: 10px 14px; border-radius: var(--r-sm); font-size: 32px; line-height:1.4; }
-    .small-note { font-size: 28px; color:#5a708a; margin-top: var(--sp-xs); }
-    .wa { /* whisper anchor, no visual style */ }
+    /* —— Open Design 气质：kicker(mono) + 正文层级 + Split —— */
+    .od-split {
+      display: grid;
+      grid-template-columns: minmax(400px, 460px) minmax(0, 1fr);
+      gap: 36px;
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 6px 20px 10px;
+      align-items: stretch;
+    }
+    .od-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 22px;
+      min-height: 0;
+    }
+    .od-kicker {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-text-2);
+      opacity: 0.85;
+      margin: 0;
+    }
+    .od-lead {
+      font-family: var(--font-display), Georgia, serif;
+      font-size: 44px;
+      font-weight: 500;
+      line-height: 1.38;
+      color: var(--c-text-1);
+      margin: 0;
+    }
+    .od-bullets {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .od-bullets li {
+      font-family: var(--font-sans), system-ui, sans-serif;
+      font-size: var(--fs-body);
+      font-weight: 500;
+      line-height: 1.38;
+      color: var(--c-text-1);
+      margin-bottom: 16px;
+      padding-left: 26px;
+      position: relative;
+    }
+    .od-bullets li:last-child { margin-bottom: 0; }
+    .od-bullets li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.62em;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--c-accent-a), var(--c-accent-b));
+      opacity: 0.95;
+    }
+    .od-note {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      letter-spacing: 0.06em;
+      color: var(--c-accent-b);
+      opacity: 0.9;
+      margin: 0;
+      padding-top: 8px;
+      border-top: 1px solid rgba(243, 238, 230, 0.08);
+    }
+    .od-figure {
+      border-radius: 22px;
+      border: 1px solid rgba(243, 238, 230, 0.09);
+      background: linear-gradient(155deg, rgba(44, 38, 32, 0.45) 0%, rgba(12, 10, 8, 0.94) 55%, rgba(15, 13, 11, 0.98) 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 24px 48px rgba(0, 0, 0, 0.35);
+      padding: 22px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+    .od-figure .viz-svg {
+      width: 100%;
+      height: auto;
+      max-height: var(--viz-split-max-h);
+      display: block;
+    }
+    /* 封面 */
+    #s1 .cover-grid {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(420px, 0.88fr) minmax(520px, 1.35fr);
+      gap: 24px;
+      padding: 8px 20px 12px;
+      align-items: stretch;
+    }
+    #s1 .cover-grid > .od-figure {
+      min-height: min(540px, 56vh);
+      align-self: stretch;
+    }
+    #s1 .cover-flow-svg {
+      width: 100%;
+      height: auto;
+      min-height: 380px;
+      max-height: min(560px, 58vh);
+      display: block;
+    }
+    #s1 .cover-copy { display: flex; flex-direction: column; justify-content: center; gap: 18px; padding-right: 12px; }
+    #s1 .cover-copy h1 {
+      font-family: var(--font-display), Georgia, serif;
+      font-size: var(--fs-hero);
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+    #s1 .cover-sub { font-size: 36px; color: var(--c-text-2); margin: 0; line-height: 1.35; }
+    #s1 .cover-lead {
+      font-family: var(--font-display), Georgia, serif;
+      font-size: 40px;
+      line-height: 1.45;
+      color: rgba(243, 238, 230, 0.92);
+      margin: 0;
+      padding-left: 20px;
+      border-left: 3px solid rgba(224, 143, 99, 0.55);
+    }
+    #s1 .cover-kicker {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--c-text-2);
+      opacity: 0.8;
+      margin: 0;
+    }
+    /* 四宫格：左文右图式卡片（图标克制） */
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 4px 16px 10px;
+    }
+    .pillar-tile {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 20px 22px;
+      border-radius: var(--r-md);
+      background: linear-gradient(165deg, rgba(30, 26, 22, 0.95) 0%, rgba(18, 16, 13, 0.98) 100%);
+      border: 1px solid rgba(243, 238, 230, 0.07);
+      box-shadow: var(--shadow-sm);
+      min-height: 0;
+    }
+    .pillar-tile .ic {
+      flex-shrink: 0;
+      width: 108px;
+      opacity: 0.92;
+    }
+    .pillar-tile .ic svg { width: 100%; height: auto; display: block; }
+    .pillar-tile .pillar-body { flex: 1; min-width: 0; }
+    .pillar-tile .pillar-t {
+      font-family: var(--font-display), Georgia, serif;
+      font-size: var(--fs-card-title);
+      font-weight: 600;
+      color: var(--c-text-1);
+      margin: 0 0 10px;
+      letter-spacing: -0.02em;
+    }
+    .pillar-tile .pillar-d {
+      font-size: var(--fs-body);
+      line-height: 1.4;
+      color: var(--c-text-2);
+      margin: 0;
+    }
+    .viz-cap { font-size: 28px; color: var(--c-text-2); text-align: center; margin-top: 10px; line-height: 1.35; max-width: 1400px; margin-left: auto; margin-right: auto; font-family: var(--font-mono); letter-spacing: 0.04em; }
+    .hero-strip {
+      font-family: var(--font-display), Georgia, serif;
+      font-size: 96px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: var(--c-accent-a);
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 <body>
-<div id="P">
+  <div id="prog" style="width:0%"></div>
+  <div id="P">
 
-  <!-- Slide 1: Cover -->
   <section class="s slide is-active" id="s1">
-    <div class="col slide-main v-center">
-      <div style="text-align:center">
-        <div class="emoji-xl">🚀</div>
-        <h1 style="font-size:var(--fs-hero);font-weight:800;margin:20px 0 10px;letter-spacing:-2px">DeepSeek V4</h1>
-        <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 24px">部署与调用实战指南</p>
-        <div style="margin-bottom:36px">
-          <span class="pill">100万Token上下文</span> <span class="pill">MoE稀疏路由</span> <span class="pill">全栈API兼容</span>
+    <div class="col slide-main fill-deck">
+      <div class="cover-grid">
+        <div class="cover-copy">
+          <p class="cover-kicker">Deploy · API · Ops</p>
+          <h1>DeepSeek V4</h1>
+          <p class="cover-sub">部署与使用 · 模型 · API · 推理运维</p>
+          <p class="cover-lead">一次讲清：模型能力如何落到可调用的接口，再落到可持续运维的推理服务。</p>
         </div>
-        <div style="font-size:var(--fs-caption);color:var(--c-text-2)">运维部署 → 开发调用 → 生产调优</div>
+        <div class="od-figure" style="padding:24px 28px">
+          <svg class="cover-flow-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 880 220" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="s1-rail" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e08f63" stop-opacity="0.28"/><stop offset="100%" stop-color="#6fa090" stop-opacity="0.28"/></linearGradient>
+              <radialGradient id="s1-n1" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#2a241f"/><stop offset="100%" stop-color="#14110e"/></radialGradient>
+              <radialGradient id="s1-n2" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#1f2825"/><stop offset="100%" stop-color="#121615"/></radialGradient>
+              <radialGradient id="s1-n3" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#252028"/><stop offset="100%" stop-color="#141218"/></radialGradient>
+            </defs>
+            <path d="M72 110 H808" stroke="url(#s1-rail)" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="176" cy="110" r="76" fill="url(#s1-n1)" stroke="#e08f63" stroke-opacity="0.88" stroke-width="2"/>
+            <text x="176" y="98" text-anchor="middle" fill="#f3eee6" font-size="34" font-weight="600" font-family="Newsreader,Georgia,serif">模型</text>
+            <text x="176" y="130" text-anchor="middle" fill="#9a9288" font-size="20" font-family="IBM Plex Mono,monospace" letter-spacing="0.06em">CTX · ATTN</text>
+            <circle cx="440" cy="110" r="76" fill="url(#s1-n2)" stroke="#6fa090" stroke-opacity="0.88" stroke-width="2"/>
+            <text x="440" y="98" text-anchor="middle" fill="#f3eee6" font-size="34" font-weight="600" font-family="Newsreader,Georgia,serif">接口</text>
+            <text x="440" y="130" text-anchor="middle" fill="#9a9288" font-size="20" font-family="IBM Plex Mono,monospace">REST · STREAM</text>
+            <circle cx="704" cy="110" r="76" fill="url(#s1-n3)" stroke="#9e8eb8" stroke-opacity="0.82" stroke-width="2"/>
+            <text x="704" y="98" text-anchor="middle" fill="#f3eee6" font-size="34" font-weight="600" font-family="Newsreader,Georgia,serif">上线</text>
+            <text x="704" y="130" text-anchor="middle" fill="#9a9288" font-size="20" font-family="IBM Plex Mono,monospace">GPU · SLO</text>
+            <path d="M252 110 H364" stroke="#e08f63" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+            <path d="M516 110 H628" stroke="#6fa090" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
       </div>
+      <p class="viz-cap" style="margin-top:4px">MODEL → API → PRODUCTION</p>
     </div>
-    <div class="slide-footer">
-      <span>AI Infra Team · 水猿</span>
-      <span>01</span>
-    </div>
-    <div class="wa">DeepSeek V4部署与使用详解</div>
+    <div class="slide-footer"><span>DeepSeek V4</span><span>01</span></div>
+    <div class="wa">欢迎收听豆包AI播客节目</div>
   </section>
 
-  <!-- Slide 2: V4三大技术突破 -->
   <section class="s slide" id="s2">
     <div class="slide-header">
       <span class="badge">认识 V4</span>
-      <h2>三大技术突破</h2>
+      <h2>三件事：容量 · 架构 · 能力</h2>
     </div>
     <div class="col slide-main fill-deck">
-      <div class="slide-cards split">
-        <div class="g">
-          <h3 class="g-title">上下文与效率</h3>
-          <div class="accent-box">
-            <div class="item"><span class="tag">上下文</span>1M Token 窗口（行业顶级），支持整书/超长对话放入单请求</div>
-            <div class="item"><span class="tag ok">MoE</span>混合专家架构：推理时仅激活部分参数，降低单次计算量</div>
-            <div class="item"><span class="tag">成本</span>推理成本显著低于前代，批量处理 ROI 提升</div>
-            <div class="item"><span class="tag ok">显存</span>KV Cache 离散管理（PagedAttention），长序列不浪费</div>
-          </div>
-          <div class="callout" style="margin-top:auto">关键：1M 不等于 64K×2 显存——有固定开销，PagedAttention 缓解但不消除</div>
+      <div class="od-split">
+        <div class="od-copy">
+          <p class="od-kicker">Brief</p>
+          <ul class="od-bullets">
+            <li><strong style="color:var(--c-accent-a)">容量</strong>：百万级上下文窗口，适合长会话与长文档 RAG。</li>
+            <li><strong style="color:var(--c-accent-b)">架构</strong>：稀疏专家与压缩注意力，控制算力与延迟。</li>
+            <li><strong style="color:var(--c-purple)">落地</strong>：国产加速栈与推理成本曲线，决定能否规模化。</li>
+          </ul>
+          <p class="od-note">缺任一维度都会出现「能 demo、不能放量」。</p>
         </div>
-        <div class="g">
-          <h3 class="g-title">注意力机制创新</h3>
-          <div class="accent-box">
-            <div class="item"><span class="tag">压缩吸收</span>丢弃低权重注意力头，降低不关键信息计算量</div>
-            <div class="item"><span class="tag ok">高度压缩</span>长序列分块定位关键信息，保持低延迟推理</div>
-            <div class="item"><span class="tag">国产芯片</span>昇腾/含5G 深度适配，端到端高效运行</div>
-            <div class="item"><span class="tag ok">Prefix</span>Prefix Caching：相同前缀请求复用 KV Cache</div>
-          </div>
-          <div class="callout" style="margin-top:auto;border-color:var(--c-accent-b)">长上下文核心信息放首尾（Lost in the Middle 通用技巧）</div>
+        <div class="od-figure">
+          <svg class="viz-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 620 360" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="s2-bar" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e08f63" stop-opacity="0.15"/><stop offset="70%" stop-color="#e08f63" stop-opacity="0.55"/></linearGradient>
+              <linearGradient id="s2-card" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#252019"/><stop offset="100%" stop-color="#151210"/></linearGradient>
+            </defs>
+            <text x="72" y="48" fill="#9a9288" font-size="18" font-family="IBM Plex Mono,monospace" letter-spacing="0.2em">WINDOW</text>
+            <text x="310" y="118" text-anchor="middle" class="hero-strip" style="font-size:88px">1M</text>
+            <rect x="48" y="138" width="524" height="52" rx="14" fill="#1a1612" stroke="rgba(224,143,99,0.35)" stroke-width="1.25"/>
+            <rect x="48" y="138" width="420" height="52" rx="14" fill="url(#s2-bar)"/>
+            <text x="310" y="174" text-anchor="middle" fill="#f3eee6" font-size="24" font-weight="600">超长上下文 · 注意力与 MoE 协同</text>
+            <rect x="48" y="214" width="240" height="110" rx="16" fill="url(#s2-card)" stroke="rgba(158,142,184,0.35)" stroke-width="1.25"/>
+            <text x="168" y="252" text-anchor="middle" fill="#c4a86e" font-size="22" font-weight="600">压缩吸收</text>
+            <text x="168" y="284" text-anchor="middle" fill="#8c8479" font-size="18">降低冗余计算</text>
+            <rect x="332" y="214" width="240" height="110" rx="16" fill="url(#s2-card)" stroke="rgba(111,160,144,0.35)" stroke-width="1.25"/>
+            <text x="452" y="252" text-anchor="middle" fill="#6fa090" font-size="22" font-weight="600">序列压缩</text>
+            <text x="452" y="284" text-anchor="middle" fill="#8c8479" font-size="18">控制长序列延迟</text>
+            <path d="M168 214 L310 182 L452 214" fill="none" stroke="#e08f63" stroke-opacity="0.35" stroke-width="2"/>
+          </svg>
         </div>
       </div>
     </div>
     <div class="slide-footer"><span>认识 V4</span><span>02</span></div>
-    <div class="wa">上下文窗口直接拉到了100万token</div>
+    <div class="wa">今天咱们来聊一聊DeepSeek V4模型的</div>
   </section>
 
-  <!-- Slide 3: MoE与注意力压缩 -->
   <section class="s slide" id="s3">
     <div class="slide-header">
-      <span class="badge">架构</span>
-      <h2>MoE 稀疏激活 + 注意力压缩</h2>
+      <span class="badge">落地</span>
+      <h2>国产化与能力升级</h2>
     </div>
     <div class="col slide-main fill-deck">
-      <div class="slide-cards">
-        <div class="g" style="flex:1">
-          <h3 class="g-title">MoE 路由 + 注意力压缩原理</h3>
-          <p class="g-body" style="margin-bottom:var(--sp-sm)">V4 推理时仅激活部分专家，注意力层压缩不关键头信息，两者结合实现长上下文低延迟。</p>
-          <div class="card-diagram">
-            <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg">
-              <!-- Input -->
-              <rect x="10" y="110" width="90" height="60" rx="8" fill="var(--c-surface-2)" stroke="var(--c-border)"/>
-              <text x="55" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="13" font-weight="700">Input</text>
-              <!-- Router -->
-              <rect x="130" y="80" width="110" height="120" rx="8" fill="rgba(56,189,248,0.12)" stroke="var(--c-accent-a)"/>
-              <text x="185" y="120" text-anchor="middle" fill="var(--c-accent-a)" font-size="13" font-weight="700">Router</text>
-              <text x="185" y="145" text-anchor="middle" fill="var(--c-text-2)" font-size="11">Top-K 选择</text>
-              <text x="185" y="165" text-anchor="middle" fill="var(--c-text-2)" font-size="11">2~4 专家</text>
-              <!-- Experts -->
-              <rect x="280" y="40" width="90" height="55" rx="8" fill="var(--c-accent-b)" opacity="0.25"/>
-              <text x="325" y="72" text-anchor="middle" fill="var(--c-text-1)" font-size="12" font-weight="700">Expert A</text>
-              <rect x="280" y="112" width="90" height="55" rx="8" fill="var(--c-accent-b)" opacity="0.45"/>
-              <text x="325" y="144" text-anchor="middle" fill="var(--c-text-1)" font-size="12" font-weight="700">Expert B</text>
-              <rect x="280" y="184" width="90" height="55" rx="8" fill="var(--c-accent-b)" opacity="0.15"/>
-              <text x="325" y="216" text-anchor="middle" fill="var(--c-text-2)" font-size="12">Expert C</text>
-              <!-- Merge -->
-              <rect x="410" y="110" width="90" height="60" rx="8" fill="var(--c-surface-2)" stroke="var(--c-border)"/>
-              <text x="455" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="13" font-weight="700">Merge</text>
-              <!-- Attention Compression -->
-              <rect x="540" y="40" width="140" height="85" rx="8" fill="rgba(167,139,250,0.12)" stroke="var(--c-accent-c)"/>
-              <text x="610" y="68" text-anchor="middle" fill="var(--c-accent-c)" font-size="12" font-weight="700">压缩吸收</text>
-              <text x="610" y="90" text-anchor="middle" fill="var(--c-text-2)" font-size="11">丢弃低权重头</text>
-              <text x="610" y="108" text-anchor="middle" fill="var(--c-text-2)" font-size="11">降低计算量</text>
-              <rect x="540" y="145" width="140" height="85" rx="8" fill="rgba(167,139,250,0.12)" stroke="var(--c-accent-c)"/>
-              <text x="610" y="176" text-anchor="middle" fill="var(--c-accent-c)" font-size="12" font-weight="700">高度压缩</text>
-              <text x="610" y="198" text-anchor="middle" fill="var(--c-text-2)" font-size="11">分块定位关键</text>
-              <text x="610" y="216" text-anchor="middle" fill="var(--c-text-2)" font-size="11">长输入保持低延迟</text>
-              <!-- Output -->
-              <rect x="720" y="110" width="95" height="60" rx="8" fill="var(--c-surface-2)" stroke="var(--c-border)"/>
-              <text x="767" y="145" text-anchor="middle" fill="var(--c-text-1)" font-size="13" font-weight="700">Output</text>
-              <!-- Arrows -->
-              <line x1="100" y1="140" x2="125" y2="140" stroke="var(--c-accent-a)" stroke-width="2"/><polygon points="125,140 118,136 118,144" fill="var(--c-accent-a)"/>
-              <line x1="240" y1="140" x2="275" y2="80" stroke="var(--c-accent-b)" stroke-width="1.5" opacity="0.6"/><polygon points="275,80 268,78 272,86" fill="var(--c-accent-b)" opacity="0.6"/>
-              <line x1="240" y1="140" x2="275" y2="140" stroke="var(--c-accent-b)" stroke-width="2"/><polygon points="275,140 268,136 268,144" fill="var(--c-accent-b)"/>
-              <line x1="240" y1="140" x2="275" y2="210" stroke="var(--c-accent-b)" stroke-width="1.5" opacity="0.4"/><polygon points="275,210 268,208 272,216" fill="var(--c-accent-b)" opacity="0.4"/>
-              <line x1="370" y1="80" x2="405" y2="120" stroke="var(--c-accent-b)" stroke-width="1.5" opacity="0.6"/><polygon points="405,120 399,114 407,118" fill="var(--c-accent-b)" opacity="0.6"/>
-              <line x1="370" y1="140" x2="405" y2="140" stroke="var(--c-accent-b)" stroke-width="2"/><polygon points="405,140 398,136 398,144" fill="var(--c-accent-b)"/>
-              <line x1="370" y1="210" x2="405" y2="160" stroke="var(--c-accent-b)" stroke-width="1.5" opacity="0.4"/><polygon points="405,160 399,154 407,158" fill="var(--c-accent-b)" opacity="0.4"/>
-              <line x1="500" y1="140" x2="535" y2="80" stroke="var(--c-accent-c)" stroke-width="1.5"/><polygon points="535,80 528,78 532,86" fill="var(--c-accent-c)"/>
-              <line x1="500" y1="140" x2="535" y2="185" stroke="var(--c-accent-c)" stroke-width="1.5"/><polygon points="535,185 528,183 532,191" fill="var(--c-accent-c)"/>
-              <line x1="680" y1="82" x2="715" y2="120" stroke="var(--c-accent-c)" stroke-width="1.5"/><polygon points="715,120 709,114 717,118" fill="var(--c-accent-c)"/>
-              <line x1="680" y1="185" x2="715" y2="160" stroke="var(--c-accent-c)" stroke-width="1.5"/><polygon points="715,160 709,154 717,158" fill="var(--c-accent-c)"/>
-            </svg>
-          </div>
+      <div class="od-split">
+        <div class="od-copy">
+          <p class="od-kicker">Silicon &amp; Skills</p>
+          <ul class="od-bullets">
+            <li><strong style="color:var(--c-accent-a)">硬核算力</strong>：面向国产加速栈深度适配，在昇腾等平台上高效推理。</li>
+            <li><strong style="color:var(--c-accent-b)">成本与对话</strong>：推理成本相对上一代更低；多轮与工具调用同步升级。</li>
+            <li><strong style="color:var(--c-purple)">Agent</strong>：足以承接更复杂的多步工具与任务编排。</li>
+          </ul>
+          <p class="od-note">MoE 路由与引擎侧调度见后文「推理栈怎么选」。</p>
+        </div>
+        <div class="od-figure">
+          <svg class="viz-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="s3-chip" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#2a241f"/><stop offset="100%" stop-color="#151210"/></linearGradient>
+            </defs>
+            <text x="360" y="34" text-anchor="middle" fill="#8c8479" font-size="19" font-family="IBM Plex Mono,monospace" letter-spacing="0.14em">DEPLOYMENT MATURITY</text>
+            <rect x="40" y="56" width="200" height="108" rx="18" fill="url(#s3-chip)" stroke="#e08f63" stroke-opacity="0.5" stroke-width="1.4"/>
+            <text x="140" y="98" text-anchor="middle" fill="#f3eee6" font-size="22" font-weight="600">国产算力</text>
+            <text x="140" y="130" text-anchor="middle" fill="#8c8479" font-size="17">昇腾等加速栈</text>
+            <text x="140" y="154" text-anchor="middle" fill="#c4a86e" font-size="15" font-family="IBM Plex Mono,monospace">STACK</text>
+            <rect x="260" y="56" width="200" height="108" rx="18" fill="#121814" stroke="#6fa090" stroke-opacity="0.48" stroke-width="1.4"/>
+            <text x="360" y="98" text-anchor="middle" fill="#f3eee6" font-size="22" font-weight="600">成本 · 对话</text>
+            <text x="360" y="130" text-anchor="middle" fill="#8c8479" font-size="17">推理更省 · 多轮更强</text>
+            <text x="360" y="154" text-anchor="middle" fill="#6fa090" font-size="15" font-family="IBM Plex Mono,monospace">COST · CHAT</text>
+            <rect x="480" y="56" width="200" height="108" rx="18" fill="#1a1620" stroke="#9e8eb8" stroke-opacity="0.45" stroke-width="1.4"/>
+            <text x="580" y="98" text-anchor="middle" fill="#f3eee6" font-size="22" font-weight="600">工具 · Agent</text>
+            <text x="580" y="130" text-anchor="middle" fill="#8c8479" font-size="17">复杂任务编排</text>
+            <text x="580" y="154" text-anchor="middle" fill="#c4b8d4" font-size="15" font-family="IBM Plex Mono,monospace">TOOLS</text>
+            <path d="M240 110 H260 M460 110 H480" stroke="#8c8479" stroke-opacity="0.35" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
         </div>
       </div>
     </div>
-    <div class="slide-footer"><span>技术架构</span><span>03</span></div>
-    <div class="wa">混合专家架构和高度压缩注意力</div>
+    <div class="slide-footer"><span>落地</span><span>03</span></div>
+    <div class="wa">跟国产芯片的一个深度适配</div>
   </section>
 
-  <!-- Slide 4: 推理效率与Agent能力 -->
   <section class="s slide" id="s4">
     <div class="slide-header">
-      <span class="badge">能力概览</span>
-      <h2>推理效率与 Agent 能力</h2>
-    </div>
-    <div class="col slide-main v-center">
-      <div style="text-align:center;max-width:1400px">
-        <div class="stat-value" style="margin-bottom:8px">1,000,000</div>
-        <div class="stat-label" style="font-size:var(--fs-subtitle);margin-bottom:40px">Token 上下文窗口</div>
-        <div style="display:flex;gap:32px;justify-content:center;margin-bottom:32px">
-          <div style="text-align:center;padding:28px 40px;background:var(--c-surface);border-radius:var(--r-lg);min-width:280px;border:1px solid var(--c-border)">
-            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-b);line-height:1">↓ 成本</div>
-            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">推理成本显著低于前代</div>
-          </div>
-          <div style="text-align:center;padding:28px 40px;background:var(--c-surface);border-radius:var(--r-lg);min-width:280px;border:1px solid var(--c-border)">
-            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-c);line-height:1">Agent</div>
-            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">工具调用闭环 + 多轮对话升级</div>
-          </div>
-          <div style="text-align:center;padding:28px 40px;background:var(--c-surface);border-radius:var(--r-lg);min-width:280px;border:1px solid var(--c-border)">
-            <div style="font-size:var(--fs-stat);font-weight:800;color:var(--c-accent-a);line-height:1">FP8</div>
-            <div style="font-size:var(--fs-body);color:var(--c-text-2);margin-top:8px">H100/H20 原生精度零损加速</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:16px;justify-content:center">
-          <span class="pill">推理模式可配置</span>
-          <span class="pill">JSON Mode 结构化</span>
-          <span class="pill">国产芯片适配</span>
-        </div>
-      </div>
-    </div>
-    <div class="slide-footer"><span>能力概览</span><span>04</span></div>
-    <div class="wa">推理成本也比上一代要低很多</div>
-  </section>
-
-  <!-- Slide 5: API新设计 -->
-  <section class="s slide" id="s5">
-    <div class="slide-header">
       <span class="badge">调用篇</span>
-      <h2>API 新设计与消息角色</h2>
+      <h2>API 分层一览</h2>
     </div>
     <div class="col slide-main fill-deck">
-      <div class="slide-cards split">
-        <div class="g">
-          <h3 class="g-title">OpenAI 兼容 + 新特性</h3>
-          <div class="accent-box" style="margin-top:var(--sp-xs)">
-            <div class="item">全面兼容 OpenAI API，SDK 可直接复用</div>
-            <div class="item">流式输出 SSE 升级，推理过程实时可见</div>
-            <div class="item"><span class="tag warn">注意</span>自托管时 model 字段需匹配 <span class="formula">--served-model-name</span></div>
-            <div class="item"><span class="tag">新</span>新增 <span class="formula">context</span> / <span class="formula">to</span> 角色，支持精细权限与路由</div>
-          </div>
-          <div class="callout" style="margin-top:auto">官方 model: deepseek-chat / deepseek-reasoner</div>
+      <div class="od-split">
+        <div class="od-copy">
+          <p class="od-kicker">Surface</p>
+          <ul class="od-bullets">
+            <li>上层可同时兼容 <strong>OpenAI</strong> 与 <strong>Messages</strong> 形态。</li>
+            <li>中间层统一「角色 + 工具 + 上下文」扩展字段。</li>
+            <li>下层暴露流式、思考强度与结构化输出开关。</li>
+          </ul>
+          <p class="od-note">集成时先锁协议，再锁特性矩阵。</p>
         </div>
-        <div class="g">
-          <h3 class="g-title">Temperature 场景速查</h3>
-          <table class="param-table">
-            <tr><th>场景</th><th>推荐值</th><th>说明</th></tr>
-            <tr><td>代码 / 数学推理</td><td><span class="val" style="color:var(--c-accent-a);font-weight:700">0.0 – 0.3</span></td><td>确定性优先</td></tr>
-            <tr><td>通用对话 / RAG</td><td><span class="val" style="color:var(--c-accent-b);font-weight:700">0.5 – 0.7</span></td><td>平衡自然与准确</td></tr>
-            <tr><td>创意写作 / 头脑风暴</td><td><span class="val" style="color:var(--c-accent-c);font-weight:700">0.8 – 1.2</span></td><td>发散探索</td></tr>
-          </table>
-          <div class="callout" style="margin-top:auto;border-color:var(--c-accent-e)">V4 温度敏感度比 GPT 低，建议下调 0.1–0.2 后测试</div>
+        <div class="od-figure">
+          <svg class="viz-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 560 400" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="s4-a" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#2a1f18"/><stop offset="100%" stop-color="#15100c"/></linearGradient>
+              <linearGradient id="s4-b" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#182420"/><stop offset="100%" stop-color="#0e1512"/></linearGradient>
+            </defs>
+            <rect x="40" y="28" width="210" height="64" rx="14" fill="url(#s4-a)" stroke="#e08f63" stroke-opacity="0.5" stroke-width="1.35"/>
+            <text x="145" y="58" text-anchor="middle" fill="#f3eee6" font-size="20" font-weight="600">OpenAI 兼容</text>
+            <text x="145" y="82" text-anchor="middle" fill="#8c8479" font-size="15" font-family="IBM Plex Mono,monospace">CHAT</text>
+            <rect x="310" y="28" width="210" height="64" rx="14" fill="url(#s4-b)" stroke="#6fa090" stroke-opacity="0.45" stroke-width="1.35"/>
+            <text x="415" y="58" text-anchor="middle" fill="#f3eee6" font-size="20" font-weight="600">Messages</text>
+            <text x="415" y="82" text-anchor="middle" fill="#8c8479" font-size="15" font-family="IBM Plex Mono,monospace">TOOLS</text>
+            <rect x="48" y="100" width="464" height="3" rx="1.5" fill="#8c8479" fill-opacity="0.22"/>
+            <rect x="72" y="112" width="416" height="76" rx="16" fill="#14110e" stroke="rgba(158,142,184,0.4)" stroke-width="1.35"/>
+            <text x="280" y="146" text-anchor="middle" fill="#e8e2d9" font-size="21" font-weight="600">消息角色扩展</text>
+            <text x="190" y="176" text-anchor="middle" fill="#7eb8a8" font-size="17" font-family="IBM Plex Mono,monospace">context</text>
+            <text x="370" y="176" text-anchor="middle" fill="#7eb8a8" font-size="17" font-family="IBM Plex Mono,monospace">tool</text>
+            <rect x="48" y="194" width="464" height="3" rx="1.5" fill="#8c8479" fill-opacity="0.22"/>
+            <rect x="48" y="244" width="145" height="56" rx="12" fill="rgba(196,163,90,0.12)" stroke="#c4a35a" stroke-opacity="0.45" stroke-width="1.2"/>
+            <text x="120" y="278" text-anchor="middle" fill="#f3eee6" font-size="17" font-weight="600">流式</text>
+            <rect x="207" y="244" width="145" height="56" rx="12" fill="rgba(118,168,184,0.12)" stroke="#76a8b8" stroke-opacity="0.45" stroke-width="1.2"/>
+            <text x="279" y="278" text-anchor="middle" fill="#f3eee6" font-size="17" font-weight="600">思考强度</text>
+            <rect x="366" y="244" width="145" height="56" rx="12" fill="rgba(224,143,99,0.1)" stroke="#e08f63" stroke-opacity="0.4" stroke-width="1.2"/>
+            <text x="438" y="278" text-anchor="middle" fill="#f3eee6" font-size="17" font-weight="600">JSON</text>
+          </svg>
         </div>
       </div>
     </div>
-    <div class="slide-footer"><span>调用篇</span><span>05</span></div>
-    <div class="wa">全面兼容 OpenAI 的 API 的格式</div>
+    <div class="slide-footer"><span>调用篇</span><span>04</span></div>
+    <div class="wa">DeepSeek V4在API的设计和调用的方式上面</div>
   </section>
 
-  <!-- Slide 6: 开发对接四大注意点 -->
+  <section class="s slide" id="s5">
+    <div class="slide-header">
+      <span class="badge">开发</span>
+      <h2>对接时的四条线</h2>
+    </div>
+    <div class="col slide-main fill-deck">
+      <div class="od-split">
+        <div class="od-copy">
+          <p class="od-kicker">Integration</p>
+          <ul class="od-bullets">
+            <li><strong>思维链</strong>：与消息历史一致的回传策略。</li>
+            <li><strong>流式</strong>：首包、网关超时与背压。</li>
+            <li><strong>前缀缓存</strong>：命中失败会直接打在延迟与成本上。</li>
+            <li><strong>并发灰度</strong>：最后才谈 SLA；顺序错了全歪。</li>
+          </ul>
+          <p class="od-note">四条线串行验收。</p>
+        </div>
+        <div class="od-figure">
+          <svg class="viz-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 840 280" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="s5-seg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#e08f63"/><stop offset="100%" stop-color="#6fa090"/></linearGradient>
+            </defs>
+            <rect x="40" y="108" width="112" height="64" rx="18" fill="#151210" stroke="#e08f63" stroke-opacity="0.65" stroke-width="1.5"/>
+            <text x="96" y="138" text-anchor="middle" fill="#f3eee6" font-size="18" font-weight="600">思维链</text>
+            <text x="96" y="158" text-anchor="middle" fill="#8c8479" font-size="13" font-family="IBM Plex Mono,monospace">RZN</text>
+            <rect x="188" y="108" width="96" height="64" rx="18" fill="#151210" stroke="#6fa090" stroke-opacity="0.6" stroke-width="1.5"/>
+            <text x="236" y="146" text-anchor="middle" fill="#f3eee6" font-size="18" font-weight="600">流式</text>
+            <rect x="320" y="108" width="112" height="64" rx="18" fill="#151210" stroke="#9e8eb8" stroke-opacity="0.55" stroke-width="1.5"/>
+            <text x="376" y="146" text-anchor="middle" fill="#f3eee6" font-size="17" font-weight="600">前缀缓存</text>
+            <rect x="464" y="108" width="96" height="64" rx="18" fill="#151210" stroke="#c4a35a" stroke-opacity="0.55" stroke-width="1.5"/>
+            <text x="512" y="138" text-anchor="middle" fill="#f3eee6" font-size="18" font-weight="600">并发</text>
+            <text x="512" y="158" text-anchor="middle" fill="#8c8479" font-size="13" font-family="IBM Plex Mono,monospace">CANARY</text>
+            <rect x="592" y="102" width="120" height="76" rx="18" fill="rgba(111,160,144,0.12)" stroke="#6fa090" stroke-opacity="0.55" stroke-width="1.5"/>
+            <text x="652" y="138" text-anchor="middle" fill="#f3eee6" font-size="19" font-weight="600">稳定</text>
+            <text x="652" y="162" text-anchor="middle" fill="#8c8479" font-size="14">SLA</text>
+            <path d="M152 140 H188" stroke="url(#s5-seg)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M284 140 H320" stroke="url(#s5-seg)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M432 140 H464" stroke="url(#s5-seg)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M560 140 H592" stroke="#8c8479" stroke-opacity="0.45" stroke-width="2"/>
+            <polygon points="184,140 176,136 176,144" fill="#6fa090" fill-opacity="0.8"/>
+            <polygon points="316,140 308,136 308,144" fill="#6fa090" fill-opacity="0.8"/>
+            <polygon points="460,140 452,136 452,144" fill="#6fa090" fill-opacity="0.8"/>
+            <text x="420" y="236" text-anchor="middle" fill="#8c8479" font-size="20">顺序锁定 · 不可跳步验收</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="slide-footer"><span>开发</span><span>05</span></div>
+    <div class="wa">有哪些细节是我们必须要注意的</div>
+  </section>
+
   <section class="s slide" id="s6">
     <div class="slide-header">
       <span class="badge">开发</span>
-      <h2>开发对接四大注意点</h2>
+      <h2>四类常见症状</h2>
     </div>
     <div class="col slide-main fill-deck">
-      <div class="slide-cards grid-2x2">
-        <div class="g">
-          <h3 class="g-title">① 多轮对话结构</h3>
-          <ul class="check-list">
-            <li>assistant <span class="formula">reasoning_content</span> 需显式回传</li>
-            <li>stream_options 合理配置，避免异常流</li>
-            <li>长上下文缓存 Prefix Caching 复用 KV</li>
-          </ul>
-          <div class="small-note">reasoning 模式：默认关闭，需要时打开 enable_thinking</div>
+      <p class="od-kicker" style="padding:4px 28px 0;font-size:20px">Symptoms — 对策写在卡片里，图标只做锚点</p>
+      <div class="pillar-grid">
+        <div class="pillar-tile">
+          <div class="ic"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><path d="M18 52 Q40 18 62 52" fill="none" stroke="#e08f63" stroke-width="2.2" stroke-linecap="round"/><circle cx="40" cy="38" r="6" fill="#c4a35a" opacity="0.9"/></svg></div>
+          <div class="pillar-body"><div class="pillar-t">多轮漂移</div><p class="pillar-d">统一 assistant / reasoning 字段回传；别让客户端随机丢段。</p></div>
         </div>
-        <div class="g">
-          <h3 class="g-title">② 并发与资源</h3>
-          <ul class="check-list">
-            <li>结合机器资源与模型版本动态调整</li>
-            <li>单卡 A100 80G 裸跑约 <strong>10~20 并发</strong></li>
-            <li>压测公式：<span class="formula">(总显存−权重) / 单请求KV / 1024³ × 0.7</span></li>
-          </ul>
-          <div class="small-note">几百并发不可能，需要 engine 层批处理 + 多卡</div>
+        <div class="pillar-tile">
+          <div class="ic"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="22" width="44" height="36" rx="6" fill="none" stroke="#6fa090" stroke-width="2"/><path d="M28 38 H56 M28 48 H50" stroke="#6fa090" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <div class="pillar-body"><div class="pillar-t">首包慢</div><p class="pillar-d">stream、网关超时、前缀缓存三连；先量瓶颈再调参。</p></div>
         </div>
-        <div class="g">
-          <h3 class="g-title">③ 视觉功能（灰度）</h3>
-          <ul class="check-list">
-            <li>当前处于灰度阶段，关注状态更新</li>
-            <li>跟进官方文档确认可用区域与版本</li>
-            <li>多模态输入格式可能与纯文本不同</li>
-          </ul>
+        <div class="pillar-tile">
+          <div class="ic"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect x="22" y="20" width="38" height="42" rx="8" fill="rgba(196,163,90,0.15)" stroke="#c4a35a" stroke-width="1.8"/><text x="41" y="50" text-anchor="middle" fill="#f3eee6" font-size="16" font-weight="700" font-family="IBM Plex Mono,monospace">429</text></svg></div>
+          <div class="pillar-body"><div class="pillar-t">排队爆延迟</div><p class="pillar-d">并发与引擎队列对齐；客户端退避别「打穿」网关。</p></div>
         </div>
-        <div class="g">
-          <h3 class="g-title">④ JSON Mode + 计费</h3>
-          <ul class="check-list">
-            <li>Schema 严格匹配，Prompt 引导要到位</li>
-            <li>reasoning_tokens 计入 total_tokens，不计入 completion_tokens</li>
-            <li>计费基数务必用 <span class="formula">total_tokens</span></li>
-          </ul>
-          <div class="code-block" style="font-size:24px;padding:8px 12px">
-            <span class="c"># 兼容 V3/V4 计费</span>
-            <span class="k">billable</span> = usage.total_tokens
-          </div>
+        <div class="pillar-tile">
+          <div class="ic"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="22" fill="none" stroke="#9e8eb8" stroke-width="1.8" stroke-dasharray="6 5"/><text x="40" y="46" text-anchor="middle" fill="#9e8eb8" font-size="15" font-weight="600" font-family="IBM Plex Mono,monospace">β</text></svg></div>
+          <div class="pillar-body"><div class="pillar-t">灰度功能抖</div><p class="pillar-d">特性开关 + 版本 pin；预留降级路径，别绑死在单一路由。</p></div>
         </div>
       </div>
     </div>
@@ -329,91 +496,93 @@
     <div class="wa">多轮对话的时候你要注意assistant里面的</div>
   </section>
 
-  <!-- Slide 7: 部署框架选型指南 -->
   <section class="s slide" id="s7">
     <div class="slide-header">
       <span class="badge">部署</span>
-      <h2>部署框架选型指南</h2>
+      <h2>推理栈怎么选</h2>
     </div>
     <div class="col slide-main fill-deck">
-      <div class="slide-cards split">
-        <div class="g">
-          <h3 class="g-title">生产环境 → vLLM</h3>
-          <div class="accent-box">
-            <div class="item"><span class="tag">首选</span>Continuous Batching + PagedAttention</div>
-            <div class="item"><span class="tag">显存</span>配置化注意力节省 60%+ 显存</div>
-            <div class="item"><span class="tag">并行</span>多卡并行，稀疏 MoE 专用调度</div>
-            <div class="item"><span class="tag">量化</span>FP8 / AWQ 现成 tag，直接加载</div>
-          </div>
-          <div class="callout" style="margin-top:auto">TensorRT-LLM 吞吐更高但构建复杂，先用 vLLM 跑通再考虑换</div>
+      <div class="od-split">
+        <div class="od-copy">
+          <p class="od-kicker">Runtime</p>
+          <ul class="od-bullets">
+            <li><strong>vLLM</strong>：生产默认解；PagedAttention + MoE 生态成熟。</li>
+            <li><strong>Ollama / SGLang</strong>：轻量原型或低延迟专用场景评估。</li>
+            <li><strong>换栈</strong>：权重、量化与内核制品混用是高风险源。</li>
+          </ul>
+          <p class="od-note">先锁定制品，再谈 QPS。</p>
         </div>
-        <div class="g">
-          <h3 class="g-title">轻量 / 极端场景</h3>
-          <table class="param-table" style="font-size:30px">
-            <tr><th>场景</th><th>框架</th><th>特点</th></tr>
-            <tr><td>本地开发</td><td>Ollama / Llama.cpp</td><td>轻量灵活，快速验证</td></tr>
-            <tr><td>极致低延迟</td><td>SGLang</td><td>面向低延迟优化</td></tr>
-            <tr><td>国产芯片</td><td>K-Transformers</td><td>昇腾等异构适配</td></tr>
-          </table>
-          <div class="callout" style="margin-top:auto;border-color:var(--c-accent-d)"><strong>⚠️ 不同框架模型格式和量化方式不兼容</strong>，切换需重新转换权重</div>
+        <div class="od-figure">
+          <svg class="viz-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 720 380" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="s7-hub" cx="40%" cy="35%" r="70%"><stop offset="0%" stop-color="#3a2a22"/><stop offset="100%" stop-color="#15100e"/></radialGradient>
+            </defs>
+            <circle cx="360" cy="196" r="102" fill="url(#s7-hub)" stroke="#e08f63" stroke-opacity="0.55" stroke-width="1.6"/>
+            <text x="360" y="188" text-anchor="middle" fill="#f3eee6" font-size="28" font-weight="700" font-family="Newsreader,Georgia,serif">vLLM</text>
+            <text x="360" y="218" text-anchor="middle" fill="#8c8479" font-size="16">生产默认</text>
+            <text x="360" y="242" text-anchor="middle" fill="#6fa090" font-size="14" font-family="IBM Plex Mono,monospace">PAGED · MOE</text>
+            <circle cx="168" cy="118" r="52" fill="#12100e" stroke="#6fa090" stroke-opacity="0.5" stroke-width="1.35"/>
+            <text x="168" y="114" text-anchor="middle" fill="#f3eee6" font-size="17" font-weight="600">Ollama</text>
+            <text x="168" y="136" text-anchor="middle" fill="#8c8479" font-size="13">轻量</text>
+            <circle cx="552" cy="118" r="52" fill="#12100e" stroke="#76a8b8" stroke-opacity="0.5" stroke-width="1.35"/>
+            <text x="552" y="122" text-anchor="middle" fill="#f3eee6" font-size="17" font-weight="600">SGLang</text>
+            <text x="552" y="142" text-anchor="middle" fill="#8c8479" font-size="13">低延迟</text>
+            <circle cx="168" cy="283" r="52" fill="#12100e" stroke="#9e8eb8" stroke-opacity="0.45" stroke-width="1.35"/>
+            <text x="168" y="279" text-anchor="middle" fill="#f3eee6" font-size="16" font-weight="600">K-Trans</text>
+            <text x="168" y="301" text-anchor="middle" fill="#8c8479" font-size="13">国产加速</text>
+            <circle cx="552" cy="283" r="52" fill="#12100e" stroke="#c4a35a" stroke-opacity="0.55" stroke-width="1.35"/>
+            <text x="552" y="275" text-anchor="middle" fill="#f3eee6" font-size="16" font-weight="600">换栈风险</text>
+            <text x="552" y="297" text-anchor="middle" fill="#c4a35a" font-size="13">格式坑</text>
+            <path d="M214 138 L298 168 M506 138 L422 168 M214 262 L298 224 M506 262 L422 224" fill="none" stroke="#8c8479" stroke-opacity="0.28" stroke-width="1.5"/>
+            <path d="M506 262 L422 224" stroke="#b8776a" stroke-opacity="0.55" stroke-width="2"/>
+            <rect x="210" y="322" width="300" height="40" rx="10" fill="rgba(184,119,106,0.12)" stroke="#b8776a" stroke-opacity="0.45" stroke-width="1.2"/>
+            <text x="360" y="348" text-anchor="middle" fill="#e8dcd4" font-size="15" font-weight="500">权重 × 量化 × 内核 — 制品隔离</text>
+          </svg>
         </div>
       </div>
     </div>
     <div class="slide-footer"><span>部署</span><span>07</span></div>
-    <div class="wa">生产环境强烈推荐使用vLLM</div>
+    <div class="wa">我们是强烈推荐就是用VLLM</div>
   </section>
 
-  <!-- Slide 8: 硬件配置速查表 -->
   <section class="s slide" id="s8">
     <div class="slide-header">
       <span class="badge">硬件</span>
-      <h2>硬件配置速查表</h2>
+      <h2>容量一条线</h2>
     </div>
     <div class="col slide-main fill-deck">
-      <div class="slide-cards" style="flex-direction:column">
-        <div class="g" style="flex:1">
-          <div class="process-flow" style="align-items:stretch">
-            <div class="step" style="background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);border:1px solid var(--c-border);align-items:flex-start;text-align:left;height:100%;box-sizing:border-box;">
-              <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-a);margin-bottom:8px">Step 1</div>
-              <div style="font-size:36px;font-weight:700;margin-bottom:8px">精度选型</div>
-              <div style="font-size:30px;color:var(--c-text-2);line-height:1.5">
-                全精度 FP16<br/>
-                → 量化 FP8<br/>
-                → 4-bit AWQ
-              </div>
-            </div>
-            <div class="arrow" style="align-self:center">▶</div>
-            <div class="step" style="background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);border:1px solid var(--c-border);align-items:flex-start;text-align:left;height:100%;box-sizing:border-box;">
-              <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-b);margin-bottom:8px">Step 2</div>
-              <div style="font-size:36px;font-weight:700;margin-bottom:8px">GPU选型</div>
-              <div style="font-size:30px;color:var(--c-text-2);line-height:1.5">
-                FP16: 8×H100<br/>
-                → FP8: 4×H100<br/>
-                → 4-bit: 2×H100
-              </div>
-            </div>
-            <div class="arrow" style="align-self:center">▶</div>
-            <div class="step" style="background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);border:1px solid var(--c-border);align-items:flex-start;text-align:left;height:100%;box-sizing:border-box;">
-              <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-c);margin-bottom:8px">Step 3</div>
-              <div style="font-size:36px;font-weight:700;margin-bottom:8px">内存/存储</div>
-              <div style="font-size:30px;color:var(--c-text-2);line-height:1.5">
-                每卡 256GB 内存<br/>
-                7G/s+ NVMe SSD<br/>
-                模型文件巨大需预留
-              </div>
-            </div>
-            <div class="arrow" style="align-self:center">▶</div>
-            <div class="step" style="background:var(--c-surface);border-radius:var(--r-md);padding:var(--card-pad);border:1px solid var(--c-border);align-items:flex-start;text-align:left;height:100%;box-sizing:border-box;">
-              <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-d);margin-bottom:8px">Step 4</div>
-              <div style="font-size:36px;font-weight:700;margin-bottom:8px">系统环境</div>
-              <div style="font-size:30px;color:var(--c-text-2);line-height:1.5">
-                Ubuntu 22.04<br/>
-                CUDA 12.1+ / Driver 535+<br/>
-                Python 3.10–3.11<br/>
-                NUMA 绑定
-              </div>
-            </div>
-          </div>
+      <div class="od-split">
+        <div class="od-copy">
+          <p class="od-kicker">Footprint</p>
+          <ul class="od-bullets">
+            <li>算力链条：<strong>全精度 → 量化 → Lite</strong>，逐级减卡。</li>
+            <li>多卡场景优先捋清 <strong>NVLink / 拓扑</strong>，别只看显存容量。</li>
+            <li>内存、本地盘与 OS/CUDA 版本写在清单里，避免「机器够却跑不稳」。</li>
+          </ul>
+          <p class="od-note">硬件表述随机型调整；结构不变。</p>
+        </div>
+        <div class="od-figure">
+          <svg class="viz-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
+            <defs><marker id="s8-ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#8c8479" fill-opacity="0.55"/></marker></defs>
+            <rect x="32" y="44" width="160" height="92" rx="16" fill="#161410" stroke="#e08f63" stroke-opacity="0.45" stroke-width="1.35"/>
+            <text x="112" y="82" text-anchor="middle" fill="#f3eee6" font-size="19" font-weight="600">全精度</text>
+            <text x="112" y="108" text-anchor="middle" fill="#8c8479" font-size="14">多卡 GPU</text>
+            <text x="112" y="128" text-anchor="middle" fill="#c4a86e" font-size="13" font-family="IBM Plex Mono,monospace">FP16/BF16</text>
+            <rect x="216" y="64" width="132" height="72" rx="14" fill="#121814" stroke="#6fa090" stroke-opacity="0.45" stroke-width="1.25"/>
+            <text x="282" y="98" text-anchor="middle" fill="#dbe8e3" font-size="18" font-weight="600">量化</text>
+            <text x="282" y="122" text-anchor="middle" fill="#8c8479" font-size="14">减卡</text>
+            <rect x="376" y="78" width="100" height="56" rx="12" fill="#14110e" stroke="#9e8eb8" stroke-opacity="0.4" stroke-width="1.25"/>
+            <text x="426" y="112" text-anchor="middle" fill="#f3eee6" font-size="17" font-weight="600">Lite</text>
+            <path d="M192 88 H216 M348 98 H376" stroke="#8c8479" stroke-opacity="0.4" stroke-width="2" marker-end="url(#s8-ar)"/>
+            <path d="M380 44 Q440 12 540 72" fill="none" stroke="#6fa090" stroke-opacity="0.35" stroke-width="2"/>
+            <text x="468" y="36" text-anchor="middle" fill="#7eb89e" font-size="15" font-family="IBM Plex Mono,monospace" letter-spacing="0.12em">NVLINK</text>
+            <rect x="48" y="168" width="624" height="108" rx="16" fill="#100e0c" stroke="rgba(140,132,121,0.35)" stroke-width="1.2"/>
+            <text x="84" y="206" fill="#8c8479" font-size="15" font-family="IBM Plex Mono,monospace">MEM</text>
+            <text x="140" y="206" fill="#f3eee6" font-size="17" font-weight="600">256G / 卡</text>
+            <text x="280" y="206" fill="#8c8479" font-size="15" font-family="IBM Plex Mono,monospace">DISK</text>
+            <text x="336" y="206" fill="#f3eee6" font-size="17" font-weight="600">NVMe 7G+</text>
+            <text x="84" y="248" fill="#8c8479" font-size="14">NUMA · OS · CUDA 与驱动钉版本</text>
+          </svg>
         </div>
       </div>
     </div>
@@ -421,107 +590,111 @@
     <div class="wa">全精度推理多块高端GPU</div>
   </section>
 
-  <!-- Slide 9: 运维必查清单 -->
   <section class="s slide" id="s9">
     <div class="slide-header">
       <span class="badge">运维</span>
-      <h2>运维必查清单</h2>
+      <h2>四条防线</h2>
     </div>
     <div class="col slide-main fill-deck">
-      <div class="slide-cards grid-2x2">
-        <div class="g">
-          <h3 class="g-title">① 模型文件对齐</h3>
-          <ul class="check-list">
-            <li>权重与 Tokenizer 配置严格一致</li>
-            <li>不同框架模型 <strong>不可混用</strong></li>
-            <li>vLLM / TensorRT-LLM / TGI 各用其格式</li>
-          </ul>
-          <div class="callout" style="margin-top:auto;border-color:var(--c-accent-d)">混用会导致无声错误或异常生成</div>
+      <p class="od-kicker" style="padding:4px 28px 0;font-size:20px">Ops — 文本是 checklist，图标减轻认知负荷</p>
+      <div class="pillar-grid">
+        <div class="pillar-tile">
+          <div class="ic"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect x="18" y="20" width="46" height="40" rx="6" fill="none" stroke="#e08f63" stroke-width="2"/><path d="M26 42 L36 50 L56 30" fill="none" stroke="#6fa090" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+          <div class="pillar-body"><div class="pillar-t">制品同源</div><p class="pillar-d">权重、tokenizer、推理镜像同一 CI；禁止「手搓目录」。</p></div>
         </div>
-        <div class="g">
-          <h3 class="g-title">② 环境参数</h3>
-          <ul class="check-list">
-            <li>MaxModelLen 设够大，否则长上下文被 <strong>静默截断</strong></li>
-            <li>max_num_seqs 压测定上限，勿无脑开</li>
-            <li>按业务 95 分位长度预留余量</li>
-          </ul>
-          <div class="callout" style="margin-top:auto">128K 设满 ≠ 最优，过度预留会挤占并发</div>
+        <div class="pillar-tile">
+          <div class="ic"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect x="22" y="24" width="38" height="34" rx="6" fill="rgba(196,163,90,0.12)" stroke="#c4a35a" stroke-width="1.6"/><path d="M28 42 H54" stroke="#e08f63" stroke-width="2"/><text x="41" y="46" text-anchor="middle" fill="#f3eee6" font-size="11" font-family="IBM Plex Mono,monospace">max</text></svg></div>
+          <div class="pillar-body"><div class="pillar-t">上下文上限</div><p class="pillar-d">对齐服务端 max_len；静默截断最难排查。</p></div>
         </div>
-        <div class="g">
-          <h3 class="g-title">③ 显存管理</h3>
-          <ul class="check-list">
-            <li>Ingram 缓存开启</li>
-            <li>DevSHM 权限给够</li>
-            <li>吸收注意力 + 专家并行环境变量打开</li>
-            <li>防止 OOM 是第一条纪律</li>
-          </ul>
-          <div class="small-note">max_num_seqs 过大触发 preemption，吞吐反跌</div>
+        <div class="pillar-tile">
+          <div class="ic"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect x="22" y="22" width="38" height="38" rx="7" fill="#121410" stroke="#76a8b8" stroke-width="1.6"/><path d="M30 36 H52 M30 46 H46" stroke="#6fa090" stroke-width="1.8"/><text x="41" y="62" text-anchor="middle" fill="#c4a35a" font-size="11" font-weight="600" font-family="IBM Plex Mono,monospace">VRAM</text></svg></div>
+          <div class="pillar-body"><div class="pillar-t">显存开关</div><p class="pillar-d">Prefix cache、共享内存、内核特性要与栈版本匹配。</p></div>
         </div>
-        <div class="g">
-          <h3 class="g-title">④ 部署规范</h3>
-          <ul class="check-list">
-            <li>Docker + 官方镜像 + 健康检查 + 自动重启</li>
-            <li>vLLM Router 做负载均衡</li>
-            <li>推理强度合理配置，避免过度计算</li>
-            <li>监控：GPU Util / 显存 Alloc vs Reserved / P99</li>
-          </ul>
+        <div class="pillar-tile">
+          <div class="ic"><svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><rect x="24" y="26" width="34" height="30" rx="6" fill="none" stroke="#9e8eb8" stroke-width="1.6"/><circle cx="54" cy="36" r="12" fill="rgba(111,160,144,0.22)" stroke="#6fa090" stroke-width="1.4"/><path d="M54 30 V42 M48 36 H60" stroke="#f3eee6" stroke-width="1.6"/></svg></div>
+          <div class="pillar-body"><div class="pillar-t">交付弹性</div><p class="pillar-d">容器探针、滚动发布、入口 Router 与熔断要写进 Runbook。</p></div>
         </div>
       </div>
     </div>
     <div class="slide-footer"><span>运维</span><span>09</span></div>
-    <div class="wa">模型的文件和Tokenizer的配置要对齐</div>
+    <div class="wa">首先就是你要保证</div>
   </section>
 
-  <!-- Slide 10: 快速启动建议 -->
   <section class="s slide" id="s10">
     <div class="slide-header">
       <span class="badge">总结</span>
-      <h2>快速启动建议</h2>
+      <h2>从模型到线上</h2>
     </div>
-    <div class="col slide-main v-center">
-      <div style="text-align:center;max-width:1400px">
-        <div style="display:flex;gap:20px;justify-content:center;margin-bottom:36px">
-          <div style="background:var(--c-surface);padding:24px 32px;border-radius:var(--r-lg);text-align:left;min-width:420px;border:1px solid var(--c-border)">
-            <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-a);margin-bottom:12px">开发</div>
-            <div style="font-size:32px;color:var(--c-text-2);line-height:1.6">
-              先跑通 OpenAI 兼容 API<br/>
-              核对 model 字段与 reasoning 开关<br/>
-              计费用 total_tokens<br/>
-              JSON Mode 场景对号入座
-            </div>
-          </div>
-          <div style="background:var(--c-surface);padding:24px 32px;border-radius:var(--r-lg);text-align:left;min-width:420px;border:1px solid var(--c-border)">
-            <div style="font-size:var(--fs-card-title);font-weight:700;color:var(--c-accent-b);margin-bottom:12px">运维</div>
-            <div style="font-size:32px;color:var(--c-text-2);line-height:1.6">
-              Docker + vLLM 起步<br/>
-              监控显存 &amp; P99 延迟<br/>
-              max_model_len 按 95 分位设<br/>
-              量化路径：FP8 → AWQ → 加卡
-            </div>
-          </div>
+    <div class="col slide-main fill-deck">
+      <div class="od-split">
+        <div class="od-copy">
+          <p class="od-kicker">Closing</p>
+          <ul class="od-bullets">
+            <li><strong>容量</strong>决定能不能接什么业务形态。</li>
+            <li><strong>契约（API）</strong>决定集成摩擦有多大。</li>
+            <li><strong>运维</strong>决定能不能稳定睡在夜里。</li>
+          </ul>
+          <p class="od-lead" style="font-size:40px;border-left:3px solid rgba(111,160,144,0.45);padding-left:18px">收敛成一件事：可观测的推理服务交付。</p>
         </div>
-        <div style="background: linear-gradient(90deg, rgba(56,189,248,0.08), rgba(129,140,248,0.08)); padding:22px 40px; border-radius: var(--r-lg); border: 1px solid rgba(56,189,248,0.2); display:inline-block;">
-          <div style="font-size:var(--fs-body);font-weight:700;color:var(--c-accent-a)">今晚就能做的下一步</div>
-          <div style="font-size:32px;color:var(--c-text-2);margin-top:6px">打开你的 vLLM 配置，对照三条检查清单——今晚就能少改一轮配置</div>
+        <div class="od-figure">
+          <svg class="viz-svg" preserveAspectRatio="xMidYMid meet" viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="s10-c1" x1="30%" y1="20%" x2="70%" y2="80%"><stop offset="0%" stop-color="#3d2e26"/><stop offset="100%" stop-color="#15100e"/></linearGradient>
+              <linearGradient id="s10-c2" x1="30%" y1="20%" x2="70%" y2="80%"><stop offset="0%" stop-color="#1e2c26"/><stop offset="100%" stop-color="#0e1512"/></linearGradient>
+              <linearGradient id="s10-c3" x1="30%" y1="20%" x2="70%" y2="80%"><stop offset="0%" stop-color="#2a2430"/><stop offset="100%" stop-color="#141218"/></linearGradient>
+            </defs>
+            <circle cx="168" cy="150" r="72" fill="url(#s10-c1)" stroke="#e08f63" stroke-opacity="0.55" stroke-width="1.5"/>
+            <text x="168" y="142" text-anchor="middle" fill="#f8f3eb" font-size="24" font-weight="600" font-family="Newsreader,Georgia,serif">容量</text>
+            <text x="168" y="168" text-anchor="middle" fill="#9a9288" font-size="15">长上下文</text>
+            <circle cx="360" cy="150" r="72" fill="url(#s10-c2)" stroke="#6fa090" stroke-opacity="0.5" stroke-width="1.5"/>
+            <text x="360" y="142" text-anchor="middle" fill="#f8f3eb" font-size="24" font-weight="600" font-family="Newsreader,Georgia,serif">契约</text>
+            <text x="360" y="168" text-anchor="middle" fill="#9a9288" font-size="15">API</text>
+            <circle cx="552" cy="150" r="72" fill="url(#s10-c3)" stroke="#9e8eb8" stroke-opacity="0.5" stroke-width="1.5"/>
+            <text x="552" y="142" text-anchor="middle" fill="#f8f3eb" font-size="24" font-weight="600" font-family="Newsreader,Georgia,serif">运维</text>
+            <text x="552" y="168" text-anchor="middle" fill="#9a9288" font-size="15">可观测</text>
+            <path d="M240 150 H288 M432 150 H480" stroke="#8c8479" stroke-opacity="0.35" stroke-width="2"/>
+            <polygon points="288,150 280,146 280,154" fill="#8c8479" fill-opacity="0.55"/>
+            <polygon points="480,150 472,146 472,154" fill="#8c8479" fill-opacity="0.55"/>
+            <text x="360" y="258" text-anchor="middle" fill="#8c8479" font-size="18" font-family="IBM Plex Mono,monospace" letter-spacing="0.14em">SHIP · OBSERVE · ITERATE</text>
+          </svg>
         </div>
-        <p style="font-size:var(--fs-caption);color:var(--c-text-2);margin-top:28px">如果想深入了解量化陷阱，关注下期：INT8 为什么比 FP8 还慢</p>
       </div>
     </div>
-    <div class="slide-footer">
-      <span>AI Infra Team · 水猿</span>
-      <span>10</span>
-    </div>
-    <div class="wa">希望能够帮助大家少踩坑</div>
+    <div class="slide-footer"><span>DeepSeek V4</span><span>10</span></div>
+    <div class="wa">希望可以帮助大家能够少采坑</div>
   </section>
 
-</div>
-<script>
-document.addEventListener('keydown', e => {
-  const slides = [...document.querySelectorAll('.s.slide')];
-  const idx = slides.findIndex(s => s.classList.contains('is-active'));
-  if (e.key === 'ArrowRight' || e.key === ' ') { slides[idx]?.classList.remove('is-active'); slides[Math.min(idx+1, slides.length-1)]?.classList.add('is-active'); }
-  if (e.key === 'ArrowLeft') { slides[idx]?.classList.remove('is-active'); slides[Math.max(idx-1, 0)]?.classList.add('is-active'); }
-});
-</script>
+  </div>
+
+  <div id="pn"></div>
+  <script>
+  (function(){
+    var PW=1920,PH=1080;
+    function fit(){
+      var el=document.getElementById('P');
+      if(!el)return;
+      var r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;
+      el.style.transform='scale('+r+')';
+      el.style.transformOrigin='0 0';
+      el.style.left=x+'px';
+      el.style.top=y+'px';
+    }
+    window.addEventListener('resize',fit);
+    requestAnimationFrame(function(){ fit(); });
+    var slides=document.querySelectorAll('.s.slide'),total=slides.length,cur=0;
+    function ui(){
+      var pn=document.getElementById('pn');
+      if(pn)pn.textContent=(cur+1)+' / '+total;
+      var b=document.getElementById('prog');
+      if(b)b.style.width=(total<=1?100:(cur/(total-1)*100))+'%';
+    }
+    function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('is-active');cur=i;slides[cur].classList.add('is-active');ui()}
+    document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1)}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}});
+    document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1)});
+    window.go=go;
+    window.fit=fit;
+    ui();
+  })();
+  </script>
 </body>
 </html>

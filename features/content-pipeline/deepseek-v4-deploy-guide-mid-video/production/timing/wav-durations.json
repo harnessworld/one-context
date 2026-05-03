@@ -1,20 +1,20 @@
 {
-  "wavFile": "production/media/voiceover.wav",
+  "wavFile": "media/voiceover.wav",
   "slideDurationsSec": [
-    22.0,
-    45.0,
-    50.0,
-    55.0,
-    55.0,
-    45.0,
-    45.0,
-    40.0,
-    50.0,
-    36.0
+    23.66,
+    57.92,
+    23.64,
+    58.02,
+    24.76,
+    15.06,
+    69.46,
+    65.0,
+    86.42,
+    39.907125
   ],
   "outputFile": "final.mp4",
   "burnSubtitles": true,
-  "srtFile": "production/subtitles/sub.srt",
+  "srtFile": "subtitles/sub.srt",
   "subtitle": {
     "charsPerLine": 28,
     "fontSize": 48,
@@ -26,5 +26,6 @@
     "outline": 0,
     "barHeight": 0,
     "barAlpha": 0.55
-  }
+  },
+  "_slideBoundariesSec": "s3 文案对齐口播：81.58–105.22s 为国产芯片/昇腾/成本/Agent，非 MoE 路由图（已改为「国产化与能力升级」）。s2→s3 仍在「简直太有用了」之后。累计：0→23.66；→81.58 s2；→105.22 s3；→163.24 s4；→188.0 s5；→203.06 s6；→272.52 s7；→337.52 s8；→423.94 s9；→463.847 s10。"
 }
