@@ -233,6 +233,30 @@ features/
 
 更完整的 one-context 约定见根目录 `README.md`、`knowledge/standards/one-context-conventions.md`。
 
+<!-- source: features/_template/content-production/production/content/00-structure.md -->
+
+# 话题大纲
+
+<!-- 视频的话题拆分、每段核心要点、预计时长 -->
+
+<!-- source: features/_template/content-production/production/content/01-script.md -->
+
+# 口播讲稿
+
+<!-- 完整口播文字稿，按话题段落组织 -->
+
+<!-- source: features/_template/content-production/production/content/05-publish-kit.md -->
+
+# 发布素材
+
+标题：
+
+简介：
+
+话题：
+
+<!-- 各平台标题、简介、话题标签、置顶评论、章节轴、检查清单 -->
+
 <!-- source: features/_template/content-production/README.md -->
 
 # Content Production — 短视频 Feature 模板
@@ -342,30 +366,6 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | 8 | content/ 有讲稿 | `production/content/01-script.md` 存在 |
 | 9 | INDEX.md 一致 | `features/INDEX.md` 中该 feature 的 path 与实际目录一致 |
 | 10 | spec.md 路径自洽 | spec.md 内引用的路径前缀与实际 `features/content-pipeline/<id>/` 一致 |
-
-<!-- source: features/_template/content-production/production/content/00-structure.md -->
-
-# 话题大纲
-
-<!-- 视频的话题拆分、每段核心要点、预计时长 -->
-
-<!-- source: features/_template/content-production/production/content/01-script.md -->
-
-# 口播讲稿
-
-<!-- 完整口播文字稿，按话题段落组织 -->
-
-<!-- source: features/_template/content-production/production/content/05-publish-kit.md -->
-
-# 发布素材
-
-标题：
-
-简介：
-
-话题：
-
-<!-- 各平台标题、简介、话题标签、置顶评论、章节轴、检查清单 -->
 
 <!-- source: features/_template/deliver.md -->
 
@@ -478,6 +478,30 @@ updated: ""
 
 勿在此文件存放密钥、token 或未脱敏的敏感客户信息。
 
+<!-- source: features/_template/content-production/production/content/00-structure.md -->
+
+# 话题大纲
+
+<!-- 视频的话题拆分、每段核心要点、预计时长 -->
+
+<!-- source: features/_template/content-production/production/content/01-script.md -->
+
+# 口播讲稿
+
+<!-- 完整口播文字稿，按话题段落组织 -->
+
+<!-- source: features/_template/content-production/production/content/05-publish-kit.md -->
+
+# 发布素材
+
+标题：
+
+简介：
+
+话题：
+
+<!-- 各平台标题、简介、话题标签、置顶评论、章节轴、检查清单 -->
+
 <!-- source: features/_template/content-production/README.md -->
 
 # Content Production — 短视频 Feature 模板
@@ -587,27 +611,3 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | 8 | content/ 有讲稿 | `production/content/01-script.md` 存在 |
 | 9 | INDEX.md 一致 | `features/INDEX.md` 中该 feature 的 path 与实际目录一致 |
 | 10 | spec.md 路径自洽 | spec.md 内引用的路径前缀与实际 `features/content-pipeline/<id>/` 一致 |
-
-<!-- source: features/_template/content-production/production/content/00-structure.md -->
-
-# 话题大纲
-
-<!-- 视频的话题拆分、每段核心要点、预计时长 -->
-
-<!-- source: features/_template/content-production/production/content/01-script.md -->
-
-# 口播讲稿
-
-<!-- 完整口播文字稿，按话题段落组织 -->
-
-<!-- source: features/_template/content-production/production/content/05-publish-kit.md -->
-
-# 发布素材
-
-标题：
-
-简介：
-
-话题：
-
-<!-- 各平台标题、简介、话题标签、置顶评论、章节轴、检查清单 -->
