@@ -31,6 +31,12 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 | **tts** | `node cli.js tts --project <dir>` | `presentation.html`、`讲稿.md`、可选 `config.json` | 机器念稿 + 自动字幕 |
 | **srt-map** | `node cli.js srt-map --project <dir>`（可选 `--boundaries "0:0-0,1:1-2,..."`） | `sub.srt`、`presentation.html` | Whisper 对齐失败时，手动映射 SRT 条目→幻灯片，生成 `wav-durations.json` |
 | **timing-check** | `node cli.js timing-check --project <dir>`（可选 `--json`、`--audit-cue-starts`） | `timing/wav-durations.json`、`subtitles/sub.srt`、`slides/presentation.html` | 默认只报高危：**翻页落在「下一页 .wa」所在字幕条的起点**（句首陷阱）；`--audit-cue-starts` 列出所有「翻页≈字幕起点」供人工扫；**wav 成片前**命中高危则打印（`--skip-timing-check` 跳过）；高危存在时退出码 **2** |
+
+### `timing/flip-boundaries.md`（wav 成片前语义门控）
+
+- **`timing-check` 不够**：它不收口「这一页该讲哪几句」。画面与口播错位（例如关键词句仍在上一页视觉）属于 **语义分界错误**，须在成片前用文档锁死。
+- **做法**：在 `timing/` 下维护 **`flip-boundaries.md`**（模板：**`references/flip-boundaries.template.md`**）：一页一行，写清 **进入该页的 wall-clock 秒数** + **`sub.srt` 条目锚点**；与 `wav-durations.json` 的 `slideDurationsSec` 前缀和自检一致。
+- **流水线**：`pipeline/video-pipeline.step.yaml` 的 **Step 10** 会在格式校验后自动执行 **`timing-check`**；若缺失 `flip-boundaries.md` 会 **WARN**（建议补全后再渲染）。手工跑 `wav` 前也应先看该文件是否已与最新 SRT/时长对齐。
 | **cover** | `node cli.js cover --project <dir>`（可选 `--horizontal`） | `cover.html` / `cover_h.html` | Playwright 截图 → `videos/cover.png` 或 `videos/cover_h.png` |
 
 ### 翻页边界语义（机制 · 防「句首陷阱」）
@@ -290,14 +296,22 @@ node cli.js cover --project <素材目录> --horizontal
 
 ### 发布素材（全平台通用格式）
 
-建议在素材目录增加 `production/content/05-publish-kit.md`，格式：
+建议在素材目录增加 `production/content/05-publish-kit.md`。**简介与话题放在同一个小节**（如 `## 简介与话题`）：小节内从标题下到话题行之上，写成**纯文本**——按各平台「简介 / 描述」输入框里会直接显示的样子来写（换行可用；不要写 `**`、`-` 列表等 Markdown，复制进去不会渲染）。**最后一行单独写话题**。同一文件里其它小节（标题备选、封面备忘、检查清单等）仍可用 Markdown 方便制片协作。
 
 ```
-标题：……
+（## 简介与话题 下面这一段粘贴到平台时应一字不差可用）
 
-简介：……
+面向……（纯文本多行）
 
-话题：#话题1 #话题2 …
+#话题甲 #话题乙 #话题丙
 ```
+
+**话题行约定**
+
+- 每个标签必须以 **`#`** 开头（平台话题格式）。
+- 标签之间只用 **空格** 分隔；**不要**用英文逗号、顿号或其它标点串标签。
+- 需要中英混写时写在同一标签内，例如 `#ManagedAgents`、`#AI公司蓝图`。
+
+**封面流水线（`pipeline/video-pipeline.step.yaml` Step 12）**：向 `publish_kit` 写入 `intro`、`topics`。优先解析 `## 简介与话题`：小节内**最后一行**若为「仅由 `#标签` 与空格构成」则记入 `topics`，其余记入 `intro`。若无小节或缺字段，则回退：`简介：` / `Summary:` / `Intro:` 单行、`话题：` / `Tags:` 单行（旧版「简介 / 话题分两行」写法仍兼容）。
 
 示例：`features/content-pipeline/short-video-reporting-paradigm/production/content/05-publish-kit.md`

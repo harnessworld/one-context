@@ -670,7 +670,9 @@ steps:
            ```
            注意：wa 字段不要重复 title；accentColor 从 ["g-hi","g-gn","g-or","g-sk","g-rd","g-purple"] 中轮询分配，相邻页不同。
 
-        4. 同时写回正式的 `wav-durations.json` 到 project_dir，格式：
+        4. 同时写回正式的 `wav-durations.json` 到 project_dir，并 **创建或更新 `timing/flip-boundaries.md`**（复制 `skills/html-video-from-slides/references/flip-boundaries.template.md` 起稿）：表格列出每页「进入时刻 + sub.srt 条目锚点」，与人审「这句必须在哪一页讲完」对齐；仅靠 timing-check 无法发现语义错位。
+
+        5. `wav-durations.json` 格式：
            ```json
            {
              "wavFile": "xxx.wav",
@@ -683,7 +685,7 @@ steps:
            ```
            subtitle 字段优先复用 video-input.json 中已有的 subtitle，缺省项用上方推荐值填充。
 
-           **字幕样式设计原则（必读）**：
+        6. **字幕样式设计原则（必读）**：
            - `primaryColour: "#FFD700"`（日落金）：比纯黄 `#FFFF00` 更耐看，长视频不刺眼。
            - `outline: 0`：ASS 描边会在深色幻灯片背景上产生脏黑边。取消描边，依靠 `barHeight` 提供干净的半透明底栏。
            - `barHeight: 0`（默认）：不绘制底栏，字幕直接浮于画面底部，保持画面干净。适合深色主题 PPT 或播客类视频。
@@ -693,10 +695,10 @@ steps:
            - `barHeight: 70–90`：底栏托住字幕，避免与幻灯正文打架。
            - `marginV: 12–16`：字幕在底栏内留白。
 
-        5. 自检并输出摘要（markdown 表格）：
+        7. 自检并输出摘要（markdown 表格）：
            页码 | 布局 | 标题 | 正文字数 | 锚文字
 
-        6. 结尾说明：内容板已生成，接下来 Step 9 将进行视觉细化。如需修改内容，可从 `--from_step 8` 重跑；如认可内容板，继续执行即可。
+        8. 结尾说明：内容板已生成，接下来 Step 9 将进行视觉细化。如需修改内容，可从 `--from_step 8` 重跑；如认可内容板，继续执行即可。
       input_source: "step:7"
       timeout: 300
     output_file: outputs/step-8.txt
@@ -783,7 +785,7 @@ steps:
     config:
       command: |
         #!/usr/bin/env python3
-        import os, sys, json, re
+        import os, sys, json, re, subprocess
         from pathlib import Path
 
         STATE_FILE = Path(os.environ.get("STEP_STATE", ".step/video-pipeline/state.json"))
@@ -845,7 +847,6 @@ steps:
             total_sec = sum(slides)
             wav = PROJECT_DIR / dur.get("wavFile", state["wav_file"])
             if wav.exists():
-                import subprocess
                 ff = subprocess.run(
                     ["ffprobe", "-v", "error", "-show_entries", "format=duration",
                      "-of", "default=noprint_wrappers=1:nokey=1", str(wav)],
@@ -856,6 +857,31 @@ steps:
                     diff = abs(total_sec - wav_dur)
                     if diff > 5.0:
                         errors.append(f"slideDurationsSec 总和({total_sec:.1f}s) 与 WAV 时长({wav_dur:.1f}s) 差 {diff:.1f}s")
+
+        # 3b. timing-check（句首陷阱；与 SKILL.md 一致）
+        SKILL_DIR = Path(state["skill_dir"]).resolve()
+        tc = subprocess.run(
+            ["node", str(SKILL_DIR / "cli.js"), "timing-check", "--project", str(PROJECT_DIR)],
+            capture_output=True,
+            text=True,
+        )
+        print(tc.stdout or "")
+        if tc.stderr:
+            print(tc.stderr)
+        if tc.returncode == 2:
+            errors.append(
+                "timing-check 高危（exit 2）：翻页可能落在下一页 .wa 句起点；见 skills/html-video-from-slides/SKILL.md「翻页边界语义」，修正 wav-durations 后重跑 Step 10"
+            )
+        elif tc.returncode != 0:
+            errors.append(f"timing-check 异常退出码 {tc.returncode}")
+
+        # 3c. 语义翻页契约（缺失仅警告，避免一次性卡死旧项目）
+        fb = PROJECT_DIR / "timing" / "flip-boundaries.md"
+        if not fb.is_file():
+            print(
+                "[WARN] 缺少 timing/flip-boundaries.md：建议在 wav 成片前写明「每页进入时刻 + sub.srt 锚句」，"
+                "否则易出现画面与口播语义错位。模板：skills/html-video-from-slides/references/flip-boundaries.template.md"
+            )
 
         # 4. 输出结果
         if errors:
@@ -872,7 +898,7 @@ steps:
             print(f"     HTML Slides:   {state.get('slide_count', 'unknown')} 页")
             print(f"     时长数组长度:  {len(state.get('slide_durations', []))}")
             print(f"     总时长:        {sum(state.get('slide_durations', [])):.1f}s")
-            print("     翻页语义：请在 skills/html-video-from-slides 下执行 timing-check（默认识别「下一页 .wa 句起点」高危对齐）")
+            print("     句首陷阱：Step 10 已跑 timing-check；语义分界请对照 timing/flip-boundaries.md（模板 references/flip-boundaries.template.md）")
 
         state["step10_verified"] = True
         with open(STATE_FILE, "w", encoding="utf-8") as f:
@@ -970,11 +996,36 @@ steps:
         if kit_file.exists():
             kit_text = kit_file.read_text(encoding="utf-8")
             title_m = re.search(r'(?:标题|Title)[：:]\s*\n?\s*(?:[-\s])*(.+)', kit_text)
-            # 简介：找"简介"或"Summary/Intro"关键词后的第一行非空内容
-            intro_m = re.search(r'(?:简介|Summary|Intro)[：:]\s*\n?\s*(.+)', kit_text)
+            intro = ""
+            topics = ""
+            sec_m = re.search(
+                r"^##\s*简介与话题\s*\n(.*?)(?=^##\s|\Z)",
+                kit_text,
+                re.MULTILINE | re.DOTALL,
+            )
+            if sec_m:
+                block = sec_m.group(1).strip()
+                lines = [ln.rstrip() for ln in block.splitlines()]
+                while lines and not lines[-1].strip():
+                    lines.pop()
+                if lines:
+                    last = lines[-1].strip()
+                    if re.fullmatch(r"(?:#\S+\s*)+", last):
+                        topics = last
+                        lines = lines[:-1]
+                intro = "\n".join(lines).strip()
+            if not intro:
+                intro_m = re.search(r"(?:简介|Summary|Intro)[：:]\s*\n?\s*(.+)", kit_text)
+                if intro_m:
+                    intro = intro_m.group(1).strip()
+            if not topics:
+                topics_m = re.search(r"(?:话题|Tags|Hashtags)[：:]\s*\n?\s*(.+)", kit_text)
+                if topics_m:
+                    topics = topics_m.group(1).strip()
             publish_kit = {
-                "title": title_m.group(1).strip().lstrip('- ') if title_m else "",
-                "intro": intro_m.group(1).strip() if intro_m else "",
+                "title": title_m.group(1).strip().lstrip("- ") if title_m else "",
+                "intro": intro,
+                "topics": topics,
             }
 
         # 3. 检查用户是否已自定义封面

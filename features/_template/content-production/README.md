@@ -26,7 +26,7 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
     ├── content/                    # 内容创作资产 ✅ 跟踪
     │   ├── 00-structure.md         #   话题大纲
     │   ├── 01-script.md            #   口播讲稿
-    │   └── 05-publish-kit.md       #   发布素材（标题/简介/话题/检查清单）
+    │   └── 05-publish-kit.md       #   发布素材（标题/简介与话题同节/检查清单等）
     │
     ├── slides/                     # 幻灯片资产 ✅ 跟踪
     │   └── presentation.html       #   主幻灯（核心资产）
@@ -36,6 +36,7 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
     │
     ├── timing/                     # 时间轴与配置 ✅ 跟踪
     │   ├── wav-durations.json      #   精确翻页时长
+    │   ├── flip-boundaries.md      #   翻页语义契约（页 ↔ 时刻 ↔ SRT 锚；wav 前建议必有）
     │   └── video-input.json        #   配置 + srtReplacements 积累
     │
     ├── media/                      # 媒体文件 ❌ 不跟踪
@@ -57,6 +58,7 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | presentation.html | ✅ | 布局+SVG+精炼文字，不可无损重建 |
 | sub.srt（校对后） | ✅ | 校对是人工+推理过程，不可无损重建 |
 | wav-durations.json | ✅ | 精确翻页时长，不可无损重建 |
+| flip-boundaries.md | ✅（强烈建议） | 页↔口播锚点的人审契约；缺则易画面与语义错位 |
 | video-input.json | ✅ | 含 srtReplacements 积累，不可无损重建 |
 | cover.html | ✅ | 封面设计，不可无损重建 |
 | review_record / issue_checklist | ✅ | 评审产出，放 feature 根目录 |
@@ -105,3 +107,4 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | 8 | content/ 有讲稿 | `production/content/01-script.md` 存在 |
 | 9 | INDEX.md 一致 | `features/INDEX.md` 中该 feature 的 path 与实际目录一致 |
 | 10 | spec.md 路径自洽 | spec.md 内引用的路径前缀与实际 `features/content-pipeline/<id>/` 一致 |
+| 11 | wav 成片语义契约（建议） | `production/timing/flip-boundaries.md` 存在并与 `wav-durations.json` 同步 |

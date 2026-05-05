@@ -1,0 +1,27 @@
+{
+  "_comment": "翻页定义见同目录 flip-boundaries.md；时长之和须等于 WAV（约 730.143s）。",
+  "wavFile": "media/podcast-action0.wav",
+  "outputFile": "media/final-from-wav.mp4",
+  "burnSubtitles": true,
+  "srtFile": "subtitles/sub.srt",
+  "subtitle": {
+    "charsPerLine": 36,
+    "fontSize": 42,
+    "barHeight": 80
+  },
+  "slideDurationsSec": [
+    42.14,
+    84.22,
+    1.56,
+    2.48,
+    85.26,
+    75.6,
+    68.18,
+    36.62,
+    158.98,
+    36,
+    97.96,
+    22.04,
+    19.103167
+  ]
+}

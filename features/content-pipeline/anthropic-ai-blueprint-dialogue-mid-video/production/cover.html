@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>封面</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #020812;
+}
+
+#cover {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+}
+
+/* ─── 背景层 ─── */
+#bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+}
+
+/* 纯CSS备用背景（无背景图时展示） */
+#bg-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+/* ─── 3D 蓝图层（透视网格 + 线框） ─── */
+#blueprint-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+.blueprint-floor {
+    position: absolute;
+    bottom: -10%;
+    left: -75%;
+    width: 250%;
+    height: 68%;
+    transform-origin: 50% 0%;
+    transform: perspective(560px) rotateX(58deg);
+    background-image:
+        linear-gradient(0deg, rgba(120, 245, 255, 0.11) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100, 220, 255, 0.07) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(0, 238, 255, 0.28) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 220, 255, 0.18) 1px, transparent 1px);
+    background-size: 36px 36px, 36px 36px, 180px 180px, 180px 180px;
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 18%, rgba(0,0,0,0.95) 52%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 18%, rgba(0,0,0,0.95) 52%);
+}
+.blueprint-floor::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(160, 250, 255, 0.08), transparent 65%);
+}
+/* 顶部柔和青光，压低噪点感 */
+.blueprint-aurora {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 90% 55% at 50% -5%, rgba(0, 210, 255, 0.09), transparent 55%),
+        radial-gradient(ellipse 70% 40% at 85% 25%, rgba(56, 189, 248, 0.045), transparent 50%);
+    pointer-events: none;
+}
+#blueprint-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0.78;
+}
+
+/* 暗角遮罩 */
+#overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    /* background 由 JS 根据 overlayDirection 动态注入 */
+}
+
+/* 噪点纹理 */
+#noise {
+    position: absolute; inset: 0;
+    z-index: 6;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* ─── 中层装饰（蓝图线框 /  architecture schematic，非手机） ─── */
+#hero-deco {
+    position: absolute;
+    left: 50%;
+    top: 53%;
+    width: 500px;
+    height: 860px;
+    margin-left: -250px;
+    margin-top: -430px;
+    z-index: 7;
+    pointer-events: none;
+}
+#hero-deco svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ─── 顶部品牌栏 ─── */
+#header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 76px 76px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#tagline {
+    font-size: 30px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 6px;
+}
+
+#brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#brand-name {
+    font-size: 30px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 3px;
+}
+
+#avatar {
+    width: 78px; height: 78px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.25);
+    display: block;
+}
+
+#avatar-fallback {
+    width: 78px; height: 78px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.20);
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+}
+
+/* ─── 核心内容区 ─── */
+#content {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 200px 72px 280px;
+    text-align: center;
+    z-index: 20;
+    gap: 0;
+}
+
+/* 小标签 */
+#tag {
+    display: inline-block;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 8px;
+    padding: 10px 32px;
+    border-radius: 100px;
+    margin-bottom: 52px;
+}
+
+/* ── 主标题 ─── */
+#headline {
+    font-size: 200px;
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -4px;
+    color: #ffffff;
+    text-align: center;
+    word-break: keep-all;
+}
+
+/* 自适应字号 — 按每行最大 CJK 视觉宽度分档 */
+#headline.len5  { font-size: 200px; }                          /* maxLineW ≤4 */
+#headline.len6  { font-size: 180px; }                          /* maxLineW ≤5 */
+#headline.len7  { font-size: 155px; letter-spacing: -2px; }    /* maxLineW ≤6 */
+#headline.len8  { font-size: 130px; letter-spacing: -1px; }    /* maxLineW ≤7 */
+#headline.len10 { font-size: 110px; letter-spacing: 0px; }     /* maxLineW ≤9 */
+#headline.len12 { font-size: 95px; }                           /* maxLineW ≤11 */
+#headline.long  { font-size: 82px;  letter-spacing: 0px; }     /* maxLineW >11 */
+
+/* 强调词 */
+#headline em {
+    font-style: normal;
+}
+
+/* 分割线 */
+#divider {
+    width: 120px;
+    height: 3px;
+    border-radius: 2px;
+    margin: 44px auto 44px;
+}
+
+/* 副标题（tech 下由 JS 覆盖为更高对比） */
+#subline {
+    font-size: 48px;
+    font-weight: 600;
+    line-height: 1.55;
+    color: rgba(235, 252, 255, 0.96);
+    letter-spacing: 3px;
+    max-width: 900px;
+    text-shadow:
+        0 1px 2px rgba(0, 10, 20, 0.95),
+        0 2px 16px rgba(0, 0, 0, 0.88),
+        0 0 20px rgba(0, 210, 255, 0.22);
+}
+
+/* ─── 底部信息条 ─── */
+#footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0 76px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.foot-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 27px;
+    color: rgba(255,255,255,0.38);
+    letter-spacing: 2px;
+}
+
+.foot-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+#watermark {
+    font-size: 24px;
+    color: rgba(255,255,255,0.22);
+    letter-spacing: 3px;
+}
+
+/* ─── 底部装饰线 ─── */
+#accent-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 5px;
+}
+</style>
+</head>
+<body>
+<div id="cover">
+
+    <!-- 背景 -->
+    <img id="bg" src="" alt="">
+    <div id="bg-fallback"></div>
+    <div id="blueprint-bg" aria-hidden="true">
+        <div class="blueprint-floor"></div>
+        <div class="blueprint-aurora"></div>
+        <svg id="blueprint-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid slice">
+            <defs>
+                <linearGradient id="bp-fade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#7ee8ff" stop-opacity="0.07"/>
+                    <stop offset="40%" stop-color="#00a8cc" stop-opacity="0.02"/>
+                    <stop offset="100%" stop-color="#001018" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="bp-ray" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" stop-color="#00e5ff" stop-opacity="0"/>
+                    <stop offset="50%" stop-color="#b8f8ff" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+                </linearGradient>
+                <pattern id="bp-hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(35)">
+                    <line x1="0" y1="0" x2="0" y2="10" stroke="#5ecfff" stroke-opacity="0.045" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="1080" height="720" fill="url(#bp-fade)"/>
+            <rect width="1080" height="640" fill="url(#bp-hatch)" opacity="0.85"/>
+            <!-- 灭点透视（540, 420） -->
+            <g stroke="#8aefff" stroke-width="0.85" fill="none" stroke-linecap="round" opacity="0.22">
+                <path d="M540 420 L0 180"/><path d="M540 420 L216 180"/><path d="M540 420 L432 180"/><path d="M540 420 L648 180"/><path d="M540 420 L864 180"/><path d="M540 420 L1080 180"/>
+                <path d="M540 420 L0 1320"/><path d="M540 420 L216 1320"/><path d="M540 420 L432 1320"/><path d="M540 420 L648 1320"/><path d="M540 420 L864 1320"/><path d="M540 420 L1080 1320"/>
+            </g>
+            <g stroke="#00d4e8" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.18" stroke-dasharray="4 12">
+                <path d="M540 420 L180 200"/><path d="M540 420 L900 200"/><path d="M540 420 L120 900"/><path d="M540 420 L960 900"/>
+            </g>
+            <!-- 图框角标 -->
+            <g stroke="#5ecfff" stroke-width="1.15" fill="none" stroke-linecap="square" opacity="0.35">
+                <path d="M48 96 V136 H88"/><path d="M1032 96 V136 H992"/><path d="M48 820 V780 H88"/><path d="M1032 820 V780 H992"/>
+            </g>
+            <!-- 主结构：单组精致等轴块 -->
+            <g stroke="#9ff0ff" stroke-width="1.15" fill="rgba(0,28,42,0.18)" stroke-linejoin="round" opacity="0.32">
+                <path d="M200 260 L380 168 L560 260 L380 352 Z"/>
+                <path d="M380 352 L560 260 L560 440 L380 532 Z"/>
+                <path d="M200 260 L380 352 L380 532 L200 440 Z"/>
+            </g>
+            <g stroke="#40d4e8" stroke-width="0.9" fill="none" stroke-linejoin="round" opacity="0.22">
+                <path d="M680 300 L820 228 L960 300 L820 372 Z"/>
+                <path d="M820 372 L960 300 L960 428 L820 500 Z"/>
+                <path d="M680 300 L820 372 L820 500 L680 428 Z"/>
+            </g>
+            <!-- 水平「扫描」细线与渐变高光 -->
+            <rect x="0" y="318" width="1080" height="1.5" fill="url(#bp-ray)" opacity="0.35"/>
+            <rect x="0" y="498" width="1080" height="1" fill="url(#bp-ray)" opacity="0.22"/>
+            <circle cx="540" cy="420" r="168" stroke="#00e8ff" stroke-width="0.75" fill="none" opacity="0.11"/>
+            <circle cx="540" cy="420" r="268" stroke="#00c8e8" stroke-width="0.6" fill="none" opacity="0.07" stroke-dasharray="5 16"/>
+            <!-- 仰卧在展开的蓝图上（侧视线框 + 透视图纸） -->
+            <g transform="translate(540, 1560)" opacity="0.94">
+                <g transform="rotate(-4.5)">
+                    <rect x="-490" y="-125" width="980" height="360" rx="12" fill="rgba(0,26,42,0.5)" stroke="#8aefff" stroke-width="2"/>
+                    <rect x="-472" y="-108" width="944" height="326" rx="8" fill="none" stroke="#4ab8cc" stroke-width="0.75" stroke-dasharray="14 12" opacity="0.45"/>
+                    <g stroke="#5ecfff" stroke-width="0.85" opacity="0.28" stroke-linecap="round">
+                        <line x1="-450" y1="-70" x2="450" y2="-70"/><line x1="-450" y1="-20" x2="450" y2="-20"/><line x1="-450" y1="30" x2="450" y2="30"/><line x1="-450" y1="80" x2="450" y2="80"/><line x1="-450" y1="130" x2="450" y2="130"/><line x1="-450" y1="180" x2="450" y2="180"/>
+                        <line x1="-380" y1="-108" x2="-380" y2="218"/><line x1="-220" y1="-108" x2="-220" y2="218"/><line x1="-60" y1="-108" x2="-60" y2="218"/><line x1="100" y1="-108" x2="100" y2="218"/><line x1="260" y1="-108" x2="260" y2="218"/><line x1="420" y1="-108" x2="420" y2="218"/>
+                    </g>
+                    <text x="-468" y="-138" fill="#7fd8ec" font-size="22" font-family="Microsoft YaHei,PingFang SC,system-ui,sans-serif" opacity="0.42" letter-spacing="3">图 A · 运行架构示意</text>
+                </g>
+                <g transform="translate(8, -52)" fill="rgba(0,42,58,0.38)" stroke="#dff8ff" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round">
+                    <ellipse cx="-258" cy="-18" rx="36" ry="34"/>
+                    <path d="M-222 -22 Q-170 -38 -95 -42 Q20 -48 145 -38 Q275 -28 355 -42 Q405 -52 438 -35"/>
+                    <path d="M-95 -42 Q-115 8 -85 38 Q-45 52 5 42 Q35 22 40 -12"/>
+                    <path d="M145 -38 Q165 5 210 18 Q280 28 340 12 Q395 -8 432 22 Q452 58 415 88 Q365 102 308 88 Q255 72 220 35"/>
+                    <path d="M210 18 Q235 55 218 95 Q188 115 155 98 Q135 72 145 38"/>
+                    <circle cx="-268" cy="-12" r="4" fill="#bffbff" stroke="none"/>
+                </g>
+            </g>
+            <!-- 底部淡示意框（虚线剖面感） -->
+            <g stroke="#6ecfe0" stroke-width="0.95" fill="none" opacity="0.18" stroke-dasharray="9 11" stroke-linecap="round">
+                <rect x="90" y="1180" width="420" height="200" rx="3"/>
+                <rect x="570" y="1220" width="380" height="150" rx="3"/>
+            </g>
+        </svg>
+    </div>
+    <div id="overlay"></div>
+
+    <!-- 中层装饰：蓝图式架构示意（与讲稿 Managed Agents / Workflow / 合规 对齐） -->
+    <div id="hero-deco" aria-hidden="true"></div>
+
+    <div id="noise"></div>
+
+    <!-- 顶部品牌 -->
+    <div id="header">
+        <div id="tagline"></div>
+        <div id="brand">
+            <div id="brand-name"></div>
+            <img id="avatar" src="" onerror="this.style.display='none'" alt="">
+            <div id="avatar-fallback"></div>
+        </div>
+    </div>
+
+    <!-- 正文 -->
+    <div id="content">
+        <div id="tag"></div>
+        <div id="headline"></div>
+        <div id="divider"></div>
+        <div id="subline"></div>
+    </div>
+
+    <!-- 底部 -->
+    <div id="footer">
+        <div id="footer-left"></div>
+        <div id="watermark"></div>
+    </div>
+    <div id="accent-bar"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  每期视频只改 CONFIG 这一块
+// ════════════════════════════════════════════════════
+const CONFIG = {
+    // ── 内容 ──
+    headline:    "1个人类CEO=躺平",
+    accentLine:  1,
+    subline:     "Anthropic 终极蓝图 — Managed Agents × Workflow × 合规闭环",
+    tag:         "蓝图精读 · Agent 生产化",
+    bgImage:     "",
+    avatarImage: "",
+    avatarEmoji: "🧭",
+    brandName:   "老K × 阿柚",
+    tagline:     "对话拆解 · 拒绝话术带偏",
+    footerItems: ["Managed Agents", "Workflow vs Agent", "云上合规"],
+    watermark:   "AI 公司蓝图 · 深度拆解",
+
+    // ── 主题 ──
+    theme:       "tech",              // danger | growth | tech | finance
+
+    // ── 装饰图形 ──
+    decoSVG:     "",                  // 内联 SVG；空则用默认「蓝图架构板」（非手机）
+    decoRotate:  -8,                  // 装饰图形旋转角度(deg)
+    decoOpacity: 0.42,                // 略淡：主视觉为底部「躺蓝图」场景
+    decoScale:   1,                   // 装饰图形缩放
+
+    // ── 遮罩渐变方向 ──
+    overlayDirection: "to-bottom",    // to-bottom | to-top | center-out | to-left | to-right
+
+    // ── 噪点 ──
+    noiseEnabled: true,               // 开关
+    noiseOpacity: 0.05,               // 强度（0~1）
+};
+// ════════════════════════════════════════════════════
+
+// ── 默认装饰：图纸板 + 分层示意（细线、无糊滤镜）──
+const DEFAULT_BLUEPRINT_DECO_SVG = `<svg viewBox="0 0 260 440" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <defs>
+        <linearGradient id="bd-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#a8f6ff" stop-opacity="0.10"/>
+            <stop offset="100%" stop-color="#003948" stop-opacity="0.05"/>
+        </linearGradient>
+    </defs>
+    <title>Blueprint schematic</title>
+    <rect x="16" y="14" width="228" height="412" rx="2" stroke="rgba(140,230,255,0.42)" stroke-width="1"/>
+    <rect x="24" y="22" width="212" height="396" rx="1.5" stroke="rgba(90,200,230,0.28)" stroke-width="0.85" stroke-dasharray="6 10"/>
+    <!-- 角标 -->
+    <g stroke="#7fe8ff" stroke-width="1.2" stroke-linecap="square" opacity="0.5">
+        <path d="M32 34 V52 H50"/><path d="M228 34 V52 H210"/><path d="M32 406 V388 H50"/><path d="M228 406 V388 H210"/>
+    </g>
+    <!-- Oversight -->
+    <rect x="40" y="56" width="180" height="42" rx="3" stroke="#9ef6ff" stroke-width="1.05" fill="url(#bd-fill)" stroke-linejoin="round" opacity="0.92"/>
+    <path stroke="#5ecfff" stroke-width="0.75" opacity="0.45" stroke-linecap="round" d="M54 72 h56 M54 82 h124"/>
+    <!-- 尺寸短线 -->
+    <path stroke="#4ec4df" stroke-width="0.7" opacity="0.55" d="M34 77 h6 M220 77 h-6"/>
+    <line x1="130" y1="98" x2="130" y2="108" stroke="#00e8f7" stroke-width="1" stroke-linecap="round"/>
+    <polygon points="130,114 126.5,107 133.5,107" fill="#00f2ff" opacity="0.9"/>
+    <!-- Hub -->
+    <path d="M130 114 L162 130 L162 162 L130 178 L98 162 L98 130 Z" stroke="#c5fbff" stroke-width="1.2" fill="rgba(0,40,56,0.22)" stroke-linejoin="round" opacity="0.95"/>
+    <circle cx="130" cy="146" r="11" stroke="#00e5ff" stroke-width="0.9" opacity="0.85"/>
+    <line x1="130" y1="178" x2="130" y2="194" stroke="#00e8f7" stroke-width="1"/>
+    <polygon points="130,200 126.5,193 133.5,193" fill="#00f2ff" opacity="0.88"/>
+    <!-- Agents -->
+    <g stroke="#7cdbee" stroke-width="1" stroke-linejoin="round" opacity="0.88">
+        <rect x="50" y="206" width="46" height="34" rx="2.5"/>
+        <rect x="107" y="206" width="46" height="34" rx="2.5"/>
+        <rect x="164" y="206" width="46" height="34" rx="2.5"/>
+    </g>
+    <path stroke="#4ab8cc" stroke-width="0.65" opacity="0.5" stroke-linecap="round" d="M96 223 h14 M150 223 h14"/>
+    <line x1="130" y1="240" x2="130" y2="254" stroke="#00e8f7" stroke-width="1"/>
+    <polygon points="130,260 126.5,253 133.5,253" fill="#00f2ff" opacity="0.85"/>
+    <!-- Workflow strip -->
+    <rect x="36" y="266" width="188" height="30" rx="2.5" stroke="#8aefff" stroke-width="1" stroke-dasharray="5 6" opacity="0.82"/>
+    <g stroke="#5ed4e8" stroke-width="0.75" opacity="0.42">
+        <line x1="76" y1="274" x2="76" y2="288"/><line x1="130" y1="274" x2="130" y2="288"/><line x1="184" y1="274" x2="184" y2="288"/>
+    </g>
+    <line x1="130" y1="296" x2="130" y2="308" stroke="#00e8f7" stroke-width="1"/>
+    <polygon points="130,314 126.5,307 133.5,307" fill="#00f2ff" opacity="0.85"/>
+    <!-- Governance -->
+    <path d="M76 322 L130 296 L184 322 L184 398 L76 398 Z" stroke="#a8f2ff" stroke-width="1.15" fill="url(#bd-fill)" stroke-linejoin="round" opacity="0.94"/>
+    <path d="M98 354 L130 338 L162 354" stroke="#6ce0f5" stroke-width="0.85" opacity="0.55"/>
+    <circle cx="130" cy="372" r="4.5" stroke="#bffbff" stroke-width="0.9"/>
+</svg>`;
+
+// ── 主题色系 ──
+const THEMES = {
+    danger: {
+        accent:     "#FF2A55",
+        accent2:    "#FF8C00",
+        tagBg:      "rgba(255,42,85,0.12)",
+        tagBorder:  "rgba(255,42,85,0.5)",
+        tagColor:   "#FF6B8A",
+        glowColor:  "rgba(255,42,85,0.25)",
+        glowColor2: "rgba(255,140,0,0.15)",
+        dotColor:   "#FF2A55",
+        bar:        "linear-gradient(90deg, transparent 2%, #FF2A55 35%, #FF8C00 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,42,85,0.35), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FF2A55 0%, #FF8C00 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #1a0508 0%, #0d0305 40%, #050208 100%)",
+        decoGlow:   "rgba(255,42,85,0.28)",
+        decoAccent: "rgba(255,140,0,0.35)",
+    },
+    growth: {
+        accent:     "#FFD700",
+        accent2:    "#00F0FF",
+        tagBg:      "rgba(255,215,0,0.10)",
+        tagBorder:  "rgba(255,215,0,0.45)",
+        tagColor:   "#FFD700",
+        glowColor:  "rgba(255,215,0,0.20)",
+        glowColor2: "rgba(0,240,255,0.12)",
+        dotColor:   "#FFD700",
+        bar:        "linear-gradient(90deg, transparent 2%, #FFD700 35%, #00F0FF 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,215,0,0.30), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #150f00 0%, #0a0800 40%, #050505 100%)",
+        decoGlow:   "rgba(255,215,0,0.28)",
+        decoAccent: "rgba(0,240,255,0.22)",
+    },
+    tech: {
+        accent:     "#00F0FF",
+        accent2:    "#38BDF8",
+        tagBg:      "rgba(0,55,72,0.55)",
+        tagBorder:  "rgba(120,250,255,0.75)",
+        tagColor:   "#E8FFFF",
+        tagTextShadow: "0 1px 2px rgba(0,8,16,0.95), 0 0 18px rgba(0,230,255,0.35)",
+        glowColor:  "rgba(0,240,255,0.18)",
+        glowColor2: "rgba(56,189,248,0.12)",
+        dotColor:   "#5AE8FF",
+        bar:        "linear-gradient(90deg, transparent 2%, #00F5FF 28%, #38BDF8 55%, #0088FF 72%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(0,240,255,0.35), 0 4px 30px rgba(0,0,0,0.9)",
+        headlineColor: "#FFFFFF",
+        headlineGlow: "0 1px 0 rgba(0,25,40,0.92), 0 2px 4px rgba(0,10,24,0.95), 0 4px 24px rgba(0,0,0,0.88), 0 0 20px rgba(0,235,255,0.55), 0 0 42px rgba(0,160,255,0.28)",
+        accentGrad: "linear-gradient(135deg, #FFFFFF 0%, #D8FFFF 22%, #00F5FF 52%, #0090E8 100%)",
+        accentHeadlineFilter: "drop-shadow(0 1px 1px rgba(0,15,28,0.95)) drop-shadow(0 2px 12px rgba(0,0,0,0.75)) drop-shadow(0 0 14px rgba(0,245,255,0.75)) drop-shadow(0 0 36px rgba(0,160,255,0.35))",
+        fallbackBg: "radial-gradient(ellipse 115% 90% at 50% 14%, #082038 0%, #051422 42%, #020810 78%)",
+        decoGlow:   "rgba(0,230,255,0.22)",
+        decoAccent: "rgba(56,189,248,0.22)",
+        headerMuted:     "rgba(200, 245, 255, 0.72)",
+        headerBrand:   "#F5FDFF",
+        headerBrandShadow: "0 1px 3px rgba(0,8,18,0.9)",
+        footerItemColor: "rgba(190, 238, 252, 0.72)",
+        watermarkColor:  "rgba(150, 220, 240, 0.48)",
+        sublineColor:    "#F0FDFF",
+        sublineShadow:   "0 1px 2px rgba(0,12,22,0.98), 0 2px 14px rgba(0,0,0,0.9), 0 0 18px rgba(0,210,255,0.28)",
+    },
+    finance: {
+        accent:     "#FFD700",
+        accent2:    "#00FF88",
+        tagBg:      "rgba(255,215,0,0.10)",
+        tagBorder:  "rgba(255,215,0,0.45)",
+        tagColor:   "#FFD700",
+        glowColor:  "rgba(255,215,0,0.18)",
+        glowColor2: "rgba(0,255,136,0.15)",
+        dotColor:   "#00FF88",
+        bar:        "linear-gradient(90deg, transparent 2%, #FFD700 35%, #00FF88 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,215,0,0.28), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FFD700 0%, #00FF88 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #0e0f00 0%, #070800 40%, #040505 100%)",
+        decoGlow:   "rgba(255,215,0,0.28)",
+        decoAccent: "rgba(0,255,136,0.22)",
+    },
+};
+
+// ── 遮罩渐变 ──
+const OVERLAYS = {
+    "to-bottom": `linear-gradient(to bottom,
+        rgba(2,14,26,0.86) 0%,
+        rgba(2,18,32,0.28) 16%,
+        rgba(2,12,22,0.02) 34%,
+        rgba(2,12,22,0.02) 54%,
+        rgba(2,14,26,0.42) 72%,
+        rgba(1,8,16,0.93) 100%)`,
+    "to-top": `linear-gradient(to top,
+        rgba(2,14,26,0.88) 0%,
+        rgba(2,18,32,0.34) 18%,
+        rgba(2,12,22,0.06) 38%,
+        rgba(2,12,22,0.06) 52%,
+        rgba(2,14,26,0.48) 72%,
+        rgba(1,8,16,0.94) 100%)`,
+    "center-out": `radial-gradient(ellipse 100% 80% at 50% 50%,
+        rgba(2,12,22,0.06) 0%,
+        rgba(2,16,28,0.28) 40%,
+        rgba(1,8,16,0.88) 100%)`,
+    "to-left": `linear-gradient(to left,
+        rgba(2,14,26,0.88) 0%,
+        rgba(2,18,32,0.34) 25%,
+        rgba(2,12,22,0.06) 50%,
+        rgba(2,18,32,0.34) 75%,
+        rgba(2,14,26,0.88) 100%)`,
+    "to-right": `linear-gradient(to right,
+        rgba(2,14,26,0.88) 0%,
+        rgba(2,18,32,0.34) 25%,
+        rgba(2,12,22,0.06) 50%,
+        rgba(2,18,32,0.34) 75%,
+        rgba(2,14,26,0.88) 100%)`,
+};
+
+(function render() {
+    const t = THEMES[CONFIG.theme] || THEMES.tech;
+
+    // ── 背景图 ──
+    const bgEl = document.getElementById('bg');
+    const blueprintEl = document.getElementById('blueprint-bg');
+    if (CONFIG.bgImage) {
+        bgEl.src = CONFIG.bgImage;
+        bgEl.onerror = () => { bgEl.style.display = 'none'; };
+        if (blueprintEl) blueprintEl.style.display = 'none';
+    } else {
+        bgEl.style.display = 'none';
+        if (blueprintEl) blueprintEl.style.display = '';
+    }
+
+    // ── 纯CSS备用背景 ──
+    document.getElementById('bg-fallback').style.background =
+        t.fallbackBg + `, radial-gradient(ellipse 80% 60% at 50% 75%, ${t.glowColor} 0%, transparent 60%), radial-gradient(ellipse 60% 60% at 80% 20%, ${t.glowColor2} 0%, transparent 60%)`;
+
+    // ── 遮罩方向 ──
+    const overlayDir = CONFIG.overlayDirection || 'to-bottom';
+    document.getElementById('overlay').style.background = OVERLAYS[overlayDir] || OVERLAYS['to-bottom'];
+
+    // ── 噪点 ──
+    const noiseEl = document.getElementById('noise');
+    if (CONFIG.noiseEnabled === false) {
+        noiseEl.style.display = 'none';
+    } else {
+        const opacity = CONFIG.noiseOpacity != null ? CONFIG.noiseOpacity : 0.05;
+        noiseEl.style.opacity = opacity;
+    }
+
+    // ── 装饰图形 ──
+    const decoEl = document.getElementById('hero-deco');
+    const svgContent = CONFIG.decoSVG || DEFAULT_BLUEPRINT_DECO_SVG;
+    decoEl.innerHTML = svgContent;
+    decoEl.style.opacity = CONFIG.decoOpacity != null ? CONFIG.decoOpacity : 0.82;
+    decoEl.style.transform = `rotate(${CONFIG.decoRotate != null ? CONFIG.decoRotate : -8}deg) scale(${CONFIG.decoScale || 1})`;
+    decoEl.style.filter = `drop-shadow(0 0 48px ${t.decoGlow}) drop-shadow(0 28px 64px rgba(0,0,0,0.5))`;
+
+    // ── 头像 ──
+    const avatarFallback = document.getElementById('avatar-fallback');
+    if (CONFIG.avatarImage) {
+        document.getElementById('avatar').src = CONFIG.avatarImage;
+        avatarFallback.style.display = 'none';
+    } else {
+        document.getElementById('avatar').style.display = 'none';
+        avatarFallback.textContent = CONFIG.avatarEmoji || '🐶';
+    }
+
+    // ── 品牌栏 ──
+    const taglineEl = document.getElementById('tagline');
+    const brandNameEl = document.getElementById('brand-name');
+    taglineEl.textContent = CONFIG.tagline;
+    brandNameEl.textContent = CONFIG.brandName;
+    if (t.headerMuted) taglineEl.style.color = t.headerMuted;
+    brandNameEl.style.textShadow = t.headerBrandShadow || 'none';
+    if (t.headerBrand) brandNameEl.style.color = t.headerBrand;
+
+    // ── 标签 ──
+    const tagEl = document.getElementById('tag');
+    tagEl.textContent = CONFIG.tag;
+    tagEl.style.cssText += `background:${t.tagBg}; border:1.5px solid ${t.tagBorder}; color:${t.tagColor};`;
+    if (t.tagTextShadow) tagEl.style.textShadow = t.tagTextShadow;
+
+    // ── 副标题（对比度） ──
+    const subEl = document.getElementById('subline');
+    if (t.sublineColor) subEl.style.color = t.sublineColor;
+    if (t.sublineShadow) subEl.style.textShadow = t.sublineShadow;
+
+    // ── 主标题 ──
+    const headEl = document.getElementById('headline');
+    const lines = CONFIG.headline.split('\n');
+
+    // CJK 视觉宽度：CJK/fullwidth = 1，ASCII = 0.55
+    function cjkWidth(s) {
+        let w = 0;
+        for (const c of s) {
+            w += /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(c) ? 1 : 0.55;
+        }
+        return Math.round(w);
+    }
+    const maxLineW = Math.max(...lines.map(l => cjkWidth(l)));
+
+    // 按每行最大视觉宽度分档，确保单行不溢出（可用宽度 936px）
+    const cls = maxLineW <= 4 ? 'len5'
+              : maxLineW <= 5 ? 'len6'
+              : maxLineW <= 6 ? 'len7'
+              : maxLineW <= 7 ? 'len8'
+              : maxLineW <= 9 ? 'len10'
+              : maxLineW <= 11 ? 'len12' : 'long';
+    headEl.classList.add(cls);
+    headEl.style.textShadow = t.headlineGlow ? 'none' : t.textGlow;
+
+    headEl.innerHTML = lines.map((line, i) => {
+        if (CONFIG.accentLine === i + 1) {
+            const fd = t.accentHeadlineFilter ? `filter:${t.accentHeadlineFilter};` : '';
+            return `<em style="background:${t.accentGrad};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;${fd}">${line}</em>`;
+        }
+        const lc = t.headlineColor ? `color:${t.headlineColor};` : '';
+        const lg = t.headlineGlow ? `text-shadow:${t.headlineGlow};` : '';
+        return `<span style="${lc}${lg}">${line}</span>`;
+    }).join('<br>');
+
+    // ── 分割线 ──
+    document.getElementById('divider').style.background = t.accentGrad;
+
+    subEl.textContent = CONFIG.subline;
+
+    // ── 底部项目 ──
+    const footLeft = document.getElementById('footer-left');
+    footLeft.innerHTML = '';
+    (CONFIG.footerItems || []).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'foot-item';
+        if (t.footerItemColor) div.style.color = t.footerItemColor;
+        div.innerHTML = `<div class="foot-dot" style="background:${t.dotColor};box-shadow:0 0 8px ${t.dotColor}"></div>${item}`;
+        footLeft.appendChild(div);
+    });
+
+    // ── 水印 & 底线 ──
+    const wm = document.getElementById('watermark');
+    wm.textContent = CONFIG.watermark;
+    if (t.watermarkColor) wm.style.color = t.watermarkColor;
+    document.getElementById('accent-bar').style.background = t.bar;
+})();
+</script>
+</body>
+</html>

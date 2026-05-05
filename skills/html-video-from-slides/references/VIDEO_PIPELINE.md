@@ -126,7 +126,7 @@ export PROJECT_DIR=/path/to/my-video-project
 | 4 | reasoning | SRT 校对建议 | **审阅**（`approval-4.json`） |
 | 5–7 | script / reasoning / script | 锁定 SRT、拆页、确认拆页 | Step 6 **审阅**（`approval-6.json`） |
 | 8–9 | reasoning | 内容板 + `wav-durations.json`、视觉细化 HTML | 无（可 `--from_step 8`/`9` 重跑） |
-| 10–11 | script | 格式校验、`wav` 渲染 | 无 |
+| 10–11 | script | 格式校验（含 **`timing-check`**）、`wav` 渲染 | Step 10：缺 `timing/flip-boundaries.md` 时 **WARN**（建议补语义契约） |
 
 **可选尾部（Step 12–15）**：在 `PROJECT_DIR/html-deck/` 下凑封面链路（元数据采集 → 推理生成封面 JSON → 注入模板并 `cli.js cover` → 汇总）。**多数内容型 feature 更推荐**：在 `production/` 放好 `cover.html`（见 **`skills/cover-design/`**），直接 `node cli.js cover --project <production>`，不必跑 12–15。
 
@@ -142,6 +142,12 @@ export PROJECT_DIR=/path/to/my-video-project
 | **Step 9** | 视觉表达：布局结构、SVG 图形、配色组合、装饰元素 | 中（只改 HTML 结构，不改内容） |
 
 **典型场景**：如果内容对了但视觉不好看（比如布局太单调、SVG 选得不合适），直接 `--from_step 9` 重跑视觉细化，内容板保持不变。
+
+## 翻页语义契约：`timing/flip-boundaries.md`
+
+- **`timing-check`（Step 10 自动跑）**：只拦截「翻页落在下一页 `.wa` 句起点」类 **句首陷阱**，**不**校验「这句话本该属于哪一页」。
+- **`timing/flip-boundaries.md`**：成片前由人（或 Step 8 Agent）维护的 **页 ↔ 进入时刻 ↔ `sub.srt` 锚点** 表；模板见 **`references/flip-boundaries.template.md`**。与 `wav-durations.json` 前缀和一致，用于避免「口播讲分层图却停在 Trap 页」这类语义错位。
+- Step 8 产出 `wav-durations.json` 时应 **同步创建/更新** 该文件；旧项目若缺失，Step 10 仅 **WARN**，不阻塞。
 
 ## 人工确认机制
 
