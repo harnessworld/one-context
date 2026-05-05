@@ -23,8 +23,7 @@ const FPS = 60;
 const VIDEO_BITRATE = '8M';
 const VIDEO_PRESET = 'slow';
 
-/** 须与 wav_auto.js extractSlideTexts 一致；勿仅用 `.s.slide`，否则仅有 `section.slide` 的 deck 会被判为 0 屏 */
-const SLIDE_SELECTOR = '.s, .slide';
+/** 浏览器内选取逻辑见下方 page.evaluate：优先 `#P > .slide`、`.deck > .slide`，避免 html-ppt runtime 克隆节点重复计数 */
 
 function ff(args) {
   execSync(`"${ffmpegPath}" ${args}`, { stdio: 'inherit' });
@@ -193,10 +192,14 @@ async function run(projectRoot, skillDir, options = {}) {
   });
   await page.waitForTimeout(300);
 
-  const numSlides = await page.evaluate(
-    ({ sel }) => document.querySelectorAll(sel).length,
-    { sel: SLIDE_SELECTOR }
-  );
+  const numSlides = await page.evaluate(() => {
+    const primary = document.querySelectorAll('#P > .slide, .deck > .slide');
+    const slides =
+      primary.length > 0
+        ? primary
+        : document.querySelectorAll('.s.slide, section.slide');
+    return slides.length;
+  });
   if (slideDurations.length !== numSlides) {
     await browser.close();
     throw new Error(
@@ -219,11 +222,15 @@ async function run(projectRoot, skillDir, options = {}) {
   let cum = 0;
 
   for (let i = 0; i < numSlides; i++) {
-    await page.evaluate(({ n, sel }) => {
+    await page.evaluate(({ n }) => {
       // 核心修复：直接修改 style.display 强制 Chromium headless 重排/重绘。
       // 纯 classList.toggle 在 headless 模式下不会触发合成器更新帧缓冲，
       // 导致所有截图都返回第一帧。
-      const slides = document.querySelectorAll(sel);
+      const primary = document.querySelectorAll('#P > .slide, .deck > .slide');
+      const slides =
+        primary.length > 0
+          ? primary
+          : document.querySelectorAll('.s.slide, section.slide');
       slides.forEach((s, idx) => {
         if (idx === n) {
           s.style.display = 'flex';
@@ -245,7 +252,7 @@ async function run(projectRoot, skillDir, options = {}) {
         deck.style.width = '100vw';
         deck.style.transform = 'translateX(0)';
       }
-    }, { n: i, sel: SLIDE_SELECTOR });
+    }, { n: i });
     await page.waitForTimeout(900);
 
     const imgPath = path.join(TEMP_DIR, `slide_${String(i).padStart(2, '0')}.png`);

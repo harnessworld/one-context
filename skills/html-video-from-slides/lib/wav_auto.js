@@ -33,14 +33,19 @@ async function extractSlideTexts(projectRoot) {
   await page.goto(pathToFileURL(html).href);
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1000);
-  const result = await page.evaluate(() =>
-    Array.from(document.querySelectorAll('.s, .slide')).map((s) => {
+  const result = await page.evaluate(() => {
+    const primary = document.querySelectorAll('#P > .slide, .deck > .slide');
+    const slides =
+      primary.length > 0
+        ? primary
+        : document.querySelectorAll('.s.slide, section.slide');
+    return Array.from(slides).map((s) => {
       const wa = s.querySelector('.wa');
       const anchor = wa ? (wa.textContent || '').replace(/\r/g, '\n').trim() : '';
       const full = (s.innerText || '').replace(/\r/g, '\n').trim();
       return { anchor, full };
-    })
-  );
+    });
+  });
   await browser.close();
   if (result.length === 0) {
     throw new Error('HTML 中未找到 slide 元素');
