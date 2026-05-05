@@ -1,382 +1,749 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prompt Caching Is Everything · Magazine Deck</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=IBM+Plex+Mono:wght@400;600&family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prompt Caching · Agent 产品的架构基础</title>
+<!-- Open Design html-ppt tech-sharing + html-deck-layout 字号/配图下限（成片 1920×1080，手机缩屏仍可读） -->
+<link rel="stylesheet" href="html-ppt-assets/fonts.css">
+<link rel="stylesheet" href="html-ppt-assets/base.css">
+<link rel="stylesheet" href="html-ppt-assets/animations/animations.css">
+<link rel="stylesheet" href="html-ppt-assets/od-tech-sharing.css">
+<link rel="stylesheet" href="html-ppt-assets/od-rich-figures.css">
 <style>
-  :root{--ink:#0a0a0b;--ink-rgb:10,10,11;--paper:#f1efea;--paper-rgb:241,239,234;--paper-tint:#e8e5de;
-    --mono:"IBM Plex Mono",monospace;--serif-en:"Playfair Display",serif;--serif-zh:"Noto Serif SC",serif;--sans-zh:"Noto Sans SC",sans-serif;}
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased}
-  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
-  canvas#bg-light{opacity:0}canvas#bg-dark{opacity:1}body.light-bg canvas#bg-light{opacity:1}body.light-bg canvas#bg-dark{opacity:0}
-  #deck{position:fixed;inset:0;width:10000vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
-  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:3.5vh 4vw 5.5vh 4vw;display:flex;flex-direction:column;overflow:hidden}
-  .slide.light{color:var(--ink)}.slide.dark{color:var(--paper)}
-  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
-  .slide.light::before{background:rgba(var(--paper-rgb),.82);backdrop-filter:blur(3px)}
-  .slide.dark::before{background:rgba(var(--ink-rgb),.82);backdrop-filter:blur(3px)}
-  .slide.hero.light::before{background:rgba(var(--paper-rgb),.18);backdrop-filter:none}
-  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.14);backdrop-filter:none}
-  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
-  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.32) 0%,rgba(var(--paper-rgb),0) 12%,rgba(var(--paper-rgb),0) 88%,rgba(var(--paper-rgb),.32) 100%)}
-  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.36) 0%,rgba(var(--ink-rgb),0) 12%,rgba(var(--ink-rgb),0) 88%,rgba(var(--ink-rgb),.36) 100%)}
-
-  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:clamp(44px,9vw,140px);line-height:.95;letter-spacing:-.02em}
-  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:clamp(32px,5.5vw,90px);line-height:1.05;letter-spacing:-.01em}
-  .h2{font-family:var(--serif-zh);font-weight:700;font-size:clamp(26px,4vw,64px);line-height:1.1}
-  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:clamp(20px,2.4vw,44px);line-height:1.25}
-  .body{font-family:var(--sans-zh);font-weight:400;font-size:clamp(16px,1.5vw,32px);line-height:1.6;opacity:.82;letter-spacing:.01em}
-  .body-lg{font-family:var(--serif-zh);font-weight:400;font-size:clamp(18px,1.8vw,36px);line-height:1.55;opacity:.88}
-  .lead{font-family:var(--serif-zh);font-weight:400;font-size:clamp(18px,1.9vw,38px);line-height:1.45;opacity:.82}
-  .kicker{font-family:var(--mono);font-size:clamp(11px,.9vw,16px);letter-spacing:.28em;text-transform:uppercase;opacity:.5;margin-bottom:1.5vh}
-  .meta{font-family:var(--mono);font-size:clamp(11px,.85vw,15px);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
-
-  .col{display:flex;flex-direction:column;gap:1.5vh}
-  .row{display:flex;align-items:center;gap:2vw}
-  .fill{flex:1;min-height:0}
-  .split{display:grid;grid-template-columns:1fr 1fr;gap:2.5vw;flex:1;align-items:start}
-  .split-64{display:grid;grid-template-columns:6fr 4fr;gap:2.5vw;flex:1;align-items:start}
-  .split-46{display:grid;grid-template-columns:4fr 6fr;gap:2.5vw;flex:1;align-items:start}
-  .grid-4{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:1.5vh 2vw;flex:1}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:2vw;flex:1}
-  .center{align-items:center;justify-content:center;text-align:center}
-  .frame{flex:1;display:flex;flex-direction:column;min-height:0;gap:1.5vh}
-
-  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:clamp(10px,.85vw,15px);letter-spacing:.2em;text-transform:uppercase;opacity:.55;margin-bottom:.5vh;flex-shrink:0}
-  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:clamp(10px,.85vw,15px);letter-spacing:.16em;text-transform:uppercase;opacity:.45;flex-shrink:0}
-
-  .card{padding:2.2vh 2.4vw;border-radius:5px;display:flex;flex-direction:column;gap:1vh}
-  .slide.light .card{background:rgba(var(--ink-rgb),.04)}
-  .slide.dark .card{background:rgba(var(--paper-rgb),.06)}
-  .card-bd{padding:2vh 2.4vw;border-radius:5px;display:flex;flex-direction:column;gap:1vh;border:1px solid rgba(127,127,127,.22)}
-  .card-rd{border-left:4px solid #ef4444}
-  .card-gn{border-left:4px solid #22c55e}
-
-  .band{display:flex;align-items:center;gap:1.2vw;padding:1.4vh 1.8vw;border-radius:4px}
-  .band .emoji{font-size:clamp(22px,2.5vw,42px);line-height:1}
-
-  .stat{display:flex;flex-direction:column;gap:.6vh}
-  .stat .n{font-family:var(--serif-en);font-weight:800;font-size:clamp(64px,9vw,150px);line-height:.92;letter-spacing:-.03em}
-  .stat .l{font-family:var(--mono);font-size:clamp(12px,1vw,18px);letter-spacing:.2em;text-transform:uppercase;opacity:.45}
-  .stat .d{font-family:var(--sans-zh);font-size:clamp(16px,1.4vw,26px);opacity:.65;line-height:1.5;margin-top:.8vh}
-
-  .callout{padding:1.8vh 1.8vw;border-left:3px solid currentColor;position:relative;font-family:var(--serif-zh);font-size:clamp(16px,1.4vw,28px);line-height:1.5;opacity:.9}
-  .slide.light .callout{background:rgba(var(--ink-rgb),.03)}
-  .slide.dark .callout{background:rgba(var(--paper-rgb),.05)}
-  .callout-src{display:block;margin-top:1.2vh;font-family:var(--mono);font-size:clamp(10px,.75vw,14px);letter-spacing:.2em;text-transform:uppercase;opacity:.45}
-
-  .pill{display:inline-block;font-family:var(--mono);font-size:clamp(11px,.9vw,16px);letter-spacing:.2em;text-transform:uppercase;padding:.5vh 1vw;border:1px solid currentColor;opacity:.6}
-  .rule{width:100%;height:1px;background:currentColor;opacity:.15}
-
-  .frame-img{overflow:hidden;position:relative;width:100%;border-radius:4px;display:flex;flex-direction:column}
-  .frame-img > img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
-  .frame-img-fit{background:#fff}
-  .frame-img-fit > img{object-fit:contain}
-  figure.tile{display:flex;flex-direction:column;margin:0;min-width:0}
-  .img-cap{display:flex;justify-content:space-between;gap:1vw;margin-top:.6vh;font-family:var(--mono);font-size:clamp(10px,.75vw,14px);letter-spacing:.18em;text-transform:uppercase;opacity:.5}
-
-  .hi{position:relative;display:inline}
-  .slide.dark .hi::after{content:"";position:absolute;left:-.08em;right:-.08em;bottom:-.04em;height:.25em;background:rgba(var(--paper-rgb),.16);z-index:-1}
-  .slide.light .hi::after{content:"";position:absolute;left:-.08em;right:-.08em;bottom:-.04em;height:.25em;background:rgba(var(--ink-rgb),.1);z-index:-1}
-  .dim{opacity:.5}
-
-  /* 缓存条可视化 */
-  .cache-bar{display:flex;height:clamp(40px,6vh,70px);border-radius:4px;overflow:hidden;position:relative}
-  .cache-seg{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:clamp(11px,1vw,16px);color:#fff;font-weight:600;opacity:.9}
-  .cache-seg.sys{background:#6366f1}
-  .cache-seg.tool{background:#8b5cf6}
-  .cache-seg.proj{background:#06b6d4}
-  .cache-seg.sess{background:#10b981}
-  .cache-seg.msg{background:#f59e0b}
-  .cache-seg.brk{background:transparent;width:4px;flex:none}
-  .cache-seg.broken{background:#ef4444}
-  .cache-seg.renew{background:#22c55e}
-  .flow{display:flex;align-items:center;gap:1vw}
-
-  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.2);backdrop-filter:blur(10px)}
-  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s;border:0;padding:0}
-  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
-  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
-  body.light-bg #nav{background:rgba(255,255,255,.3)}
-  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.3)}
-  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
-  #hint{position:fixed;bottom:2.8vh;right:3vw;z-index:30;font-family:var(--mono);font-size:clamp(10px,.85vw,14px);letter-spacing:.2em;text-transform:uppercase;opacity:.3;mix-blend-mode:difference;color:#aaa}
+/* ── html-deck-layout 对齐：正文 ≥42px，卡片标题 ≥52px；保留 OD 深色与渐变 ── */
+:root{
+  --mv-fs-kicker:28px;
+  --mv-fs-h1:102px;
+  --mv-fs-h2:76px;
+  --mv-fs-lede:44px;
+  --mv-fs-card-title:52px;
+  --mv-fs-card-body:42px;
+  --mv-fs-tag:28px;
+  --mv-fs-code:26px;
+  --mv-fs-agenda:40px;
+  --mv-fs-agenda-meta:28px;
+  --mv-slide-pad-y:48px;
+  --mv-slide-pad-x:64px;
+}
+.tpl-tech-sharing .deck-footer{position:absolute;bottom:24px;left:var(--mv-slide-pad-x);right:var(--mv-slide-pad-x);display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:28px;color:var(--text-3);z-index:2}
+.tpl-tech-sharing .slide-number[data-current]::before{content:attr(data-current)" / "attr(data-total)}
+.wa{font-weight:700;color:var(--accent-2)}
+.tpl-tech-sharing .slide{padding:var(--mv-slide-pad-y) var(--mv-slide-pad-x)}
+.tpl-tech-sharing .h1{font-size:var(--mv-fs-h1)!important;line-height:1.06!important}
+.tpl-tech-sharing .h2{font-size:var(--mv-fs-h2)!important;line-height:1.12!important}
+.tpl-tech-sharing .kicker{font-size:var(--mv-fs-kicker)!important}
+.tpl-tech-sharing .lede{font-size:var(--mv-fs-lede)!important;line-height:1.48!important;font-weight:400}
+.tpl-tech-sharing .card{padding:28px 32px}
+.tpl-tech-sharing .card h4{font-size:var(--mv-fs-card-title)!important;line-height:1.15!important;margin:0 0 14px!important;font-weight:700!important}
+.tpl-tech-sharing .card p,.tpl-tech-sharing .card .dim{font-size:var(--mv-fs-card-body)!important;line-height:1.45!important}
+.tpl-tech-sharing .tag{font-size:var(--mv-fs-tag)!important;padding:10px 18px!important;border-radius:10px!important}
+.tpl-tech-sharing .agenda-row{padding:14px 0}
+.tpl-tech-sharing .agenda-row .t{font-size:var(--mv-fs-agenda)!important;line-height:1.25!important}
+.tpl-tech-sharing .agenda-row .d{font-size:var(--mv-fs-agenda-meta)!important}
+.tpl-tech-sharing .agenda-row .num{font-size:var(--mv-fs-agenda-meta)!important;width:56px}
+.tpl-tech-sharing .terminal{font-size:var(--mv-fs-code)!important}
+.tpl-tech-sharing .terminal .bar{font-size:24px!important;padding:14px 20px!important}
+.tpl-tech-sharing .terminal pre{font-size:var(--mv-fs-code)!important;padding:28px 32px!important;max-height:520px;line-height:1.55!important}
+/* 垂直铺满：避免大字页「悬空居中」留大块空带 */
+.tpl-tech-sharing .slide.slide--spread{justify-content:flex-start!important;padding-top:40px}
+.tpl-tech-sharing .slide.slide--spread > .kicker{margin-bottom:8px}
+.tpl-tech-sharing .slide.slide--spread > .h2{margin-bottom:12px}
+.tpl-tech-sharing .diagram-band{margin:12px 0 8px}
+.tpl-tech-sharing .diagram-band--compact{margin:8px 0 4px!important}
+.tpl-tech-sharing .grid.g2.mt-l,.tpl-tech-sharing .grid.g3.mt-l{margin-top:18px!important}
+.tpl-tech-sharing .grid{align-items:stretch!important}
+.tpl-tech-sharing .grid .card{display:flex;flex-direction:column;justify-content:flex-start}
+.tpl-tech-sharing .slide.center .h2{font-size:84px!important}
+.tpl-tech-sharing .slide.center .lede{max-width:48ch!important}
+/* Agenda：更大目录字号 */
+.tpl-tech-sharing .slide[data-title="Agenda"] .agenda-row{padding:18px 0}
+.tpl-tech-sharing .slide[data-title="Agenda"] .agenda-row .t{font-size:50px!important;line-height:1.22!important}
+.tpl-tech-sharing .slide[data-title="Agenda"] .agenda-row .d{font-size:34px!important}
+.tpl-tech-sharing .slide[data-title="Agenda"] .agenda-row .num{font-size:34px!important;width:76px;font-weight:800}
+.tpl-tech-sharing .slide[data-title="Agenda"] .h2{font-size:82px!important}
+/* Thanks：closing 视觉权重 */
+.tpl-tech-sharing .slide[data-title="Thanks"] .thanks-mesh{position:absolute;inset:0;pointer-events:none;opacity:.55;z-index:0}
+.tpl-tech-sharing .slide[data-title="Thanks"] > div{position:relative;z-index:1}
+.tpl-tech-sharing .slide[data-title="Thanks"] .h2,.tpl-tech-sharing .slide[data-title="Thanks"] .lede,.tpl-tech-sharing .slide[data-title="Thanks"] .kicker{text-shadow:0 2px 24px rgba(0,0,0,.75)}
+/* Thanks：compact 默认 max-height 会裁切大图；拉高外壳 + SVG，避免下排压住上排 */
+.tpl-tech-sharing .slide[data-title="Thanks"] .diagram-band--compact .figure-shell{min-height:min(600px,56vh);flex:0 0 auto}
+.tpl-tech-sharing .slide[data-title="Thanks"] .diagram-band--compact .figure-shell__body{min-height:520px!important;max-height:none!important;padding:14px 18px 20px!important;align-items:flex-start!important}
+.tpl-tech-sharing .slide[data-title="Thanks"] .diagram-band--compact .figure-shell__body > svg{min-height:500px!important;max-height:none!important}
+.tpl-tech-sharing .slide[data-title="Thanks"] .h2{font-size:72px!important;line-height:1.1!important}
+.tpl-tech-sharing .slide[data-title="Thanks"] .diagram-band{margin-bottom:4px}
+/* Principles：抬高 READONLY 核心区 + 底部说明条对比（仅此页） */
+.tpl-tech-sharing .slide[data-title="Principles"] .diagram-band .figure-shell__body{min-height:min(360px,38vh)}
 </style>
 </head>
-<body>
-<canvas id="bg-dark" class="bg"></canvas>
-<canvas id="bg-light" class="bg"></canvas>
-<div id="hint">← → 翻页 · ESC 索引</div>
-<div id="deck">
+<body class="tpl-tech-sharing">
+<div class="deck">
 
-<!-- ============================================================ -->
-<!-- s0 · Hero Cover -->
-<!-- ============================================================ -->
-<section class="slide hero dark">
-  <div class="chrome"><div>Anthropic Blog · 2026.04.30</div><div>01 / 08</div></div>
-  <div class="frame" style="display:grid;gap:2.5vh;align-content:center;min-height:68vh">
-    <div class="kicker">Claude Code 工程经验深度解读</div>
-    <h1 class="h-hero" style="font-size:clamp(42px,9.5vw,140px)">Prompt Caching<br>Is Everything</h1>
-    <p class="lead" style="max-width:68vw">
-      长上下文 Agent 的经济可行性，核心取决于一个反直觉的架构决策：<strong class="hi">提示缓存</strong>。<br>
-      Claude Code 团队将命中率当作 SEV 处理。
-    </p>
-    <div class="row" style="gap:1.5vw;flex-wrap:wrap;margin-top:.5vh">
-      <div class="pill">成本 ↓ 90%</div>
-      <div class="pill">延迟 < 5ms</div>
-      <div class="pill">前缀匹配</div>
-      <div class="pill">Cache-safe Forking</div>
-    </div>
-  </div>
-  <div class="foot"><div>顺序即架构，缓存即经济</div><div>Source: anthropic.com/blog</div></div>
-</section>
-
-<!-- ============================================================ -->
-<!-- s1 · 数据冲击 -->
-<!-- ============================================================ -->
-<section class="slide light">
-  <div class="chrome"><div>Impact · 实测数据</div><div>02 / 08</div></div>
-  <div class="frame" style="display:grid;gap:2vh;align-content:center">
-    <div class="kicker">Claude Code Internal Metrics</div>
-    <h2 class="h-xl">一个数量级的变化</h2>
-    <div class="grid-4" style="gap:3vh 2.5vw;margin-top:1vh">
-      <div class="stat"><div class="l">Cost Reduction</div><div class="n" style="color:#ef4444">90<span style="font-size:.38em;opacity:.7">%</span></div><div class="d">缓存命中后输入费用 1/10</div></div>
-      <div class="stat"><div class="l">Latency TTFT</div><div class="n" style="color:#22c55e">< 5<span style="font-size:.38em;opacity:.7">ms</span></div><div class="d">首 token 延迟降至毫秒级</div></div>
-      <div class="stat"><div class="l">Alert Level</div><div class="n" style="color:#f59e0b">SEV</div><div class="d">命中率异常 = 系统事件</div></div>
-      <div class="stat"><div class="l">Cache Breakpoints</div><div class="n" style="color:#8b5cf6">≤ 4</div><div class="d">每请求最多 cache_control 断点</div></div>
-    </div>
-    <div class="callout" style="margin-top:.5vh">
-      没有 caching 的长上下文 Agent 在经济模型上不可持续。
-      <div class="callout-src">— Anthropic Engineering Team</div>
-    </div>
-  </div>
-  <div class="foot"><div>缓存命中率 = 经济生命线</div><div>Impact</div></div>
-</section>
-
-<!-- ============================================================ -->
-<!-- s2 · 前缀匹配机制（重度图形化） -->
-<!-- ============================================================ -->
-<section class="slide dark">
-  <div class="chrome"><div>Mechanism · 核心机制</div><div>03 / 08</div></div>
-  <div class="frame" style="gap:1.5vh">
-    <div class="kicker">Prefix Matching</div>
-    <h2 class="h-xl">前缀匹配，<span class="dim">一字不差</span></h2>
-    <div class="body-lg" style="max-width:75vw">
-      API 缓存的是 <b class="hi">token 序列的精确哈希</b>，不是语义。从第一个 token 到 cache_control 断点，<b>前缀字节完全一致</b>才会命中。
-    </div>
-
-    <!-- 可视化：前缀条对比 -->
-    <div class="split" style="gap:2.5vw;margin-top:.5vh;align-items:stretch">
-      <!-- 错误 -->
-      <div class="col" style="gap:1.2vh">
-        <div class="h-md" style="color:#ef4444">❌ 中间修改 = 全段作废</div>
-        <div class="cache-bar" style="border:2px solid rgba(239,68,68,.3)">
-          <div class="cache-seg sys" style="width:28%">SYS</div>
-          <div class="cache-seg tool" style="width:22%">TOOLS</div>
-          <div class="cache-seg broken" style="width:50%">💥 CHANGED → FULL MISS</div>
-        </div>
-        <div class="body dim">改时间戳 / 调工具序 / 改 system prompt → 后缀全部重算</div>
-      </div>
-      <!-- 正确 -->
-      <div class="col" style="gap:1.2vh">
-        <div class="h-md" style="color:#22c55e">✅ 静态前置，动态追加</div>
-        <div class="cache-bar" style="border:2px solid rgba(34,197,94,.3)">
-          <div class="cache-seg sys" style="width:25%">SYS</div>
-          <div class="cache-seg tool" style="width:20%">TOOLS</div>
-          <div class="cache-seg proj" style="width:15%">CONF</div>
-          <div class="cache-seg sess" style="width:15%">SESS</div>
-          <div class="cache-seg renew" style="width:25%">+ NEW MSG</div>
-        </div>
-        <div class="body dim">稳定内容放最前，变化追加到末尾 → 前缀永远复用</div>
-      </div>
-    </div>
-
-    <div class="rule" style="margin-top:.5vh"></div>
-    <!-- 底部 5 层条带 -->
-    <div class="col" style="gap:.8vh">
-      <div class="cache-bar" style="height:clamp(34px,4.5vh,58px)">
-        <div class="cache-seg sys" style="width:25%"><span style="font-size:.85em">⚙️ Global System</span></div>
-        <div class="cache-seg tool" style="width:20%"><span style="font-size:.85em">🔧 Tools</span></div>
-        <div class="cache-seg proj" style="width:15%"><span style="font-size:.85em">📁 Project</span></div>
-        <div class="cache-seg sess" style="width:15%"><span style="font-size:.85em">🗣️ Session</span></div>
-        <div class="cache-seg msg" style="width:25%"><span style="font-size:.85em">✨ Messages</span></div>
-      </div>
-      <div class="row" style="justify-content:space-between;opacity:.45"><span class="meta">静态 ← 全局缓存</span><span class="meta">动态 → 逐轮增长</span></div>
-    </div>
-  </div>
-  <div class="foot"><div>顺序即架构</div><div>Mechanism</div></div>
-</section>
-
-<!-- ============================================================ -->
-<!-- s3 · 提示结构 + 大图 -->
-<!-- ============================================================ -->
-<section class="slide light">
-  <div class="chrome"><div>Structure · 提示分层</div><div>04 / 08</div></div>
-  <div class="frame" style="gap:1.2vh">
-    <div class="kicker">5-Layer Architecture</div>
-    <h2 class="h-xl" style="font-size:clamp(28px,5vw,80px)">五层结构，从静到动</h2>
-
-    <!-- 大图全宽展示 -->
-    <figure class="tile" style="flex:1;min-height:0;display:flex;flex-direction:column">
-      <div class="frame-img frame-img-fit" style="flex:1;background:#fff;border:1px solid rgba(0,0,0,.08)">
-        <img src="../media/Lay%20out%20your%20prompt%20for%20caching.png" alt="Lay out your prompt for caching">
-      </div>
-      <div class="img-cap"><span style="font-weight:600">图1</span><span>Anthropic 官方 · 提示分层示意</span></div>
-    </figure>
-
-    <!-- 底部 5 层标签 -->
-    <div class="row" style="gap:1vw;flex-wrap:wrap;margin-top:.3vh">
-      <div class="band" style="background:rgba(99,102,241,.1)"><span class="emoji">⚙️</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#4f46e5">Global System</span><span class="meta dim">全局缓存</span></div>
-      <div class="band" style="background:rgba(139,92,246,.1)"><span class="emoji">🔧</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#7c3aed">Tools</span><span class="meta dim">全局缓存</span></div>
-      <div class="band" style="background:rgba(6,182,212,.1)"><span class="emoji">📁</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#0891b2">CLAUDE.md</span><span class="meta dim">项目缓存</span></div>
-      <div class="band" style="background:rgba(16,185,129,.1)"><span class="emoji">🗣️</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#059669">Session</span><span class="meta dim">会话缓存</span></div>
-      <div class="band" style="background:rgba(245,158,11,.1)"><span class="emoji">✨</span><span class="body" style="font-size:clamp(14px,1.2vw,24px);font-weight:700;color:#d97706">Messages</span><span class="meta dim">动态</span></div>
-    </div>
-  </div>
-  <div class="foot"><div>稳定的在上，变化的在下</div><div>Structure</div></div>
-</section>
-
-<!-- ============================================================ -->
-<!-- s4 · 三大陷阱（更简洁） -->
-<!-- ============================================================ -->
-<section class="slide dark">
-  <div class="chrome"><div>Pitfalls · 反直觉法则</div><div>05 / 08</div></div>
-  <div class="frame" style="gap:1.5vh">
-    <div class="kicker">Counter-intuitive Rules</div>
-    <h2 class="h-xl">三大陷阱</h2>
-    <div class="grid-3" style="gap:1.5vw;margin-top:.5vh">
-      <div class="card card-rd">
-        <div style="font-size:clamp(36px,4vw,64px);line-height:1">📨</div>
-        <div class="h-md" style="color:#fca5a5">不要改 System Prompt</div>
-        <div class="body">变化信息通过 <strong>user message</strong> 传递，不动前缀。</div>
-        <div class="body dim" style="font-size:.9em">Claude Code 用 &lt;system-reminder&gt; 注入更新</div>
-      </div>
-      <div class="card" style="border-left:4px solid #f59e0b">
-        <div style="font-size:clamp(36px,4vw,64px);line-height:1">🚫</div>
-        <div class="h-md" style="color:#fcd34d">不要换模型</div>
-        <div class="body">缓存<strong>模型绑定</strong>。100k Opus 换 Haiku 反而全价重算。</div>
-        <div class="body dim" style="font-size:.9em">用 subagent fork 独立缓存路径</div>
-      </div>
-      <div class="card card-gn">
-        <div style="font-size:clamp(36px,4vw,64px);line-height:1">🔧</div>
-        <div class="h-md" style="color:#86efac">不要换工具集</div>
-        <div class="body">加减工具 = 前缀失效。用 <strong>defer_loading stubs</strong> 替代移除。</div>
-        <div class="body dim" style="font-size:.9em">Plan Mode 是工具，不是换工具集</div>
-      </div>
-    </div>
-    <div class="callout" style="margin-top:.5vh">
-      用 message 更新，用工具建模状态，用 subagent 切换路径。
-      <div class="callout-src">维系前缀 = 维系成本</div>
-    </div>
-  </div>
-  <div class="foot"><div>前缀不变，成本永低</div><div>Pitfalls</div></div>
-</section>
-
-<!-- ============================================================ -->
-<!-- s5 · Compaction + 大图 -->
-<!-- ============================================================ -->
-<section class="slide light">
-  <div class="chrome"><div>Compaction · 上下文压缩</div><div>06 / 08</div></div>
-  <div class="frame" style="gap:1.2vh">
-    <div class="kicker">Cache-safe Forking</div>
-    <h2 class="h-xl" style="font-size:clamp(28px,5vw,84px)">最隐蔽的成本陷阱</h2>
-
-    <!-- 大图主视觉 -->
-    <figure class="tile" style="flex:1.8;min-height:0;display:flex;flex-direction:column">
-      <div class="frame-img frame-img-fit" style="flex:1;background:#fff;border:1px solid rgba(0,0,0,.08)">
-        <img src="../media/Compacting%20without%20breaking%20the%20cache.png" alt="Compacting without breaking the cache">
-      </div>
-      <div class="img-cap"><span style="font-weight:600">图2</span><span>Anthropic 官方 · Cache-safe Forking</span></div>
-    </figure>
-
-    <!-- 极简对比 -->
-    <div class="split" style="gap:2vw;margin-top:.3vh;flex:0.75">
-      <div class="col" style="gap:.8vh">
-        <div class="h-md" style="color:#dc2626">❌ 错误：不同 system prompt</div>
-        <div class="body dim">独立 API 调用 → 前缀不匹配 → 全价付费</div>
-        <div class="cache-bar" style="height:clamp(28px,3.5vh,48px);border:1px solid rgba(239,68,68,.25)">
-          <div class="cache-seg broken" style="width:100%;font-size:.9em">NEW SYSTEM → FULL MISS 💸</div>
-        </div>
-      </div>
-      <div class="col" style="gap:.8vh">
-        <div class="h-md" style="color:#16a34a">✅ 正确：复用前缀，追加 message</div>
-        <div class="body dim">相同前缀 + compaction prompt → 成本 1/10</div>
-        <div class="cache-bar" style="height:clamp(28px,3.5vh,48px);border:1px solid rgba(34,197,94,.25)">
-          <div class="cache-seg sys" style="width:30%;font-size:.9em">PREFIX</div>
-          <div class="cache-seg renew" style="width:70%;font-size:.9em">+ COMPACTION MSG → HIT ✅</div>
+  <section class="slide is-active slide--spread" data-title="Cover">
+    <p class="kicker">tech-sharing · prompt-caching</p>
+    <h1 class="h1 anim-fade-up">Prompt Caching<br>是 Agent 产品的<span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">架构基础</span></h1>
+    <p class="lede mt-m">长上下文 Agent 里，<span class="wa">为什么 caching 是不可或缺的</span>——从 Anthropic / Claude Code 的最新信号讲起。</p>
+    <div class="diagram-band diagram-band--hero" aria-hidden="true">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>blueprint · prefix → cache → tail</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1920 460" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="cv-dot" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.8" fill="#30363d"/></pattern>
+              <linearGradient id="cv-line" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7ee787"/><stop offset="50%" stop-color="#79c0ff"/><stop offset="100%" stop-color="#d2a8ff"/></linearGradient>
+              <linearGradient id="cv-fill-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1f2937"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="cv-fill-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="cv-fill-c" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3f1d25"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <filter id="cv-glow-a" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="cv-arr" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><path d="M0,0 L14,5 L0,10 Z" fill="#79c0ff"/></marker>
+            </defs>
+            <rect width="1920" height="460" fill="url(#cv-dot)" opacity=".45"/>
+            <rect x="40" y="48" width="438" height="248" rx="24" fill="url(#cv-fill-a)" stroke="#79c0ff" stroke-width="3" filter="url(#cv-glow-a)"/>
+            <text x="259" y="118" text-anchor="middle" fill="#79c0ff" font-size="30" font-weight="700" font-family="JetBrains Mono,IBM Plex Mono,monospace">BLOCK A</text>
+            <text x="259" y="188" text-anchor="middle" fill="#e6edf3" font-size="46" font-weight="800">稳定前缀</text>
+            <text x="259" y="258" text-anchor="middle" fill="#8b949e" font-size="30">System · Tools</text>
+            <line x1="498" y1="172" x2="598" y2="172" stroke="url(#cv-line)" stroke-width="6" marker-end="url(#cv-arr)"/>
+            <rect x="618" y="36" width="484" height="272" rx="26" fill="url(#cv-fill-b)" stroke="#7ee787" stroke-width="4" filter="url(#cv-glow-a)"/>
+            <text x="860" y="108" text-anchor="middle" fill="#7ee787" font-size="32" font-weight="800" font-family="JetBrains Mono,IBM Plex Mono,monospace">CACHE HIT</text>
+            <text x="860" y="188" text-anchor="middle" fill="#fff" font-size="56" font-weight="900">复用 KV</text>
+            <text x="860" y="258" text-anchor="middle" fill="#afffc8" font-size="28">Anthropic-style prefix</text>
+            <line x1="1112" y1="172" x2="1212" y2="172" stroke="#8b949e" stroke-width="5" marker-end="url(#cv-arr)"/>
+            <rect x="1232" y="48" width="648" height="248" rx="24" fill="url(#cv-fill-c)" stroke="#ff7b72" stroke-width="3"/>
+            <text x="1556" y="118" text-anchor="middle" fill="#ff7b72" font-size="30" font-weight="700" font-family="JetBrains Mono,IBM Plex Mono,monospace">TAIL</text>
+            <text x="1556" y="198" text-anchor="middle" fill="#e6edf3" font-size="46" font-weight="800">动态尾部</text>
+            <text x="1556" y="268" text-anchor="middle" fill="#fca5a5" font-size="28">Messages · Tool Results</text>
+            <text x="960" y="352" text-anchor="middle" fill="#8b949e" font-size="30" font-family="JetBrains Mono,IBM Plex Mono,monospace">prefix stable → 成本↓ · 延迟↓ · Agent 产品默认架构</text>
+            <rect x="280" y="396" width="1360" height="5" rx="2" fill="url(#cv-line)" opacity=".55"/>
+          </svg>
         </div>
       </div>
     </div>
-  </div>
-  <div class="foot"><div>复用前缀，追加消息</div><div>Compaction</div></div>
-</section>
+    <div class="deck-footer"><span class="mono">#prompt-cache #agent #anthropic</span><span class="slide-number" data-current="1" data-total="15"></span></div>
+  </section>
 
-<!-- ============================================================ -->
-<!-- s6 · 设计原则（更轻） -->
-<!-- ============================================================ -->
-<section class="slide light">
-  <div class="chrome"><div>Principles · 设计原则</div><div>07 / 08</div></div>
-  <div class="frame" style="gap:2vh;align-content:center">
-    <div class="kicker">Design Principles</div>
-    <h2 class="h-xl" style="font-size:clamp(30px,5.5vw,90px)">Architecture as Caching</h2>
-    <div class="grid-4" style="gap:2.5vh 3vw;margin-top:.8vh">
-      <div class="card" style="padding:3vh 2.6vw"><div class="h-md" style="font-size:clamp(22px,2.6vw,46px)">🎯 顺序 = 架构</div><div class="body" style="font-size:clamp(16px,1.5vw,28px);margin-top:.6vh">前缀匹配约束决定系统设计，顺序不是细节。</div></div>
-      <div class="card" style="padding:3vh 2.6vw"><div class="h-md" style="font-size:clamp(22px,2.6vw,46px)">📨 Message 传变化</div><div class="body" style="font-size:clamp(16px,1.5vw,28px);margin-top:.6vh">所有变动通过 message 追加，不动 system prompt。</div></div>
-      <div class="card" style="padding:3vh 2.6vw"><div class="h-md" style="font-size:clamp(22px,2.6vw,46px)">🔧 工具建状态</div><div class="body" style="font-size:clamp(16px,1.5vw,28px);margin-top:.6vh">Plan Mode / defer_loading 是工具行为，非工具集变更。</div></div>
-      <div class="card" style="padding:3vh 2.6vw"><div class="h-md" style="font-size:clamp(22px,2.6vw,46px)">📊 命中率 = Uptime</div><div class="body" style="font-size:clamp(16px,1.5vw,28px);margin-top:.6vh">缓存命中率与在线率同级，波动即告警。</div></div>
+  <section class="slide slide--spread" data-title="Signal">
+    <p class="kicker">context / signal</p>
+    <h2 class="h2">市场信号：成本与延迟</h2>
+    <p class="lede mt-m">Claude Code 启用 prompt caching 后，官方口径里<span class="wa">成本和延迟都下降了一个数量级</span>——缓存不是「可选优化」，而是产品结构问题。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>dashboard · cost / latency signal</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1600 400" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="sg-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="sg-gn" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="sg-bl" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e3a5f"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="sg-arc-a" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#7ee787"/></linearGradient>
+              <linearGradient id="sg-arc-b" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#2563eb"/><stop offset="100%" stop-color="#93c5fd"/></linearGradient>
+              <filter id="sg-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="1600" height="400" fill="url(#sg-dot)" opacity=".35"/>
+            <rect x="48" y="28" width="720" height="344" rx="26" fill="url(#sg-gn)" stroke="#7ee787" stroke-width="3" filter="url(#sg-soft)"/>
+            <text x="408" y="62" text-anchor="middle" fill="#7ee787" font-size="36" font-weight="800" font-family="JetBrains Mono,monospace">COST</text>
+            <path d="M 180 300 A 160 160 0 0 1 520 300" fill="none" stroke="#21262d" stroke-width="22" stroke-linecap="round"/>
+            <path d="M 200 300 A 140 140 0 0 1 500 300" fill="none" stroke="url(#sg-arc-a)" stroke-width="22" stroke-linecap="round" filter="url(#sg-soft)"/>
+            <text x="408" y="248" text-anchor="middle" fill="#fff" font-size="76" font-weight="900">−90%</text>
+            <text x="408" y="332" text-anchor="middle" fill="#d1fae5" font-size="30">重复算力 ↓ · 账单更可预测</text>
+            <rect x="832" y="28" width="720" height="344" rx="26" fill="url(#sg-bl)" stroke="#79c0ff" stroke-width="3" filter="url(#sg-soft)"/>
+            <text x="1192" y="62" text-anchor="middle" fill="#79c0ff" font-size="36" font-weight="800" font-family="JetBrains Mono,monospace">LATENCY</text>
+            <path d="M 964 300 A 160 160 0 0 1 1304 300" fill="none" stroke="#21262d" stroke-width="22" stroke-linecap="round"/>
+            <path d="M 984 300 A 140 140 0 0 1 1284 300" fill="none" stroke="url(#sg-arc-b)" stroke-width="22" stroke-linecap="round" filter="url(#sg-soft)"/>
+            <text x="1192" y="248" text-anchor="middle" fill="#fff" font-size="76" font-weight="900">TTFT</text>
+            <text x="1192" y="332" text-anchor="middle" fill="#bfdbfe" font-size="30">首轮更稳 · 工具密集 Agent</text>
+          </svg>
+        </div>
+      </div>
     </div>
-    <div class="callout" style="margin-top:.5vh">
-      Claude Code 从 day one 就以 caching 为架构基础。
-      <div class="callout-src">Lessons from building Claude Code, 2026.04</div>
+    <div class="grid g2 mt-l">
+      <div class="card card-accent"><h4>成本曲线</h4><p class="dim">前缀复用 → 重复算力下降 → 账单峰谷可控。</p></div>
+      <div class="card card-accent"><h4>交互体验</h4><p class="dim">命中缓存 → 延迟尾部收敛 → 对话「跟手」。</p></div>
     </div>
-  </div>
-  <div class="foot"><div>缓存不是补丁，是第一性原理</div><div>Principles</div></div>
-</section>
+  </section>
 
-<!-- ============================================================ -->
-<!-- s7 · CTA -->
-<!-- ============================================================ -->
-<section class="slide hero light">
-  <div class="chrome"><div>Closing</div><div>08 / 08</div></div>
-  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:68vh">
-    <div class="kicker">Prompt Caching Is Everything</div>
-    <h1 class="h-hero" style="font-size:clamp(38px,8.5vw,130px)">从 Day One<br>开始设计。</h1>
-    <p class="lead" style="max-width:60vw">
-      静态前置 · 动态后置 · 分层隔离 · 前缀复用<br>
-      Prompt caching 不是补丁，是<strong class="hi">Agent 经济模型的第一性原理</strong>。
-    </p>
-    <div class="row" style="gap:1.5vw;flex-wrap:wrap;margin-top:1vh">
-      <div class="pill">Follow</div><div class="pill">Star</div><div class="pill">Share</div>
+  <section class="slide slide--spread" data-title="Agenda">
+    <p class="kicker">agenda</p>
+    <h2 class="h2">本期结构</h2>
+    <div class="stack mt-l">
+      <div class="agenda-row"><span class="num">01</span><span class="t"><span class="wa">缓存机制与结构</span>：前缀如何命中</span><span class="d">机制</span></div>
+      <div class="agenda-row"><span class="num">02</span><span class="t">分层与 cache_control 断点</span><span class="d">架构</span></div>
+      <div class="agenda-row"><span class="num">03</span><span class="t">易忽略的实践与陷阱</span><span class="d">最佳实践</span></div>
+      <div class="agenda-row"><span class="num">04</span><span class="t">运维误区：改 prompt、工具集、模型</span><span class="d">操作面</span></div>
+      <div class="agenda-row"><span class="num">05</span><span class="t">压缩、监控与设计原则</span><span class="d">收口</span></div>
     </div>
-    <div class="meta" style="opacity:.4">anthropic.com/blog · Lessons from building Claude Code</div>
-  </div>
-  <div class="foot"><div>缓存命中率是经济生命线</div><div>— Fin —</div></div>
-</section>
+  </section>
+
+  <section class="slide slide--spread" data-title="Prefix">
+    <p class="kicker">mechanism · prefix</p>
+    <h2 class="h2"><span class="wa">前缀匹配机制到底是怎么工作的</span></h2>
+    <p class="lede mt-m">缓存的是 token 序列上的<strong>中间状态</strong>；<strong>精确哈希</strong>判定一致——不是模糊匹配。</p>
+    <div class="diagram-band diagram-band--compact">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>pipeline · hash → hit / miss</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 360" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="pf-dot" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.4" fill="#30363d"/></pattern>
+              <marker id="pf-arr" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#79c0ff"/></marker>
+              <linearGradient id="pf-hit" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#166534"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="pf-miss" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7f1d1d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <filter id="pf-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="1760" height="360" fill="url(#pf-dot)" opacity=".4"/>
+            <text x="880" y="38" text-anchor="middle" fill="#8b949e" font-size="26" font-family="JetBrains Mono,monospace">INPUT TOKENS · PREFIX … N</text>
+            <rect x="72" y="62" width="220" height="88" rx="14" fill="#21262d" stroke="#79c0ff" stroke-width="3" filter="url(#pf-glow)"/>
+            <text x="182" y="122" text-anchor="middle" fill="#e6edf3" font-size="34" font-weight="700">T₁ … Tᵢ</text>
+            <line x1="302" y1="106" x2="382" y2="106" stroke="#79c0ff" stroke-width="5" marker-end="url(#pf-arr)"/>
+            <rect x="392" y="56" width="300" height="100" rx="16" fill="#238636" stroke="#7ee787" stroke-width="3"/>
+            <text x="542" y="118" text-anchor="middle" fill="#fff" font-size="36" font-weight="900">hash(prefix)</text>
+            <line x1="702" y1="106" x2="782" y2="106" stroke="#79c0ff" stroke-width="5" marker-end="url(#pf-arr)"/>
+            <rect x="792" y="48" width="360" height="116" rx="18" fill="url(#pf-hit)" stroke="#7ee787" stroke-width="4" filter="url(#pf-glow)"/>
+            <text x="972" y="118" text-anchor="middle" fill="#7ee787" font-size="40" font-weight="900">HIT · KV</text>
+            <line x1="1162" y1="106" x2="1242" y2="106" stroke="#8b949e" stroke-width="4" marker-end="url(#pf-arr)"/>
+            <rect x="1252" y="48" width="436" height="116" rx="18" fill="url(#pf-miss)" stroke="#ff7b72" stroke-width="4"/>
+            <text x="1470" y="118" text-anchor="middle" fill="#ff7b72" font-size="40" font-weight="900">MISS</text>
+            <text x="880" y="210" text-anchor="middle" fill="#e6edf3" font-size="30">前缀逐 token 对齐 → 命中；早期任一差异 → 后缀全量重算</text>
+            <rect x="140" y="238" width="1480" height="92" rx="16" fill="#010409" stroke="#30363d" stroke-width="2"/>
+            <text x="880" y="298" text-anchor="middle" fill="#79c0ff" font-size="28" font-family="JetBrains Mono,monospace">same_prefix → reuse_kv_state() · else → full_forward()</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="terminal mt-l">
+      <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>cache-key intuition</span></div>
+<pre><span class="cmt"># 断点前每一位都要对齐</span>
+<span class="kw">if</span> <span class="fn">hash</span>(prefix_1..N) == stored_hash:
+    <span class="fn">reuse_kv_and_prefix_state</span>()
+<span class="kw">else</span>:
+    <span class="fn">recompute_from_mismatch</span>()</pre>
+    </div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Order">
+    <p class="kicker">ordering</p>
+    <h2 class="h2"><span class="wa">顺序就非常重要</span></h2>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>ordering · SYSTEM → TOOLS → DYNAMIC</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 320" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="ord-dot" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#30363d"/></pattern>
+              <linearGradient id="ord-g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="ord-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e3a8a"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="ord-g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#44403c"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <marker id="ord-arr" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><path d="M0,0 L14,5 L0,10 Z" fill="#94a3b8"/></marker>
+              <filter id="ord-glow" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="1760" height="320" fill="url(#ord-dot)" opacity=".38"/>
+            <text x="880" y="44" text-anchor="middle" fill="#8b949e" font-size="28" font-family="JetBrains Mono,monospace">从左到右 · 顺序即缓存键的一部分</text>
+            <rect x="56" y="72" width="460" height="148" rx="22" fill="url(#ord-g1)" stroke="#7ee787" stroke-width="4" filter="url(#ord-glow)"/>
+            <text x="286" y="138" text-anchor="middle" fill="#7ee787" font-size="30" font-weight="800" font-family="JetBrains Mono,monospace">01</text>
+            <text x="286" y="188" text-anchor="middle" fill="#fff" font-size="48" font-weight="900">SYSTEM</text>
+            <line x1="526" y1="146" x2="598" y2="146" stroke="#64748b" stroke-width="6" marker-end="url(#ord-arr)"/>
+            <rect x="612" y="72" width="460" height="148" rx="22" fill="url(#ord-g2)" stroke="#79c0ff" stroke-width="4" filter="url(#ord-glow)"/>
+            <text x="842" y="138" text-anchor="middle" fill="#93c5fd" font-size="30" font-weight="800" font-family="JetBrains Mono,monospace">02</text>
+            <text x="842" y="188" text-anchor="middle" fill="#fff" font-size="48" font-weight="900">TOOLS</text>
+            <line x1="1082" y1="146" x2="1154" y2="146" stroke="#64748b" stroke-width="6" marker-end="url(#ord-arr)"/>
+            <rect x="1168" y="72" width="536" height="148" rx="22" fill="url(#ord-g3)" stroke="#ff7b72" stroke-width="4"/>
+            <text x="1436" y="138" text-anchor="middle" fill="#fecaca" font-size="30" font-weight="800" font-family="JetBrains Mono,monospace">03</text>
+            <text x="1436" y="188" text-anchor="middle" fill="#f8fafc" font-size="44" font-weight="900">MESSAGES</text>
+            <text x="880" y="278" text-anchor="middle" fill="#94a3b8" font-size="28">动态内容只追加尾部 · 勿插队污染前缀</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3 mt-l">
+      <div class="card"><h4>工具定义顺序</h4><p class="dim">system / tools / messages 顺序摇摆 → 前缀哈希立刻失效。</p></div>
+      <div class="card"><h4>稳定块前置</h4><p class="dim">最稳定的系统提示与工具模式<strong>锁在头部</strong>。</p></div>
+      <div class="card card-accent"><h4>禁止中间插入</h4><p class="dim">动态内容<strong>只追加尾部</strong>，勿插队污染前缀。</p></div>
+    </div>
+    <p class="lede mt-l dim">缓存友好 = <strong>可预测的静态前缀</strong> + <strong>可控的尾部增量</strong>。</p>
+  </section>
+
+  <section class="slide slide--spread" data-title="Layers">
+    <p class="kicker">architecture · layers</p>
+    <h2 class="h2">Claude Code 式<span class="wa">三层缓存结构</span></h2>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>orbit-map · reuse radius vs churn（创意视图）</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1680 420" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="lyr2-dot" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#30363d"/></pattern>
+              <linearGradient id="lyr2-orbit3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#44403c"/><stop offset="100%" stop-color="#0c0a09"/></linearGradient>
+              <linearGradient id="lyr2-orbit2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e3a8a"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <linearGradient id="lyr2-orbit1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#166534"/><stop offset="100%" stop-color="#052e16"/></linearGradient>
+              <filter id="lyr2-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="lyr2-ar" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#94a3b8"/></marker>
+            </defs>
+            <rect width="1680" height="420" fill="url(#lyr2-dot)" opacity=".4"/>
+            <ellipse cx="840" cy="228" rx="520" ry="168" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="14 10" opacity=".9"/>
+            <ellipse cx="840" cy="228" rx="380" ry="118" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="10 8"/>
+            <ellipse cx="840" cy="228" rx="220" ry="68" fill="none" stroke="#64748b" stroke-width="2"/>
+            <circle cx="840" cy="228" r="44" fill="#020617" stroke="#e2e8f0" stroke-width="3"/>
+            <text x="840" y="242" text-anchor="middle" fill="#f8fafc" font-size="22" font-weight="800" font-family="JetBrains Mono,monospace">SESSION</text>
+            <rect x="1180" y="68" width="440" height="92" rx="18" fill="url(#lyr2-orbit1)" stroke="#7ee787" stroke-width="3" filter="url(#lyr2-glow)" transform="rotate(-8 1400 114)"/>
+            <text x="1220" y="118" fill="#bbf7d0" font-size="26" font-weight="900" font-family="JetBrains Mono,monospace">L1</text>
+            <text x="1340" y="112" fill="#fff" font-size="30" font-weight="800">Fleet-global</text>
+            <text x="1340" y="148" fill="#86efac" font-size="22">跨会话 · System / 通用 Tools · 命中半径最大</text>
+            <rect x="1140" y="218" width="460" height="100" rx="18" fill="url(#lyr2-orbit2)" stroke="#60a5fa" stroke-width="3" filter="url(#lyr2-glow)" transform="rotate(6 1370 268)"/>
+            <text x="1180" y="268" fill="#bfdbfe" font-size="26" font-weight="900" font-family="JetBrains Mono,monospace">L2</text>
+            <text x="1320" y="258" fill="#fff" font-size="30" font-weight="800">Workspace</text>
+            <text x="1320" y="294" fill="#93c5fd" font-size="22">同一 Repo · CLAUDE.md / skill 模板 · 中等半径</text>
+            <rect x="60" y="168" width="420" height="112" rx="20" fill="url(#lyr2-orbit3)" stroke="#fb923c" stroke-width="3" filter="url(#lyr2-glow)" transform="rotate(-4 270 224)"/>
+            <text x="100" y="224" fill="#fed7aa" font-size="26" font-weight="900" font-family="JetBrains Mono,monospace">L3</text>
+            <text x="240" y="212" fill="#fff" font-size="30" font-weight="800">Thread-hot</text>
+            <text x="240" y="252" fill="#fdba74" font-size="22">消息 / Tool Results · 高 churn · 紧贴核心</text>
+            <path d="M 520 228 Q 680 120 1020 118" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#lyr2-ar)" opacity=".85"/>
+            <path d="M 560 248 Q 720 280 1040 268" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#lyr2-ar)" opacity=".85"/>
+            <text x="840" y="392" text-anchor="middle" fill="#94a3b8" font-size="26" font-family="JetBrains Mono,monospace">隐喻：离核心越远 → 复用面越大 · 越近 → 变化越频繁（分层放置静态 / 动态）</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3 mt-l">
+      <div class="card card-accent"><h4>L1 · 全局</h4><p class="dim">跨会话复用潜力最大。</p></div>
+      <div class="card card-accent"><h4>L2 · 项目</h4><p class="dim">同一 codebase 重复命中。</p></div>
+      <div class="card card-accent"><h4>L3 · 会话</h4><p class="dim">变化快，单独分层。</p></div>
+    </div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Breakpoints">
+    <p class="kicker">cache_control</p>
+    <h2 class="h2"><span class="wa">cache_control 断点</span>：最长前缀 wins</h2>
+    <p class="lede mt-m">标记<strong>有限个</strong>断点；运行时取<strong>最长匹配前缀</strong>恢复缓存。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>token stream · breakpoints · longest-prefix（技术向）</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 420" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="brk2-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="brk2-seg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#14532d"/><stop offset="22%" stop-color="#1e3a8a"/><stop offset="48%" stop-color="#4c1d95"/><stop offset="72%" stop-color="#9a3412"/><stop offset="100%" stop-color="#7f1d1d"/></linearGradient>
+              <marker id="brk2-mk" markerWidth="11" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L11,4 L0,8 Z" fill="#fbbf24"/></marker>
+              <filter id="brk2-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".4"/></filter>
+            </defs>
+            <rect width="1760" height="420" fill="url(#brk2-dot)" opacity=".36"/>
+            <text x="880" y="44" text-anchor="middle" fill="#94a3b8" font-size="26" font-family="JetBrains Mono,monospace">序列位置 t · 每个 cache_control 写入「可悬停的恢复锚」</text>
+            <rect x="72" y="118" width="1616" height="72" rx="12" fill="#020617" stroke="#334155" stroke-width="2"/>
+            <rect x="72" y="118" width="380" height="72" fill="rgba(34,197,94,.14)" stroke="#22c55e" stroke-width="2"/>
+            <rect x="452" y="118" width="340" height="72" fill="rgba(59,130,246,.14)" stroke="#3b82f6" stroke-width="2"/>
+            <rect x="792" y="118" width="420" height="72" fill="rgba(168,85,247,.14)" stroke="#a855f7" stroke-width="2"/>
+            <rect x="1212" y="118" width="476" height="72" fill="rgba(249,115,22,.12)" stroke="#fb923c" stroke-width="2"/>
+            <text x="262" y="164" text-anchor="middle" fill="#e6edf3" font-size="26" font-weight="700">system</text>
+            <text x="622" y="164" text-anchor="middle" fill="#e6edf3" font-size="26" font-weight="700">tools</text>
+            <text x="1002" y="164" text-anchor="middle" fill="#e6edf3" font-size="26" font-weight="700">messages…</text>
+            <text x="1450" y="164" text-anchor="middle" fill="#e6edf3" font-size="26" font-weight="700">tool_results</text>
+            <line x1="262" y1="210" x2="262" y2="248" stroke="#fbbf24" stroke-width="3"/>
+            <line x1="622" y1="210" x2="622" y2="248" stroke="#fbbf24" stroke-width="3"/>
+            <line x1="1002" y1="210" x2="1002" y2="248" stroke="#fbbf24" stroke-width="3"/>
+            <line x1="1450" y1="210" x2="1450" y2="248" stroke="#fbbf24" stroke-width="3"/>
+            <rect x="92" y="252" width="1720" height="56" rx="12" fill="rgba(251,191,36,.08)" stroke="#fbbf24" stroke-width="2" stroke-dasharray="8 6"/>
+            <text x="120" y="288" fill="#fcd34d" font-size="24" font-weight="800" font-family="JetBrains Mono,monospace">BP①</text>
+            <text x="220" y="288" fill="#fde68a" font-size="24" font-family="JetBrains Mono,monospace">BP②</text>
+            <text x="340" y="288" fill="#fde68a" font-size="24" font-family="JetBrains Mono,monospace">BP③</text>
+            <text x="460" y="288" fill="#fde68a" font-size="24" font-family="JetBrains Mono,monospace">BP④</text>
+            <text x="880" y="290" text-anchor="middle" fill="#e2e8f0" font-size="28" font-weight="700">最长缓存前缀 = max { 锚点 k | hash(seq[:cut_k]) 命中 }</text>
+            <path d="M 88 330 L 1672 330" stroke="url(#brk2-seg)" stroke-width="5" marker-end="url(#brk2-mk)" opacity=".75"/>
+            <rect x="108" y="348" width="1544" height="54" rx="10" fill="#0f172a" stroke="#475569" stroke-width="1" filter="url(#brk2-sh)"/>
+            <text x="880" y="384" text-anchor="middle" fill="#94a3b8" font-size="24" font-family="JetBrains Mono,monospace">变更落在锚点右侧 → 仅失效该截断之后的后缀 · 静态头部仍在键空间内保持连续</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="stack mt-l">
+      <span class="tag">✦ 断点数量与合规 / 隔离折中</span>
+      <span class="tag">✦ 局部失效 · 不必整段重算</span>
+    </div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Pitfalls">
+    <p class="kicker">anti-patterns</p>
+    <h2 class="h2">常被忽略的污染：<span class="wa">动态内容例如时间戳</span></h2>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>diff · polluted prefix vs clean tail</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1600 300" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="plt-dot" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#30363d"/></pattern>
+              <linearGradient id="plt-bad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7f1d1d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="plt-good" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <filter id="plt-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="1600" height="300" fill="url(#plt-dot)" opacity=".38"/>
+            <rect x="48" y="52" width="680" height="196" rx="24" fill="url(#plt-bad)" stroke="#ff7b72" stroke-width="4" filter="url(#plt-glow)"/>
+            <text x="388" y="118" text-anchor="middle" fill="#fecaca" font-size="34" font-weight="800" font-family="JetBrains Mono,monospace">ANTI-PATTERN</text>
+            <text x="388" y="172" text-anchor="middle" fill="#fff" font-size="44" font-weight="900">前缀里塞时间戳</text>
+            <text x="388" y="222" text-anchor="middle" fill="#fca5a5" font-size="30">命中率 → ≈ 0</text>
+            <text x="800" y="168" text-anchor="middle" fill="#64748b" font-size="96" font-weight="200">⇒</text>
+            <rect x="872" y="52" width="680" height="196" rx="24" fill="url(#plt-good)" stroke="#7ee787" stroke-width="4" filter="url(#plt-glow)"/>
+            <text x="1212" y="118" text-anchor="middle" fill="#bbf7d0" font-size="34" font-weight="800" font-family="JetBrains Mono,monospace">FIX</text>
+            <text x="1212" y="172" text-anchor="middle" fill="#fff" font-size="44" font-weight="900">动态走 user / tool</text>
+            <text x="1212" y="222" text-anchor="middle" fill="#d1fae5" font-size="30">前缀冻结 · 尾部承接变量</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card"><h4>❌ 高频字段进前缀</h4><p class="dim">随机 ID、环境 dump → 缓存形同虚设。</p></div>
+      <div class="card card-accent"><h4>✅ 外置或后置</h4><p class="dim">变量走 messages / tool result。</p></div>
+    </div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Practice">
+    <p class="kicker">engineering hygiene</p>
+    <h2 class="h2">团队级清单</h2>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>executive dashboard · hygiene KPIs（商务ppt气质）</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1680 260" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="pr9-dot" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.4" fill="#e2e8f0" opacity=".08"/></pattern>
+              <linearGradient id="pr9-ribbon" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0f172a"/><stop offset="50%" stop-color="#1e293b"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <linearGradient id="pr9-card" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f8fafc"/><stop offset="100%" stop-color="#e2e8f0"/></linearGradient>
+              <filter id="pr9-card-sh" x="-15%" y="-15%" width="130%" height="130%"><feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000" flood-opacity=".35"/></filter>
+            </defs>
+            <rect width="1680" height="260" fill="#020617"/>
+            <rect width="1680" height="260" fill="url(#pr9-dot)"/>
+            <rect x="48" y="28" width="1584" height="52" rx="12" fill="url(#pr9-ribbon)" stroke="#334155"/>
+            <text x="840" y="64" text-anchor="middle" fill="#f1f5f9" font-size="28" font-weight="800" letter-spacing=".06em">CACHE OPS SCORECARD</text>
+            <rect x="56" y="98" width="380" height="142" rx="16" fill="url(#pr9-card)" stroke="#cbd5e1" stroke-width="1" filter="url(#pr9-card-sh)"/>
+            <text x="246" y="138" text-anchor="middle" fill="#0f172a" font-size="22" font-weight="800">工具清单版本化</text>
+            <text x="246" y="178" text-anchor="middle" fill="#16a34a" font-size="42" font-weight="900">● OK</text>
+            <text x="246" y="218" text-anchor="middle" fill="#475569" font-size="20">schema_hash 锁定 · feature flag</text>
+            <rect x="462" y="98" width="380" height="142" rx="16" fill="url(#pr9-card)" stroke="#cbd5e1" stroke-width="1" filter="url(#pr9-card-sh)"/>
+            <text x="652" y="138" text-anchor="middle" fill="#0f172a" font-size="22" font-weight="800">命中率面板</text>
+            <text x="652" y="178" text-anchor="middle" fill="#2563eb" font-size="42" font-weight="900">SLI</text>
+            <text x="652" y="218" text-anchor="middle" fill="#475569" font-size="20">hit-rate · p95 · SKUs</text>
+            <rect x="868" y="98" width="380" height="142" rx="16" fill="url(#pr9-card)" stroke="#cbd5e1" stroke-width="1" filter="url(#pr9-card-sh)"/>
+            <text x="1058" y="138" text-anchor="middle" fill="#0f172a" font-size="22" font-weight="800">告警阈值</text>
+            <text x="1058" y="178" text-anchor="middle" fill="#ea580c" font-size="42" font-weight="900">&gt; Δ</text>
+            <text x="1058" y="218" text-anchor="middle" fill="#475569" font-size="20">急跌联动前缀审计</text>
+            <rect x="1274" y="98" width="350" height="142" rx="16" fill="url(#pr9-card)" stroke="#cbd5e1" stroke-width="1" filter="url(#pr9-card-sh)"/>
+            <text x="1449" y="138" text-anchor="middle" fill="#0f172a" font-size="22" font-weight="800">Runbook</text>
+            <text x="1449" y="178" text-anchor="middle" fill="#7c3aed" font-size="42" font-weight="900">SOP</text>
+            <text x="1449" y="218" text-anchor="middle" fill="#475569" font-size="20">排障路径一页纸</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card card-accent"><h4>工具清单版本化</h4><p class="dim">顺序与定义锁定；用开关位控制启用，而非来回删工具。</p></div>
+      <div class="card card-accent"><h4><span class="wa">监控缓存命中率</span></h4><p class="dim">抖动先于账单爆炸——面板必须可看。</p></div>
+    </div>
+    <p class="lede mt-l dim">压缩 / 分支会话时守住<strong>同一前缀形状</strong>，否则等于静默全量重算。</p>
+  </section>
+
+  <section class="slide slide--spread" data-title="Runtime">
+    <p class="kicker">operations · part 2</p>
+    <h2 class="h2">误区：<span class="wa">运行过程中修改 system prompt</span></h2>
+    <p class="lede mt-m">中途改写 system → 前缀断裂 → <strong>整段前缀作废</strong>。</p>
+    <div class="diagram-band diagram-band--compact">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>freeze · system + tail append-only</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1520 260" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="rt-dot" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.4" fill="#30363d"/></pattern>
+              <linearGradient id="rt-sys" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#166534"/><stop offset="100%" stop-color="#052e16"/></linearGradient>
+              <linearGradient id="rt-tail" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e3a8a"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <filter id="rt-glow" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="1520" height="260" fill="url(#rt-dot)" opacity=".4"/>
+            <rect x="56" y="48" width="620" height="164" rx="22" fill="url(#rt-sys)" stroke="#7ee787" stroke-width="4" filter="url(#rt-glow)"/>
+            <text x="366" y="118" text-anchor="middle" fill="#bbf7d0" font-size="30" font-weight="800" font-family="JetBrains Mono,monospace">LOCKED</text>
+            <text x="366" y="172" text-anchor="middle" fill="#fff" font-size="48" font-weight="900">system 冻结</text>
+            <text x="760" y="142" text-anchor="middle" fill="#79c0ff" font-size="72" font-weight="300">+</text>
+            <rect x="844" y="48" width="620" height="164" rx="22" fill="url(#rt-tail)" stroke="#79c0ff" stroke-width="4" filter="url(#rt-glow)"/>
+            <text x="1154" y="118" text-anchor="middle" fill="#bfdbfe" font-size="30" font-weight="800" font-family="JetBrains Mono,monospace">APPEND</text>
+            <text x="1154" y="172" text-anchor="middle" fill="#fff" font-size="42" font-weight="800">user / tool 动态</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="terminal mt-l">
+      <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>preferred pattern</span></div>
+<pre><span class="cmt"># 动态意图 → 后置追加</span>
+system := <span class="str">frozen_profile</span>
+user   += <span class="str">dynamic_instructions</span></pre>
+    </div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Tools">
+    <p class="kicker">tools · models</p>
+    <h2 class="h2">工具集与模型切换</h2>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>matrix · tools / model / sub-agents</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 320" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="tls-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="tls-hot" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7f1d1d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="tls-ok" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <filter id="tls-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity=".5"/></filter>
+            </defs>
+            <rect width="1760" height="320" fill="url(#tls-dot)" opacity=".36"/>
+            <text x="880" y="46" text-anchor="middle" fill="#94a3b8" font-size="28" font-family="JetBrains Mono,monospace">左两类 → 缓存键变 · 右一类 → 独立前缀分支</text>
+            <rect x="56" y="72" width="520" height="168" rx="22" fill="url(#tls-hot)" stroke="#ff7b72" stroke-width="4" filter="url(#tls-sh)"/>
+            <text x="316" y="138" text-anchor="middle" fill="#fecaca" font-size="30" font-weight="800">INVALIDATES</text>
+            <text x="316" y="192" text-anchor="middle" fill="#fff" font-size="42" font-weight="900">工具表结构</text>
+            <rect x="620" y="72" width="520" height="168" rx="22" fill="url(#tls-hot)" stroke="#f97316" stroke-width="4" filter="url(#tls-sh)"/>
+            <text x="880" y="138" text-anchor="middle" fill="#ffedd5" font-size="30" font-weight="800">INVALIDATES</text>
+            <text x="880" y="192" text-anchor="middle" fill="#fff" font-size="42" font-weight="900">模型切换</text>
+            <rect x="1184" y="72" width="520" height="168" rx="22" fill="url(#tls-ok)" stroke="#7ee787" stroke-width="4" filter="url(#tls-sh)"/>
+            <text x="1444" y="138" text-anchor="middle" fill="#bbf7d0" font-size="30" font-weight="800">BRANCH</text>
+            <text x="1444" y="192" text-anchor="middle" fill="#fff" font-size="42" font-weight="900">子 Agent</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3 mt-l">
+      <div class="card"><h4>工具增减 / 换序</h4><p class="dim">结构变 → 前缀变 → 大面积失效。</p></div>
+      <div class="card card-accent"><h4>模型切换</h4><p class="dim">不同模型族通常不共享同一缓存键。</p></div>
+      <div class="card"><h4>子智能体</h4><p class="dim">每分支独立前缀，各自稳定小前缀。</p></div>
+    </div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Compress">
+    <p class="kicker">compression</p>
+    <h2 class="h2">上下文压缩：<span class="wa">压缩时一定要保证</span></h2>
+    <p class="lede mt-m">system 与工具定义与压缩前<strong>一致</strong>；摘要用<strong>专用消息类型</strong>标明。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>before / after · KV lane vs transcript lane（压缩重做）</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1720 360" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="cmp2-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="cmp2-kv" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient>
+              <marker id="cmp2-ar" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#a855f7"/></marker>
+              <filter id="cmp2-g" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="1720" height="360" fill="url(#cmp2-dot)" opacity=".38"/>
+            <text x="860" y="38" text-anchor="middle" fill="#94a3b8" font-size="26" font-family="JetBrains Mono,monospace">约束：hash(system‖tools) 压缩前后一致 · COMPACT 作为「显式摘要槽」插入 transcript</text>
+            <text x="180" y="78" text-anchor="middle" fill="#64748b" font-size="22" font-weight="700">BEFORE</text>
+            <text x="1320" y="78" text-anchor="middle" fill="#64748b" font-size="22" font-weight="700">AFTER</text>
+            <rect x="48" y="96" width="620" height="88" rx="14" fill="#020617" stroke="#475569"/>
+            <rect x="56" y="104" width="200" height="72" rx="10" fill="rgba(34,197,94,.2)" stroke="#22c55e"/>
+            <text x="156" y="150" text-anchor="middle" fill="#bbf7d0" font-size="26" font-weight="800">SYSTEM</text>
+            <rect x="268" y="104" width="200" height="72" rx="10" fill="rgba(59,130,246,.2)" stroke="#60a5fa"/>
+            <text x="368" y="150" text-anchor="middle" fill="#dbeafe" font-size="26" font-weight="800">TOOLS</text>
+            <rect x="480" y="104" width="180" height="72" rx="10" fill="rgba(249,115,22,.25)" stroke="#fb923c"/>
+            <text x="570" y="150" text-anchor="middle" fill="#ffedd5" font-size="22" font-weight="800">long msgs…</text>
+            <path d="M 688 142 L 820 142" stroke="#64748b" stroke-width="3" stroke-dasharray="10 6"/>
+            <polygon points="820,142 850,132 850,152" fill="#94a3b8"/>
+            <rect x="872" y="96" width="800" height="88" rx="14" fill="#020617" stroke="#475569"/>
+            <rect x="884" y="104" width="200" height="72" rx="10" fill="rgba(34,197,94,.2)" stroke="#22c55e" filter="url(#cmp2-g)"/>
+            <text x="984" y="148" text-anchor="middle" fill="#bbf7d0" font-size="24" font-weight="800">SYSTEM ✓</text>
+            <rect x="1096" y="104" width="200" height="72" rx="10" fill="rgba(59,130,246,.2)" stroke="#60a5fa" filter="url(#cmp2-g)"/>
+            <text x="1196" y="148" text-anchor="middle" fill="#dbeafe" font-size="24" font-weight="800">TOOLS ✓</text>
+            <rect x="1308" y="104" width="160" height="72" rx="10" fill="rgba(168,85,247,.28)" stroke="#c084fc"/>
+            <text x="1388" y="148" text-anchor="middle" fill="#f3e8ff" font-size="22" font-weight="900">COMPACT</text>
+            <rect x="1480" y="104" width="180" height="72" rx="10" fill="rgba(249,115,22,.22)" stroke="#fb923c"/>
+            <text x="1570" y="148" text-anchor="middle" fill="#ffedd5" font-size="22" font-weight="800">RECENT</text>
+            <rect x="48" y="210" width="1624" height="56" rx="12" fill="#0f172a" stroke="#334155"/>
+            <rect x="64" y="222" width="340" height="32" rx="8" fill="url(#cmp2-kv)" opacity=".55"/>
+            <text x="234" y="246" text-anchor="middle" fill="#ecfdf5" font-size="22" font-weight="800" font-family="JetBrains Mono,monospace">KV lane · frozen prefix</text>
+            <text x="580" y="246" fill="#94a3b8" font-size="26">‖</text>
+            <rect x="620" y="222" width="1036" height="32" rx="8" fill="#312e81" opacity=".45"/>
+            <text x="1138" y="246" text-anchor="middle" fill="#e0e7ff" font-size="22" font-weight="700" font-family="JetBrains Mono,monospace">transcript lane · rolling window（摘要必须类型化，避免静默丢状态）</text>
+            <line x1="1388" y1="180" x2="1388" y2="210" stroke="#a855f7" stroke-width="2" marker-end="url(#cmp2-ar)"/>
+            <text x="860" y="328" text-anchor="middle" fill="#8b949e" font-size="24">工具超长输出 → 外置 blob · 上下文只保留 handle（否则压缩后前缀形状漂移）</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="stack mt-m">
+      <span class="tag">✦ 摘要丢状态 → 行为漂移</span>
+      <span class="tag">✦ 大 tool 输出外置 · 上下文留句柄</span>
+    </div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Ship">
+    <p class="kicker">production checklist</p>
+    <h2 class="h2">落地建议</h2>
+    <p class="lede mt-l"><span class="wa">System Prompt 与工具定义置顶</span>且只读；动态事实后置；cache_control 分层。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>rollout roadmap · 三柱治理模型（重做）</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1680 320" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="shp2-dot" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#cbd5e1" opacity=".06"/></pattern>
+              <linearGradient id="shp2-p1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e3a8a"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <linearGradient id="shp2-p2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <linearGradient id="shp2-p3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9a3412"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <filter id="shp2-sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity=".45"/></filter>
+            </defs>
+            <rect width="1680" height="320" fill="#020617"/>
+            <rect width="1680" height="320" fill="url(#shp2-dot)"/>
+            <rect x="48" y="36" width="1584" height="56" rx="14" fill="#1e293b" stroke="#334155"/>
+            <text x="840" y="74" text-anchor="middle" fill="#f8fafc" font-size="28" font-weight="800" letter-spacing=".04em">GOVERNANCE · DESIGN → OPERATE → OBSERVE</text>
+            <rect x="56" y="112" width="480" height="184" rx="20" fill="url(#shp2-p1)" stroke="#60a5fa" stroke-width="3" filter="url(#shp2-sh)"/>
+            <text x="296" y="156" text-anchor="middle" fill="#bfdbfe" font-size="26" font-weight="900" font-family="JetBrains Mono,monospace">PILLAR I</text>
+            <text x="296" y="198" text-anchor="middle" fill="#fff" font-size="34" font-weight="800">静态头部契约</text>
+            <text x="296" y="246" text-anchor="middle" fill="#cbd5e1" font-size="22">system/tools 冻结文档化 · PR gate</text>
+            <rect x="560" y="112" width="560" height="184" rx="20" fill="url(#shp2-p2)" stroke="#4ade80" stroke-width="3" filter="url(#shp2-sh)"/>
+            <text x="840" y="156" text-anchor="middle" fill="#bbf7d0" font-size="26" font-weight="900" font-family="JetBrains Mono,monospace">PILLAR II</text>
+            <text x="840" y="198" text-anchor="middle" fill="#fff" font-size="34" font-weight="800">cache_control 运维面</text>
+            <text x="840" y="246" text-anchor="middle" fill="#cbd5e1" font-size="22">分层键 · 租户隔离 · 渐进上线</text>
+            <rect x="1144" y="112" width="480" height="184" rx="20" fill="url(#shp2-p3)" stroke="#fb923c" stroke-width="3" filter="url(#shp2-sh)"/>
+            <text x="1384" y="156" text-anchor="middle" fill="#fed7aa" font-size="26" font-weight="900" font-family="JetBrains Mono,monospace">PILLAR III</text>
+            <text x="1384" y="198" text-anchor="middle" fill="#fff" font-size="34" font-weight="800">可观测闭环</text>
+            <text x="1384" y="246" text-anchor="middle" fill="#cbd5e1" font-size="22">命中率 / p95 / 用量三角 · 告警 Runbook</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card card-accent"><h4>结构化监控</h4><p class="dim">命中率 · 缓存延迟 · 存储用量——联防。</p></div>
+      <div class="card card-accent"><h4>异常联动</h4><p class="dim">命中率急跌 → 先查前缀是否被改写。</p></div>
+    </div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Principles">
+    <p class="kicker">design principles</p>
+    <h2 class="h2">高效缓存的核心</h2>
+    <p class="lede mt-l"><span class="wa">System 与 Tool 只读头部</span>；静态 / 动态<strong>硬隔离</strong>；缓存键含租户 · 会话 · 版本。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>mandala · readonly core + satellites</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1520 360" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="pr-dot" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#30363d"/></pattern>
+              <linearGradient id="pr-ring" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7ee787"/><stop offset="100%" stop-color="#79c0ff"/></linearGradient>
+              <radialGradient id="pr-hub" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#1e293b"/><stop offset="100%" stop-color="#020617"/></radialGradient>
+              <filter id="pr-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="1520" height="360" fill="url(#pr-dot)" opacity=".36"/>
+            <circle cx="760" cy="124" r="112" fill="url(#pr-hub)" stroke="url(#pr-ring)" stroke-width="6" filter="url(#pr-glow)"/>
+            <text x="760" y="138" text-anchor="middle" fill="#fff" font-size="44" font-weight="900">READONLY</text>
+            <rect x="120" y="68" width="240" height="118" rx="18" fill="#0f172a" stroke="#7ee787" stroke-width="3"/>
+            <text x="240" y="118" text-anchor="middle" fill="#e6edf3" font-size="34" font-weight="800">分层</text>
+            <text x="240" y="162" text-anchor="middle" fill="#94a3b8" font-size="28">L1 / L2 / L3</text>
+            <rect x="1160" y="68" width="240" height="118" rx="18" fill="#0f172a" stroke="#79c0ff" stroke-width="3"/>
+            <text x="1280" y="118" text-anchor="middle" fill="#e6edf3" font-size="34" font-weight="800">版本</text>
+            <text x="1280" y="162" text-anchor="middle" fill="#94a3b8" font-size="28">模型 · 工具</text>
+            <line x1="360" y1="127" x2="560" y2="127" stroke="#475569" stroke-width="3"/>
+            <line x1="960" y1="127" x2="1160" y2="127" stroke="#475569" stroke-width="3"/>
+            <rect x="210" y="252" width="1100" height="56" rx="16" fill="#0f172a" stroke="#64748b" stroke-width="2.5" opacity=".98"/>
+            <text x="760" y="290" text-anchor="middle" fill="#e2e8f0" font-size="30" font-weight="800">敏感上下文不进共享切片 · 租户硬隔离</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3 mt-l">
+      <div class="card"><h4>分层</h4><p class="dim">全局 / 项目 / 会话边界清晰。</p></div>
+      <div class="card"><h4>版本</h4><p class="dim">进键 + 事件淘汰 + TTL。</p></div>
+      <div class="card"><h4>安全</h4><p class="dim">租户隔离 · 合规。</p></div>
+    </div>
+  </section>
+
+  <section class="slide center tc slide--spread" data-title="Thanks" style="position:relative;overflow:hidden">
+    <svg class="thanks-mesh" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <radialGradient id="thx2-r1" cx="22%" cy="18%" r="45%"><stop offset="0%" stop-color="#312e81"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+        <radialGradient id="thx2-r2" cx="88%" cy="78%" r="40%"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+        <linearGradient id="thx2-line" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#22c55e"/></linearGradient>
+      </defs>
+      <rect width="1920" height="1080" fill="#020617"/>
+      <rect width="1920" height="1080" fill="url(#thx2-r1)"/>
+      <rect width="1920" height="1080" fill="url(#thx2-r2)"/>
+      <path d="M0,540 Q480,380 960,540 T1920,540" fill="none" stroke="url(#thx2-line)" stroke-width="2" opacity=".35"/>
+      <path d="M0,620 Q520,780 960,620 T1920,620" fill="none" stroke="url(#thx2-line)" stroke-width="1.5" opacity=".22"/>
+    </svg>
+    <div>
+      <p class="kicker">closing</p>
+      <h2 class="h2">监控要看什么？</h2>
+      <div class="diagram-band diagram-band--compact" style="max-width:1180px;margin-left:auto;margin-right:auto">
+        <div class="figure-shell">
+          <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>closing · 核心指标 + 落地动作（对齐口播）</span></div>
+          <div class="figure-shell__body">
+            <svg viewBox="0 0 1180 498" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="thx2-b1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#312e81"/></linearGradient>
+                <linearGradient id="thx2-b2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#064e3b"/></linearGradient>
+                <linearGradient id="thx2-b3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#d97706"/><stop offset="100%" stop-color="#78350f"/></linearGradient>
+                <linearGradient id="thx2-b4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#4c1d95"/></linearGradient>
+                <linearGradient id="thx-hero-arc" x1="0" y1="1" x2="1" y2="0"><stop offset="0%" stop-color="#6366f1"/><stop offset="35%" stop-color="#22d3ee"/><stop offset="70%" stop-color="#34d399"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+                <radialGradient id="thx-hero-core" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#312e81"/><stop offset="55%" stop-color="#1e1b4b"/><stop offset="100%" stop-color="#020617"/></radialGradient>
+                <filter id="thx-hero-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <marker id="thx-arr" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#94a3b8"/></marker>
+              </defs>
+              <!-- 顶部：观测闭环 · 三弧仪表带（视觉锚点） -->
+              <rect x="0" y="0" width="1180" height="118" rx="20" fill="rgba(15,23,42,.55)" stroke="rgba(148,163,184,.35)" stroke-width="2"/>
+              <path d="M 96 102 A 494 494 0 0 1 1084 102" fill="none" stroke="url(#thx-hero-arc)" stroke-width="10" stroke-linecap="round" opacity=".85" filter="url(#thx-hero-glow)"/>
+              <path d="M 140 102 A 450 450 0 0 1 1040 102" fill="none" stroke="#475569" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+              <circle cx="590" cy="102" r="52" fill="url(#thx-hero-core)" stroke="url(#thx-hero-arc)" stroke-width="4" filter="url(#thx-hero-glow)"/>
+              <text x="590" y="96" text-anchor="middle" fill="#c7d2fe" font-size="20" font-weight="800" letter-spacing=".12em">OBSERVABILITY</text>
+              <text x="590" y="118" text-anchor="middle" fill="#fff" font-size="26" font-weight="900">缓存作战屏 · 三联闭环</text>
+              <circle cx="200" cy="102" r="22" fill="#312e81" stroke="#818cf8" stroke-width="3"/>
+              <text x="200" y="109" text-anchor="middle" fill="#e0e7ff" font-size="18" font-weight="800">命中</text>
+              <circle cx="980" cy="102" r="22" fill="#064e3b" stroke="#34d399" stroke-width="3"/>
+              <text x="980" y="109" text-anchor="middle" fill="#d1fae5" font-size="18" font-weight="800">延迟</text>
+              <circle cx="118" cy="102" r="18" fill="#78350f" stroke="#fbbf24" stroke-width="2.5"/>
+              <text x="118" y="108" text-anchor="middle" fill="#fef3c7" font-size="15" font-weight="800">配额</text>
+              <line x1="142" y1="102" x2="528" y2="102" stroke="#64748b" stroke-width="2" marker-end="url(#thx-arr)" opacity=".7"/>
+              <line x1="652" y1="102" x2="958" y2="102" stroke="#64748b" stroke-width="2" marker-end="url(#thx-arr)" opacity=".7"/>
+              <!-- 指标行：整体上移，框加高 -->
+              <rect x="12" y="138" width="372" height="148" rx="18" fill="url(#thx2-b1)" stroke="#a5b4fc" stroke-width="2"/>
+              <text x="198" y="178" text-anchor="middle" fill="#e0e7ff" font-size="24" font-weight="800">命中率</text>
+              <text x="198" y="218" text-anchor="middle" fill="#fff" font-size="34" font-weight="900">hit-rate</text>
+              <text x="198" y="258" text-anchor="middle" fill="#c7d2fe" font-size="22" font-weight="600">常规 ≥60% · 高并发 ≥90%</text>
+              <rect x="404" y="138" width="372" height="148" rx="18" fill="url(#thx2-b2)" stroke="#6ee7b7" stroke-width="2"/>
+              <text x="590" y="178" text-anchor="middle" fill="#d1fae5" font-size="24" font-weight="800">缓存延迟</text>
+              <text x="590" y="218" text-anchor="middle" fill="#fff" font-size="34" font-weight="900">缓存 ~5ms 级</text>
+              <text x="590" y="258" text-anchor="middle" fill="#a7f3d0" font-size="22" font-weight="600">勿拖累整体 TTFT / 吞吐</text>
+              <rect x="796" y="138" width="372" height="148" rx="18" fill="url(#thx2-b3)" stroke="#fcd34d" stroke-width="2"/>
+              <text x="982" y="178" text-anchor="middle" fill="#fef3c7" font-size="24" font-weight="800">存储用量</text>
+              <text x="982" y="218" text-anchor="middle" fill="#fff" font-size="34" font-weight="900">配额 · 上限</text>
+              <text x="982" y="258" text-anchor="middle" fill="#fde68a" font-size="22" font-weight="600">内存 / Redis · 告警规则</text>
+              <!-- 落地动作行：与上行留出空隙 -->
+              <rect x="12" y="312" width="276" height="168" rx="18" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+              <text x="150" y="358" text-anchor="middle" fill="#7dd3fc" font-size="24" font-weight="800">预热</text>
+              <text x="150" y="402" text-anchor="middle" fill="#e2e8f0" font-size="28" font-weight="700">高峰前加载</text>
+              <text x="150" y="446" text-anchor="middle" fill="#94a3b8" font-size="22" font-weight="600">热门前缀先入缓存</text>
+              <rect x="308" y="312" width="276" height="168" rx="18" fill="#0f172a" stroke="#a78bfa" stroke-width="2"/>
+              <text x="446" y="358" text-anchor="middle" fill="#c4b5fd" font-size="24" font-weight="800">A/B 对照</text>
+              <text x="446" y="402" text-anchor="middle" fill="#e2e8f0" font-size="28" font-weight="700">有缓存 vs 无</text>
+              <text x="446" y="446" text-anchor="middle" fill="#94a3b8" font-size="22" font-weight="600">量化真实收益</text>
+              <rect x="604" y="312" width="276" height="168" rx="18" fill="#0f172a" stroke="#fb7185" stroke-width="2"/>
+              <text x="742" y="358" text-anchor="middle" fill="#fecdd3" font-size="24" font-weight="800">联防告警</text>
+              <text x="742" y="402" text-anchor="middle" fill="#e2e8f0" font-size="28" font-weight="700">命中率急跌</text>
+              <text x="742" y="446" text-anchor="middle" fill="#94a3b8" font-size="22" font-weight="600">先查前缀是否被改写</text>
+              <rect x="900" y="312" width="268" height="168" rx="18" fill="url(#thx2-b4)" stroke="#ddd6fe" stroke-width="2"/>
+              <text x="1034" y="362" text-anchor="middle" fill="#ede9fe" font-size="24" font-weight="800">账单对齐</text>
+              <text x="1034" y="408" text-anchor="middle" fill="#fff" font-size="28" font-weight="800">成本 · 延迟 · 命中</text>
+              <text x="1034" y="454" text-anchor="middle" fill="#e9d5ff" font-size="22" font-weight="600">三层目标看板</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <p class="lede" style="margin:14px auto 10px;max-width:58ch;font-size:40px!important;line-height:1.42!important">指标联防 + 预热与 A/B，才能把缓存收益说清楚。<span class="wa">感谢收听</span>，欢迎分享你的实践。</p>
+      <div class="row mt-l" style="justify-content:center;flex-wrap:wrap;gap:16px">
+        <span class="tag">Prompt Caching · Agent 架构</span>
+        <span class="tag">Production Observability</span>
+      </div>
+    </div>
+  </section>
 
 </div>
-<div id="nav"></div>
-
+<script src="html-ppt-assets/runtime.js"></script>
 <script>
-const VS=`attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
-const FS_DARK=`precision highp float;\nuniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;\nvec3 palette(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}\nvoid main(){\n  vec2 uv=gl_FragCoord.xy/u_resolution.xy;\n  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;\n  vec2 m=u_mouse*2.0-1.0;m.x*=u_resolution.x/u_resolution.y;\n  float md=length(p-m);\n  float mr=sin(md*15.0-u_time*4.0)*exp(-md*3.0);p+=mr*0.08;\n  vec2 p0=p;\n  for(float i=1.0;i<4.0;i++){p.x+=0.1/i*sin(i*3.0*p.y+u_time*0.4)+0.05;p.y+=0.1/i*cos(i*2.0*p.x+u_time*0.3)-0.05;}\n  float r=length(p);float ang=atan(p.y,p.x);\n  vec3 col=palette(r*1.5+p0.x*0.5+u_time*0.1,vec3(0.12,0.12,0.13),vec3(0.03,0.04,0.05),vec3(1.0,1.0,1.0),vec3(0.1,0.2,0.4));\n  float disp=sin(r*25.0-u_time*1.5+ang*2.0)*0.5+0.5;\n  col+=vec3(disp*0.015,disp*0.01,disp*0.02);\n  float hi=pow(sin(p.x*4.0+p.y*3.0+u_time)*0.5+0.5,8.0);\n  col+=hi*0.08;\n  col=mix(vec3(0.05,0.05,0.06),col,0.85);\n  gl_FragColor=vec4(col,1.0);\n}`;
-const FS_LIGHT=`precision highp float;\nuniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;\nfloat hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat noise(vec2 p){vec2 i=floor(p),f=fract(p);float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));vec2 u=f*f*(3.0-2.0*f);return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;}\nfloat fbm(vec2 p){float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}return v;}\nvoid main(){\n  vec2 uv=gl_FragCoord.xy/u_resolution.xy;\n  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;\n  vec2 m=u_mouse;m.x*=u_resolution.x/u_resolution.y;\n  vec2 md=p-m;float dl=length(md);p+=normalize(md+vec2(0.0001))*exp(-dl*5.0)*0.03;\n  vec2 q=vec2(fbm(p*1.8+u_time*0.07),fbm(p*1.8+vec2(5.2,1.3)+u_time*0.06));\n  vec2 r=vec2(fbm(p*2.0+q*1.3+vec2(1.7,9.2)+u_time*0.05),fbm(p*2.0+q*1.3+vec2(8.3,2.8)+u_time*0.04));\n  float f=fbm(p*2.2+r*1.5);\n  vec3 silverDark=vec3(0.86,0.85,0.84);vec3 paper=vec3(0.955,0.945,0.925);\n  vec3 col=mix(silverDark,paper,f);\n  float ph=r.x*2.2+u_time*0.35;\n  col+=vec3(0.78,0.62,0.92)*sin(ph)*0.055;\n  col+=vec3(0.55,0.72,0.95)*sin(ph*0.8+2.0)*0.05;\n  float hl=smoothstep(0.48,0.92,f);col+=hl*0.06;\n  gl_FragColor=vec4(col,1.0);\n}`;
-const mouse={x:.5,y:.5};
-addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
-function bootGL(cid,fs){const c=document.getElementById(cid);const gl=c.getContext('webgl',{alpha:false,antialias:true});if(!gl)return;const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};const p=gl.createProgram();gl.attachShader(p,mk(gl.VERTEX_SHADER,VS));gl.attachShader(p,mk(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);gl.useProgram(p);const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);const pl=gl.getAttribLocation(p,"position");gl.enableVertexAttribArray(pl);gl.vertexAttribPointer(pl,2,gl.FLOAT,false,0,0);const uR=gl.getUniformLocation(p,"u_resolution"),uT=gl.getUniformLocation(p,"u_time"),uM=gl.getUniformLocation(p,"u_mouse");function rs(){c.width=innerWidth*devicePixelRatio;c.height=innerHeight*devicePixelRatio;gl.viewport(0,0,c.width,c.height);}rs();addEventListener('resize',rs);let st=performance.now();function lp(now){gl.uniform2f(uR,c.width,c.height);gl.uniform1f(uT,(now-st)*.001);gl.uniform2f(uM,mouse.x,mouse.y);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(lp);}requestAnimationFrame(lp);}
-bootGL('bg-dark',FS_DARK);bootGL('bg-light',FS_LIGHT);
-const deck=document.getElementById('deck'),slides=[...document.querySelectorAll('.slide')];let idx=0;
-function upd(){deck.style.transform=`translateX(${-idx*100}vw)`;const s=slides[idx];s.classList.contains('light')?document.body.classList.add('light-bg'):document.body.classList.remove('light-bg');renderDots();}
-function renderDots(){const nav=document.getElementById('nav');nav.innerHTML=slides.map((_,i)=>`<button class="dot ${i===idx?'active':''}" onclick="go(${i})" aria-label="slide ${i+1}"></button>`).join('');}
-function go(n){idx=Math.max(0,Math.min(slides.length-1,n));upd();}
-addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' ')go(idx+1);if(e.key==='ArrowLeft')go(idx-1);if(e.key==='Escape'){alert('Slides:\n'+slides.map((s,i)=>`${i+1}. `+(s.querySelector('.chrome div:first-child')?.textContent||'Slide')).join('\n'));}});
-addEventListener('touchstart',e=>{const t=e.changedTouches[0];window._tx=t.clientX;window._ty=t.clientY;});
-addEventListener('touchend',e=>{const t=e.changedTouches[0],dx=t.clientX-window._tx;if(Math.abs(dx)>50)dx<0?go(idx+1):go(idx-1);});
-upd();
+(function(){
+var slides=document.querySelectorAll('.deck .slide');
+window.go=function(n){
+  if(n<0||n>=slides.length)return;
+  slides.forEach(function(s,i){
+    s.classList.toggle('is-active',i===n);
+  });
+};
+})();
 </script>
 </body>
 </html>

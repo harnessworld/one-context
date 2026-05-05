@@ -18,7 +18,13 @@
   "noSpeechThreshold": 0.85,
   "vadFilter": false,
   "whisperHotwords": "Anthropic Claude prompt caching agent context",
-  "srtReplacements": [],
+  "srtReplacements": [
+    { "from": "那你可以用一个就统一的这个工具的列表里面", "to": "那你可以用一个就是统一的这个工具的列表里面" },
+    { "from": "都应该通过user message或者是tool result这种方式来进行一个追加", "to": "都应该通过 user message 或者是 tool results 这种方式来进行一个追加" },
+    { "from": "当然就是你存储的用量不能超过系统的上限", "to": "当然就是你这个存储的用量不能超过系统的上限" },
+    { "from": "它的上限然后配合上一些这种告警的规则", "to": "它的上限，然后配合上一些这种告警的规则" },
+    { "from": "你可以去做一些这种ab测试", "to": "你可以去做一些这种 A/B 测试" }
+  ],
   "wrapSubtitles": true,
   "subtitle": {
     "fontSize": 48,
