@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1.0">
+<title>Markdown vs HTML — Claude 工程师讨论</title>
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/themes/mobile-tech.css">
+<style>
+#prog{position:fixed;top:0;left:0;height:5px;width:0;z-index:100;background:linear-gradient(90deg,#38bdf8,#818cf8);transition:width .3s}
+#P{position:fixed;left:0;top:0;width:1920px;height:1080px;margin:0;z-index:1;overflow:hidden}
+#pn{position:fixed;bottom:14px;right:20px;color:var(--c-text-2);font-size:22px;z-index:99;font-family:var(--font-sans),system-ui,sans-serif}
+.host-chip{display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.host-chip span{padding:8px 18px;border-radius:999px;font-size:26px;font-weight:700;border:1px solid var(--c-border);background:var(--c-surface-2)}
+.wa{font-weight:700;color:var(--c-accent-a)}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div id="P">
+<section class="s slide is-active fill-deck" id="s0">
+<div class="slide-header"><h2>Markdown 要被淘汰？</h2></div>
+<p class="deck-sub" style="font-size:46px;margin-top:8px">Claude 工程师弃用真相｜对话口播</p>
+<div class="host-chip"><span>阿哲 · 技术视角</span><span>小夏 · 行业观察</span></div>
+<p class="deck-lead" style="margin-top:28px;max-width:920px">Thariq（Claude Code）在 X 的讨论：AI 协作下 Markdown 与 HTML 怎么选。<span class="wa">听完知道该用什么。</span></p>
+</section>
+<section class="s slide fill-deck" id="s1">
+<div class="slide-header"><h2>今夜路线图</h2></div>
+<div class="slide-cards grid-2" style="margin-top:12px">
+<div class="g g-or"><div class="gc"><div class="gt">Markdown 为何曾封神</div><div class="gd">纯文本 · Git 友好 · 跨平台</div></div></div>
+<div class="g g-sk"><div class="gc"><div class="gt">AI 时代的短板</div><div class="gd">少手改 · 长文 · 密度 · 分享</div></div></div>
+<div class="g g-gn"><div class="gc"><div class="gt">HTML 的四张牌</div><div class="gd">表达 · 阅读 · 链接 · <span class="wa">交互闭环</span></div></div></div>
+<div class="g g-purple"><div class="gc"><div class="gt">选型结论</div><div class="gd">工具找准生态位 · 为人服务</div></div></div>
+</div>
+</section>
+<section class="s slide fill-deck" id="s2">
+<div class="slide-header"><h2>Claude Code × HTML</h2></div>
+<div class="card-diagram" style="min-height:340px;margin-top:8px">
+<svg viewBox="0 0 900 280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker></defs>
+<rect x="20" y="60" width="180" height="100" rx="14" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+<text x="110" y="118" text-anchor="middle" font-size="22" fill="var(--c-text-1)" font-weight="700">仓库 / Git</text>
+<line x1="200" y1="110" x2="260" y2="110" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="260" y="40" width="200" height="140" rx="16" fill="var(--c-accent-a)" opacity="0.15" stroke="var(--c-accent-a)" stroke-width="2"/>
+<text x="360" y="95" text-anchor="middle" font-size="24" fill="var(--c-accent-a)" font-weight="800">Claude Code</text>
+<text x="360" y="128" text-anchor="middle" font-size="19" fill="var(--c-text-2)">上下文 + MCP</text>
+<text x="360" y="158" text-anchor="middle" font-size="19" fill="var(--c-text-2)">生成 HTML</text>
+<line x1="460" y1="110" x2="520" y2="110" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#arr)"/>
+<rect x="520" y="50" width="200" height="120" rx="14" fill="var(--c-surface-2)" stroke="var(--c-accent-c)" stroke-width="2"/>
+<text x="620" y="108" text-anchor="middle" font-size="22" fill="var(--c-text-1)" font-weight="700">可读可交互页面</text>
+<line x1="620" y1="170" x2="620" y2="210" stroke="var(--c-accent-c)" stroke-width="2" marker-end="url(#arr)"/>
+<text x="620" y="248" text-anchor="middle" font-size="20" fill="var(--c-accent-c)" font-weight="700"><tspan class="wa">人决策 · 参数回流</tspan></text>
+</svg>
+</div>
+<p class="deck-lead" style="margin-top:8px;max-width:900px">代价也要记住：<span class="wa">diff 更吵、生成更慢</span>——理性选型。</p>
+</section>
+<section class="s slide v-center" id="s3">
+<div class="emoji-xl" aria-hidden="true">🛠️</div>
+<h2 class="hero-title" style="margin-top:12px">选对场景，比追风口重要</h2>
+<p class="deck-sub">Markdown · HTML · 白板 —— 各归其位</p>
+<p class="deck-lead" style="margin-top:20px"><span class="wa">简单笔记 Markdown；复杂协作与交互试 HTML。</span></p>
+</section>
+</div>
+<div id="pn"></div>
+<script>
+(function(){
+var PW=1920,PH=1080;
+function fit(){var el=document.getElementById('P'),r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;el.style.transform='scale('+r+')';el.style.transformOrigin='0 0';el.style.left=x+'px';el.style.top=y+'px'}
+window.addEventListener('resize',fit);fit();
+var slides=document.querySelectorAll('.s.slide'),total=slides.length,cur=0;
+function ui(){document.getElementById('pn').textContent=(cur+1)+' / '+total;var b=document.getElementById('prog');if(b)b.style.width=(total<=1?100:(cur/(total-1)*100))+'%';}
+function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('is-active');cur=i;slides[cur].classList.add('is-active');ui()}
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1)}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}});
+document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1)});
+ui();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1.0">
+<title>顶尖工程师不写代码 — Boris / Anthropic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
+<link rel="stylesheet" href="theme-claude.css">
+<style>
+  :root {
+    --fs-hero: 204px;
+    --fs-page-title: 100px;
+    --fs-subtitle: 68px;
+    --fs-body: 50px;
+    --fs-caption: 38px;
+    --fs-card-title: 60px;
+    --fs-card-body: 50px;
+    --fs-stat: 182px;
+    --fs-pill: 40px;
+    --fs-footer: 40px;
+    --slide-pad: 36px 52px;
+    --card-pad: 28px 32px;
+  }
+  body { margin:0; background:#0a0908; min-height:100vh; overflow:hidden; }
+  #P {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    margin: 0;
+    z-index: 1;
+    overflow: hidden;
+  }
+  #prog { position:fixed; top:0; left:0; z-index:100; transition:width .3s; }
+  #pn { position:fixed; bottom:16px; right:24px; color:var(--c-text-2); font-size:var(--fs-caption); font-family:var(--font-sans),system-ui,sans-serif; z-index:99; }
+  .orb { position:absolute; border-radius:50%; pointer-events:none; }
+  .grid-bg { position:absolute; inset:0; pointer-events:none; opacity:0.04; }
+  .card-diagram { min-height:300px; }
+  .card-diagram > svg { min-height:280px; }
+  .s.slide svg text[font-size="16"] { font-size: 22px !important; }
+  .s.slide svg text[font-size="17"] { font-size: 23px !important; }
+  .s.slide svg text[font-size="18"] { font-size: 26px !important; }
+  .s.slide svg text[font-size="20"] { font-size: 28px !important; }
+  .s.slide svg text[font-size="21"] { font-size: 29px !important; }
+  .s.slide svg text[font-size="22"] { font-size: 30px !important; }
+  .s.slide svg text[font-size="23"] { font-size: 31px !important; }
+  .s.slide svg text[font-size="24"] { font-size: 33px !important; }
+  .s.slide svg text[font-size="26"] { font-size: 35px !important; }
+  .s.slide svg text[font-size="28"] { font-size: 37px !important; }
+  .s.slide svg text[font-size="30"] { font-size: 39px !important; }
+  .s.slide svg text[font-size="32"] { font-size: 41px !important; }
+  /* ===== Cover s0：少字、留白、杂志封面感 ===== */
+  #s0 { position:relative; overflow:hidden; }
+  #s0 .grid-bg { opacity:0.055 !important; }
+  #s0 .cover-vignette {
+    position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 88% 70% at 50% 36%, rgba(224,143,99,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(8,6,4,0.5) 100%);
+  }
+  #s0 .cover-frame {
+    position:absolute; inset:22px; z-index:1; pointer-events:none;
+    border-radius:20px;
+    border:1px solid rgba(224,143,99,0.18);
+    box-shadow: 0 0 0 1px rgba(255,248,240,0.035) inset;
+  }
+  #s0 .cover-corner {
+    position:absolute; z-index:1; pointer-events:none; opacity:0.65;
+    width:100px; height:100px;
+  }
+  #s0 .cover-corner.tl {
+    top:44px; left:44px;
+    border-top: 2px solid rgba(196,168,110,0.65);
+    border-left: 2px solid rgba(196,168,110,0.45);
+    border-radius: 12px 0 0 0;
+  }
+  #s0 .cover-corner.br {
+    bottom:80px; right:44px;
+    border-bottom: 2px solid rgba(224,143,99,0.45);
+    border-right: 2px solid rgba(224,143,99,0.32);
+    border-radius: 0 0 12px 0;
+  }
+  #s0 .col.slide-main { position:relative; z-index:3; }
+  #s0 .cover-stack { max-width: 1180px; margin: 0 auto; padding: 0 48px; }
+  #s0 .cover-kicker {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: calc(var(--fs-caption) * 0.68);
+    font-weight: 600;
+    letter-spacing: 0.62em;
+    text-transform: uppercase;
+    color: rgba(232,201,146,0.88);
+    margin: 0 0 20px;
+  }
+  #s0 .cover-kicker em {
+    font-style: normal;
+    font-weight: 800;
+    color: var(--c-accent-b);
+    letter-spacing: 0.28em;
+  }
+  #s0 .cover-rule {
+    display: block;
+    margin: 0 auto 40px;
+    width: min(380px, 46vw);
+    height: 32px;
+    color: rgba(196,168,110,0.55);
+  }
+  #s0 h1 {
+    margin: 0 0 36px;
+    line-height: 1.06;
+    letter-spacing: -0.045em;
+  }
+  #s0 .cover-byline {
+    font-family: var(--font-display), Georgia, "Songti SC", serif;
+    font-size: calc(var(--fs-subtitle) * 0.62);
+    font-weight: 400;
+    font-style: italic;
+    color: rgba(243,238,230,0.62);
+    margin: 0 0 56px;
+    letter-spacing: 0.14em;
+  }
+  #s0 .cover-byline .nm {
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    background: linear-gradient(95deg, #fffaf4 0%, #e8c9a8 50%, #a8d4c8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  #s0 .cover-byline .sep {
+    display: inline-block;
+    margin: 0 0.35em;
+    color: rgba(224,143,99,0.55);
+    font-style: normal;
+    font-weight: 300;
+  }
+  #s0 .cover-pull {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: calc(var(--fs-body) * 0.82);
+    line-height: 1.62;
+    color: rgba(243,238,230,0.48);
+    max-width: 38rem;
+    margin: 0 auto;
+    padding: 0 0 0 28px;
+    border-left: 2px solid rgba(224,143,99,0.38);
+    text-align: left;
+    font-style: italic;
+    letter-spacing: 0.03em;
+  }
+</style>
+</head>
+<body>
+<div id="prog" style="width:0%"></div>
+<div id="P">
+
+<!-- 1 Cover -->
+<section class="s slide is-active" id="s0">
+  <div class="cover-vignette" aria-hidden="true"></div>
+  <div class="cover-frame" aria-hidden="true"></div>
+  <div class="cover-corner tl" aria-hidden="true"></div>
+  <div class="cover-corner br" aria-hidden="true"></div>
+  <div class="orb" style="width:520px;height:520px;top:-180px;right:-140px;background:radial-gradient(circle,rgba(224,143,99,0.22),transparent 68%)"></div>
+  <div class="orb" style="width:420px;height:420px;bottom:-120px;left:-100px;background:radial-gradient(circle,rgba(111,160,144,0.18),transparent 70%)"></div>
+  <div class="orb" style="width:360px;height:360px;top:42%;left:62%;background:radial-gradient(circle,rgba(196,168,110,0.12),transparent 65%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080" aria-hidden="true"><defs><pattern id="bg0" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern><radialGradient id="glow0" cx="50%" cy="42%" r="55%"><stop offset="0%" stop-color="rgba(224,143,99,0.09)"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#bg0)"/><rect width="100%" height="100%" fill="url(#glow0)"/></svg>
+  <div class="col slide-main v-center">
+    <div class="cover-stack" style="text-align:center">
+      <p class="cover-kicker">红杉现场 <em>Anthropic</em></p>
+      <svg class="cover-rule" viewBox="0 0 380 32" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="cvLn0" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="rgba(196,168,110,0)"/>
+            <stop offset="50%" stop-color="rgba(196,168,110,0.85)"/>
+            <stop offset="100%" stop-color="rgba(196,168,110,0)"/>
+          </linearGradient>
+        </defs>
+        <path d="M 24 16 H 356" stroke="url(#cvLn0)" stroke-width="1.25" fill="none"/>
+        <circle cx="190" cy="16" r="3.5" fill="rgba(224,143,99,0.65)"/>
+      </svg>
+      <h1 style="font-size:var(--fs-hero)">当顶尖工程师<br>不再写代码</h1>
+      <p class="cover-byline"><span class="nm">Boris</span><span class="sep">·</span>Engineering<span class="sep">·</span>口述样本</p>
+      <p class="cover-pull"><span class="wa">2026 年至今一行代码没写，一天 150 个 PR——工程师的真正变革才刚开始。</span></p>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>红杉 × Anthropic｜口述</span>
+    <span>01 / 10</span>
+  </div>
+</section>
+
+<!-- 2 Grid 2×2 -->
+<section class="s slide" id="s1">
+  <div class="orb" style="width:350px;height:350px;top:-80px;left:-60px;background:radial-gradient(circle,rgba(176,96,86,0.09),transparent 70%)"></div>
+  <div class="orb" style="width:280px;height:280px;bottom:-40px;right:-30px;background:radial-gradient(circle,rgba(111,160,144,0.08),transparent 70%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg1" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg1)"/></svg>
+  <div class="slide-header">
+    <span class="badge">开场</span>
+    <h2>四个「反常识」事实</h2>
+  </div>
+  <div class="col slide-main fill-deck">
+    <div class="slide-cards grid-2x2">
+      <div class="g">
+        <div class="emoji-lg">🚫</div>
+        <h3 class="g-title">不写代码</h3>
+        <p class="g-body">TS 教材作者、Claude Code 缔造者，今年键盘闲置。</p>
+      </div>
+      <div class="g">
+        <div class="emoji-lg">📤</div>
+        <h3 class="g-title">150 PR / 天</h3>
+        <p class="g-body">单日合并量级，组织方式先于工具炒作。</p>
+      </div>
+      <div class="g">
+        <div class="emoji-lg">🎙️</div>
+        <h3 class="g-title">红杉背书</h3>
+        <p class="g-body">现场口述，不是自媒体段子。</p>
+      </div>
+      <div class="g">
+        <div class="emoji-lg">🧭</div>
+        <h3 class="g-title">变革起点</h3>
+        <p class="g-body"><span class="wa">今天只聊工程师角色如何被重写。</span></p>
+      </div>
+    </div>
+    <div class="card-diagram" style="min-height:200px;flex-shrink:0;padding:14px 22px;margin-top:var(--sp-sm)">
+      <svg viewBox="0 0 1760 220" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-s1" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-text-2)"/></marker>
+        </defs>
+        <text x="880" y="32" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-text-1)">四件事 · 一条递进链</text>
+        <line x1="140" y1="118" x2="1620" y2="118" stroke="var(--c-border)" stroke-width="2"/>
+        <circle cx="240" cy="118" r="42" fill="rgba(224,143,99,0.2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+        <text x="240" y="126" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">①</text>
+        <text x="240" y="178" text-anchor="middle" font-size="22" fill="var(--c-accent-a)">人设反差</text>
+        <line x1="282" y1="118" x2="458" y2="118" stroke="var(--c-text-2)" stroke-width="2" marker-end="url(#arr-s1)"/>
+        <circle cx="540" cy="118" r="42" fill="rgba(111,160,144,0.18)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="540" y="126" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">②</text>
+        <text x="540" y="178" text-anchor="middle" font-size="22" fill="var(--c-accent-b)">组织量级</text>
+        <line x1="582" y1="118" x2="758" y2="118" stroke="var(--c-text-2)" stroke-width="2" marker-end="url(#arr-s1)"/>
+        <circle cx="840" cy="118" r="42" fill="rgba(196,168,110,0.22)" stroke="var(--c-accent-c)" stroke-width="2"/>
+        <text x="840" y="126" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">③</text>
+        <text x="840" y="178" text-anchor="middle" font-size="22" fill="var(--c-accent-c)">场合背书</text>
+        <line x1="882" y1="118" x2="1058" y2="118" stroke="var(--c-text-2)" stroke-width="2" marker-end="url(#arr-s1)"/>
+        <circle cx="1140" cy="118" r="42" fill="rgba(158,142,184,0.2)" stroke="var(--c-purple)" stroke-width="2"/>
+        <text x="1140" y="126" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">④</text>
+        <text x="1140" y="178" text-anchor="middle" font-size="22" fill="var(--c-purple)">议题边界</text>
+        <text x="1380" y="95" font-size="22" font-weight="700" fill="var(--c-text-2)">图例</text>
+        <rect x="1380" y="108" width="18" height="18" rx="3" fill="var(--c-accent-a)" opacity="0.85"/>
+        <text x="1406" y="124" font-size="20" fill="var(--c-text-2)">反差梗</text>
+        <rect x="1380" y="134" width="18" height="18" rx="3" fill="var(--c-accent-b)" opacity="0.85"/>
+        <text x="1406" y="150" font-size="20" fill="var(--c-text-2)">PR 密度信号</text>
+        <rect x="1560" y="108" width="18" height="18" rx="3" fill="var(--c-accent-c)" opacity="0.85"/>
+        <text x="1586" y="124" font-size="20" fill="var(--c-text-2)">可信出处</text>
+        <rect x="1560" y="134" width="18" height="18" rx="3" fill="var(--c-purple)" opacity="0.85"/>
+        <text x="1586" y="150" font-size="20" fill="var(--c-text-2)">本期只谈角色</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>钩子</span>
+    <span>02 / 10</span>
+  </div>
+</section>
+
+<!-- 3 Split -->
+<section class="s slide" id="s2">
+  <div class="orb" style="width:360px;height:360px;top:10%;right:-100px;background:radial-gradient(circle,rgba(224,143,99,0.1),transparent 68%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg2" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg2)"/></svg>
+  <div class="slide-header">
+    <span class="badge">第一问</span>
+    <h2>AI 编程 ≠ 按 Tab 补一行</h2>
+  </div>
+  <div class="col slide-main fill-deck">
+    <div class="slide-cards split" style="align-items:stretch">
+      <div class="g" style="justify-content:flex-start">
+        <div class="emoji-lg">⌨️</div>
+        <h3 class="g-title" style="color:var(--c-text-2)">旧直觉</h3>
+        <p class="g-body" style="flex:1">IDE 里一点点补全；人仍是主笔画师。</p>
+        <span class="pill">辅助模式</span>
+      </div>
+      <div class="g" style="justify-content:flex-start">
+        <div class="emoji-lg">🤖</div>
+        <h3 class="g-title" style="color:var(--c-accent-a)">现状</h3>
+        <p class="g-body" style="flex:1"><span class="wa">模型直接写完整代码</span>；人转向验收与编排。</p>
+        <span class="pill">生成模式</span>
+      </div>
+    </div>
+    <div class="card-diagram" style="min-height:210px;flex-shrink:0;padding:14px 22px;margin-top:var(--sp-sm)">
+      <svg viewBox="0 0 1680 250" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <text x="840" y="34" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-text-1)">能力形态对照</text>
+        <rect x="72" y="68" width="360" height="128" rx="18" fill="var(--c-surface-2)" stroke="var(--c-text-2)" stroke-width="2" stroke-dasharray="10 7"/>
+        <text x="252" y="118" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">人执笔 · IDE 为主</text>
+        <text x="252" y="158" text-anchor="middle" font-size="22" fill="var(--c-text-2)">Tab / 补全打补丁</text>
+        <rect x="1248" y="68" width="360" height="128" rx="18" fill="rgba(224,143,99,0.14)" stroke="var(--c-accent-a)" stroke-width="3"/>
+        <text x="1428" y="118" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">模型整段输出</text>
+        <text x="1428" y="158" text-anchor="middle" font-size="22" fill="var(--c-accent-a)">人验收 · 编排上下文</text>
+        <text x="840" y="138" text-anchor="middle" font-size="48" fill="var(--c-accent-a)">⇄</text>
+        <text x="840" y="188" text-anchor="middle" font-size="22" fill="var(--c-text-2)">同一任务 · 两种「谁在写」</text>
+        <rect x="320" y="212" width="20" height="20" rx="4" fill="none" stroke="var(--c-text-2)" stroke-width="2" stroke-dasharray="5 4"/>
+        <text x="348" y="229" font-size="20" fill="var(--c-text-2)">虚线框 = 辅助补全（局部）</text>
+        <rect x="780" y="212" width="20" height="20" rx="4" fill="var(--c-accent-a)" opacity="0.45"/>
+        <text x="808" y="229" font-size="20" fill="var(--c-text-2)">实线珊瑚框 = 生成模式（端到端）</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>能力边界</span>
+    <span>03 / 10</span>
+  </div>
+</section>
+
+<!-- 4 Card + Diagram -->
+<section class="s slide" id="s3">
+  <div class="orb" style="width:300px;height:300px;bottom:-50px;left:20%;background:radial-gradient(circle,rgba(196,168,110,0.12),transparent 70%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg3" width="72" height="72" patternUnits="userSpaceOnUse"><circle cx="36" cy="36" r="1.2" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg3)"/></svg>
+  <div class="slide-header">
+    <span class="badge">第一问 · 深层</span>
+    <h2>产品先于模型成熟</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-md)">
+    <div class="g" style="flex-shrink:0">
+      <p class="g-body" style="margin:0">Claude Code 前 6 个月难用，只用了 10% 工作量在上面——但团队赌的是曲线，不是当下手感。</p>
+    </div>
+    <div class="card-diagram" style="min-height:300px;padding:var(--card-pad)">
+      <svg viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="mk4" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker>
+        </defs>
+        <text x="450" y="36" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-text-1)">模型能力 ↑ vs 产品接住能力</text>
+        <polyline points="80,240 200,200 340,120 520,90 780,70" fill="none" stroke="var(--c-accent-a)" stroke-width="4"/>
+        <text x="90" y="268" font-size="22" fill="var(--c-accent-a)">模型曲线狂飙</text>
+        <polyline points="80,260 240,230 420,200 620,140 780,100" fill="none" stroke="var(--c-accent-b)" stroke-width="3" stroke-dasharray="10 6"/>
+        <text x="90" y="302" font-size="22" fill="var(--c-accent-b)">市面产品滞后</text>
+        <rect x="560" y="168" width="300" height="120" rx="14" fill="var(--c-surface-2)" stroke="var(--c-accent-c)" stroke-width="2"/>
+        <text x="710" y="212" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">赌注</text>
+        <text x="710" y="252" text-anchor="middle" font-size="22" fill="var(--c-text-2)">早期难用 ≠ 方向错</text>
+      </svg>
+    </div>
+    <p class="g-body" style="margin:0;font-size:var(--fs-caption)"><span class="wa">早期难用不等于方向错了，只要模型曲线能追上。</span></p>
+  </div>
+  <div class="slide-footer">
+    <span>认知框架</span>
+    <span>04 / 10</span>
+  </div>
+</section>
+
+<!-- 5 Card + Diagram agents -->
+<section class="s slide" id="s4">
+  <div class="orb" style="width:380px;height:380px;top:-100px;left:-80px;background:radial-gradient(circle,rgba(111,160,144,0.11),transparent 72%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg4" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg4)"/></svg>
+  <div class="slide-header">
+    <span class="badge">第二问</span>
+    <h2>手机指挥「Agent 舰队」</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <p class="g-body" style="margin:0">多会话并行 × 每会话多 Agent → <strong>几百路同时跑</strong>；夜间再放大深度任务。</p>
+    <div class="card-diagram" style="flex:1;min-height:280px;padding:var(--card-pad)">
+      <svg viewBox="0 0 920 340" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="mk5" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker>
+        </defs>
+        <rect x="40" y="120" width="140" height="100" rx="14" fill="var(--c-accent-a)" opacity="0.18" stroke="var(--c-accent-a)" stroke-width="2"/>
+        <text x="110" y="175" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">人</text>
+        <line x1="180" y1="170" x2="260" y2="170" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#mk5)"/>
+        <rect x="260" y="60" width="120" height="72" rx="12" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="320" y="105" text-anchor="middle" font-size="20" fill="var(--c-text-1)">会话 A</text>
+        <rect x="400" y="60" width="120" height="72" rx="12" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="460" y="105" text-anchor="middle" font-size="20" fill="var(--c-text-1)">会话 B</text>
+        <rect x="540" y="60" width="120" height="72" rx="12" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="600" y="105" text-anchor="middle" font-size="20" fill="var(--c-text-1)">···</text>
+        <rect x="280" y="200" width="340" height="110" rx="14" fill="var(--c-accent-c)" opacity="0.15" stroke="var(--c-accent-c)" stroke-width="2"/>
+        <text x="450" y="238" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-accent-c)">数百 Agent 并行</text>
+        <text x="450" y="278" text-anchor="middle" font-size="22" fill="var(--c-text-2)">PR / CI / rebase / Flaky test</text>
+        <path d="M 450 288 C 450 310 520 310 620 260" fill="none" stroke="var(--c-accent-a)" stroke-width="2.5" marker-end="url(#mk5)"/>
+        <rect x="720" y="210" width="160" height="88" rx="12" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+        <text x="800" y="248" text-anchor="middle" font-size="22" font-weight="700" fill="var(--c-accent-a)">Loop</text>
+        <text x="800" y="278" text-anchor="middle" font-size="18" fill="var(--c-text-2)">定时回流</text>
+      </svg>
+    </div>
+    <p class="g-body" style="margin:0"><span class="wa">Loop 用定时任务让 Agent 后台修 CI、rebase、不稳定测试——改变密度的是持续循环，不是一次性生成。</span></p>
+  </div>
+  <div class="slide-footer">
+    <span>工作密度</span>
+    <span>05 / 10</span>
+  </div>
+</section>
+
+<!-- 6 Process -->
+<section class="s slide" id="s5">
+  <div class="orb" style="width:340px;height:340px;bottom:-80px;right:-40px;background:radial-gradient(circle,rgba(224,143,99,0.1),transparent 70%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg5" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg5)"/></svg>
+  <div class="slide-header">
+    <span class="badge">第三问</span>
+    <h2>代码变成「通用表达」</h2>
+  </div>
+  <div class="col slide-main fill-deck">
+    <p class="g-body" style="flex-shrink:0;margin:0 0 var(--sp-sm)">工程经理、产品、设计、数据、财务、用研——<strong>都在写代码</strong>；壁垒从技能变为语境。</p>
+    <div class="card-diagram" style="min-height:230px;flex-shrink:0;padding:12px 20px;margin-bottom:var(--sp-sm)">
+      <svg viewBox="0 0 1680 270" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-s5" markerWidth="9" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,9 3,0 6" fill="var(--c-accent-b)" opacity="0.9"/></marker>
+        </defs>
+        <text x="840" y="30" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-text-1)">代码 = 跨职能「通用表达」</text>
+        <circle cx="840" cy="150" r="56" fill="rgba(224,143,99,0.22)" stroke="var(--c-accent-a)" stroke-width="3"/>
+        <text x="840" y="142" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-text-1)">代码</text>
+        <text x="840" y="172" text-anchor="middle" font-size="22" fill="var(--c-text-2)">媒介 · 非祭司特权</text>
+        <line x1="896" y1="130" x2="1048" y2="88" stroke="var(--c-accent-b)" stroke-width="2" marker-end="url(#arr-s5)"/>
+        <rect x="1060" y="62" width="128" height="52" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="1124" y="96" text-anchor="middle" font-size="22" fill="var(--c-text-1)">产品</text>
+        <line x1="896" y1="165" x2="1078" y2="195" stroke="var(--c-accent-b)" stroke-width="2" marker-end="url(#arr-s5)"/>
+        <rect x="1090" y="178" width="128" height="52" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="1154" y="212" text-anchor="middle" font-size="22" fill="var(--c-text-1)">设计</text>
+        <line x1="784" y1="130" x2="632" y2="88" stroke="var(--c-accent-b)" stroke-width="2" marker-end="url(#arr-s5)"/>
+        <rect x="492" y="62" width="128" height="52" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="556" y="96" text-anchor="middle" font-size="22" fill="var(--c-text-1)">工程</text>
+        <line x1="784" y1="165" x2="602" y2="195" stroke="var(--c-accent-b)" stroke-width="2" marker-end="url(#arr-s5)"/>
+        <rect x="462" y="178" width="128" height="52" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="526" y="212" text-anchor="middle" font-size="22" fill="var(--c-text-1)">数据</text>
+        <line x1="840" y1="206" x2="840" y2="238" stroke="var(--c-accent-c)" stroke-width="2" marker-end="url(#arr-s5)"/>
+        <rect x="776" y="242" width="128" height="22" rx="6" fill="rgba(196,168,110,0.2)" stroke="var(--c-accent-c)" stroke-width="1.5"/>
+        <text x="840" y="258" text-anchor="middle" font-size="18" fill="var(--c-accent-c)">财务 · 用研 …</text>
+        <text x="1320" y="118" font-size="22" font-weight="700" fill="var(--c-text-2)">图例</text>
+        <rect x="1320" y="132" width="16" height="16" rx="3" fill="var(--c-accent-a)" opacity="0.75"/>
+        <text x="1344" y="146" font-size="20" fill="var(--c-text-2)">中心：共同媒介</text>
+        <rect x="1320" y="158" width="16" height="16" rx="3" fill="var(--c-accent-b)" opacity="0.75"/>
+        <text x="1344" y="172" font-size="20" fill="var(--c-text-2)">箭头：角色接入同一表达层</text>
+        <rect x="1320" y="184" width="16" height="16" rx="3" fill="var(--c-accent-c)" opacity="0.75"/>
+        <text x="1344" y="198" font-size="20" fill="var(--c-text-2)">金色：更多职能同理</text>
+      </svg>
+    </div>
+    <div class="slide-cards process-flow" style="flex:1;align-items:stretch;min-height:0">
+      <div class="g step">
+        <div class="emoji-lg">🧩</div>
+        <h3 class="g-title" style="margin-top:8px">想法</h3>
+        <p class="g-body">业务痛点直接成形</p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="g step">
+        <div class="emoji-lg">💻</div>
+        <h3 class="g-title" style="margin-top:8px">代码</h3>
+        <p class="g-body"><span class="wa">表达工具，而非祭司特权</span></p>
+      </div>
+      <div class="arrow">→</div>
+      <div class="g step">
+        <div class="emoji-lg">🌐</div>
+        <h3 class="g-title" style="margin-top:8px">通才</h3>
+        <p class="g-body">专长仍在，交付提速</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>组织形态</span>
+    <span>06 / 10</span>
+  </div>
+</section>
+
+<!-- 7 Split 印刷机 -->
+<section class="s slide" id="s6">
+  <div class="orb" style="width:300px;height:300px;top:20%;left:-60px;background:radial-gradient(circle,rgba(196,168,110,0.1),transparent 68%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg6" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg6)"/></svg>
+  <div class="slide-header">
+    <span class="badge">第四问</span>
+    <h2>软件的「印刷机时刻」</h2>
+  </div>
+  <div class="col slide-main fill-deck">
+    <div class="slide-cards split" style="align-items:stretch">
+      <div class="g">
+        <h3 class="g-title" style="color:var(--c-text-2)">15 世纪</h3>
+        <p class="g-body">识字极少数；抄写昂贵。</p>
+        <div class="divider-h"></div>
+        <p class="g-body" style="font-size:var(--fs-caption);color:var(--c-text-2)">类比入口：读写曾是职业。</p>
+      </div>
+      <div class="g">
+        <h3 class="g-title" style="color:var(--c-accent-a)">今天</h3>
+        <p class="g-body"><span class="wa">软件会像发短信一样普遍</span>，碎片工具井喷。</p>
+        <div class="divider-h"></div>
+        <p class="g-body" style="font-size:var(--fs-caption)">稀缺迁到：定义问题 · 组织 Agent · 验收标准。</p>
+      </div>
+    </div>
+    <div class="card-diagram" style="min-height:240px;flex-shrink:0;padding:14px 22px;margin-top:var(--sp-sm)">
+      <svg viewBox="0 0 1720 280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr-s6" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker>
+        </defs>
+        <text x="860" y="32" text-anchor="middle" font-size="26" font-weight="700" fill="var(--c-text-1)">类比轴：稀缺从「抄写」迁到「编排」</text>
+        <rect x="72" y="58" width="300" height="150" rx="16" fill="rgba(140,132,121,0.14)" stroke="var(--c-text-2)" stroke-width="2"/>
+        <text x="222" y="108" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">手写 · 抄写</text>
+        <text x="222" y="148" text-anchor="middle" font-size="22" fill="var(--c-text-2)">识字极少 · 成本高</text>
+        <text x="222" y="184" text-anchor="middle" font-size="20" fill="var(--c-text-2)">文本稀缺</text>
+        <line x1="382" y1="133" x2="472" y2="133" stroke="var(--c-accent-a)" stroke-width="4" marker-end="url(#arr-s6)"/>
+        <text x="427" y="118" text-anchor="middle" font-size="20" fill="var(--c-accent-a)">印刷机</text>
+        <rect x="492" y="58" width="320" height="150" rx="16" fill="rgba(224,143,99,0.12)" stroke="var(--c-accent-a)" stroke-width="2"/>
+        <text x="652" y="108" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">读写平民化</text>
+        <text x="652" y="148" text-anchor="middle" font-size="22" fill="var(--c-text-2)">信息复制边际 → 0</text>
+        <text x="652" y="184" text-anchor="middle" font-size="20" fill="var(--c-accent-a)">类比：软件生产</text>
+        <line x1="822" y1="133" x2="912" y2="133" stroke="var(--c-accent-b)" stroke-width="4" marker-end="url(#arr-s6)"/>
+        <text x="867" y="118" text-anchor="middle" font-size="20" fill="var(--c-accent-b)">当下</text>
+        <rect x="932" y="58" width="716" height="150" rx="16" fill="rgba(111,160,144,0.1)" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="1290" y="108" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">软件像发短信一样碎 · 工具井喷</text>
+        <text x="1290" y="148" text-anchor="middle" font-size="22" fill="var(--c-text-2)">稀缺不再是「会不会写」</text>
+        <text x="1290" y="184" text-anchor="middle" font-size="22" fill="var(--c-accent-b)">而是拆任务 · Agent · 验收</text>
+        <text x="120" y="248" font-size="22" font-weight="700" fill="var(--c-text-2)">图例</text>
+        <rect x="120" y="258" width="16" height="16" rx="3" fill="var(--c-text-2)" opacity="0.55"/>
+        <text x="142" y="272" font-size="20" fill="var(--c-text-2)">灰箱 = 旧稀缺（抄写时代）</text>
+        <rect x="460" y="258" width="16" height="16" rx="3" fill="var(--c-accent-a)" opacity="0.65"/>
+        <text x="482" y="272" font-size="20" fill="var(--c-text-2)">珊瑚 = 平民化浪潮（印刷机 ⇄ 软件）</text>
+        <rect x="860" y="258" width="16" height="16" rx="3" fill="var(--c-accent-b)" opacity="0.65"/>
+        <text x="882" y="272" font-size="20" fill="var(--c-text-2)">青绿 = 新护城河（流程与编排）</text>
+      </svg>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>类比</span>
+    <span>07 / 10</span>
+  </div>
+</section>
+
+<!-- 8 MCP -->
+<section class="s slide" id="s7">
+  <div class="orb" style="width:360px;height:360px;top:-90px;right:-70px;background:radial-gradient(circle,rgba(111,160,144,0.1),transparent 70%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg7" width="72" height="72" patternUnits="userSpaceOnUse"><circle cx="36" cy="36" r="1.2" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg7)"/></svg>
+  <div class="slide-header">
+    <span class="badge">第五问</span>
+    <h2>护城河在流程，不在单个工具</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <p class="g-body" style="margin:0">新公司 AI 原生起步；大公司要改流程与肌肉记忆。<strong>能把工作拆给 Agent 的团队</strong>拉开速度差。</p>
+    <div class="card-diagram" style="flex:1;min-height:260px;padding:var(--card-pad)">
+      <svg viewBox="0 0 900 280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <rect x="60" y="100" width="200" height="100" rx="14" fill="var(--c-accent-a)" opacity="0.14" stroke="var(--c-accent-a)" stroke-width="2"/>
+        <text x="160" y="158" text-anchor="middle" font-size="24" font-weight="700" fill="var(--c-text-1)">Agent 池</text>
+        <line x1="260" y1="150" x2="360" y2="120" stroke="var(--c-accent-b)" stroke-width="2.5"/>
+        <line x1="260" y1="150" x2="360" y2="180" stroke="var(--c-accent-b)" stroke-width="2.5"/>
+        <rect x="360" y="70" width="200" height="56" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-c)" stroke-width="2"/>
+        <text x="460" y="108" text-anchor="middle" font-size="22" fill="var(--c-text-1)">MCP · Salesforce</text>
+        <rect x="360" y="150" width="200" height="56" rx="10" fill="var(--c-surface-2)" stroke="var(--c-accent-c)" stroke-width="2"/>
+        <text x="460" y="188" text-anchor="middle" font-size="22" fill="var(--c-text-1)">MCP · Docs</text>
+        <line x1="560" y1="120" x2="720" y2="140" stroke="var(--c-accent-a)" stroke-width="2.5"/>
+        <line x1="560" y1="178" x2="720" y2="158" stroke="var(--c-accent-a)" stroke-width="2.5"/>
+        <rect x="720" y="110" width="140" height="80" rx="12" fill="var(--c-accent-b)" opacity="0.2" stroke="var(--c-accent-b)" stroke-width="2"/>
+        <text x="790" y="158" text-anchor="middle" font-size="22" font-weight="700" fill="var(--c-text-1)">知识工作</text>
+      </svg>
+    </div>
+    <p class="g-body" style="margin:0;font-size:var(--fs-caption)"><span class="wa">MCP 把云工具接进回路，模型自选本地或云端。</span></p>
+  </div>
+  <div class="slide-footer">
+    <span>协作接口</span>
+    <span>08 / 10</span>
+  </div>
+</section>
+
+<!-- 9 Stat -->
+<section class="s slide" id="s8">
+  <div class="orb" style="width:400px;height:400px;bottom:-120px;left:-80px;background:radial-gradient(circle,rgba(224,143,99,0.12),transparent 72%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg8" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0L0 0 0 60" fill="none" stroke="var(--c-text-2)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg8)"/></svg>
+  <div class="slide-header">
+    <span class="badge">收束</span>
+    <h2>数字背后的组织方式</h2>
+  </div>
+  <div class="col slide-main fill-deck">
+    <div class="slide-cards split" style="align-items:stretch">
+      <div class="g" style="justify-content:center;text-align:center">
+        <div class="emoji-xl">🔥</div>
+        <div class="stat-value">150</div>
+        <div class="stat-label">单日 PR 量级（口述）</div>
+        <div class="divider-h" style="width:55%;margin:var(--sp-md) auto"></div>
+        <p style="font-size:var(--fs-caption);color:var(--c-text-2);margin:0">并行编排 + 自动化回流</p>
+      </div>
+      <div class="g" style="justify-content:center;text-align:center">
+        <div class="emoji-xl">🎯</div>
+        <div class="stat-value">∞</div>
+        <div class="stat-label">可复制的单元：小任务</div>
+        <div class="divider-h" style="width:55%;margin:var(--sp-md) auto"></div>
+        <p style="font-size:var(--fs-body);margin:0"><span class="wa">用 AI 的人取代不用 AI 的人。</span></p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>记忆点</span>
+    <span>09 / 10</span>
+  </div>
+</section>
+
+<!-- 10 Thanks -->
+<section class="s slide" id="s9">
+  <div class="orb" style="width:380px;height:380px;top:-100px;right:-60px;background:radial-gradient(circle,rgba(111,160,144,0.12),transparent 70%)"></div>
+  <div class="orb" style="width:260px;height:260px;bottom:-40px;left:10%;background:radial-gradient(circle,rgba(224,143,99,0.1),transparent 68%)"></div>
+  <svg class="grid-bg" viewBox="0 0 1920 1080"><defs><pattern id="bg9" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1.5" fill="var(--c-text-2)"/></pattern></defs><rect width="100%" height="100%" fill="url(#bg9)"/></svg>
+  <div class="col slide-main v-center">
+    <div style="text-align:center">
+      <div class="emoji-xl">✅</div>
+      <h1 style="font-size:var(--fs-hero);margin:24px 0 16px">先拆自己的工作</h1>
+      <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 28px">可执行 · 可验证 · 可循环</p>
+      <span class="pill">一条 CI · 一条反馈流 · 一份定时报告</span>
+      <p style="font-size:var(--fs-body);margin-top:28px"><span class="wa">核心竞争力是会指挥 AI，把想法变成价值。</span></p>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span>Thanks</span>
+    <span>10 / 10</span>
+  </div>
+</section>
+
+</div>
+<div id="pn"></div>
+<script>
+(function(){
+var PW=1920,PH=1080;
+function fit(){
+ var el=document.getElementById('P');
+ if(!el)return;
+ var r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;
+ el.style.transform='scale('+r+')';
+ el.style.transformOrigin='0 0';
+ el.style.left=x+'px';
+ el.style.top=y+'px';
+}
+window.addEventListener('resize',fit);
+requestAnimationFrame(function(){ fit(); });
+var slides=document.querySelectorAll('.s.slide'),total=slides.length,cur=0;
+function ui(){
+ document.getElementById('pn').textContent=(cur+1)+' / '+total;
+ var b=document.getElementById('prog');if(b)b.style.width=(total<=1?100:(cur/(total-1)*100))+'%';
+}
+function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('is-active');cur=i;slides[cur].classList.add('is-active');ui();}
+document.addEventListener('keydown',function(e){
+ if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1);}
+ else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1);}
+});
+document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1);});
+window.go=go;
+window.fit=fit;
+ui();
+})();
+</script>
+</body>
+</html>

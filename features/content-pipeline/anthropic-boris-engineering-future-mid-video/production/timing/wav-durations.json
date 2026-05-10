@@ -1,0 +1,32 @@
+{
+  "wavFile": "media/voiceover.wav",
+  "slideDurationsSec": [
+    13.8708,
+    13.6085,
+    12.9308,
+    13.47,
+    33.42,
+    40.7373,
+    39.3961,
+    40.0667,
+    15.34,
+    22.9606
+  ],
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "srtFile": "subtitles/sub.srt",
+  "subtitle": {
+    "fontSize": 52,
+    "marginV": 14,
+    "primaryColour": "#FFFF00",
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "primaryAlpha": 108,
+    "outline": 1,
+    "barHeight": 110,
+    "barAlpha": 0.65,
+    "charsPerLine": 32,
+    "backAlpha": 255,
+    "shadow": 0
+  }
+}

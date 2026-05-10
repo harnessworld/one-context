@@ -17,6 +17,10 @@
 | hermes-agent-short-video      | Hermes Agent 短视频口播成片（wav-auto）                          | content-pipeline  | draft  | `features/content-pipeline/hermes-agent-short-video/`      | one-context     |
 | anthropic-agent-harness-narration | Anthropic Agent Harness 哲学 — 口播稿                         | content-pipeline  | draft  | `features/content-pipeline/anthropic-agent-harness-narration/` | one-context |
 | anthropic-ai-blueprint-dialogue-mid-video | Anthropic AI 公司蓝图对话拆解（中视频） | content-pipeline | draft | `features/content-pipeline/anthropic-ai-blueprint-dialogue-mid-video/` | one-context |
+| anthropic-boris-engineering-future-mid-video | 当顶尖工程师不再写代码：AI 重写软件开发未来（对话口播） | content-pipeline | draft | `features/content-pipeline/anthropic-boris-engineering-future-mid-video/` | one-context |
+| ai-agent-security-2026-revelations-mid-video | 2026 AI Agent 安全启示录（对话口播） | content-pipeline | draft | `features/content-pipeline/ai-agent-security-2026-revelations-mid-video/` | one-context |
+| markdown-html-claude-engineer-mid-video | Markdown 要被淘汰？Claude 工程师弃用真相（对话口播） | content-pipeline | draft | `features/content-pipeline/markdown-html-claude-engineer-mid-video/` | one-context |
+| markdown-html-claude-engineer-mid-video | Markdown 要被淘汰？Claude 工程师弃用真相（阿哲 / 小夏 对话口播） | content-pipeline | draft | `features/content-pipeline/markdown-html-claude-engineer-mid-video/` | one-context |
 | damai-ticket-bot              | 大麦抢票助手 — 浏览器插件 + CLI 集成 one-context skill                 | integrations | draft  | `features/integrations/damai-ticket-bot/`              | one-context     |
 | operator-spaces-paper-analysis | 算子空间论文深度分析 — 发现证明漏洞与改进机会 | research | in_progress | `features/research/operator-spaces-paper-analysis/` | paperwork |
 | skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill                     | core     | done   | `features/core/skill-windows-c-drive-cleanup/`    | one-context     |
