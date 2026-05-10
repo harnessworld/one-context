@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>封面 · Markdown vs HTML</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --kw-a: #00ff9d;
+  --kw-b: #39ff14;
+  --kw-c: #00f5d4;
+}
+
+body {
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: #06080f;
+}
+
+#cover {
+  position: relative;
+  width: 1080px;
+  height: 1920px;
+  overflow: hidden;
+}
+
+/* ── 绚丽「网页」背景：浏览器框 + 渐变着陆页风 ── */
+#web-bg {
+  position: absolute;
+  inset: -40px -80px 280px -80px;
+  transform: perspective(1200px) rotateX(6deg) rotateY(-3deg) scale(1.06);
+  transform-origin: 50% 28%;
+  z-index: 0;
+}
+
+.browser-shell {
+  border-radius: 28px;
+  border: 2px solid rgba(255,255,255,0.14);
+  box-shadow:
+    0 0 0 1px rgba(0,255,157,0.08),
+    0 40px 120px rgba(0,0,0,0.65),
+    0 0 80px rgba(0,245,212,0.12);
+  overflow: hidden;
+  background: #0d1117;
+}
+
+.browser-top {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 22px;
+  background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+.dot-r { background: #ff5f57; box-shadow: 0 0 10px rgba(255,95,87,0.5); }
+.dot-y { background: #febc2e; box-shadow: 0 0 10px rgba(254,188,46,0.45); }
+.dot-g { background: #28c840; box-shadow: 0 0 12px rgba(40,200,64,0.55); }
+
+.url-bar {
+  flex: 1;
+  margin-left: 8px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(0,255,157,0.15);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 18px;
+  color: rgba(0,255,157,0.55);
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+.page-inner {
+  min-height: 980px;
+  background:
+    radial-gradient(ellipse 90% 70% at 12% 18%, rgba(139,92,246,0.55) 0%, transparent 52%),
+    radial-gradient(ellipse 70% 55% at 88% 12%, rgba(236,72,153,0.45) 0%, transparent 48%),
+    radial-gradient(ellipse 80% 60% at 55% 85%, rgba(0,245,212,0.35) 0%, transparent 55%),
+    linear-gradient(165deg, #0f172a 0%, #1e1b4b 38%, #312e81 72%, #0f172a 100%);
+  position: relative;
+}
+
+.page-inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.hero-badge {
+  position: absolute;
+  top: 56px;
+  left: 48px;
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #a855f7, #ec4899);
+  box-shadow: 0 12px 40px rgba(236,72,153,0.35);
+}
+
+.hero-title-mock {
+  position: absolute;
+  top: 128px;
+  left: 48px;
+  right: 48px;
+  font-size: 56px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.2;
+  text-shadow: 0 4px 30px rgba(0,0,0,0.35);
+}
+
+.hero-title-mock span {
+  color: rgba(0,255,157,0.95);
+}
+
+.card-stack {
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  top: 310px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.card {
+  border-radius: 18px;
+  padding: 28px;
+  min-height: 160px;
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+}
+
+.card-a {
+  background: linear-gradient(135deg, rgba(56,189,248,0.35), rgba(99,102,241,0.25));
+  box-shadow: 0 20px 50px rgba(56,189,248,0.15);
+}
+.card-b {
+  background: linear-gradient(135deg, rgba(244,114,182,0.35), rgba(168,85,247,0.22));
+  box-shadow: 0 20px 50px rgba(244,114,182,0.12);
+}
+
+.card h4 {
+  font-size: 26px;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.card p {
+  font-size: 20px;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.45;
+}
+
+.html-snippet {
+  position: absolute;
+  left: 48px;
+  right: 48px;
+  bottom: 56px;
+  border-radius: 16px;
+  padding: 22px 26px;
+  background: rgba(15,23,42,0.75);
+  border: 1px solid rgba(0,255,157,0.22);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 19px;
+  color: rgba(226,232,240,0.85);
+  line-height: 1.65;
+  box-shadow: 0 0 40px rgba(0,255,157,0.08);
+}
+
+.html-snippet .tag { color: #f472b6; }
+.html-snippet .attr { color: #67e8f9; }
+.html-snippet .txt { color: #bbf7d0; }
+
+/* 阅读遮罩：中间透亮、上下压暗 */
+#overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    rgba(4,8,14,0.88) 0%,
+    rgba(4,8,14,0.35) 22%,
+    rgba(4,8,14,0.25) 48%,
+    rgba(4,8,14,0.42) 72%,
+    rgba(4,8,14,0.94) 100%
+  );
+  pointer-events: none;
+}
+
+#noise {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+#header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 76px 64px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+}
+
+#tagline {
+  font-size: 28px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 5px;
+}
+
+#brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+#brand-name {
+  font-size: 28px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.78);
+  letter-spacing: 2px;
+}
+
+#avatar-fallback {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,255,157,0.35);
+  background: rgba(0,255,157,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+}
+
+#content {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 200px 56px 300px;
+  text-align: center;
+  z-index: 20;
+}
+
+#tag {
+  display: inline-block;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 6px;
+  padding: 12px 36px;
+  border-radius: 999px;
+  margin-bottom: 48px;
+  background: rgba(0,255,157,0.12);
+  border: 1.5px solid rgba(57,255,20,0.45);
+  color: #9fffbf;
+}
+
+#headline {
+  font-size: 92px;
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -2px;
+  color: #ffffff;
+  text-align: center;
+  word-break: keep-all;
+  text-shadow:
+    0 0 60px rgba(0,255,157,0.25),
+    0 6px 40px rgba(0,0,0,0.85);
+}
+
+#headline .kw {
+  font-style: normal;
+  background: linear-gradient(125deg, var(--kw-a) 0%, var(--kw-b) 38%, var(--kw-c) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 28px rgba(0,255,157,0.55)) drop-shadow(0 0 50px rgba(57,255,20,0.25));
+}
+
+#divider {
+  width: 140px;
+  height: 4px;
+  border-radius: 3px;
+  margin: 40px auto;
+  background: linear-gradient(90deg, transparent, var(--kw-a), var(--kw-b), transparent);
+  box-shadow: 0 0 24px rgba(0,255,157,0.5);
+}
+
+#subline {
+  font-size: 46px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.82);
+  letter-spacing: 2px;
+  max-width: 920px;
+  text-shadow: 0 2px 24px rgba(0,0,0,0.75);
+}
+
+#subline .kw-sm {
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--kw-c), var(--kw-a));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 64px 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  z-index: 20;
+}
+
+#footer-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.foot-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 26px;
+  color: rgba(255,255,255,0.38);
+  letter-spacing: 2px;
+}
+
+.foot-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--kw-a);
+  box-shadow: 0 0 10px var(--kw-b);
+}
+
+#watermark {
+  font-size: 22px;
+  color: rgba(255,255,255,0.22);
+  letter-spacing: 3px;
+}
+
+#accent-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  z-index: 21;
+  background: linear-gradient(90deg, transparent 3%, var(--kw-a) 28%, var(--kw-b) 52%, var(--kw-c) 76%, transparent 97%);
+}
+</style>
+</head>
+<body>
+<div id="cover">
+  <div id="web-bg">
+    <div class="browser-shell">
+      <div class="browser-top">
+        <span class="dot dot-r"></span>
+        <span class="dot dot-y"></span>
+        <span class="dot dot-g"></span>
+        <div class="url-bar">https://preview.local/<strong style="color:rgba(255,255,255,0.7)">hero.html</strong></div>
+      </div>
+      <div class="page-inner">
+        <div class="hero-badge">LIVE PREVIEW</div>
+        <div class="hero-title-mock"><span>&lt;article&gt;</span> AI 协作 · 可读页面</div>
+        <div class="card-stack">
+          <div class="card card-a">
+            <h4>组件式排版</h4>
+            <p>表格 · 图表 · 控件一块屏讲完</p>
+          </div>
+          <div class="card card-b">
+            <h4>打开即演示</h4>
+            <p>链接分享 · 评审不用附件</p>
+          </div>
+        </div>
+        <div class="html-snippet">
+          <span class="tag">&lt;section</span> <span class="attr">class</span>=<span class="txt">"deck"</span><span class="tag">&gt;</span>
+          <span class="txt"> …Markdown 还是 HTML？一条视频拆给你 … </span>
+          <span class="tag">&lt;/section&gt;</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay"></div>
+  <div id="noise"></div>
+
+  <div id="header">
+    <div id="tagline">开发者对话 · 技术选题</div>
+    <div id="brand">
+      <div id="brand-name">阿哲 × 小夏</div>
+      <div id="avatar-fallback">📺</div>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="tag">2026 · Claude Code</div>
+    <div id="headline">
+      <span class="kw">Markdown</span> 要被淘汰？<br>
+      Claude <span class="kw">工程师弃用真相</span>
+    </div>
+    <div id="divider"></div>
+    <div id="subline"><span class="kw-sm">HTML</span> 协作闭环 vs <span class="kw-sm">Markdown</span> 生态位 · 听完再选型</div>
+  </div>
+
+  <div id="footer">
+    <div id="footer-left">
+      <div class="foot-item"><span class="foot-dot"></span>Thariq · X 热议</div>
+      <div class="foot-item"><span class="foot-dot"></span>口播拆解 · 选型不跟风</div>
+    </div>
+    <div id="watermark">选题自习室</div>
+  </div>
+  <div id="accent-bar"></div>
+</div>
+</body>
+</html>

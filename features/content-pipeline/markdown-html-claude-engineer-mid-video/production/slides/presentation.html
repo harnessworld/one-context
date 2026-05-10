@@ -4,64 +4,175 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920,initial-scale=1.0">
 <title>Markdown vs HTML — Claude 工程师讨论</title>
+<!--
+  Open Design simple-deck seed — repos/reference/open-design/skills/simple-deck/assets/template.html
+  Video pipeline: html-video-from-slides (#P 1920×1080, .s.slide, go(n), .wa)
+-->
 <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
 <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
 <link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
-<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/themes/mobile-tech.css">
+<link rel="stylesheet" href="od-simple-deck.css">
 <style>
-#prog{position:fixed;top:0;left:0;height:5px;width:0;z-index:100;background:linear-gradient(90deg,#38bdf8,#818cf8);transition:width .3s}
-#P{position:fixed;left:0;top:0;width:1920px;height:1080px;margin:0;z-index:1;overflow:hidden}
-#pn{position:fixed;bottom:14px;right:20px;color:var(--c-text-2);font-size:22px;z-index:99;font-family:var(--font-sans),system-ui,sans-serif}
-.host-chip{display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-.host-chip span{padding:8px 18px;border-radius:999px;font-size:26px;font-weight:700;border:1px solid var(--c-border);background:var(--c-surface-2)}
-.wa{font-weight:700;color:var(--c-accent-a)}
+#P{position:fixed;left:0;top:0;width:1920px;height:1080px;margin:0;z-index:1;overflow:hidden;background:var(--od-bg)}
+#prog{position:fixed;top:0;left:0;width:0;z-index:100;transition:width .2s ease}
 </style>
 </head>
 <body>
 <div id="prog"></div>
 <div id="P">
-<section class="s slide is-active fill-deck" id="s0">
-<div class="slide-header"><h2>Markdown 要被淘汰？</h2></div>
-<p class="deck-sub" style="font-size:46px;margin-top:8px">Claude 工程师弃用真相｜对话口播</p>
-<div class="host-chip"><span>阿哲 · 技术视角</span><span>小夏 · 行业观察</span></div>
-<p class="deck-lead" style="margin-top:28px;max-width:920px">Thariq（Claude Code）在 X 的讨论：AI 协作下 Markdown 与 HTML 怎么选。<span class="wa">听完知道该用什么。</span></p>
+
+<section class="s slide is-active fill-deck od od-dark od-hero od-center" id="s0">
+<p class="eyebrow">DEBATE</p>
+<h1 class="h-hero">Markdown 要被淘汰？</h1>
+<p class="lead">Claude 工程师弃用真相｜对话口播</p>
+<div class="od-chips"><span>阿哲 · 技术视角</span><span>小夏 · 行业观察</span></div>
+<p class="lead" style="margin-top:22px">Thariq（Claude Code）在 X 的讨论：AI 协作下 Markdown 与 HTML 怎么选。<span class="wa">听完知道该用什么。</span></p>
 </section>
-<section class="s slide fill-deck" id="s1">
-<div class="slide-header"><h2>今夜路线图</h2></div>
-<div class="slide-cards grid-2" style="margin-top:12px">
-<div class="g g-or"><div class="gc"><div class="gt">Markdown 为何曾封神</div><div class="gd">纯文本 · Git 友好 · 跨平台</div></div></div>
-<div class="g g-sk"><div class="gc"><div class="gt">AI 时代的短板</div><div class="gd">少手改 · 长文 · 密度 · 分享</div></div></div>
-<div class="g g-gn"><div class="gc"><div class="gt">HTML 的四张牌</div><div class="gd">表达 · 阅读 · 链接 · <span class="wa">交互闭环</span></div></div></div>
-<div class="g g-purple"><div class="gc"><div class="gt">选型结论</div><div class="gd">工具找准生态位 · 为人服务</div></div></div>
+
+<section class="s slide fill-deck od od-light od-slide-grid" id="s1">
+<p class="eyebrow">路线图</p>
+<h2 class="h-xl">今夜路线图</h2>
+<div class="od-grid-2x2">
+<div class="pt"><h3>Markdown 为何曾封神</h3><p>纯文本 · Git 友好 · 跨平台</p></div>
+<div class="pt"><h3>AI 时代的短板</h3><p>少手改 · 长文 · 密度 · 分享</p></div>
+<div class="pt"><h3>HTML 的四张牌</h3><p>表达 · 阅读 · 链接 · <span class="wa">交互闭环</span></p></div>
+<div class="pt"><h3>选型结论</h3><p>工具找准生态位 · 为人服务</p></div>
 </div>
 </section>
-<section class="s slide fill-deck" id="s2">
-<div class="slide-header"><h2>Claude Code × HTML</h2></div>
-<div class="card-diagram" style="min-height:340px;margin-top:8px">
-<svg viewBox="0 0 900 280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-<defs><marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="var(--c-accent-a)"/></marker></defs>
-<rect x="20" y="60" width="180" height="100" rx="14" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
-<text x="110" y="118" text-anchor="middle" font-size="22" fill="var(--c-text-1)" font-weight="700">仓库 / Git</text>
-<line x1="200" y1="110" x2="260" y2="110" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#arr)"/>
-<rect x="260" y="40" width="200" height="140" rx="16" fill="var(--c-accent-a)" opacity="0.15" stroke="var(--c-accent-a)" stroke-width="2"/>
-<text x="360" y="95" text-anchor="middle" font-size="24" fill="var(--c-accent-a)" font-weight="800">Claude Code</text>
-<text x="360" y="128" text-anchor="middle" font-size="19" fill="var(--c-text-2)">上下文 + MCP</text>
-<text x="360" y="158" text-anchor="middle" font-size="19" fill="var(--c-text-2)">生成 HTML</text>
-<line x1="460" y1="110" x2="520" y2="110" stroke="var(--c-accent-a)" stroke-width="2" marker-end="url(#arr)"/>
-<rect x="520" y="50" width="200" height="120" rx="14" fill="var(--c-surface-2)" stroke="var(--c-accent-c)" stroke-width="2"/>
-<text x="620" y="108" text-anchor="middle" font-size="22" fill="var(--c-text-1)" font-weight="700">可读可交互页面</text>
-<line x1="620" y1="170" x2="620" y2="210" stroke="var(--c-accent-c)" stroke-width="2" marker-end="url(#arr)"/>
-<text x="620" y="248" text-anchor="middle" font-size="20" fill="var(--c-accent-c)" font-weight="700"><tspan class="wa">人决策 · 参数回流</tspan></text>
+
+<section class="s slide fill-deck od od-light od-photo" id="s2">
+<div class="od-photo-top"><p class="eyebrow">Source</p><h2 class="h-xl">一手信源</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/article-images/tweet-thariq-html-open-in-browser-workflow.png" alt="Thariq 讨论 HTML 工作流"/></div>
+<p class="od-cap">争议起点：<span class="wa">HTML 打开即用、协作闭环</span>——先看清原帖再下结论。</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-dark od-photo" id="s3">
+<div class="od-photo-top"><p class="eyebrow">Signal</p><h2 class="h-xl">HTML 能承载什么</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/article-images/infographic-html-eight-information-types.png" alt="八种信息类型信息图"/></div>
+<p class="od-cap">复杂版式与交互：<span class="wa">Markdown 不好单打的部分</span>交给结构化页面。</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-light od-photo" id="s4">
+<div class="od-photo-top"><p class="eyebrow">Compare</p><h2 class="h-xl">同一段说明 · 两种载体</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/article-images/compare-markdown-vs-html-payments-spec.png" alt="Markdown 与 HTML 并排对比"/></div>
+<p class="od-cap">可读性与排版：<span class="wa">对外交付与评审</span>时常是 HTML 更省事。</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-light od-slide-grid" id="s5">
+<p class="eyebrow">Markdown</p>
+<h2 class="h-xl">仍强的场景</h2>
+<div class="od-grid-2x2">
+<div class="pt"><h3>纯文本友好</h3><p>Git diff · 评审习惯</p></div>
+<div class="pt"><h3>笔记与 RFC</h3><p>速记 · 协作注释</p></div>
+<div class="pt"><h3>AI 时代短板</h3><p>少手改 · 长文密度 · 分享样式</p></div>
+<div class="pt"><h3>口径</h3><p><span class="wa">不是淘汰，是分工</span></p></div>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-dark" id="s6">
+<p class="eyebrow">Read</p>
+<h2 class="h-xl">阅读体验差在哪</h2>
+<div class="od-ba">
+<div class="od-ph-frame" role="img" aria-label="可读性对比：Markdown 密麻一行流 vs HTML 块状层级">
+<svg viewBox="0 0 920 520" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<linearGradient id="odReadBgL" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="rgba(250,250,247,0.07)"/>
+<stop offset="1" stop-color="rgba(250,250,247,0.02)"/>
+</linearGradient>
+<linearGradient id="odReadBgR" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="rgba(201,100,66,0.22)"/>
+<stop offset="1" stop-color="rgba(201,100,66,0.06)"/>
+</linearGradient>
+</defs>
+<rect x="8" y="8" width="440" height="504" rx="18" fill="url(#odReadBgL)" stroke="rgba(250,250,247,0.14)" stroke-width="2"/>
+<text x="228" y="52" text-anchor="middle" fill="rgba(250,250,247,0.45)" font-size="22" font-family="ui-monospace,Menlo,monospace" letter-spacing="0.14em">MARKDOWN</text>
+<text x="228" y="92" text-anchor="middle" fill="#fafaf7" font-size="30" font-weight="700" font-family="system-ui,&quot;Microsoft YaHei&quot;,sans-serif">一长串 · 难扫读</text>
+<g fill="rgba(250,250,247,0.22)">
+<rect x="36" y="118" width="360" height="10" rx="3"/><rect x="36" y="136" width="300" height="10" rx="3"/><rect x="36" y="154" width="340" height="10" rx="3"/><rect x="36" y="172" width="280" height="10" rx="3"/><rect x="36" y="190" width="360" height="10" rx="3"/><rect x="36" y="208" width="220" height="10" rx="3"/><rect x="36" y="226" width="340" height="10" rx="3"/><rect x="36" y="244" width="310" height="10" rx="3"/><rect x="36" y="262" width="360" height="10" rx="3"/><rect x="36" y="280" width="260" height="10" rx="3"/><rect x="36" y="298" width="330" height="10" rx="3"/><rect x="36" y="316" width="360" height="10" rx="3"/><rect x="36" y="334" width="290" height="10" rx="3"/><rect x="36" y="352" width="340" height="10" rx="3"/><rect x="36" y="370" width="360" height="10" rx="3"/><rect x="36" y="388" width="240" height="10" rx="3"/><rect x="36" y="406" width="320" height="10" rx="3"/><rect x="36" y="424" width="360" height="10" rx="3"/><rect x="36" y="442" width="300" height="10" rx="3"/>
+</g>
+<text x="228" y="492" text-anchor="middle" fill="rgba(250,250,247,0.38)" font-size="24" font-family="system-ui,&quot;Microsoft YaHei&quot;,sans-serif">信息挤在一块儿</text>
+<rect x="472" y="8" width="440" height="504" rx="18" fill="url(#odReadBgR)" stroke="rgba(232,160,144,0.45)" stroke-width="2"/>
+<text x="692" y="52" text-anchor="middle" fill="rgba(232,160,144,0.95)" font-size="22" font-family="ui-monospace,Menlo,monospace" letter-spacing="0.14em">HTML</text>
+<text x="692" y="92" text-anchor="middle" fill="#fafaf7" font-size="30" font-weight="700" font-family="system-ui,&quot;Microsoft YaHei&quot;,sans-serif">块状 · 层级清晰</text>
+<rect x="502" y="120" width="380" height="72" rx="14" fill="rgba(250,250,247,0.08)" stroke="#e8a090" stroke-width="2"/>
+<text x="692" y="162" text-anchor="middle" fill="#fafaf7" font-size="28" font-weight="700" font-family="system-ui,&quot;Microsoft YaHei&quot;,sans-serif">标题 / 小结</text>
+<rect x="502" y="210" width="380" height="110" rx="14" fill="rgba(250,250,247,0.08)" stroke="rgba(232,160,144,0.65)" stroke-width="2"/>
+<text x="692" y="268" text-anchor="middle" fill="rgba(250,250,247,0.88)" font-size="28" font-weight="600" font-family="system-ui,&quot;Microsoft YaHei&quot;,sans-serif">正文段落分区</text>
+<rect x="502" y="338" width="380" height="110" rx="14" fill="rgba(250,250,247,0.08)" stroke="rgba(232,160,144,0.65)" stroke-width="2"/>
+<text x="692" y="396" text-anchor="middle" fill="rgba(250,250,247,0.88)" font-size="28" font-weight="600" font-family="system-ui,&quot;Microsoft YaHei&quot;,sans-serif">表格 · 图 · 控件</text>
+<text x="692" y="492" text-anchor="middle" fill="rgba(250,250,247,0.42)" font-size="24" font-family="system-ui,&quot;Microsoft YaHei&quot;,sans-serif">扫一眼抓住结构</text>
+<line x1="456" y1="48" x2="456" y2="472" stroke="rgba(250,250,247,0.12)" stroke-width="2"/>
+<text x="456" y="276" text-anchor="middle" fill="rgba(232,160,144,0.85)" font-size="26" font-weight="800" font-family="system-ui,sans-serif">VS</text>
 </svg>
 </div>
-<p class="deck-lead" style="margin-top:8px;max-width:900px">代价也要记住：<span class="wa">diff 更吵、生成更慢</span>——理性选型。</p>
+<div class="od-ba-copy"><p class="lead">密度一高，手机上「扫一眼」：<span class="wa">HTML 块往往更利落</span>；Markdown 仍是写得最快的草稿纸。</p></div>
+</div>
 </section>
-<section class="s slide v-center" id="s3">
-<div class="emoji-xl" aria-hidden="true">🛠️</div>
-<h2 class="hero-title" style="margin-top:12px">选对场景，比追风口重要</h2>
-<p class="deck-sub">Markdown · HTML · 白板 —— 各归其位</p>
-<p class="deck-lead" style="margin-top:20px"><span class="wa">简单笔记 Markdown；复杂协作与交互试 HTML。</span></p>
+
+<section class="s slide fill-deck od od-light od-photo" id="s7">
+<div class="od-photo-top"><p class="eyebrow">Flow</p><h2 class="h-xl">典型工作流</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/article-images/workflow-html-tune-copy-prompt-to-claude-code.png" alt="HTML 调参复制到 Claude Code"/></div>
+<p class="od-cap">页面即上下文：<span class="wa">调文案 → 复制 → 丢回 Agent</span>，闭环在现实项目里很常见。</p>
+</div>
 </section>
+
+<section class="s slide fill-deck od od-dark" id="s8">
+<p class="eyebrow">Agent</p>
+<h2 class="h-xl">Claude Code × HTML</h2>
+<div class="od-diagram-wrap">
+<svg viewBox="0 0 900 420" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+<defs><marker id="arr" markerWidth="12" markerHeight="8" refX="12" refY="4" orient="auto"><polygon points="0 0,12 4,0 8" fill="var(--c-accent-a)"/></marker></defs>
+<rect x="20" y="100" width="200" height="130" rx="14" fill="var(--c-surface-2)" stroke="var(--c-accent-a)" stroke-width="2"/>
+<text x="120" y="175" text-anchor="middle" font-size="27" fill="var(--c-text-1)" font-weight="800">仓库 / Git</text>
+<line x1="220" y1="165" x2="275" y2="165" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr)"/>
+<rect x="275" y="55" width="230" height="210" rx="16" fill="var(--c-accent-a)" opacity="0.14" stroke="var(--c-accent-a)" stroke-width="2"/>
+<text x="390" y="118" text-anchor="middle" font-size="30" fill="var(--c-accent-a)" font-weight="900">Claude Code</text>
+<text x="390" y="162" text-anchor="middle" font-size="24" fill="var(--c-text-2)">上下文 + MCP</text>
+<text x="390" y="208" text-anchor="middle" font-size="24" fill="var(--c-text-2)">生成 HTML</text>
+<line x1="505" y1="165" x2="560" y2="165" stroke="var(--c-accent-a)" stroke-width="3" marker-end="url(#arr)"/>
+<rect x="560" y="85" width="230" height="160" rx="14" fill="var(--c-surface-2)" stroke="var(--c-accent-c)" stroke-width="2"/>
+<text x="675" y="155" text-anchor="middle" font-size="27" fill="var(--c-text-1)" font-weight="800">可读可交互页面</text>
+<line x1="675" y1="245" x2="675" y2="300" stroke="var(--c-accent-c)" stroke-width="3" marker-end="url(#arr)"/>
+<text x="675" y="358" text-anchor="middle" font-size="26" fill="var(--c-accent-c)" font-weight="800"><tspan class="wa">人决策 · 参数回流</tspan></text>
+</svg>
+</div>
+<p class="lead od-deck-lead">代价也要记住：<span class="wa">diff 更吵、生成更慢</span>——理性选型。</p>
+</section>
+
+<section class="s slide fill-deck od od-light od-photo" id="s9">
+<div class="od-photo-top"><p class="eyebrow">Stack</p><h2 class="h-xl">不止 HTML</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/article-images/tweet-gordon-excalidraw-svg-agent-question.png" alt="Gordon Excalidraw SVG Agent"/></div>
+<p class="od-cap">白板 / 图示自有生态位：<span class="wa">Agent + SVG</span> 与 Markdown、HTML 并行。</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-light od-slide-grid" id="s10">
+<p class="eyebrow">成本</p>
+<h2 class="h-xl">代价三问</h2>
+<div class="od-grid-2x2">
+<div class="pt"><h3>Token</h3><p>页面更长 · 上下文更贵</p></div>
+<div class="pt"><h3>速度</h3><p>生成与迭代可能更慢</p></div>
+<div class="pt"><h3>Diff</h3><p>噪声多 · 评审要习惯</p></div>
+<div class="pt"><h3>结论</h3><p><span class="wa">为交付选 HTML，为速度保留 MD</span></p></div>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-dark od-center od-hero" id="s11">
+<p class="eyebrow">Takeaway</p>
+<h2 class="h-hero">选对场景，比追风口重要</h2>
+<p class="lead">Markdown · HTML · 图示 —— 各归其位</p>
+<p class="lead" style="margin-top:20px"><span class="wa">简单笔记 Markdown；复杂协作与交互试 HTML。</span></p>
+</section>
+
 </div>
 <div id="pn"></div>
 <script>

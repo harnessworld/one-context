@@ -1,6 +1,7 @@
 {
   "_comment": "wav-auto 可选配置。单个 .wav 建议路径 production/media/（本地，勿提交）。成片前按 spec 核查事实表述。",
   "wavFile": "media/voiceover_volc.wav",
+  "srtFile": "subtitles/sub.srt",
   "whisperModel": "small",
   "noSpeechThreshold": 0.85,
   "vadFilter": false,
@@ -8,7 +9,14 @@
   "maxSubtitleGapSec": 2.5,
   "fillSrtGaps": true,
   "whisperHotwords": "Thariq Claude Code Markdown HTML MCP Slack GitHub Excalidraw Opus",
-  "srtReplacements": [],
+  "srtReplacements": [
+    { "from": "Cloud Code", "to": "Claude Code", "ignoreCase": true },
+    { "from": "Excalidra", "to": "Excalidraw", "ignoreCase": false },
+    { "from": "Starik", "to": "Thariq", "ignoreCase": false },
+    { "from": "Sarika", "to": "Thariq", "ignoreCase": false },
+    { "from": "Taric", "to": "Thariq", "ignoreCase": false },
+    { "from": "getup", "to": "GitHub", "ignoreCase": true }
+  ],
   "wrapSubtitles": true,
   "outputFile": "final_auto.mp4",
   "burnSubtitles": true,
