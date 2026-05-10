@@ -121,26 +121,58 @@ def parse_one_message(data: bytes) -> tuple[int, str, Any, int]:
     payload: dict（JSON）或 bytes（RAW 音频 / 未解码）
     message_type: 帧头消息类型（含 MSG_ERROR=0b1111）
     """
-    if len(data) < 12:
+    if len(data) < 4:
         raise ValueError("frame too short")
     b1 = data[1]
     msg_type = (b1 >> 4) & 0xF
     flags = b1 & 0xF
     ser = (data[2] >> 4) & 0xF
     comp = data[2] & 0xF
-    off = 4
-    if flags == FLAG_EVENT_ID:
-        event = struct.unpack(">I", data[off : off + 4])[0]
-        off += 4
+
+    # 下行 FULL_SERVER_RESPONSE / AUDIO_ONLY_RESPONSE / ERROR：与 volcengine_audio
+    # VolcengineTTSFunctions.extract_response_payload 一致——紧接头 4 字节即为 event，
+    # 不能仅用 flags==CARRY_EVENT_ID 判断。AUDIO_ONLY 常见 POS_SEQUENCE(0b0001)，
+    # 若误判会跳过 event、把音频当成 sid_len，随后在 plen 处 struct 报错。
+    if msg_type in (
+        MSG_FULL_SERVER_RESPONSE,
+        MSG_AUDIO_ONLY_RESPONSE,
+        MSG_ERROR,
+    ):
+        if len(data) < 12:
+            raise ValueError("frame too short")
+        event = struct.unpack(">I", data[4:8])[0]
+        sid_len = struct.unpack(">I", data[8:12])[0]
+        if 12 + sid_len > len(data):
+            raise ValueError("invalid session id length")
+        session_end = 12 + sid_len
+        if len(data) < session_end + 4:
+            raise ValueError("frame too short for payload length")
+        session_id = data[12:session_end].decode("utf-8") if sid_len else ""
+        plen = struct.unpack(">I", data[session_end : session_end + 4])[0]
+        payload_start = session_end + 4
+        if len(data) < payload_start + plen:
+            raise ValueError("truncated payload")
+        payload = data[payload_start : payload_start + plen]
     else:
-        event = -1
-    sid_len = struct.unpack(">I", data[off : off + 4])[0]
-    off += 4
-    session_id = data[off : off + sid_len].decode("utf-8") if sid_len else ""
-    off += sid_len
-    plen = struct.unpack(">I", data[off : off + 4])[0]
-    off += 4
-    payload = data[off : off + plen]
+        if len(data) < 12:
+            raise ValueError("frame too short")
+        off = 4
+        if flags == FLAG_EVENT_ID:
+            event = struct.unpack(">I", data[off : off + 4])[0]
+            off += 4
+        else:
+            event = -1
+        sid_len = struct.unpack(">I", data[off : off + 4])[0]
+        off += 4
+        if off + sid_len + 4 > len(data):
+            raise ValueError("frame too short for session / length")
+        session_id = data[off : off + sid_len].decode("utf-8") if sid_len else ""
+        off += sid_len
+        plen = struct.unpack(">I", data[off : off + 4])[0]
+        off += 4
+        if off + plen > len(data):
+            raise ValueError("truncated payload")
+        payload = data[off : off + plen]
 
     if comp == COMP_GZIP:
         payload = gzip.decompress(payload)

@@ -230,34 +230,43 @@ async function run(projectRoot, skillDir, options = {}) {
   env.PYTHONUTF8 = '1';
 
   const pythonExe = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
-  const r = spawnSync(
-    pythonExe,
-    [
-      py,
-      '--wav',
-      wavAbs,
-      '--slides-json',
-      slidesJson,
-      '--out-json',
-      alignOut,
-      '--model',
-      whisperModel,
-      '--max-subtitle-gap-sec',
-      String(maxSubtitleGapSec),
-      ...(strictSubtitles ? ['--strict-subtitles'] : []),
-      ...(vadFilter ? ['--vad-filter'] : []),
-      ...(noSpeechThresholdArg !== null
-        ? ['--no-speech-threshold', noSpeechThresholdArg]
-        : []),
-      ...(!fillSrtGaps ? ['--no-fill-srt-gaps'] : []),
-      ...(whisperHotwords.trim()
-        ? ['--hotwords', whisperHotwords.trim()]
-        : []),
-      // 与口播对齐的 SRT 始终生成（除非用户指定外部 srtFile），便于缺口检测；仅 burnSubtitles 时拷贝到项目根
-      ...(!externalSrt ? ['--srt-out', srtOut] : []),
-    ],
-    { encoding: 'utf-8', env, maxBuffer: 50 * 1024 * 1024 }
-  );
+  const pyArgv = [
+    py,
+    '--wav',
+    wavAbs,
+    '--slides-json',
+    slidesJson,
+    '--out-json',
+    alignOut,
+    '--model',
+    whisperModel,
+    '--max-subtitle-gap-sec',
+    String(maxSubtitleGapSec),
+    ...(strictSubtitles ? ['--strict-subtitles'] : []),
+    ...(vadFilter ? ['--vad-filter'] : []),
+    ...(noSpeechThresholdArg !== null
+      ? ['--no-speech-threshold', noSpeechThresholdArg]
+      : []),
+    ...(!fillSrtGaps ? ['--no-fill-srt-gaps'] : []),
+    ...(whisperHotwords.trim()
+      ? ['--hotwords', whisperHotwords.trim()]
+      : []),
+    // 与口播对齐的 SRT 始终生成（除非用户指定外部 srtFile），便于缺口检测；仅 burnSubtitles 时拷贝到项目根
+    ...(!externalSrt ? ['--srt-out', srtOut] : []),
+  ];
+  const spawnOpts = { encoding: 'utf-8', env, maxBuffer: 50 * 1024 * 1024 };
+  let r = spawnSync(pythonExe, pyArgv, spawnOpts);
+  const outComb = `${r.stderr || ''}${r.stdout || ''}`;
+  const pythonLaunchFailed =
+    process.platform === 'win32' &&
+    !process.env.PYTHON &&
+    ((r.error &&
+      (r.error.code === 'ENOENT' || r.error.errno === -4058)) ||
+      r.status === 9009 ||
+      /not recognized as an internal or external command|'python' was not found/i.test(outComb));
+  if (pythonLaunchFailed) {
+    r = spawnSync('py', ['-3', ...pyArgv], spawnOpts);
+  }
 
   if (r.status !== 0) {
     console.error(r.stderr || r.stdout);

@@ -1,6 +1,6 @@
 ---
 name: html-deck-layout
-description: Mobile-first HTML presentation generator (1920×1080 landscape). Creates phone-optimized slides for video production with fill-deck layouts, ≥42px body text, ≥85% coverage. Incorporates Open Design-style principles (brief-driven, visual-first, editorial hierarchy; see SKILL). Use when the user wants a mobile presentation, phone-optimized slides, presentation.html for video, or mobile PPT with emoji/SVG diagrams. Triggers: "mobile PPT", "phone presentation", "presentation.html", "video slides", "1920x1080", "手机横屏PPT", "手机PPT", "移动端幻灯片", "录屏PPT", "口播幻灯片".
+description: Mobile-first HTML presentation generator (1920×1080 landscape). Creates phone-optimized slides for video production with fill-deck layouts, ≥42px body text, ≥85% coverage; for narrated video plans **~30–60s per content slide** (see SKILL body). Incorporates Open Design-style principles (brief-driven, visual-first, editorial hierarchy; see SKILL). Use when the user wants a mobile presentation, phone-optimized slides, presentation.html for video, or mobile PPT with emoji/SVG diagrams. Triggers: "mobile PPT", "phone presentation", "presentation.html", "video slides", "1920x1080", "手机横屏PPT", "手机PPT", "移动端幻灯片", "录屏PPT", "口播幻灯片".
 ---
 
 # html-deck-layout — Mobile PPT Generator
@@ -8,6 +8,8 @@ description: Mobile-first HTML presentation generator (1920×1080 landscape). Cr
 Generate mobile-optimized HTML presentations (1920×1080 landscape) for
 phone-screen viewing: 投屏、录屏、口播视频配图。All slides enforce
 **fill-deck** (zero wasted space), **≥42px body text**, **≥85% coverage**.
+
+**口播 / 成片时长（与 `html-video-from-slides`、`wav-durations.json` 对齐）**：拆页时 **每一页内容页建议口播停留 30s–60s**（硬上限 **≤60s**/页，除非该话题不可分割须在提纲中注明并得到确认）；**封面 / 致谢可略短，但不建议短于 20s**。页数 ≈ `ceil(总口播秒数 / 45)` 并在 ±2 页内微调；避免「一页扛整段脚本」导致翻页与音频脱节。
 
 ## When to use
 
@@ -84,13 +86,13 @@ A good opening message:
 
 ### Step 3: Plan outline with layout mapping
 
-将内容拆页，每页分配布局（参考下方「7 种布局速查」）：
+将内容拆页，每页分配布局（参考下方「7 种布局速查」）；**若为口播视频**，为每页标注 **建议口播时长（30s–60s 为主）**，便于下游写 `slideDurationsSec`。
 
-| 页码 | 内容 | 布局 | 有无 SVG 图？ |
-|------|------|------|-------------|
-| 1 | 封面 | Cover | — |
-| 2 | ... | Grid 2×2 / Split / ... | 简述图内容 |
-| N | 致谢 | Thanks | — |
+| 页码 | 内容 | 布局 | 建议口播 | 有无 SVG 图？ |
+|------|------|------|----------|-------------|
+| 1 | 封面 | Cover | 20–35s | — |
+| 2 | ... | Grid 2×2 / Split / ... | **30–60s** | 简述图内容 |
+| N | 致谢 | Thanks | 20–35s | — |
 
 **Each deck MUST include ≥2 SVG diagrams** (using `<div class="card-diagram">` with inline `<svg>`) and use **≥3 distinct layout types**.
 
@@ -116,6 +118,7 @@ A good opening message:
 - [ ] 每页 ≤3 info blocks
 - [ ] Layout variety: ≥3 types total, no 3+ consecutive same
 - [ ] **≥2 pages with card-diagram + inline SVG** (not just emoji!)
+- [ ] 口播成片：**内容页**规划为每页约 **30s–60s**（封面/致谢可更短，≥20s）
 
 ✓ Gate: 全部勾选通过。
 
@@ -144,6 +147,7 @@ These are **non-negotiable**. Violating any rule means the output is rejected.
 
 | Constraint | Value | Source |
 |-----------|-------|--------|
+| 口播停留（内容页） | **30s–60s**/页，≤60s 除非已注明不可分割 | 口播视频、`wav-durations.json` |
 | Canvas | 1920×1080 | Fixed viewport |
 | Body text | **≥42px** | Hard minimum |
 | Card title | **≥52px** | Tier table |
