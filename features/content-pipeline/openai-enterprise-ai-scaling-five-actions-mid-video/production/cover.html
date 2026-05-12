@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>封面</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #05050a;
+}
+
+#cover {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+}
+
+/* ─── 背景层 ─── */
+#bg {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+}
+
+/* 纯CSS备用背景（无背景图时展示） */
+#bg-fallback {
+    position: absolute;
+    inset: 0;
+}
+
+/* 暗角遮罩 */
+#overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    /* background 由 JS 根据 overlayDirection 动态注入 */
+}
+
+/* 噪点纹理 */
+#noise {
+    position: absolute; inset: 0;
+    z-index: 5;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* ─── 装饰图形 ─── */
+#phone-deco {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    width: 520px;
+    height: 990px;
+    margin-left: -260px;
+    margin-top: -495px;
+    z-index: 6;
+    pointer-events: none;
+}
+#phone-deco svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ─── 顶部品牌栏 ─── */
+#header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 76px 76px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#tagline {
+    font-size: 30px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 6px;
+}
+
+#brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#brand-name {
+    font-size: 30px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 3px;
+}
+
+#avatar {
+    width: 78px; height: 78px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.25);
+    display: block;
+}
+
+#avatar-fallback {
+    width: 78px; height: 78px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.20);
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+}
+
+/* ─── 核心内容区 ─── */
+#content {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 200px 72px 280px;
+    text-align: center;
+    z-index: 20;
+    gap: 0;
+}
+
+/* 小标签 */
+#tag {
+    display: inline-block;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 8px;
+    padding: 10px 32px;
+    border-radius: 100px;
+    margin-bottom: 52px;
+}
+
+/* ── 主标题 ─── */
+#headline {
+    font-size: 200px;
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -4px;
+    color: #ffffff;
+    text-align: center;
+    word-break: keep-all;
+}
+
+/* 自适应字号 — 按每行最大 CJK 视觉宽度分档 */
+#headline.len5  { font-size: 200px; }                          /* maxLineW ≤4 */
+#headline.len6  { font-size: 180px; }                          /* maxLineW ≤5 */
+#headline.len7  { font-size: 155px; letter-spacing: -2px; }    /* maxLineW ≤6 */
+#headline.len8  { font-size: 130px; letter-spacing: -1px; }    /* maxLineW ≤7 */
+#headline.len10 { font-size: 110px; letter-spacing: 0px; }     /* maxLineW ≤9 */
+#headline.len12 { font-size: 95px; }                           /* maxLineW ≤11 */
+#headline.long  { font-size: 82px;  letter-spacing: 0px; }     /* maxLineW >11 */
+
+/* 强调词 */
+#headline em {
+    font-style: normal;
+}
+
+/* 分割线 */
+#divider {
+    width: 120px;
+    height: 3px;
+    border-radius: 2px;
+    margin: 44px auto 44px;
+}
+
+/* 副标题 */
+#subline {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 3px;
+    max-width: 900px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+
+/* ─── 底部信息条 ─── */
+#footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0 76px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.foot-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 27px;
+    color: rgba(255,255,255,0.38);
+    letter-spacing: 2px;
+}
+
+.foot-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+#watermark {
+    font-size: 24px;
+    color: rgba(255,255,255,0.22);
+    letter-spacing: 3px;
+}
+
+/* ─── 底部装饰线 ─── */
+#accent-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 5px;
+}
+</style>
+</head>
+<body>
+<div id="cover">
+
+    <!-- 背景 -->
+    <img id="bg" src="" alt="">
+    <div id="bg-fallback"></div>
+    <div id="overlay"></div>
+
+    <!-- 装饰图形 -->
+    <div id="phone-deco" aria-hidden="true"></div>
+
+    <div id="noise"></div>
+
+    <!-- 顶部品牌 -->
+    <div id="header">
+        <div id="tagline"></div>
+        <div id="brand">
+            <div id="brand-name"></div>
+            <img id="avatar" src="" onerror="this.style.display='none'" alt="">
+            <div id="avatar-fallback"></div>
+        </div>
+    </div>
+
+    <!-- 正文 -->
+    <div id="content">
+        <div id="tag"></div>
+        <div id="headline"></div>
+        <div id="divider"></div>
+        <div id="subline"></div>
+    </div>
+
+    <!-- 底部 -->
+    <div id="footer">
+        <div id="footer-left"></div>
+        <div id="watermark"></div>
+    </div>
+    <div id="accent-bar"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+//  每期视频只改 CONFIG 这一块
+// ════════════════════════════════════════════════════
+const CONFIG = {
+    headline:    "强模型有了\n为何落地不顺",
+    accentLine:  2,
+    subline:     "OpenAI 企业规模化 AI：文化、治理、所有权、质量与判断型工作——五条路径与真实案例。",
+    tag:         "2026 · OpenAI Frontiers",
+    bgImage:     "",
+    avatarImage: "",
+    avatarEmoji: "🎙",
+    brandName:   "阿哲 × 小夏",
+    tagline:     "指南拆解",
+    footerItems: ["capability gap", "五条 pattern", "PDF checklist"],
+    watermark:   "事实口径以官网与 PDF 为准",
+
+    theme:       "tech",
+
+    decoSVG:     "",
+    decoRotate:  -11,
+    decoOpacity: 0.72,
+    decoScale:   1,
+
+    overlayDirection: "to-bottom",
+
+    noiseEnabled: true,
+    noiseOpacity: 0.05,
+};
+// ════════════════════════════════════════════════════
+
+// ── 默认手机 SVG ──
+const DEFAULT_PHONE_SVG = `<svg viewBox="0 0 210 400" xmlns="http://www.w3.org/2000/svg" fill="none">
+    <defs>
+        <linearGradient id="ph-screen" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0d2236"/>
+            <stop offset="45%" stop-color="#122a42"/>
+            <stop offset="100%" stop-color="#241432"/>
+        </linearGradient>
+        <linearGradient id="ph-glow" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00d4e8" stop-opacity="0.55"/>
+            <stop offset="55%" stop-color="#8b5cf6" stop-opacity="0.38"/>
+            <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.22"/>
+        </linearGradient>
+        <linearGradient id="ph-bar" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00f0ff"/>
+            <stop offset="100%" stop-color="#8b5cf6"/>
+        </linearGradient>
+    </defs>
+    <rect x="8" y="6" width="194" height="388" rx="28" fill="#0c1220" stroke="rgba(255,255,255,0.38)" stroke-width="2.5"/>
+    <rect x="18" y="18" width="174" height="364" rx="20" fill="url(#ph-screen)" stroke="rgba(0,240,255,0.35)" stroke-width="1.5"/>
+    <ellipse cx="105" cy="120" rx="72" ry="88" fill="url(#ph-glow)"/>
+    <circle cx="62" cy="44" r="4" fill="rgba(255,255,255,0.5)"/>
+    <circle cx="78" cy="44" r="4" fill="rgba(255,255,255,0.28)"/>
+    <circle cx="94" cy="44" r="4" fill="rgba(255,255,255,0.16)"/>
+    <rect x="118" y="40" width="64" height="8" rx="4" fill="rgba(255,255,255,0.14)"/>
+    <circle cx="105" cy="188" r="36" fill="rgba(0,0,0,0.42)" stroke="rgba(0,240,255,0.65)" stroke-width="2.5"/>
+    <path d="M96 168 L96 208 L132 188 Z" fill="rgba(255,255,255,0.95)"/>
+    <rect x="32" y="318" width="146" height="5" rx="2.5" fill="rgba(255,255,255,0.18)"/>
+    <rect x="32" y="318" width="62" height="5" rx="2.5" fill="url(#ph-bar)"/>
+    <text x="105" y="342" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-size="13" font-family="system-ui,sans-serif" letter-spacing="1">0:15</text>
+    <rect x="78" y="372" width="54" height="4" rx="2" fill="rgba(255,255,255,0.28)"/>
+</svg>`;
+
+// ── 主题色系 ──
+const THEMES = {
+    danger: {
+        accent:     "#FF2A55",
+        accent2:    "#FF8C00",
+        tagBg:      "rgba(255,42,85,0.12)",
+        tagBorder:  "rgba(255,42,85,0.5)",
+        tagColor:   "#FF6B8A",
+        glowColor:  "rgba(255,42,85,0.25)",
+        glowColor2: "rgba(255,140,0,0.15)",
+        dotColor:   "#FF2A55",
+        bar:        "linear-gradient(90deg, transparent 2%, #FF2A55 35%, #FF8C00 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,42,85,0.35), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FF2A55 0%, #FF8C00 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #1a0508 0%, #0d0305 40%, #050208 100%)",
+        decoGlow:   "rgba(255,42,85,0.28)",
+        decoAccent: "rgba(255,140,0,0.35)",
+    },
+    growth: {
+        accent:     "#FFD700",
+        accent2:    "#00F0FF",
+        tagBg:      "rgba(255,215,0,0.10)",
+        tagBorder:  "rgba(255,215,0,0.45)",
+        tagColor:   "#FFD700",
+        glowColor:  "rgba(255,215,0,0.20)",
+        glowColor2: "rgba(0,240,255,0.12)",
+        dotColor:   "#FFD700",
+        bar:        "linear-gradient(90deg, transparent 2%, #FFD700 35%, #00F0FF 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,215,0,0.30), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #150f00 0%, #0a0800 40%, #050505 100%)",
+        decoGlow:   "rgba(255,215,0,0.28)",
+        decoAccent: "rgba(0,240,255,0.22)",
+    },
+    tech: {
+        accent:     "#00F0FF",
+        accent2:    "#8B5CF6",
+        tagBg:      "rgba(0,240,255,0.08)",
+        tagBorder:  "rgba(0,240,255,0.40)",
+        tagColor:   "#00D4E8",
+        glowColor:  "rgba(0,240,255,0.18)",
+        glowColor2: "rgba(139,92,246,0.18)",
+        dotColor:   "#00F0FF",
+        bar:        "linear-gradient(90deg, transparent 2%, #00F0FF 35%, #8B5CF6 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(0,240,255,0.25), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #00F0FF 0%, #8B5CF6 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #03101a 0%, #020810 40%, #03050f 100%)",
+        decoGlow:   "rgba(0,240,255,0.28)",
+        decoAccent: "rgba(139,92,246,0.35)",
+    },
+    finance: {
+        accent:     "#FFD700",
+        accent2:    "#00FF88",
+        tagBg:      "rgba(255,215,0,0.10)",
+        tagBorder:  "rgba(255,215,0,0.45)",
+        tagColor:   "#FFD700",
+        glowColor:  "rgba(255,215,0,0.18)",
+        glowColor2: "rgba(0,255,136,0.15)",
+        dotColor:   "#00FF88",
+        bar:        "linear-gradient(90deg, transparent 2%, #FFD700 35%, #00FF88 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,215,0,0.28), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FFD700 0%, #00FF88 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #0e0f00 0%, #070800 40%, #040505 100%)",
+        decoGlow:   "rgba(255,215,0,0.28)",
+        decoAccent: "rgba(0,255,136,0.22)",
+    },
+};
+
+// ── 遮罩渐变 ──
+const OVERLAYS = {
+    "to-bottom": `linear-gradient(to bottom,
+        rgba(3,3,8,0.82) 0%,
+        rgba(3,3,8,0.30) 18%,
+        rgba(3,3,8,0.08) 38%,
+        rgba(3,3,8,0.08) 52%,
+        rgba(3,3,8,0.45) 72%,
+        rgba(3,3,8,0.92) 100%)`,
+    "to-top": `linear-gradient(to top,
+        rgba(3,3,8,0.82) 0%,
+        rgba(3,3,8,0.30) 18%,
+        rgba(3,3,8,0.08) 38%,
+        rgba(3,3,8,0.08) 52%,
+        rgba(3,3,8,0.45) 72%,
+        rgba(3,3,8,0.92) 100%)`,
+    "center-out": `radial-gradient(ellipse 100% 80% at 50% 50%,
+        rgba(3,3,8,0.08) 0%,
+        rgba(3,3,8,0.25) 40%,
+        rgba(3,3,8,0.85) 100%)`,
+    "to-left": `linear-gradient(to left,
+        rgba(3,3,8,0.82) 0%,
+        rgba(3,3,8,0.30) 25%,
+        rgba(3,3,8,0.08) 50%,
+        rgba(3,3,8,0.30) 75%,
+        rgba(3,3,8,0.82) 100%)`,
+    "to-right": `linear-gradient(to right,
+        rgba(3,3,8,0.82) 0%,
+        rgba(3,3,8,0.30) 25%,
+        rgba(3,3,8,0.08) 50%,
+        rgba(3,3,8,0.30) 75%,
+        rgba(3,3,8,0.82) 100%)`,
+};
+
+(function render() {
+    const t = THEMES[CONFIG.theme] || THEMES.tech;
+
+    // ── 背景图 ──
+    const bgEl = document.getElementById('bg');
+    if (CONFIG.bgImage) {
+        bgEl.src = CONFIG.bgImage;
+        bgEl.onerror = () => { bgEl.style.display = 'none'; };
+    } else {
+        bgEl.style.display = 'none';
+    }
+
+    // ── 纯CSS备用背景 ──
+    document.getElementById('bg-fallback').style.background =
+        t.fallbackBg + `, radial-gradient(ellipse 80% 60% at 50% 75%, ${t.glowColor} 0%, transparent 60%), radial-gradient(ellipse 60% 60% at 80% 20%, ${t.glowColor2} 0%, transparent 60%)`;
+
+    // ── 遮罩方向 ──
+    const overlayDir = CONFIG.overlayDirection || 'to-bottom';
+    document.getElementById('overlay').style.background = OVERLAYS[overlayDir] || OVERLAYS['to-bottom'];
+
+    // ── 噪点 ──
+    const noiseEl = document.getElementById('noise');
+    if (CONFIG.noiseEnabled === false) {
+        noiseEl.style.display = 'none';
+    } else {
+        const opacity = CONFIG.noiseOpacity != null ? CONFIG.noiseOpacity : 0.05;
+        noiseEl.style.opacity = opacity;
+    }
+
+    // ── 装饰图形 ──
+    const decoEl = document.getElementById('phone-deco');
+    const svgContent = CONFIG.decoSVG || DEFAULT_PHONE_SVG;
+    decoEl.innerHTML = svgContent;
+    decoEl.style.opacity = CONFIG.decoOpacity != null ? CONFIG.decoOpacity : 0.82;
+    decoEl.style.transform = `rotate(${CONFIG.decoRotate != null ? CONFIG.decoRotate : -11}deg) scale(${CONFIG.decoScale || 1})`;
+    decoEl.style.filter = `drop-shadow(0 0 100px ${t.decoGlow}) drop-shadow(0 40px 100px rgba(0,0,0,0.45))`;
+
+    // ── 头像 ──
+    const avatarFallback = document.getElementById('avatar-fallback');
+    if (CONFIG.avatarImage) {
+        document.getElementById('avatar').src = CONFIG.avatarImage;
+        avatarFallback.style.display = 'none';
+    } else {
+        document.getElementById('avatar').style.display = 'none';
+        avatarFallback.textContent = CONFIG.avatarEmoji || '🐶';
+    }
+
+    // ── 品牌栏 ──
+    document.getElementById('tagline').textContent = CONFIG.tagline;
+    document.getElementById('brand-name').textContent = CONFIG.brandName;
+
+    // ── 标签 ──
+    const tagEl = document.getElementById('tag');
+    tagEl.textContent = CONFIG.tag;
+    tagEl.style.cssText += `background:${t.tagBg}; border:1.5px solid ${t.tagBorder}; color:${t.tagColor};`;
+
+    // ── 主标题 ──
+    const headEl = document.getElementById('headline');
+    const lines = CONFIG.headline.split('\n');
+
+    // CJK 视觉宽度：CJK/fullwidth = 1，ASCII = 0.55
+    function cjkWidth(s) {
+        let w = 0;
+        for (const c of s) {
+            w += /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(c) ? 1 : 0.55;
+        }
+        return Math.round(w);
+    }
+    const maxLineW = Math.max(...lines.map(l => cjkWidth(l)));
+
+    // 按每行最大视觉宽度分档，确保单行不溢出（可用宽度 936px）
+    const cls = maxLineW <= 4 ? 'len5'
+              : maxLineW <= 5 ? 'len6'
+              : maxLineW <= 6 ? 'len7'
+              : maxLineW <= 7 ? 'len8'
+              : maxLineW <= 9 ? 'len10'
+              : maxLineW <= 11 ? 'len12' : 'long';
+    headEl.classList.add(cls);
+    headEl.style.textShadow = t.textGlow;
+
+    headEl.innerHTML = lines.map((line, i) => {
+        if (CONFIG.accentLine === i + 1) {
+            return `<em style="background:${t.accentGrad}; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">${line}</em>`;
+        }
+        return `<span>${line}</span>`;
+    }).join('<br>');
+
+    // ── 分割线 ──
+    document.getElementById('divider').style.background = t.accentGrad;
+
+    // ── 副标题 ──
+    document.getElementById('subline').textContent = CONFIG.subline;
+
+    // ── 底部项目 ──
+    const footLeft = document.getElementById('footer-left');
+    (CONFIG.footerItems || []).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'foot-item';
+        div.innerHTML = `<div class="foot-dot" style="background:${t.dotColor};box-shadow:0 0 6px ${t.dotColor}"></div>${item}`;
+        footLeft.appendChild(div);
+    });
+
+    // ── 水印 & 底线 ──
+    document.getElementById('watermark').textContent = CONFIG.watermark;
+    document.getElementById('accent-bar').style.background = t.bar;
+})();
+</script>
+</body>
+</html>
