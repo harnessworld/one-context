@@ -726,7 +726,7 @@ def main() -> int:
             try:
                 # 清理损坏的缓存
                 cached = huggingface_hub.snapshot_download(model_id, local_files_only=False)
-                print(f"✅ 模型已缓存至: {cached}", flush=True)
+                print(f"OK 模型已缓存至: {cached}", flush=True)
             except Exception as dl_err:
                 print(f"⚠️  重新下载失败: {dl_err}，尝试强制清理后重试...", flush=True)
                 cache_base = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "hub", f"models--{model_id.replace('/','--')}")
@@ -803,7 +803,7 @@ def main() -> int:
 
     # --srt-only：只转写输出 SRT，不做幻灯对齐
     if args.srt_only:
-        print(f"✅ --srt-only：已输出 SRT → {args.srt_out}", flush=True)
+        print(f"OK --srt-only: wrote SRT -> {args.srt_out}", flush=True)
         if not seg_list:
             print("⚠️  Whisper 未产出有效片段", file=sys.stderr)
             return 1

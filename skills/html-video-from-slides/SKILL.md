@@ -1,6 +1,6 @@
 ---
 name: html-video-from-slides
-description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支持 Edge TTS（讲稿.md）、手动 WAV 时长（wav-durations.json）、或 wav-auto（仅 HTML+单个 WAV，本地 Whisper 自动对齐）。实现位于 one-context skills/html-video-from-slides/，跨 Cursor / Claude Code / OpenClaw 共用同一 CLI。
+description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。Edge TTS（`tts`：讲稿须 `# 【】` 分块见正文）、手动 WAV（`wav`）、或 wav-auto（Whisper）。真双人播客 WAV → `VIDEO_PIPELINE.md` 的 podcastTts + volc-podcast-tts。实现于 skills/html-video-from-slides/。
 ---
 
 # HTML 幻灯 → 讲解视频（跨工具技能）
@@ -31,6 +31,23 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。支
 | **tts** | `node cli.js tts --project <dir>` | `presentation.html`、`讲稿.md`、可选 `config.json` | 机器念稿 + 自动字幕 |
 | **srt-map** | `node cli.js srt-map --project <dir>`（可选 `--boundaries "0:0-0,1:1-2,..."`） | `sub.srt`、`presentation.html` | Whisper 对齐失败时，手动映射 SRT 条目→幻灯片，生成 `wav-durations.json` |
 | **timing-check** | `node cli.js timing-check --project <dir>`（可选 `--json`、`--audit-cue-starts`） | `timing/wav-durations.json`、`subtitles/sub.srt`、`slides/presentation.html` | 默认只报高危：**翻页落在「下一页 .wa」所在字幕条的起点**（句首陷阱）；`--audit-cue-starts` 列出所有「翻页≈字幕起点」供人工扫；**wav 成片前**命中高危则打印（`--skip-timing-check` 跳过）；高危存在时退出码 **2** |
+
+### Edge `tts`：讲稿分页与「双人」边界（必读）
+
+**讲稿路径**：默认 `content/01-script.md`；否则根下 `讲稿.md`，或由 `config.json` 的 `input.scriptFile` 指定（路径相对素材目录 `production/`）。
+
+**分页契约**（与 `lib/tts_pipeline.js` 的 `parseScript` 一致）：
+
+- 每一页口播对应一块，块首行必须为 **`# 【任意页标题】`**（全角括号 **`【】`**）。
+- 块首行之后：可写若干空行、可选 **`时长：…`** 行（仅备忘，**不送入 TTS**）。
+- 从首段正文起，直到单独一行的 **`---`** 为止，拼成该页 **Edge 整段念稿**；**块内不要再写第二个 `---`**，否则后面的正文会被截掉、不念。
+- 页数须与 `presentation.html` 里 `go(n)` 可切换的 **slide 数量一致**（通常与 `#P` 下 `.s.slide` 数量一致），否则音画不同步。
+
+**「双人」能做什么、不能做什么**：
+
+- **不能**：根据稿里的「阿哲：」「小夏：」「男：」「女：」**在同页内**自动拆轨、换两个 Edge 音色；这些字会原样进 TTS（除非你自己删掉）。
+- **能（弱双人）**：在素材目录放 `config.json`，设 **`voice.mode`** 为 **`"alternate"`**（或 **`voice.alternate`: true**），并配置 **`voice.male` / `voice.female`** 与可选 **`voice.startWith`**：按 **幻灯片下标** 轮换男女声（第 0 页一种、第 1 页另一种……），**不是**对话剧式逐句对切。
+- **真·双人播客式**：用 **`references/VIDEO_PIPELINE.md`** 里 **`video-input.json` → `podcastTts`**，调用 **`skills/volc-podcast-tts`**（如 `action=3` 对白）生成 **WAV**，再走本技能的 **`wav-auto`** 或 **`wav`**；勿把该需求压在 **`tts`** 上。
 
 ### `timing/flip-boundaries.md`（wav 成片前语义门控）
 

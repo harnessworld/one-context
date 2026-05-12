@@ -173,6 +173,8 @@ steps:
                 ise = pt.get("interSpeakerSilenceMs")
                 if ise is not None:
                     pcm_cmd.extend(["--inter-speaker-silence-ms", str(int(ise))])
+                if pt.get("mergeSameSpeakerLines"):
+                    pcm_cmd.append("--merge-same-speaker-lines")
                 meta_pod = PROJECT_DIR / "tmp" / "podcast-tts-meta.json"
                 meta_pod.parent.mkdir(parents=True, exist_ok=True)
                 pcm_cmd.extend(["--meta-out", str(meta_pod)])

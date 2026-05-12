@@ -71,7 +71,8 @@ production/
 | **`podcastTts.speakers`** | 逗号分隔两条音色 id，默认文档示例男女（大壹+蜜仔） |
 | **`podcastTts.timeoutSec`** | 默认 `900` |
 | **`podcastTts.speechRate`** | 对应 `--speech-rate`，默认 `0` |
-| **`podcastTts.forceRegenerate`** | `true` 时即便已有 WAV 也重新合成 |
+| **`podcastTts.mergeSameSpeakerLines`** | `true` 时 CLI 追加 `--merge-same-speaker-lines`（action=3 减硬切） |
+| **`podcastTts.interSpeakerSilenceMs`** | 如 `80`，对应 `--inter-speaker-silence-ms`（发音人切换间短静音） |
 
 鉴权：在仓库根 export **`VOLCENGINE_PODCAST_API_KEY`**，或使用 **`skills/volc-podcast-tts/local.env`**（CLI 会自动读取）。也可用环境变量 **`VOLC_PODCAST_FROM_SCRIPT=1`** 等价于打开 `podcastTts.enabled`（仍需配置 `wavFile`）。
 
