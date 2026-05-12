@@ -19,6 +19,8 @@
 | anthropic-ai-blueprint-dialogue-mid-video | Anthropic AI 公司蓝图对话拆解（中视频） | content-pipeline | draft | `features/content-pipeline/anthropic-ai-blueprint-dialogue-mid-video/` | one-context |
 | anthropic-boris-engineering-future-mid-video | 当顶尖工程师不再写代码：AI 重写软件开发未来（对话口播） | content-pipeline | draft | `features/content-pipeline/anthropic-boris-engineering-future-mid-video/` | one-context |
 | ai-agent-security-2026-revelations-mid-video | 2026 AI Agent 安全启示录（对话口播） | content-pipeline | draft | `features/content-pipeline/ai-agent-security-2026-revelations-mid-video/` | one-context |
+| claude-code-multi-agent-source-mid-video | Claude Code 多 Agent 机制源码解读（中视频口播） | content-pipeline | draft | `features/content-pipeline/claude-code-multi-agent-source-mid-video/` | one-context |
+| openai-enterprise-ai-scaling-five-actions-mid-video | OpenAI 企业 AI 规模化落地五要点（中视频口播） | content-pipeline | draft | `features/content-pipeline/openai-enterprise-ai-scaling-five-actions-mid-video/` | one-context |
 | markdown-html-claude-engineer-mid-video | Markdown 要被淘汰？Claude 工程师弃用真相（对话口播） | content-pipeline | draft | `features/content-pipeline/markdown-html-claude-engineer-mid-video/` | one-context |
 | markdown-html-claude-engineer-mid-video | Markdown 要被淘汰？Claude 工程师弃用真相（阿哲 / 小夏 对话口播） | content-pipeline | draft | `features/content-pipeline/markdown-html-claude-engineer-mid-video/` | one-context |
 | damai-ticket-bot              | 大麦抢票助手 — 浏览器插件 + CLI 集成 one-context skill                 | integrations | draft  | `features/integrations/damai-ticket-bot/`              | one-context     |

@@ -75,6 +75,13 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | html-deck-layout | `presentation.html` | `production/slides/presentation.html` |
 | html-video-from-slides | `--project` 指向 | `production/`（读取各子目录） |
 
+### 口播选路：`tts` vs 火山播客 WAV
+
+| 目标 | 做法 |
+|------|------|
+| Edge 机器念稿 + 直接出 **MP4** | `node cli.js tts --project production/`；讲稿 **`content/01-script.md`** 须按 **`# 【页题】` … `---`** 分页，与 `slides/presentation.html` 页数一致。详见 **`skills/html-video-from-slides/SKILL.md`**「Edge tts：讲稿分页与双人边界」。 |
+| 双人对话感、播客式 **WAV** | **`timing/video-input.json`** 配置 **`podcastTts`** + **`skills/volc-podcast-tts`**，见 **`skills/html-video-from-slides/references/VIDEO_PIPELINE.md`**；再用 **`wav-auto` / `wav`** 与幻灯合成。勿用 Edge **`tts`** 承担「同页双角色分轨」。 |
+
 ## 与标准 feature 模板的关系
 
 此模板**补充而非替代** `features/_template/` 下的标准模板。短视频 feature 同时包含：
