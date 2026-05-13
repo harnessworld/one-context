@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>沙箱与并发安全 · Claude Code 安全架构解析</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0b;
+    --ink-rgb:10,10,11;
+    --paper:#f1efea;
+    --paper-rgb:241,239,234;
+    --paper-tint:#e8e5de;
+    --ink-tint:#18181a;
+    --accent:#c9a96e;
+    --accent-rgb:201,169,110;
+
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  /* ============ WebGL 双背景 ============ */
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+
+  /* ============ Deck 容器 + 翻页 ============ */
+  #deck{position:fixed;inset:0;width:800vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink)}
+  .slide.dark{color:var(--paper)}
+
+  /* 默认页：遮罩较厚 */
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  /* Hero 页：遮罩降低 */
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  /* Hero 页顶底渐隐 */
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  /* ============ Magazine chrome ============ */
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+
+  /* ============ Typography ============ */
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:10vw;line-height:.96;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:6.2vw;line-height:1.08;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3.1vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.3vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.75vw;line-height:1.5;opacity:.86}
+  .meta-row{font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  /* ============ Layout ============ */
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+
+  /* ============ Pillar ============ */
+  .pillar{display:flex;flex-direction:column;gap:1.8vh;padding:2vh 0;border-top:1px solid rgba(127,127,127,.3)}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400;color:var(--accent)}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
+
+  /* ============ Callout ============ */
+  .callout{padding:3vh 2.4vw;border-left:3px solid var(--accent);position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+
+  /* ============ Highlight ============ */
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+  .hi-gold{color:var(--accent)}
+
+  /* ============ Pipeline ============ */
+  .pipeline-section{margin-top:4.4vh;padding-top:2.8vh;border-top:1px dashed rgba(127,127,127,.32)}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2vw}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.15vw;opacity:.45}
+  .step-title{font-family:var(--serif-zh);font-weight:700;font-size:1.55vw;letter-spacing:.01em;line-height:1.2}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.95vw);line-height:1.45;opacity:.72}
+
+  /* ============ Code node ============ */
+  .code-node{font-family:var(--mono);font-size:12px;line-height:1.5;padding:12px 16px;border-radius:6px;border:1px solid rgba(127,127,127,.35);background:rgba(127,127,127,.08);white-space:pre-wrap}
+  .slide.dark .code-node{background:rgba(var(--paper-rgb),.06)}
+  .slide.light .code-node{background:rgba(var(--ink-rgb),.05)}
+  .code-kw{color:var(--accent);font-weight:600}
+  .code-func{color:#8fa;opacity:.9}
+  .slide.light .code-func{color:#2a8}
+  .code-str{color:#ead;opacity:.9}
+  .slide.light .code-str{color:#967}
+  .code-hl{background:rgba(201,169,110,.2);padding:0 4px;border-radius:3px}
+
+  /* ============ SVG Diagram ============ */
+  .diagram{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+  .diagram svg{width:100%;max-height:48vh}
+
+  /* ============ Navigation ============ */
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+
+  /* ============ ESC Overview ============ */
+  #overview{position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw}
+  #overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto}
+  .overview-card{cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid rgba(var(--paper-rgb),.15);transition:border-color .2s}
+  .overview-card:hover{border-color:rgba(var(--paper-rgb),.6)}
+  .overview-card .thumb{width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:var(--ink)}
+  .overview-card .slide-clone{width:100vw;height:100vh;transform:scale(0.222);transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none}
+  .overview-card.active{border-color:rgba(var(--paper-rgb),.85)}
+  .overview-card .label{padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7}
+
+  @media (max-width:900px){
+    .h-hero{font-size:14vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .split{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ============================================================
+     SLIDE 0: Cover (Hero, Dark)
+     ============================================================ -->
+<section class="slide hero dark" id="s0">
+  <div class="chrome"><div class="left"><span>Claude Code</span><span class="sep"></span><span>Vol · 沙箱与并发</span></div><div class="right">01 / 08</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:76vh">
+    <div class="kicker">Security Layers Deep Dive</div>
+    <h1 class="h-hero">沙箱与并发安全</h1>
+    <h2 class="h-sub">从源码看 Agent 平台存储系统设计</h2>
+
+    <!-- Pipeline: 5 layers -->
+    <div class="pipeline-section" style="margin-top:2vh">
+      <div class="pipeline">
+        <div class="step">
+          <div class="step-nb">01</div>
+          <div class="step-title">Python沙箱</div>
+          <div class="step-desc">黑名单式 import 拦截</div>
+        </div>
+        <div class="step">
+          <div class="step-nb">02</div>
+          <div class="step-title">文件锁</div>
+          <div class="step-desc">O_CREAT|O_EXCL 原子锁</div>
+        </div>
+        <div class="step">
+          <div class="step-nb">03</div>
+          <div class="step-title">Session锁</div>
+          <div class="step-desc">PID + startTime 双重验证</div>
+        </div>
+        <div class="step">
+          <div class="step-nb">04</div>
+          <div class="step-title">任务Claim</div>
+          <div class="step-desc">乐观预检 → 原子锁 → 重读验证</div>
+        </div>
+        <div class="step">
+          <div class="step-nb">05</div>
+          <div class="step-title">Bridge生命周期</div>
+          <div class="step-desc">四层验证 + 逐级终止</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="title">Agent 安全架构</div><div>Cover</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 1: Python REPL Sandbox (Light)
+     ============================================================ -->
+<section class="slide light" id="s1">
+  <div class="chrome"><div class="left"><span>第一层</span><span class="sep"></span></div><div class="right">02 / 08</div></div>
+  <div class="frame split-55" style="padding-top:4vh">
+    <div class="col" style="justify-content:center;gap:3vh">
+      <div class="kicker">Python REPL Sandbox</div>
+      <h2 class="h-xl">诚实的黑名单</h2>
+      <p class="lead"><span class="hi-gold">默认信任，可主动收紧。</span></p>
+      <p class="body-zh">沙箱默认关闭，仅当 <code class="code-hl">OMC_SECURITY=strict</code> 时才启用。<br>白名单更安全但寸步难行，黑名单是在安全与可用性之间的 trade-off。</p>
+      <div class="callout" style="margin-top:2vh">
+        <span class="cite">源码注释写道</span>
+        "这个黑名单不是安全边界，建议配合操作系统级别的隔离。「诚实标注能力边界，比夸大宣传更能赢得工程师的信任。」"
+      </div>
+    </div>
+    <div class="col" style="justify-content:center;align-items:center">
+      <!-- SVG Flow: ENV → hook __import__ → ImportError -->
+      <svg viewBox="0 0 520 480" style="width:100%;max-width:520px">
+        <defs>
+          <marker id="arr1" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(10,10,11,.6)"/></marker>
+        </defs>
+        <!-- ENV node -->
+        <rect x="20" y="20" width="200" height="56" rx="6" fill="rgba(10,10,11,.06)" stroke="rgba(10,10,11,.4)" stroke-width="1.5"/>
+        <text x="120" y="55" text-anchor="middle" fill="#0a0a0b" font-size="15" font-family="IBM Plex Mono,monospace">OMC_SECURITY=strict</text>
+        <!-- Arrow down -->
+        <line x1="120" y1="76" x2="120" y2="116" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <!-- Hook node -->
+        <rect x="20" y="130" width="200" height="80" rx="6" fill="rgba(10,10,11,.05)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="120" y="160" text-anchor="middle" fill="#0a0a0b" font-size="14" font-family="Noto Sans SC">替换 import 钩子</text>
+        <text x="120" y="190" text-anchor="middle" fill="#333" font-size="12" font-family="IBM Plex Mono">__builtins__.__import__</text>
+        <!-- Code block -->
+        <foreignObject x="260" y="110" width="240" height="120">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="font-size:11px">
+<span class="code-kw">def</span> <span class="code-func">secure_import</span>(name):
+    <span class="code-kw">if</span> name <span class="code-kw">in</span> BLACKLIST:
+        <span class="code-kw">raise</span> <span class="code-func">ImportError</span>()
+    <span class="code-kw">return</span> <span class="code-func">original_import</span>(name)
+          </div>
+        </foreignObject>
+        <!-- Arrow to result -->
+        <line x1="120" y1="210" x2="120" y2="250" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <!-- Result nodes -->
+        <rect x="20" y="264" width="200" height="46" rx="6" fill="rgba(201,169,110,.15)" stroke="rgba(201,169,110,.6)" stroke-width="1.5"/>
+        <text x="120" y="293" text-anchor="middle" fill="#c9a96e" font-size="14" font-family="Noto Sans SC" font-weight="600">危险模块 → ImportError</text>
+        <rect x="20" y="330" width="200" height="46" rx="6" fill="rgba(10,10,11,.06)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="120" y="359" text-anchor="middle" fill="#666" font-size="14" font-family="Noto Sans SC">安全模块 → 正常执行</text>
+        <!-- Side annotation -->
+        <text x="270" y="300" fill="#666" font-size="12" font-family="Noto Sans SC">拦截 os、subprocess、socket 等</text>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><div class="title">Agent 安全架构</div><div>Sandbox</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 2: File Lock (Dark)
+     ============================================================ -->
+<section class="slide dark" id="s2">
+  <div class="chrome"><div class="left"><span>第二层</span><span class="sep"></span></div><div class="right">03 / 08</div></div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker">File Lock</div>
+    <h2 class="h-xl">不靠 flock 的锁</h2>
+    <div class="diagram">
+      <svg viewBox="0 0 900 420">
+        <defs>
+          <marker id="arrd" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(241,239,234,.6)"/></marker>
+        </defs>
+        <!-- Two process boxes -->
+        <rect x="40" y="40" width="180" height="80" rx="8" fill="rgba(241,239,234,.08)" stroke="rgba(241,239,234,.45)" stroke-width="2"/>
+        <text x="130" y="85" text-anchor="middle" fill="#f1efea" font-size="18" font-family="Noto Serif SC" font-weight="600">进程 A</text>
+        <rect x="40" y="280" width="180" height="80" rx="8" fill="rgba(241,239,234,.08)" stroke="rgba(241,239,234,.45)" stroke-width="2"/>
+        <text x="130" y="325" text-anchor="middle" fill="#f1efea" font-size="18" font-family="Noto Serif SC" font-weight="600">进程 B</text>
+        <!-- Arrows to center -->
+        <line x1="220" y1="80" x2="320" y2="140" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrd)"/>
+        <line x1="220" y1="320" x2="320" y2="260" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrd)"/>
+        <!-- Central lock operation -->
+        <rect x="320" y="160" width="260" height="100" rx="8" fill="rgba(241,239,234,.05)" stroke="rgba(201,169,110,.6)" stroke-width="2"/>
+        <text x="450" y="200" text-anchor="middle" fill="#c9a96e" font-size="16" font-family="IBM Plex Mono">open(path, O_CREAT|O_EXCL)</text>
+        <text x="450" y="230" text-anchor="middle" fill="#f1efea" font-size="14" font-family="Noto Sans SC" opacity=".8">操作系统保证原子操作</text>
+        <!-- Results -->
+        <rect x="620" y="40" width="200" height="80" rx="6" fill="rgba(46,160,67,.15)" stroke="rgba(46,160,67,.6)" stroke-width="2"/>
+        <text x="720" y="85" text-anchor="middle" fill="#7fb" font-size="18" font-family="Noto Serif SC">成功创建锁</text>
+        <rect x="620" y="280" width="200" height="80" rx="6" fill="rgba(210,60,60,.15)" stroke="rgba(210,60,60,.6)" stroke-width="2"/>
+        <text x="720" y="325" text-anchor="middle" fill="#faa" font-size="18" font-family="Noto Serif SC">EEXIST (已存在)</text>
+
+        <!-- Self-healing loop (below) -->
+        <text x="450" y="380" text-anchor="middle" fill="#999" font-size="13" font-family="IBM Plex Mono" letter-spacing=".1em">SELF-HEALING LOOP</text>
+        <text x="450" y="405" text-anchor="middle" fill="#aaa" font-size="12" font-family="Noto Sans SC">读锁 → 检查 /proc/PID → 进程已死则 unlink → 重试</text>
+      </svg>
+    </div>
+    <div class="row" style="gap:4vw;margin-top:2vh">
+      <div class="callout" style="flex:1;border-left-color:#c9a96e">
+        <span class="cite">为什么不用 flock</span>
+        flock 是"建议性锁"，恶意进程可直接无视。<span class="hi-gold">O_EXCL 利用文件系统存在性语义</span>——即使对方不配合，也无法创建同名文件。
+      </div>
+      <div class="callout" style="flex:1;border-left-color:rgba(241,239,234,.4)">
+        <span class="cite">死锁自愈</span>
+        锁文件内记录 PID+时间戳。超时后检查 PID 存活，进程已死则自动清理，系统自愈。
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="title">Agent 安全架构</div><div>FileLock</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 3: Session Lock (Light)
+     ============================================================ -->
+<section class="slide light" id="s3">
+  <div class="chrome"><div class="left"><span>第三层</span><span class="sep"></span></div><div class="right">04 / 08</div></div>
+  <div class="frame split-55" style="padding-top:4vh">
+    <div class="col" style="justify-content:center">
+      <div class="kicker">Session Lock</div>
+      <h2 class="h-xl">PID 复用防御</h2>
+      <p class="lead">双重验证：不仅检查 PID 是否存活，还记录进程启动时间戳。</p>
+      <p class="body-zh">操作系统回收 PID 速度极快。进程 A 崩溃后 PID 被分配给全新进程 B，若只检查 PID 是否存活，会误判锁仍有效。</p>
+      <div class="callout" style="margin-top:2vh">
+        <span class="cite">跨平台实现</span>
+        Linux 读 /proc，macOS 用 ps，Windows 用 PowerShell —— 典型的跨平台工程实践。
+      </div>
+    </div>
+    <div class="col" style="justify-content:center">
+      <svg viewBox="0 0 540 460" style="width:100%;max-width:500px">
+        <defs>
+          <marker id="arrl" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(10,10,11,.55)"/></marker>
+        </defs>
+        <!-- Lock file content -->
+        <rect x="20" y="20" width="240" height="120" rx="6" fill="rgba(10,10,11,.05)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="140" y="60" text-anchor="middle" fill="#0a0a0b" font-size="14" font-family="IBM Plex Mono">lock_file = {</text>
+        <text x="140" y="85" text-anchor="middle" fill="#333" font-size="13" font-family="IBM Plex Mono">  "pid": 12345,</text>
+        <text x="140" y="110" text-anchor="middle" fill="#c9a96e" font-size="13" font-family="IBM Plex Mono" font-weight="600">  "startTime": 1699123</text>
+        <text x="140" y="130" text-anchor="middle" fill="#333" font-size="14" font-family="IBM Plex Mono">}</text>
+
+        <!-- Arrow down -->
+        <line x1="140" y1="140" x2="140" y2="170" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arrl)"/>
+
+        <!-- Verification box -->
+        <rect x="20" y="180" width="240" height="140" rx="6" fill="rgba(10,10,11,.06)" stroke="rgba(201,169,110,.5)" stroke-width="2"/>
+        <text x="140" y="215" text-anchor="middle" fill="#0a0a0b" font-size="15" font-family="Noto Serif SC" font-weight="600">双重验证</text>
+        <text x="140" y="250" text-anchor="middle" fill="#333" font-size="13" font-family="Noto Sans SC">① PID 是否存活？</text>
+        <text x="140" y="275" text-anchor="middle" fill="#333" font-size="13" font-family="Noto Sans SC">② startTime 是否匹配？</text>
+        <text x="140" y="305" text-anchor="middle" fill="#c9a96e" font-size="13" font-family="IBM Plex Mono">pid.startTime == file.startTime?</text>
+
+        <!-- Result arrows -->
+        <line x1="260" y1="200" x2="320" y2="170" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arrl)"/>
+        <line x1="260" y1="300" x2="320" y2="330" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arrl)"/>
+
+        <!-- Match case -->
+        <rect x="340" y="120" width="180" height="100" rx="6" fill="rgba(46,160,67,.1)" stroke="rgba(46,160,67,.5)" stroke-width="1.5"/>
+        <text x="430" y="165" text-anchor="middle" fill="#2a8" font-size="15" font-family="Noto Serif SC">锁有效</text>
+        <text x="430" y="195" text-anchor="middle" fill="#666" font-size="12" font-family="IBM Plex Mono">PID 复用前</text>
+
+        <!-- Mismatch case -->
+        <rect x="340" y="280" width="180" height="100" rx="6" fill="rgba(210,60,60,.1)" stroke="rgba(210,60,60,.5)" stroke-width="1.5"/>
+        <text x="430" y="325" text-anchor="middle" fill="#c44" font-size="15" font-family="Noto Serif SC">锁过期</text>
+        <text x="430" y="355" text-anchor="middle" fill="#666" font-size="12" font-family="IBM Plex Mono">PID 已复用</text>
+
+        <!-- Warning -->
+        <text x="140" y="400" text-anchor="middle" fill="#c9a96e" font-size="13" font-family="IBM Plex Mono">O_NOFOLLOW</text>
+        <text x="140" y="425" text-anchor="middle" fill="#888" font-size="12" font-family="Noto Sans SC">防止符号链接攻击</text>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><div class="title">Agent 安全架构</div><div>SessionLock</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 4: Task Claim (Dark)
+     ============================================================ -->
+<section class="slide dark" id="s4">
+  <div class="chrome"><div class="left"><span>第四层</span><span class="sep"></span></div><div class="right">05 / 08</div></div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker">Task Claim</div>
+    <h2 class="h-xl">乐观到悲观</h2>
+    <div class="diagram">
+      <svg viewBox="0 0 900 400">
+        <defs>
+          <marker id="arrk" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(241,239,234,.55)"/></marker>
+        </defs>
+        <!-- Step 1 -->
+        <rect x="20" y="60" width="200" height="100" rx="6" fill="rgba(241,239,234,.06)" stroke="rgba(241,239,234,.4)" stroke-width="1.5"/>
+        <text x="120" y="100" text-anchor="middle" fill="#f1efea" font-size="17" font-family="Noto Serif SC" font-weight="600">① 乐观预检</text>
+        <text x="120" y="130" text-anchor="middle" fill="#aaa" font-size="13" font-family="Noto Sans SC">不加锁，快速检查</text>
+        <!-- Arrow -->
+        <line x1="220" y1="110" x2="300" y2="110" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrk)"/>
+        <!-- Race window annotation -->
+        <text x="260" y="95" text-anchor="middle" fill="#c9a96e" font-size="12" font-family="IBM Plex Mono">竞态窗口</text>
+        <line x1="220" y1="100" x2="300" y2="100" stroke="#c9a96e" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+        <!-- Step 2 -->
+        <rect x="300" y="60" width="200" height="100" rx="6" fill="rgba(241,239,234,.08)" stroke="rgba(201,169,110,.6)" stroke-width="2"/>
+        <text x="400" y="100" text-anchor="middle" fill="#c9a96e" font-size="17" font-family="Noto Serif SC" font-weight="600">② 原子加锁</text>
+        <text x="400" y="130" text-anchor="middle" fill="#aaa" font-size="13" font-family="Noto Sans SC">O_EXCL 竞争</text>
+
+        <!-- Arrow -->
+        <line x1="500" y1="110" x2="580" y2="110" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrk)"/>
+
+        <!-- Step 3 -->
+        <rect x="580" y="60" width="200" height="100" rx="6" fill="rgba(241,239,234,.08)" stroke="rgba(241,239,234,.45)" stroke-width="2"/>
+        <text x="680" y="100" text-anchor="middle" fill="#f1efea" font-size="17" font-family="Noto Serif SC" font-weight="600">③ 锁内重读</text>
+        <text x="680" y="130" text-anchor="middle" fill="#aaa" font-size="13" font-family="Noto Sans SC">二次确认状态</text>
+
+        <!-- Timeline -->
+        <line x1="50" y1="250" x2="850" y2="250" stroke="rgba(241,239,234,.25)" stroke-width="2"/>
+        <text x="120" y="280" text-anchor="middle" fill="#888" font-size="12" font-family="Noto Sans SC">Worker A 预检</text>
+        <text x="400" y="280" text-anchor="middle" fill="#c9a96e" font-size="12" font-family="Noto Sans SC" font-weight="600">Worker B 竞争成功</text>
+        <text x="680" y="280" text-anchor="middle" fill="#888" font-size="12" font-family="Noto Sans SC">A 重读发现状态已变</text>
+
+        <!-- Race window highlight -->
+        <rect x="200" y="235" width="200" height="30" fill="rgba(201,169,110,.12)" rx="3"/>
+        <text x="300" y="325" text-anchor="middle" fill="#c9a96e" font-size="13" font-family="IBM Plex Mono">Race Window: 预检→加锁之间</text>
+      </svg>
+    </div>
+    <p class="lead" style="max-width:70vw;margin-top:2vh">"预检 → 加锁 → 重读验证"是分布式任务分配的标准三板斧。预检减少锁竞争，原子锁保证唯一性，锁内重读消除竞态条件。</p>
+  </div>
+  <div class="foot"><div class="title">Agent 安全架构</div><div>TaskClaim</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 5: Bridge Lifecycle (Light)
+     ============================================================ -->
+<section class="slide light" id="s5">
+  <div class="chrome"><div class="left"><span>第五层</span><span class="sep"></span></div><div class="right">06 / 08</div></div>
+  <div class="frame split-55" style="padding-top:3vh">
+    <div class="col" style="justify-content:center;gap:2.5vh">
+      <div class="kicker">Bridge Lifecycle</div>
+      <h2 class="h-xl">四层验证 + 逐级终止</h2>
+      <div class="callout">
+        <span class="cite">四层验证</span>
+        ① sessionId 匹配 · ② socket 路径检查<br>
+        ③ PID+startTime 验证 · ④ socket 文件类型检查
+      </div>
+      <div class="callout" style="border-left-color:rgba(10,10,11,.35)">
+        <span class="cite">信号阶梯</span>
+        <code class="code-node" style="margin-top:1vh;display:inline-block">SIGINT (5s) → SIGTERM (2.5s) → SIGKILL</code>
+        <br><span class="body-zh">给进程充分的清理时间，尽量减少数据损坏。</span>
+      </div>
+    </div>
+    <div class="col" style="justify-content:center">
+      <svg viewBox="0 0 500 520" style="width:100%;max-width:460px">
+        <defs>
+          <marker id="arrl2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(10,10,11,.5)"/></marker>
+        </defs>
+        <!-- Layer stack -->
+        <rect x="20" y="20" width="400" height="50" rx="5" fill="rgba(10,10,11,.05)" stroke="rgba(10,10,11,.3)" stroke-width="1"/>
+        <text x="220" y="52" text-anchor="middle" fill="#0a0a0b" font-size="14" font-family="Noto Sans SC">① sessionId 匹配</text>
+
+        <rect x="20" y="80" width="400" height="50" rx="5" fill="rgba(10,10,11,.05)" stroke="rgba(10,10,11,.3)" stroke-width="1"/>
+        <text x="220" y="112" text-anchor="middle" fill="#0a0a0b" font-size="14" font-family="Noto Sans SC">② socket 路径检查</text>
+
+        <rect x="20" y="140" width="400" height="50" rx="5" fill="rgba(10,10,11,.05)" stroke="rgba(10,10,11,.3)" stroke-width="1"/>
+        <text x="220" y="172" text-anchor="middle" fill="#0a0a0b" font-size="14" font-family="Noto Sans SC">③ PID + startTime 验证</text>
+
+        <rect x="20" y="200" width="400" height="50" rx="5" fill="rgba(10,10,11,.06)" stroke="rgba(201,169,110,.5)" stroke-width="1.5"/>
+        <text x="220" y="232" text-anchor="middle" fill="#c9a96e" font-size="14" font-family="Noto Sans SC" font-weight="600">④ socket 文件类型检查</text>
+
+        <!-- Signal ladder -->
+        <text x="220" y="295" text-anchor="middle" fill="#666" font-size="12" font-family="IBM Plex Mono" letter-spacing=".15em">SIGNAL LADDER</text>
+
+        <rect x="50" y="310" width="120" height="50" rx="5" fill="rgba(10,10,11,.06)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="110" y="342" text-anchor="middle" fill="#0a0a0b" font-size="14" font-family="IBM Plex Mono">SIGINT</text>
+
+        <line x1="170" y1="335" x2="210" y2="335" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arrl2)"/>
+        <text x="190" y="325" text-anchor="middle" fill="#888" font-size="11" font-family="IBM Plex Mono">5s</text>
+
+        <rect x="210" y="310" width="120" height="50" rx="5" fill="rgba(10,10,11,.06)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="270" y="342" text-anchor="middle" fill="#0a0a0b" font-size="14" font-family="IBM Plex Mono">SIGTERM</text>
+
+        <line x1="330" y1="335" x2="370" y2="335" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arrl2)"/>
+        <text x="350" y="325" text-anchor="middle" fill="#888" font-size="11" font-family="IBM Plex Mono">2.5s</text>
+
+        <rect x="370" y="310" width="100" height="50" rx="5" fill="rgba(210,60,60,.1)" stroke="rgba(210,60,60,.5)" stroke-width="1.5"/>
+        <text x="420" y="342" text-anchor="middle" fill="#c44" font-size="14" font-family="IBM Plex Mono">SIGKILL</text>
+
+        <!-- Orphan prevention -->
+        <rect x="20" y="390" width="450" height="90" rx="6" fill="rgba(46,125,168,.08)" stroke="rgba(46,125,168,.45)" stroke-width="1.5"/>
+        <text x="245" y="420" text-anchor="middle" fill="#28a" font-size="14" font-family="Noto Serif SC" font-weight="600">孤儿进程预防</text>
+        <text x="245" y="450" text-anchor="middle" fill="#0a0a0b" font-size="12" font-family="Noto Sans SC">Bridge 内部守护线程定期检查父进程（Node.js）是否存活</text>
+        <text x="245" y="470" text-anchor="middle" fill="#c44" font-size="13" font-family="Noto Sans SC" font-weight="600">父死则子自杀</text>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><div class="title">Agent 安全架构</div><div>Bridge</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 6: Summary (Dark)
+     ============================================================ -->
+<section class="slide dark" id="s6">
+  <div class="chrome"><div class="left"><span>总结</span><span class="sep"></span></div><div class="right">07 / 08</div></div>
+  <div class="frame" style="padding-top:4vh">
+    <div class="kicker">Design Principles</div>
+    <h2 class="h-xl">四个设计原则</h2>
+    <div class="grid-4" style="margin-top:4vh">
+      <div class="pillar">
+        <span class="ic">①</span>
+        <div class="t">默认信任，可主动收紧</div>
+        <div class="d">安全不应是用户体验的杀手，让用户自主选择信任等级。宽松模式可用，严格模式可选。</div>
+      </div>
+      <div class="pillar">
+        <span class="ic">②</span>
+        <div class="t">诚实声明能力边界</div>
+        <div class="d">沙箱能防什么、不能防什么，在文档里说清楚。过度承诺比不承诺更危险。</div>
+      </div>
+      <div class="pillar">
+        <span class="ic">③</span>
+        <div class="t">不依赖合作方的诚实</div>
+        <div class="d">用内核原子语义实现强制约束，而不是靠协议约定。O_EXCL 比 flock 更可靠。</div>
+      </div>
+      <div class="pillar">
+        <span class="ic">④</span>
+        <div class="t">分层防御</div>
+        <div class="d">从 Python 命名空间到文件锁，从 PID 验证到 socket 检查，每层堵一个特定漏洞。</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div class="title">Agent 安全架构</div><div>Principles</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 7: End (Light)
+     ============================================================ -->
+<section class="slide hero light" id="s7">
+  <div class="chrome"><div class="left"><span>致谢</span><span class="sep"></span></div><div class="right">08 / 08</div></div>
+  <div class="frame center" style="min-height:72vh">
+    <div class="kicker">Thank You</div>
+    <h1 class="h-hero">下期再会</h1>
+    <p class="lead" style="max-width:62vw;margin-top:3vh">如果你正在搭建自己的 agent 系统，希望这些分析对你有用。</p>
+    <div class="meta-row" style="margin-top:4vh"><span>Claude Code 安全架构解析</span></div>
+  </div>
+  <div class="foot"><div class="title">Agent 安全架构</div><div>End</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+<div id="overview"></div>
+
+<script>
+/* =============== WebGL 双背景 ===============
+   深色页：warm black 带 faint gold noise
+   浅色页：soft silver paper feel
+*/
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<4;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  float gold=fbm(p*3.0+u_time*0.02)*0.03;
+  vec3 base=vec3(0.041,0.041,0.043);
+  vec3 col=base+vec3(0.788,0.663,0.431)*gold;
+  float grain=hash(uv*u_resolution*0.01)*0.015;
+  col+=grain;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  float f=fbm(p*1.5+u_time*0.01);
+  vec3 silver=vec3(0.95,0.94,0.92);
+  vec3 paper=vec3(0.945,0.937,0.918);
+  vec3 col=mix(paper,silver,f);
+  float grain=hash(uv*u_resolution*0.01)*0.01;
+  col-=grain;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    if(lM) gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+const drawDark=bootGL('bg-dark',FS_DARK);
+const drawLight=bootGL('bg-light',FS_LIGHT);
+const t0=Date.now();
+(function loop(){
+  const t=(Date.now()-t0)/1000;
+  drawDark(t);drawLight(t);
+  requestAnimationFrame(loop);
+})();
+
+// =============== 导航 ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  idx=Math.max(0,Math.min(total-1,n));
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+}
+
+/* =============== ESC 索引视图 =============== */
+let overviewOn=false;
+const ov=document.getElementById('overview');
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.id='overview-grid';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.className='overview-card'+(i===idx?' active':'');
+    card.onclick=()=>{toggleOverview();go(i)};
+    const wrap=document.createElement('div');
+    wrap.className='thumb';
+    const clone=s.cloneNode(true);
+    clone.className=clone.className.replace(/active/g,'')+' slide';
+    clone.className+=' '+(s.classList.contains('light')?'light':'dark');
+    clone.style.cssText='width:100vw;height:100vh;transform:scale(0.222);transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.className='label';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown')go(idx+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){go(idx+(wheelAcc>0?1:-1));wheelAcc=0;}
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(idx+(dx<0?1:-1));
+},{passive:true});
+
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

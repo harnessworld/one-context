@@ -32,6 +32,7 @@
 | agent亲和架构底层原理剖析 | Agent 亲和架构底层原理剖析（口播视频） | content-pipeline | draft | `features/content-pipeline/agent亲和架构底层原理剖析/` | one-context |
 | 软件中一切皆Worker | 软件中一切皆 Worker（口播视频） | content-pipeline | draft | `features/content-pipeline/软件中一切皆Worker/` | one-context |
 | claudecode-prompt-caching-mid-video | Prompt Caching Is Everything —— Claude Code 团队最新文章 | content-pipeline | planning | `features/content-pipeline/claudecode-prompt-caching-mid-video/` | one-context |
+| claudecode-sandbox-concurrency-mid-video | Claude Code 沙箱与并发机制解析 | content-pipeline | planning | `features/content-pipeline/claudecode-sandbox-concurrency-mid-video/` | one-context |
 
 
 **Columns**
