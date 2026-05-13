@@ -134,7 +134,7 @@ function ff(args, outputFile) {
 }
 
 function generateAudio(text, outputPath, idx, voiceId, skillDir, tempDir, voiceCfg) {
-  const TTS_HELPER = path.join(skillDir, 'tts_helper.py');
+  const TTS_HELPER = path.join(skillDir, 'scripts', 'tts_helper.py');
   const configFile = path.join(tempDir, `tts_cfg_${idx}.json`);
   fs.writeFileSync(
     configFile,

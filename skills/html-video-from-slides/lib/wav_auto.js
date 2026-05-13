@@ -16,6 +16,9 @@ const { prepareSrtForBurn } = require('./srt_postprocess');
 const { resolvePath, ensureDir } = require('./path_resolver');
 const { DEFAULT_SUBTITLE_STYLE } = require('./ass_colours');
 
+/** 1080p 成片烧录：过小字号手机端不可读；可被 subtitle.allowBelowRecommendedFontSize 关闭钳制 */
+const MIN_RECOMMENDED_BURN_FONT_PX = 42;
+
 async function extractSlideTexts(projectRoot) {
   const html = resolvePath(projectRoot, 'slides', 'presentation.html');
   if (!fs.existsSync(html)) {
@@ -30,14 +33,19 @@ async function extractSlideTexts(projectRoot) {
   await page.goto(pathToFileURL(html).href);
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(1000);
-  const result = await page.evaluate(() =>
-    Array.from(document.querySelectorAll('.s, .slide')).map((s) => {
+  const result = await page.evaluate(() => {
+    const primary = document.querySelectorAll('#P > .slide, .deck > .slide');
+    const slides =
+      primary.length > 0
+        ? primary
+        : document.querySelectorAll('.s.slide, section.slide');
+    return Array.from(slides).map((s) => {
       const wa = s.querySelector('.wa');
       const anchor = wa ? (wa.textContent || '').replace(/\r/g, '\n').trim() : '';
       const full = (s.innerText || '').replace(/\r/g, '\n').trim();
       return { anchor, full };
-    })
-  );
+    });
+  });
   await browser.close();
   if (result.length === 0) {
     throw new Error('HTML 中未找到 slide 元素');
@@ -148,7 +156,19 @@ async function run(projectRoot, skillDir, options = {}) {
     }
   }
 
-  const wavAbs = findWavPath(projectRoot, wavExplicit);
+  if (
+    typeof subtitleCfg.fontSize === 'number' &&
+    subtitleCfg.fontSize > 0 &&
+    subtitleCfg.fontSize < MIN_RECOMMENDED_BURN_FONT_PX &&
+    subtitleCfg.allowBelowRecommendedFontSize !== true
+  ) {
+    console.warn(
+      `ℹ️  subtitle.fontSize=${subtitleCfg.fontSize} 低于 1080p 成片推荐下限 ${MIN_RECOMMENDED_BURN_FONT_PX}px，已提升到 ${MIN_RECOMMENDED_BURN_FONT_PX}（设置 subtitle.allowBelowRecommendedFontSize=true 可保留小字号）`
+    );
+    subtitleCfg.fontSize = MIN_RECOMMENDED_BURN_FONT_PX;
+  }
+
+  const wavAbs = path.resolve(findWavPath(projectRoot, wavExplicit));
   const wavRel = path.basename(wavAbs);
 
   console.log('\n╔══════════════════════════════════════════╗');
@@ -198,7 +218,7 @@ async function run(projectRoot, skillDir, options = {}) {
     'utf-8'
   );
 
-  const py = path.join(skillDir, 'align_wav_slides.py');
+  const py = path.join(skillDir, 'scripts', 'align_wav_slides.py');
   const env = { ...process.env };
   if (ffmpegStatic) {
     env.FFMPEG_PATH = ffmpegStatic;
@@ -210,34 +230,43 @@ async function run(projectRoot, skillDir, options = {}) {
   env.PYTHONUTF8 = '1';
 
   const pythonExe = process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
-  const r = spawnSync(
-    pythonExe,
-    [
-      py,
-      '--wav',
-      wavAbs,
-      '--slides-json',
-      slidesJson,
-      '--out-json',
-      alignOut,
-      '--model',
-      whisperModel,
-      '--max-subtitle-gap-sec',
-      String(maxSubtitleGapSec),
-      ...(strictSubtitles ? ['--strict-subtitles'] : []),
-      ...(vadFilter ? ['--vad-filter'] : []),
-      ...(noSpeechThresholdArg !== null
-        ? ['--no-speech-threshold', noSpeechThresholdArg]
-        : []),
-      ...(!fillSrtGaps ? ['--no-fill-srt-gaps'] : []),
-      ...(whisperHotwords.trim()
-        ? ['--hotwords', whisperHotwords.trim()]
-        : []),
-      // 与口播对齐的 SRT 始终生成（除非用户指定外部 srtFile），便于缺口检测；仅 burnSubtitles 时拷贝到项目根
-      ...(!externalSrt ? ['--srt-out', srtOut] : []),
-    ],
-    { encoding: 'utf-8', env, maxBuffer: 50 * 1024 * 1024 }
-  );
+  const pyArgv = [
+    py,
+    '--wav',
+    wavAbs,
+    '--slides-json',
+    slidesJson,
+    '--out-json',
+    alignOut,
+    '--model',
+    whisperModel,
+    '--max-subtitle-gap-sec',
+    String(maxSubtitleGapSec),
+    ...(strictSubtitles ? ['--strict-subtitles'] : []),
+    ...(vadFilter ? ['--vad-filter'] : []),
+    ...(noSpeechThresholdArg !== null
+      ? ['--no-speech-threshold', noSpeechThresholdArg]
+      : []),
+    ...(!fillSrtGaps ? ['--no-fill-srt-gaps'] : []),
+    ...(whisperHotwords.trim()
+      ? ['--hotwords', whisperHotwords.trim()]
+      : []),
+    // 与口播对齐的 SRT 始终生成（除非用户指定外部 srtFile），便于缺口检测；仅 burnSubtitles 时拷贝到项目根
+    ...(!externalSrt ? ['--srt-out', srtOut] : []),
+  ];
+  const spawnOpts = { encoding: 'utf-8', env, maxBuffer: 50 * 1024 * 1024 };
+  let r = spawnSync(pythonExe, pyArgv, spawnOpts);
+  const outComb = `${r.stderr || ''}${r.stdout || ''}`;
+  const pythonLaunchFailed =
+    process.platform === 'win32' &&
+    !process.env.PYTHON &&
+    ((r.error &&
+      (r.error.code === 'ENOENT' || r.error.errno === -4058)) ||
+      r.status === 9009 ||
+      /not recognized as an internal or external command|'python' was not found/i.test(outComb));
+  if (pythonLaunchFailed) {
+    r = spawnSync('py', ['-3', ...pyArgv], spawnOpts);
+  }
 
   if (r.status !== 0) {
     console.error(r.stderr || r.stdout);
@@ -269,7 +298,8 @@ async function run(projectRoot, skillDir, options = {}) {
   );
 
   const cfg = {
-    wavFile: wavRel,
+    // 须传绝对路径：wavFile 指向 Downloads 等目录时 basename 在项目根不存在
+    wavFile: wavAbs,
     slideDurationsSec: aligned.slideDurationsSec,
     outputFile,
     burnSubtitles,
@@ -281,6 +311,28 @@ async function run(projectRoot, skillDir, options = {}) {
   };
 
   await runWav(projectRoot, skillDir, { cfg });
+
+  const wdPersistPath = resolvePath(projectRoot, 'timing', 'wav-durations.json');
+  ensureDir(wdPersistPath);
+  const wavRelPersist =
+    wavExplicit || path.relative(projectRoot, wavAbs).replace(/\\/g, '/');
+  fs.writeFileSync(
+    wdPersistPath,
+    JSON.stringify(
+      {
+        wavFile: wavRelPersist,
+        slideDurationsSec: aligned.slideDurationsSec,
+        outputFile,
+        burnSubtitles,
+        ...(burnSubtitles ? { srtFile: 'subtitles/sub.srt' } : {}),
+        subtitle: subtitleCfg,
+      },
+      null,
+      2
+    ) + '\n',
+    'utf-8'
+  );
+  console.log(`\n📄 已更新 timing/wav-durations.json（与本次 wav-auto 对齐一致）\n`);
 
   // 无外部 srtFile 时，把 Whisper 生成的 SRT 拷到项目根，便于校对文案、保留时间轴（未 burn 也会复制供审阅）
   if (!externalSrt && fs.existsSync(srtOut)) {

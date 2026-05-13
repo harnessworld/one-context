@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1.0">
+<title>企业 AI 规模化 · OpenAI Frontiers｜阿哲 × 小夏</title>
+<!--
+  Open Design / simple-deck 气质：编辑分栏、纸感底、少装饰、无流程箭图。
+  成片契约：html-video-from-slides · #P 1920×1080 · .s.slide · go(n) · .wa
+  配图：../media/wechat-article/img-*.jpg|png|gif
+-->
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
+<link rel="stylesheet" href="od-simple-deck.css">
+<style>
+#P{
+  position:fixed;left:0;top:0;width:1920px;height:1080px;margin:0;z-index:1;overflow:hidden;
+  background:#0c0b0a;
+}
+#prog{position:fixed;top:0;left:0;width:0;z-index:100;transition:width .2s ease;height:3px;background:#c96442}
+
+/* ── Open Design · 封面（非机制图：纯排版 + 可选首图） ── */
+/* 勿对非 .is-active 写 display:* !important，会盖掉 mobile-layout 的 display:none，翻页失效 */
+#P .s.slide.od-cover{
+  --cover-ink:#faf7f2;
+  --cover-muted:rgba(250,247,242,.62);
+  --cover-accent:#c96442;
+  --cover-warm:#2a1814;
+  background:var(--cover-warm);
+  color:var(--cover-ink);
+  padding:0!important;
+  grid-template-columns:minmax(300px,36%) minmax(520px,64%);
+  min-height:1080px;
+  align-items:stretch;
+  position:relative;
+  overflow:hidden;
+}
+#P .s.slide.od-cover.is-active{
+  display:grid!important;
+}
+#P .s.slide.od-cover::before{
+  content:"";
+  position:absolute;inset:0;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgba(201,100,66,.18), transparent 55%),
+    radial-gradient(90% 70% at 100% 100%, rgba(40,28,24,.9), transparent 50%);
+  pointer-events:none;
+}
+#P .s.slide.od-cover::after{
+  content:"";
+  position:absolute;inset:0;
+  opacity:.055;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+.od-cover__left{
+  position:relative;z-index:1;
+  padding:72px 64px 72px 88px;
+  display:flex;flex-direction:column;justify-content:center;
+  border-right:1px solid rgba(250,247,242,.12);
+}
+.od-cover__rule{
+  width:6px;align-self:flex-start;
+  height:min(320px,28vh);
+  background:linear-gradient(180deg,var(--cover-accent),rgba(201,100,66,.25));
+  border-radius:3px;margin-bottom:36px;
+}
+.od-cover__kicker{
+  font-family:var(--od-font-mono);
+  font-size:24px;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(232,160,144,.95);margin:0 0 20px;
+}
+.od-cover__title{
+  font-family:var(--od-font-display);
+  font-size:clamp(76px,5.4vw,112px);
+  line-height:1.02;letter-spacing:-.03em;font-weight:600;margin:0 0 28px;
+  max-width:12ch;color:var(--cover-ink);
+}
+.od-cover__lede{
+  font-size:clamp(38px,2.1vw,46px);
+  line-height:1.5;color:var(--cover-muted);margin:0;max-width:32ch;
+}
+.od-cover__hosts{
+  margin-top:auto;padding-top:48px;
+  display:flex;gap:14px;flex-wrap:wrap;
+}
+.od-cover__hosts span{
+  font-size:26px;padding:12px 22px;border-radius:999px;
+  border:1px solid rgba(250,247,242,.2);
+  background:rgba(12,11,10,.35);color:var(--cover-ink);
+}
+.od-cover__right{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:40px 48px 52px 32px;
+  min-height:1080px;
+}
+.od-cover__poster{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px 16px 96px;
+}
+.od-cover__poster img{
+  width:100%;height:100%;max-height:min(1000px,94vh);
+  object-fit:cover;
+  border-radius:4px;
+  box-shadow:0 40px 100px rgba(0,0,0,.55), 0 0 0 1px rgba(250,247,242,.08);
+}
+.od-cover__poster--empty{
+  align-items:center;justify-content:center;
+  background:linear-gradient(165deg,rgba(250,247,242,.06),rgba(12,11,10,.2));
+}
+.od-cover__poster--empty .od-cover__poster-fallback{
+  display:block!important;
+}
+.od-cover__poster-fallback{
+  font-family:var(--od-font-display);
+  font-size:clamp(200px,22vw,340px);font-weight:600;line-height:1;
+  color:rgba(250,247,242,.1);letter-spacing:-.06em;
+  user-select:none;display:none;
+}
+.od-cover__meta{
+  position:relative;
+  font-family:var(--od-font-mono);
+  font-size:22px;letter-spacing:.08em;
+  color:rgba(250,247,242,.45);
+  padding-top:20px;border-top:1px solid rgba(250,247,242,.12);
+}
+.od-cover .wa{color:#e8a090}
+
+/* 议程：杂志目录条，非四格流程 */
+#P .s.slide.od-toc{
+  background:#faf7f2;color:#1a1916;
+  padding:64px 88px!important;
+}
+.od-toc__head{margin-bottom:36px}
+.od-toc__head .eyebrow{margin-bottom:10px}
+.od-toc__head .h-xl{max-width:none;margin-bottom:0}
+.od-toc__list{
+  display:flex;flex-direction:column;gap:0;
+  border-top:2px solid #c96442;
+  margin-top:8px;
+}
+.od-toc__row{
+  display:grid;grid-template-columns:72px 1fr 1.2fr;
+  gap:28px;align-items:baseline;
+  padding:26px 8px;border-bottom:1px solid #e8e5df;
+}
+.od-toc__num{
+  font-family:var(--od-font-mono);font-size:30px;font-weight:700;color:#c96442;
+}
+.od-toc__name{font-family:var(--od-font-display);font-size:52px;font-weight:600;line-height:1.12;color:#1a1916}
+.od-toc__hint{font-size:36px;color:#6b6964;line-height:1.35}
+
+/* Gap：纯文字块，无图无箭 */
+#P .s.slide.od-gap{
+  background:#141210;color:#faf7f2;
+  padding:72px 96px!important;
+  justify-content:center!important;
+}
+.od-gap__quote{
+  font-family:var(--od-font-display);
+  font-size:clamp(52px,4vw,76px);
+  line-height:1.18;font-weight:500;
+  max-width:28ch;margin:0 0 40px;color:rgba(250,247,242,.92);
+}
+.od-gap__grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:32px 48px;
+  max-width:1600px;
+}
+.od-gap__grid p{
+  margin:0;font-size:40px;line-height:1.45;color:rgba(250,247,242,.68);
+  padding-left:24px;border-left:3px solid #c96442;
+}
+
+/* 配图页：更轻的框，少「终端感」 */
+.od-photo-top .h-xl{font-size:clamp(48px,3.6vw,72px)!important;max-width:30ch}
+.od-ph-frame{
+  min-height:500px!important;
+  border-radius:2px!important;
+  border:1px solid rgba(26,25,22,.12)!important;
+  background:#fff!important;
+  box-shadow:0 24px 60px rgba(26,25,22,.06)!important;
+}
+#P .s.slide.od-dark .od-ph-frame{
+  border-color:rgba(250,247,242,.14)!important;
+  background:rgba(250,247,242,.04)!important;
+  box-shadow:none!important;
+}
+.od-ph-frame img{max-height:820px!important}
+
+/* Pattern 03：编辑双栏 + 数字条，无大图（避免微信截图像机制流） */
+#P .s.slide.od-editorial{
+  background:#faf7f2;color:#1a1916;
+  padding:56px 80px 64px!important;
+  justify-content:flex-start!important;
+  flex-direction:column;
+}
+.od-ed-head{margin-bottom:8px}
+.od-ed-body{
+  flex:1 1 0;min-height:0;
+  display:grid;grid-template-columns:1.05fr .95fr;gap:56px;
+  align-items:stretch;margin-top:8px;
+}
+.od-ed-pull{
+  display:flex;flex-direction:column;justify-content:center;
+  padding-right:12px;border-right:1px solid #e8e5df;
+}
+.od-ed-lede{
+  font-size:clamp(36px,2vw,44px);line-height:1.45;color:#6b6964;
+  margin:0 0 28px;max-width:36ch;
+}
+.od-ed-quote{
+  font-family:var(--od-font-display);
+  font-size:clamp(44px,3.2vw,58px);
+  line-height:1.22;font-weight:600;margin:0;max-width:22ch;color:#1a1916;
+}
+.od-ed-aside{
+  display:flex;flex-direction:column;justify-content:center;gap:18px;
+}
+.od-stat{
+  display:flex;align-items:baseline;gap:20px;
+  padding:18px 22px;background:#fff;border:1px solid #e8e5df;border-radius:2px;
+  box-shadow:0 12px 32px rgba(26,25,22,.04);
+}
+.od-stat-n{
+  font-family:var(--od-font-mono);font-size:clamp(44px,3.4vw,64px);
+  font-weight:800;color:#c96442;letter-spacing:-.02em;min-width:5ch;
+}
+.od-stat-l{font-size:34px;line-height:1.25;color:#4a4844;font-weight:600}
+.od-ed-note{
+  margin:12px 0 0;font-size:32px;line-height:1.4;color:#6b6964;
+  padding-top:20px;border-top:2px solid #c96442;max-width:42ch;
+}
+
+/* 终页：杂志收口（非居中 hero 堆字） */
+#P .s.slide.od-close{
+  background:#2a1814;color:#faf7f2;
+  padding:0!important;
+  position:relative;overflow:hidden;
+}
+#P .s.slide.od-close.is-active{
+  flex-direction:column;
+  justify-content:space-between!important;
+}
+#P .s.slide.od-close::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(100% 70% at 100% 0%, rgba(201,100,66,.2), transparent 50%),
+    radial-gradient(80% 60% at 0% 100%, rgba(12,11,10,.85), transparent 55%);
+}
+.od-close__grid{
+  position:relative;z-index:1;
+  flex:1 1 0;min-height:0;
+  display:grid;grid-template-columns:1fr minmax(300px,34%);
+  gap:40px 48px;
+  align-items:stretch;
+  padding:56px 56px 40px 80px;
+  box-sizing:border-box;
+}
+.od-close__text{
+  display:flex;flex-direction:column;justify-content:center;
+  min-width:0;padding-right:8px;
+}
+.od-close__rule{width:8px;height:min(220px,24vh);background:linear-gradient(180deg,#c96442,rgba(201,100,66,.2));border-radius:4px;margin-bottom:28px}
+.od-close__kicker{font-family:var(--od-font-mono);font-size:30px;letter-spacing:.18em;text-transform:uppercase;color:#e8a090;margin:0 0 20px}
+.od-close__question{
+  font-family:var(--od-font-display);
+  font-size:clamp(68px,5vw,108px);
+  line-height:1.06;font-weight:600;letter-spacing:-.03em;margin:0 0 28px;max-width:14ch;color:#faf7f2;
+}
+.od-close__en{
+  font-size:clamp(34px,1.9vw,44px);line-height:1.42;color:rgba(250,247,242,.62);
+  font-style:italic;margin:0 0 36px;max-width:46ch;border-left:4px solid rgba(201,100,66,.65);padding-left:28px;
+}
+.od-close__wa{font-size:clamp(46px,2.8vw,58px);font-weight:700;color:#e8a090;margin:0;max-width:30ch;line-height:1.25}
+.od-close__art{
+  position:relative;border-radius:6px;overflow:hidden;
+  border:1px solid rgba(250,247,242,.12);
+  background:linear-gradient(165deg,rgba(201,100,66,.22),rgba(12,11,10,.5) 45%,#1a1412);
+  box-shadow:inset 0 0 0 1px rgba(250,247,242,.06),0 28px 80px rgba(0,0,0,.45);
+  min-height:420px;
+  display:flex;align-items:center;justify-content:center;
+}
+.od-close__art svg{width:100%;height:100%;max-height:min(920px,92%);display:block}
+.od-close__foot{
+  position:relative;z-index:1;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;
+  padding:32px 80px 44px;border-top:1px solid rgba(250,247,242,.12);
+  background:rgba(12,11,10,.5);
+}
+.od-close__src{font-family:var(--od-font-mono);font-size:24px;letter-spacing:.05em;color:rgba(250,247,242,.52);max-width:56ch;line-height:1.45}
+.od-close__hosts{display:flex;gap:14px;flex-wrap:wrap}
+.od-close__hosts span{
+  font-size:28px;padding:12px 22px;border-radius:999px;
+  border:1px solid rgba(250,247,242,.2);color:#faf7f2;
+}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div id="P">
+
+<section class="s slide is-active fill-deck od od-cover" id="s0">
+<div class="od-cover__left">
+  <p class="od-cover__kicker">OpenAI · Frontiers of AI</p>
+  <div class="od-cover__rule" aria-hidden="true"></div>
+  <h1 class="od-cover__title">强模型有了，<br>日常为什么还是不顺？</h1>
+  <p class="od-cover__lede">规模化靠的不只是模型，还有 <span class="wa">管理、文化与治理</span> 要一起过关——Philips · BBVA · Mirakl · Scout24 · JetBrains · Scania。</p>
+  <div class="od-cover__hosts">
+    <span>阿哲</span><span>小夏</span>
+  </div>
+</div>
+<div class="od-cover__right">
+  <div class="od-cover__poster" id="coverPoster">
+    <img src="../media/wechat-article/img-01.jpg" alt="" onerror="var p=this.parentNode;p.classList.add('od-cover__poster--empty');this.style.display='none'"/>
+    <span class="od-cover__poster-fallback" aria-hidden="true">AI</span>
+  </div>
+  <p class="od-cover__meta">How enterprises are scaling AI · 口播事实以官网与 PDF 为准</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-toc" id="s1">
+<div class="od-toc__head">
+  <p class="eyebrow">Arc</p>
+  <h2 class="h-xl">本期会走过</h2>
+</div>
+<div class="od-toc__list">
+  <div class="od-toc__row"><span class="od-toc__num">→</span><span class="od-toc__name">Capability gap</span><span class="od-toc__hint">模型能力 vs 组织交付</span></div>
+  <div class="od-toc__row"><span class="od-toc__num">→</span><span class="od-toc__name">三阶段 + 监督</span><span class="od-toc__hint">提效 → 流程嵌入 → agents · 人不卸责</span></div>
+  <div class="od-toc__row"><span class="od-toc__num">→</span><span class="od-toc__name">文化 → 治理 → 所有权</span><span class="od-toc__hint">Philips · BBVA · Mirakl / Scania</span></div>
+  <div class="od-toc__row"><span class="od-toc__num">→</span><span class="od-toc__name">质量 → 判断型工作</span><span class="od-toc__hint">Scout24 · JetBrains · 混合工作流</span></div>
+  <div class="od-toc__row"><span class="od-toc__num">→</span><span class="od-toc__name">自检</span><span class="od-toc__hint"><span class="wa">PDF leadership checklist</span> · 英文收束</span></div>
+</div>
+<p class="lead" style="margin-top:28px;font-size:38px;max-width:52ch">先对齐「落差从哪来」，再落到案例与清单。</p>
+</section>
+
+<section class="s slide fill-deck od od-gap" id="s2">
+<p class="eyebrow" style="color:#e8a090;margin-bottom:16px">Reality</p>
+<p class="od-gap__quote">实验很强、业务里续不上——根因常被归到 <span class="wa">capability gap</span>：信任、治理、数据归属、质量标准。</p>
+<div class="od-gap__grid">
+  <p>三阶段：<strong>个人提效</strong> → <strong>流程里嵌 AI</strong> → <strong>再引 agents</strong>；全程<strong>人不卸责</strong>。</p>
+  <p>把<strong>信任、治理、评测</strong>设计进系统，别等上线再补救。</p>
+  <p>能<strong>改工作流</strong>的组织才规模化；只点多一个功能不够。</p>
+  <p>跨越 gap：先承认落差在<strong>组织条件</strong>，而不只在模型。</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-light od-photo" id="s3">
+<div class="od-photo-top"><p class="eyebrow">Pattern 01</p><h2 class="h-xl">Culture before tooling</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/wechat-article/img-02.jpg" alt="Philips"/></div>
+<p class="od-cap">Philips ~7 万员工 · 先训高管 · 一线提真实场景 · 实验进日常 · Patrick：<span class="wa">文化 · 好奇 · 敢试</span>（素养先于堆工具）</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-dark od-photo" id="s4">
+<div class="od-photo-top"><p class="eyebrow">Pattern 02</p><h2 class="h-xl">Governance as enabler</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/wechat-article/img-03.jpg" alt="BBVA"/></div>
+<p class="od-cap">BBVA · 法务/合规/安全/IT <strong>一开始进设计</strong> · 秘鲁助手 3000+ 人 · <span class="wa">查询约 7 分半 → 约 1 分钟</span> · Enterprise 12 万+</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-light od-editorial" id="s5">
+<div class="od-ed-head">
+  <p class="eyebrow">Pattern 03</p>
+  <h2 class="h-xl">Ownership over consumption</h2>
+</div>
+<div class="od-ed-body">
+  <div class="od-ed-pull">
+    <p class="od-ed-lede">能 <strong>改流程、用 AI 建设</strong> 才规模化；只会点功能，是消费。</p>
+    <p class="od-ed-quote">Mirakl：<span class="wa">自建 agent · champion 扎一线</span>，不靠中央轮流评审。</p>
+  </div>
+  <aside class="od-ed-aside" aria-label="案例数字">
+    <div class="od-stat"><span class="od-stat-n">~+70%</span><span class="od-stat-l">内部技术文档</span></div>
+    <div class="od-stat"><span class="od-stat-n">~+37%</span><span class="od-stat-l">客服效率 · 满意 96%</span></div>
+    <div class="od-stat"><span class="od-stat-n">~+91%</span><span class="od-stat-l">上架 · 错误率约腰斩</span></div>
+    <p class="od-ed-note">Scania：AI 深嵌<strong>工程到售后</strong>；CIO：<span class="wa">比预期更快 · 时间与质量都提升</span>。</p>
+  </aside>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-dark od-photo" id="s6">
+<div class="od-photo-top"><p class="eyebrow">Pattern 04</p><h2 class="h-xl">Quality before scale</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/wechat-article/img-05.jpg" alt="Scout24"/></div>
+<p class="od-cap">Scout24 房产对话 · 自定义评测框架 · 参考 OpenAI <strong>Evals</strong> 思路 · <span class="wa">不达标就延期发</span> · 少返工</p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-light od-photo" id="s7">
+<div class="od-photo-top"><p class="eyebrow">Pattern 05</p><h2 class="h-xl">Protecting judgment work</h2></div>
+<div class="od-photo-main">
+<div class="od-ph-frame"><img src="../media/wechat-article/img-06.jpg" alt="JetBrains"/></div>
+<p class="od-cap">JetBrains · 速度上去、<strong>判断质量</strong>也要上去 · 混合工作流 · Kris Kang：<span class="wa">安全 · 可读 · 可维护</span></p>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-light od-slide-grid" id="s8">
+<p class="eyebrow">Checklist</p>
+<h2 class="h-xl">带回一道题</h2>
+<div class="od-grid-2x2">
+<div class="pt"><h3>重做？</h3><p>Redesign workflows with AI</p></div>
+<div class="pt"><h3>贴纸？</h3><p>Layering AI onto existing ones</p></div>
+<div class="pt"><h3>后者</h3><p>前五条白听 · gap 还在</p></div>
+<div class="pt"><h3>一手</h3><p><span class="wa">PDF leadership checklist</span></p></div>
+</div>
+</section>
+
+<section class="s slide fill-deck od od-close" id="s9">
+<div class="od-close__grid">
+  <div class="od-close__text">
+    <div class="od-close__rule" aria-hidden="true"></div>
+    <p class="od-close__kicker">Self-check · 原文照读</p>
+    <p class="od-close__question">重做流程，<br/>还是往旧流程上贴纸？</p>
+    <p class="od-close__en">Are we redesigning workflows with AI, or layering AI onto existing ones?</p>
+    <p class="od-close__wa">答后者：前五条白听，<span class="wa">capability gap</span> 还在。</p>
+  </div>
+  <div class="od-close__art" aria-hidden="true">
+    <svg viewBox="0 0 520 900" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#c96442" stop-opacity="0.35"/>
+          <stop offset="55%" stop-color="#2a1814" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#e8a090" stop-opacity="0.2"/>
+        </linearGradient>
+        <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#faf7f2" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#faf7f2" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="28" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect width="520" height="900" fill="url(#g1)"/>
+      <ellipse cx="380" cy="160" rx="200" ry="180" fill="#c96442" opacity="0.12" filter="url(#blur)"/>
+      <ellipse cx="120" cy="720" rx="220" ry="200" fill="#e8a090" opacity="0.1" filter="url(#blur)"/>
+      <circle cx="380" cy="160" r="118" fill="none" stroke="#c96442" stroke-width="2" opacity="0.45"/>
+      <circle cx="380" cy="160" r="168" fill="none" stroke="rgba(250,247,242,0.12)" stroke-width="1"/>
+      <path d="M40 420 Q260 360 480 400" fill="none" stroke="rgba(250,247,242,0.14)" stroke-width="1.5"/>
+      <path d="M60 520 Q280 460 460 500" fill="none" stroke="rgba(201,100,66,0.35)" stroke-width="2"/>
+      <rect x="48" y="120" width="3" height="200" fill="#c96442" opacity="0.5" rx="1"/>
+      <text x="260" y="480" text-anchor="middle" font-family="Georgia,serif" font-size="180" font-weight="600" fill="rgba(250,247,242,0.06)" letter-spacing="-0.04em">5</text>
+      <rect width="520" height="900" fill="url(#g2)"/>
+    </svg>
+  </div>
+</div>
+<div class="od-close__foot">
+  <p class="od-close__src">How enterprises are scaling AI · Frontiers of AI Executive Guide（PDF）· 文化→治理→流程→质量→判断 — 缺一难规模化</p>
+  <div class="od-close__hosts"><span>阿哲</span><span>小夏</span></div>
+</div>
+</section>
+
+</div>
+<div id="pn"></div>
+<script>
+(function(){
+var PW=1920,PH=1080;
+function fit(){var el=document.getElementById('P'),r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;el.style.transform='scale('+r+')';el.style.transformOrigin='0 0';el.style.left=x+'px';el.style.top=y+'px'}
+window.addEventListener('resize',fit);fit();
+var slides=document.querySelectorAll('.s.slide'),total=slides.length,cur=0;
+function ui(){document.getElementById('pn').textContent=(cur+1)+' / '+total;var b=document.getElementById('prog');if(b)b.style.width=(total<=1?100:(cur/(total-1)*100))+'%';}
+function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('is-active');cur=i;slides[cur].classList.add('is-active');ui()}
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1)}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}});
+document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1)});
+ui();
+window.go=go;
+})();
+</script>
+</body>
+</html>

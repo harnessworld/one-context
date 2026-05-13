@@ -1,6 +1,6 @@
 ---
 name: html-deck-layout
-description: Mobile-first HTML presentation generator (1920×1080 landscape). Creates phone-optimized slides for video production with fill-deck layouts, ≥42px body text, ≥85% coverage. Use when the user wants a mobile presentation, phone-optimized slides, presentation.html for video, or mobile PPT with emoji/SVG diagrams. Triggers: "mobile PPT", "phone presentation", "presentation.html", "video slides", "1920x1080", "手机横屏PPT", "手机PPT", "移动端幻灯片", "录屏PPT", "口播幻灯片".
+description: Mobile-first HTML presentation generator (1920×1080 landscape). Creates phone-optimized slides for video production with fill-deck layouts, ≥42px body text, ≥85% coverage; for narrated video plans **~30–60s per content slide** (see SKILL body). Incorporates Open Design-style principles (brief-driven, visual-first, editorial hierarchy; see SKILL). Use when the user wants a mobile presentation, phone-optimized slides, presentation.html for video, or mobile PPT with emoji/SVG diagrams. Triggers: "mobile PPT", "phone presentation", "presentation.html", "video slides", "1920x1080", "手机横屏PPT", "手机PPT", "移动端幻灯片", "录屏PPT", "口播幻灯片".
 ---
 
 # html-deck-layout — Mobile PPT Generator
@@ -8,6 +8,8 @@ description: Mobile-first HTML presentation generator (1920×1080 landscape). Cr
 Generate mobile-optimized HTML presentations (1920×1080 landscape) for
 phone-screen viewing: 投屏、录屏、口播视频配图。All slides enforce
 **fill-deck** (zero wasted space), **≥42px body text**, **≥85% coverage**.
+
+**口播 / 成片时长（与 `html-video-from-slides`、`wav-durations.json` 对齐）**：拆页时 **每一页内容页建议口播停留 30s–60s**（硬上限 **≤60s**/页，除非该话题不可分割须在提纲中注明并得到确认）；**封面 / 致谢可略短，但不建议短于 20s**。页数 ≈ `ceil(总口播秒数 / 45)` 并在 ±2 页内微调；避免「一页扛整段脚本」导致翻页与音频脱节。
 
 ## When to use
 
@@ -19,6 +21,24 @@ phone-screen viewing: 投屏、录屏、口播视频配图。All slides enforce
 | 需要 fill-deck 防空白 | 需要 runtime.js 键盘导航 |
 
 **不确定时**：如果最终在手机上看 → html-deck-layout；如果在电脑/投影上看 → html-ppt。
+
+## Open Design 设计理念
+
+与 **[Open Design](https://github.com/nexu-io/open-design)**（伞仓登记：`meta/repos.yaml` → `id: open-design`；克隆后多为 `repos/reference/open-design/`）**目标一致、实现栈不同**：OD 走「设计体系 + Skills + brief」出杂志风 / 投融资风 HTML；本 skill 走 **`templates/` + 主题 CSS + `examples/demo-deck` 视觉基准**，产出 **1920×1080**、带 **`#P` / `section.s.slide` / `go(n)`** 的 `presentation.html`，专供 **`html-video-from-slides`**。
+
+本 skill **要求在本链路内贯彻 OD 理念**（Brief 驱动、视觉优先、杂志层级、密度与留白 — 见下表），**并不要求**默认克隆或运行 open-design 仓库整条流水线。
+
+| 原则 | 落点 |
+|------|------|
+| **Brief 驱动** | 先锁定观众与「一页一个记忆点」，再选布局；禁止把讲稿整段贴进幻灯。 |
+| **视觉优先** | 抽象概念用 **inline SVG / card-diagram / 流程与数据图示**；文字只做锚点，拒绝满屏段落。 |
+| **编辑 / 杂志层级** | 大标题 + 极短副线 + 分块（chip / card）；语气像刊物版面而非 Word 大纲。 |
+| **密度与留白** | 与 **fill-deck** 一致：画布填满，但 **≤120 汉字/页**；含截图或竖图时优先 **上图下文**，避免竖图挤进窄分栏导致不可读。 |
+| **氛围（可选）** | OD 常见 WebGL / 双背景；走 **口播视频截屏** 时优先 **CSS 渐变、噪点、柔光**，控制外网字体与非常规脚本，避免录制不稳定。 |
+
+**只有**用户 **明确要求 OD 官方模板气质**（文档举例：`guizang-ppt`、simple-deck）时，才应到 **上游 OD** 用对应 Skill 出稿，再 **自行适配** 视频管线契约（`html-video-from-slides` 所需的 DOM / `go(n)` 等）。若任务要对齐 OD 的 brief 流程或引用 `repos/reference/open-design/`，由用户在需求里写明 **偏好与模板**（是否必须用某套 OD 模板等）。
+
+**相关：** 桌面 / 投影 **全视口响应式** 幻灯见 **`html-slides`**；两条链路可共享同一套 OD 理念，仅画布与下游工具不同。
 
 ## Before you author anything — ALWAYS ask
 
@@ -66,13 +86,13 @@ A good opening message:
 
 ### Step 3: Plan outline with layout mapping
 
-将内容拆页，每页分配布局（参考下方「7 种布局速查」）：
+将内容拆页，每页分配布局（参考下方「7 种布局速查」）；**若为口播视频**，为每页标注 **建议口播时长（30s–60s 为主）**，便于下游写 `slideDurationsSec`。
 
-| 页码 | 内容 | 布局 | 有无 SVG 图？ |
-|------|------|------|-------------|
-| 1 | 封面 | Cover | — |
-| 2 | ... | Grid 2×2 / Split / ... | 简述图内容 |
-| N | 致谢 | Thanks | — |
+| 页码 | 内容 | 布局 | 建议口播 | 有无 SVG 图？ |
+|------|------|------|----------|-------------|
+| 1 | 封面 | Cover | 20–35s | — |
+| 2 | ... | Grid 2×2 / Split / ... | **30–60s** | 简述图内容 |
+| N | 致谢 | Thanks | 20–35s | — |
 
 **Each deck MUST include ≥2 SVG diagrams** (using `<div class="card-diagram">` with inline `<svg>`) and use **≥3 distinct layout types**.
 
@@ -98,6 +118,7 @@ A good opening message:
 - [ ] 每页 ≤3 info blocks
 - [ ] Layout variety: ≥3 types total, no 3+ consecutive same
 - [ ] **≥2 pages with card-diagram + inline SVG** (not just emoji!)
+- [ ] 口播成片：**内容页**规划为每页约 **30s–60s**（封面/致谢可更短，≥20s）
 
 ✓ Gate: 全部勾选通过。
 
@@ -126,6 +147,7 @@ These are **non-negotiable**. Violating any rule means the output is rejected.
 
 | Constraint | Value | Source |
 |-----------|-------|--------|
+| 口播停留（内容页） | **30s–60s**/页，≤60s 除非已注明不可分割 | 口播视频、`wav-durations.json` |
 | Canvas | 1920×1080 | Fixed viewport |
 | Body text | **≥42px** | Hard minimum |
 | Card title | **≥52px** | Tier table |

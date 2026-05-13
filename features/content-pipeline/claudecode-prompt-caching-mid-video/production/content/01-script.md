@@ -4,7 +4,7 @@
 
 ## Prompt Caching 是 Agent 产品的架构基础
 
-欢迎收听豆包AI播客节目。哈喽,大家好,欢迎收听我们的播客。今天想跟大家聊一聊,在做长上下文的agent的时候,为什么caching是不可或缺的。这个其实是受到了Anthropic最近的一个宣布,就是他们的Claude Code通过使用了prompt caching之后,成本和延迟都下降了一个数量级。
+哈喽,大家好,欢迎收听我们的播客。今天想跟大家聊一聊,在做长上下文的agent的时候,为什么caching是不可或缺的。这个其实是受到了Anthropic最近的一个宣布,就是他们的Claude Code通过使用了prompt caching之后,成本和延迟都下降了一个数量级。
 
 对,这个确实挺让人惊讶的。所以我们就来聊一聊caching到底在长上下文的这种应用当中扮演了一个什么样的角色。
 

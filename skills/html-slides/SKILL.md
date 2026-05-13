@@ -1,6 +1,6 @@
 ---
 name: html-slides
-description: Create stunning, animation-rich HTML presentations from scratch or convert PowerPoint files (.ppt/.pptx) to beautiful web slides. Use when the user wants to build a pitch deck, presentation, slideshow, or slide deck — or convert an existing PPT to a web presentation. Generates zero-dependency single HTML files with keyboard/touch navigation and scroll-triggered animations. Style options include Neon Cyber, Bold Signal, Swiss Modern, Paper & Ink, and 8 more curated presets.
+description: Create stunning, animation-rich HTML presentations from scratch or convert PowerPoint files (.ppt/.pptx) to beautiful web slides. Use when the user wants to build a pitch deck, presentation, slideshow, or slide deck — or convert an existing PPT to a web presentation. Generates zero-dependency single HTML files with keyboard/touch navigation and scroll-triggered animations. Aligns with Open Design-style principles (brief-driven, visual-first, editorial density; see SKILL). Style options include Neon Cyber, Bold Signal, Swiss Modern, Paper & Ink, and 8 more curated presets.
 openclaw:
   requires:
     bins: []
@@ -21,6 +21,22 @@ Create zero-dependency, animation-rich HTML presentations that run entirely in t
 **Style presets:** Bold Signal, Electric Studio, Creative Voltage, Dark Botanical, Notebook Tabs, Pastel Geometry, Split Pastel, Vintage Editorial, Neon Cyber, Terminal Green, Swiss Modern, Paper & Ink
 
 For full style details and CSS specs: read `references/STYLE_PRESETS.md` when needed.
+
+## Open Design 设计理念
+
+**[Open Design](https://github.com/nexu-io/open-design)**（伞仓：`meta/repos.yaml` → `id: open-design`）强调 **local-first、设计体系 + Skills、brief 驱动** 的成片流程（杂志风 / 投融资风等 HTML）。本 skill 产出 **零依赖、单文件、可离线双击** 的演示稿，与 OD「开放、可私有托管的成品」取向一致；差别是本 skill **不内置 OD 的 Web/daemon 流水线**，由代理在撰写 HTML/CSS 时 **贯彻同一套信息与视觉原则**。
+
+**生成或改写幻灯时应贯彻：**
+
+| 原则 | 落点 |
+|------|------|
+| **Brief 驱动** | Phase 1 收敛「一场一条叙事主线」；每页只保留一个适合截图传播的主张。 |
+| **视觉优先** | 用 **大字层级、pull quote、数字强调、简易 CSS 图形/渐变** 承载认知；避免投影仪上不可读的段落墙。 |
+| **编辑 / 杂志感** | 在 **Viewport Fitting** 硬约束下做强字号对比与分栏节奏；优先选用 `references/STYLE_PRESETS.md` 中偏 *Editorial / Magazine* 气质的预设（再配动画）。 |
+| **Mode B（PPT 转换）** | 提取结构后 **按 OD 密度重写**：通常远少于原 PPT 字数；「一图一句」重组，而非逐 shape 粘贴长文。 |
+| **动效与氛围** | 尊重 `prefers-reduced-motion`；复杂 WebGL 非默认路径；可用噪点、网格、柔边阴影接近 OD 质感。 |
+
+**手机横屏固定画布 + 口播转视频**：改用 **`html-deck-layout`**（1920×1080、`fill-deck`、与 `html-video-from-slides` 契约一致）；与本 skill 可选并列，共享 OD 理念，场景不同。
 
 ---
 

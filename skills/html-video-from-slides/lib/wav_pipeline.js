@@ -17,10 +17,13 @@ const {
 } = require('./ass_colours');
 const { prepareSrtForBurn, suggestCharsPerLine } = require('./srt_postprocess');
 const { resolvePath } = require('./path_resolver');
+const { runProjectTimingCheck, printReport: printTimingReport } = require('./timing_boundary_check');
 
 const FPS = 60;
 const VIDEO_BITRATE = '8M';
 const VIDEO_PRESET = 'slow';
+
+/** 浏览器内选取逻辑见下方 page.evaluate：优先 `#P > .slide`、`.deck > .slide`，避免 html-ppt runtime 克隆节点重复计数 */
 
 function ff(args) {
   execSync(`"${ffmpegPath}" ${args}`, { stdio: 'inherit' });
@@ -110,6 +113,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
  */
 async function run(projectRoot, skillDir, options = {}) {
   void skillDir;
+  const skipTimingCheck = Boolean(options.skipTimingCheck);
   // Pipeline output lands in root; fallback to slides/ for backward compat
   const htmlRoot = path.join(projectRoot, 'presentation.html');
   const htmlSlides = resolvePath(projectRoot, 'slides', 'presentation.html');
@@ -153,6 +157,16 @@ async function run(projectRoot, skillDir, options = {}) {
   console.log(`   项目目录: ${projectRoot}`);
   console.log(`   WAV: ${path.basename(WAV_FILE)}\n`);
 
+  if (!skipTimingCheck) {
+    const tc = runProjectTimingCheck(projectRoot);
+    if (!tc.skipped && tc.warnings && tc.warnings.length) {
+      printTimingReport(tc, false);
+      console.log(
+        '⚠️  翻页边界高危对齐（下一页 .wa 句起点）：建议延后对应 slideDurationsSec；或 wav --skip-timing-check 跳过本告警；timing-check --audit-cue-starts 可看全部字幕起点对齐。\n'
+      );
+    }
+  }
+
   if (fs.existsSync(TEMP_DIR)) fs.rmSync(TEMP_DIR, { recursive: true, force: true });
   fs.mkdirSync(TEMP_DIR, { recursive: true });
 
@@ -178,9 +192,14 @@ async function run(projectRoot, skillDir, options = {}) {
   });
   await page.waitForTimeout(300);
 
-  const numSlides = await page.evaluate(
-    () => document.querySelectorAll('.s.slide').length
-  );
+  const numSlides = await page.evaluate(() => {
+    const primary = document.querySelectorAll('#P > .slide, .deck > .slide');
+    const slides =
+      primary.length > 0
+        ? primary
+        : document.querySelectorAll('.s.slide, section.slide');
+    return slides.length;
+  });
   if (slideDurations.length !== numSlides) {
     await browser.close();
     throw new Error(
@@ -203,11 +222,15 @@ async function run(projectRoot, skillDir, options = {}) {
   let cum = 0;
 
   for (let i = 0; i < numSlides; i++) {
-    await page.evaluate((n) => {
+    await page.evaluate(({ n }) => {
       // 核心修复：直接修改 style.display 强制 Chromium headless 重排/重绘。
       // 纯 classList.toggle 在 headless 模式下不会触发合成器更新帧缓冲，
       // 导致所有截图都返回第一帧。
-      const slides = document.querySelectorAll('.s.slide');
+      const primary = document.querySelectorAll('#P > .slide, .deck > .slide');
+      const slides =
+        primary.length > 0
+          ? primary
+          : document.querySelectorAll('.s.slide, section.slide');
       slides.forEach((s, idx) => {
         if (idx === n) {
           s.style.display = 'flex';
@@ -229,7 +252,7 @@ async function run(projectRoot, skillDir, options = {}) {
         deck.style.width = '100vw';
         deck.style.transform = 'translateX(0)';
       }
-    }, i);
+    }, { n: i });
     await page.waitForTimeout(900);
 
     const imgPath = path.join(TEMP_DIR, `slide_${String(i).padStart(2, '0')}.png`);

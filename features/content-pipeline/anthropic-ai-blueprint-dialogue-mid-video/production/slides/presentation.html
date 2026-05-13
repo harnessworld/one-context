@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 公司蓝图 · Agent 生产化拆解</title>
+<link rel="stylesheet" href="html-ppt-assets/fonts.css">
+<link rel="stylesheet" href="html-ppt-assets/base.css">
+<link rel="stylesheet" href="html-ppt-assets/animations/animations.css">
+<link rel="stylesheet" href="html-ppt-assets/od-tech-sharing.css">
+<link rel="stylesheet" href="html-ppt-assets/od-rich-figures.css">
+<style>
+:root{
+  --bp-accent-a:#a78bfa;
+  --bp-accent-b:#f472b6;
+  --bp-accent-c:#38bdf8;
+  --mv-fs-kicker:28px;
+  --mv-fs-h1:96px;
+  --mv-fs-h2:72px;
+  --mv-fs-lede:44px;
+  --mv-fs-card-title:52px;
+  --mv-fs-card-body:42px;
+  --mv-fs-tag:28px;
+  --mv-fs-agenda:40px;
+  --mv-fs-agenda-meta:28px;
+  --mv-slide-pad-y:48px;
+  --mv-slide-pad-x:64px;
+}
+.tpl-tech-sharing .deck-footer{position:absolute;bottom:24px;left:var(--mv-slide-pad-x);right:var(--mv-slide-pad-x);display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:28px;color:var(--text-3);z-index:2}
+.tpl-tech-sharing .slide-number[data-current]::before{content:attr(data-current)" / "attr(data-total)}
+.wa{font-weight:700;color:var(--accent-2)}
+.tpl-tech-sharing .slide{padding:var(--mv-slide-pad-y) var(--mv-slide-pad-x)}
+.tpl-tech-sharing .h1{font-size:var(--mv-fs-h1)!important;line-height:1.06!important}
+.tpl-tech-sharing .h2{font-size:var(--mv-fs-h2)!important;line-height:1.12!important}
+.tpl-tech-sharing .kicker{font-size:var(--mv-fs-kicker)!important}
+.tpl-tech-sharing .lede{font-size:var(--mv-fs-lede)!important;line-height:1.48!important;font-weight:400}
+.tpl-tech-sharing .card{padding:28px 32px}
+.tpl-tech-sharing .card h4{font-size:var(--mv-fs-card-title)!important;line-height:1.15!important;margin:0 0 14px!important;font-weight:700!important}
+.tpl-tech-sharing .card p,.tpl-tech-sharing .card .dim{font-size:var(--mv-fs-card-body)!important;line-height:1.45!important}
+.tpl-tech-sharing .tag{font-size:var(--mv-fs-tag)!important;padding:10px 18px!important;border-radius:10px!important}
+.tpl-tech-sharing .agenda-row{padding:16px 0}
+.tpl-tech-sharing .agenda-row .t{font-size:var(--mv-fs-agenda)!important;line-height:1.25!important}
+.tpl-tech-sharing .agenda-row .d{font-size:var(--mv-fs-agenda-meta)!important}
+.tpl-tech-sharing .agenda-row .num{font-size:var(--mv-fs-agenda-meta)!important;width:56px}
+.tpl-tech-sharing .slide.slide--spread{justify-content:flex-start!important;padding-top:36px}
+.tpl-tech-sharing .diagram-band{margin:12px 0 8px}
+.tpl-tech-sharing .diagram-band--compact{margin:8px 0 4px!important}
+.tpl-tech-sharing .grid{align-items:stretch!important}
+.tpl-tech-sharing .grid .card{display:flex;flex-direction:column;justify-content:flex-start}
+.tpl-tech-sharing .slide[data-title="Agenda"] .kicker{font-size:40px!important;letter-spacing:.04em}
+.tpl-tech-sharing .slide[data-title="Agenda"] .agenda-row{padding:26px 0}
+.tpl-tech-sharing .slide[data-title="Agenda"] .agenda-row .t{font-size:68px!important;line-height:1.2!important;font-weight:800}
+.tpl-tech-sharing .slide[data-title="Agenda"] .agenda-row .d{font-size:46px!important;opacity:.95;line-height:1.35!important}
+.tpl-tech-sharing .slide[data-title="Agenda"] .agenda-row .num{font-size:46px!important;width:92px;font-weight:800}
+.tpl-tech-sharing .slide[data-title="Agenda"] .h2{font-size:104px!important}
+.tpl-tech-sharing .slide[data-title="Managed"] .figure-shell__bar{font-size:24px!important;letter-spacing:.02em}
+.tpl-tech-sharing .slide[data-title="Managed"] .diagram-band--managed{margin:20px 0 8px;min-height:min(52vh,520px)}
+.tpl-tech-sharing .slide[data-title="Managed"] .figure-shell__body svg{min-height:420px}
+.tpl-tech-sharing .slide[data-title="Timeline"] .diagram-band--timeline{margin:12px 0;min-height:min(48vh,480px)}
+.tpl-tech-sharing .slide[data-title="Timeline"] .figure-shell__body svg{min-height:440px}
+.tpl-tech-sharing .slide[data-title="Trap"] .kicker{margin-bottom:8px!important}
+.tpl-tech-sharing .slide[data-title="Trap"] .h2{font-size:56px!important;line-height:1.12!important;margin:0!important}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-inline{font-size:34px!important;line-height:1.35!important;margin:10px 0 6px!important;opacity:.92}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-split-wrap{display:flex;gap:22px;flex:1;min-height:0;margin-top:8px;align-items:stretch}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-blueprint-pane{position:relative;flex:0 0 42%;max-width:42%;border-radius:18px;overflow:hidden;border:1px solid rgba(148,163,184,.35);background:#0d1117;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:min(50vh,460px)}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-blueprint-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:2;background:#0d1117}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-blueprint-fallback{width:100%;height:auto;max-height:min(50vh,460px);display:block;z-index:1}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-cap{font-size:20px!important;margin:8px 12px 0;text-align:center;line-height:1.35;position:relative;z-index:3}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-stack-pane{flex:1;min-width:0;display:flex;flex-direction:column}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-stack-pane .figure-shell{flex:1;display:flex;flex-direction:column;min-height:0}
+.tpl-tech-sharing .slide[data-title="Trap"] .diagram-band{margin-top:8px!important}
+.tpl-tech-sharing .slide[data-title="Trap"] .trap-stack-pane .figure-shell__body svg{min-height:min(50vh,460px)}
+.tpl-tech-sharing .slide[data-title="TrapStory"] .h2{font-size:68px!important;line-height:1.1!important}
+.tpl-tech-sharing .slide[data-title="AgendaFour"] .h2{font-size:92px!important;line-height:1.08!important}
+.tpl-tech-sharing .slide[data-title="AgendaFour"] .lede{font-size:40px!important;max-width:96%!important}
+.tpl-tech-sharing .slide[data-title="AgendaFour"] .diagram-band--teaser{margin-top:18px!important}
+.bp-grad{background:linear-gradient(135deg,var(--bp-accent-a) 0%,var(--bp-accent-b) 50%,var(--bp-accent-c) 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.card-bp{border-left:4px solid var(--bp-accent-a)}
+.card-cold{border-left:4px solid #38bdf8}
+.tpl-tech-sharing .slide[data-title="Cover"] .diagram-band--hero{margin-top:6px!important}
+.tpl-tech-sharing .slide[data-title="Cover"] .diagram-band--hero .figure-shell{
+  border:none!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;margin:0!important;
+}
+.tpl-tech-sharing .slide[data-title="Cover"] .diagram-band--hero .figure-shell__bar{display:none!important}
+.tpl-tech-sharing .slide[data-title="Cover"] .diagram-band--hero .figure-shell__body{
+  padding:0!important;min-height:min(44vh,400px)!important;align-items:flex-end!important;
+}
+.tpl-tech-sharing .slide[data-title="Cover"] .diagram-band--hero .figure-shell__body svg{min-height:min(44vh,400px)}
+.tpl-tech-sharing .slide[data-title="Cover"] .lede{max-width:92%!important}
+</style>
+</head>
+<body class="tpl-tech-sharing">
+<div class="deck">
+
+  <section class="slide is-active slide--spread" data-title="Cover">
+    <p class="kicker">podcast · 热议一张图 → 拆拼图</p>
+    <h1 class="h1 anim-fade-up">对话拆解<br><span class="bp-grad">「AI 公司蓝图」</span></h1>
+    <p class="lede mt-m">刷屏的是同一张<span class="wa">图</span>——每层对应真实工程环节；先当<strong>架构地图</strong>读，再谈 Agent 怎能落地。</p>
+    <div class="diagram-band diagram-band--hero" aria-hidden="true">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>unused-on-cover</span></div>
+        <div class="figure-shell__body">
+          <!-- Keynote 式「环节」：弧线叙事 + 里程碑节点 — 与第二页「终端窗口·栈条对照」刻意区分 -->
+          <svg viewBox="0 0 1920 420" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="cov-sky" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#1e1035"/><stop offset="55%" stop-color="#0d1117"/><stop offset="100%" stop-color="#062c24"/></linearGradient>
+              <linearGradient id="cov-arc" x1="0%" y1="50%" x2="100%" y2="50%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="35%" stop-color="#f472b6"/><stop offset="68%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#4ade80"/></linearGradient>
+              <filter id="cov-glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="16" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <filter id="cov-node" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            </defs>
+            <rect width="1920" height="420" fill="url(#cov-sky)"/>
+            <text x="960" y="52" text-anchor="middle" fill="#30363d" font-size="180" font-weight="900" font-family="Inter,Noto Sans SC,sans-serif" opacity=".14">MAP</text>
+            <text x="960" y="118" text-anchor="middle" fill="#e6edf3" font-size="30" font-weight="800" letter-spacing=".06em">一层 · 一环节 · 同一张「可读地图」</text>
+            <text x="960" y="156" text-anchor="middle" fill="#8b949e" font-size="23">热议原点 → 分层线索 → 可读地图 → 落地拼图</text>
+            <!-- 主弧线 -->
+            <path d="M 110 318 C 340 56 620 56 960 198 C 1298 338 1560 298 1810 148" fill="none" stroke="url(#cov-arc)" stroke-width="10" stroke-linecap="round" opacity=".92" filter="url(#cov-glow)"/>
+            <path d="M 110 318 C 340 56 620 56 960 198 C 1298 338 1560 298 1810 148" fill="none" stroke="rgba(230,237,243,.12)" stroke-width="26" stroke-linecap="round"/>
+            <!-- 节点 1–4：环节隐喻，不重复 Trap 的堆叠列表语法 -->
+            <g filter="url(#cov-node)">
+              <circle cx="268" cy="268" r="22" fill="#1c1033" stroke="#a78bfa" stroke-width="4"/><text x="268" y="276" text-anchor="middle" fill="#fff" font-size="22" font-weight="900">1</text>
+              <circle cx="548" cy="138" r="22" fill="#2a1020" stroke="#f472b6" stroke-width="4"/><text x="548" y="146" text-anchor="middle" fill="#fff" font-size="22" font-weight="900">2</text>
+              <circle cx="960" cy="198" r="26" fill="#0c2433" stroke="#38bdf8" stroke-width="4"/><text x="960" y="208" text-anchor="middle" fill="#fff" font-size="22" font-weight="900">3</text>
+              <circle cx="1388" cy="254" r="22" fill="#0c2218" stroke="#4ade80" stroke-width="4"/><text x="1388" y="262" text-anchor="middle" fill="#fff" font-size="22" font-weight="900">4</text>
+            </g>
+            <text x="268" y="332" text-anchor="middle" fill="#c4b5fd" font-size="24" font-weight="800">真实环节</text>
+            <text x="268" y="362" text-anchor="middle" fill="#6e7681" font-size="20">对齐工程现实</text>
+            <text x="548" y="92" text-anchor="middle" fill="#fbcfe8" font-size="24" font-weight="800">细致分层</text>
+            <text x="548" y="62" text-anchor="middle" fill="#6e7681" font-size="20">着迷点</text>
+            <text x="960" y="268" text-anchor="middle" fill="#bae6fd" font-size="26" font-weight="900">架构地图</text>
+            <text x="960" y="300" text-anchor="middle" fill="#6e7681" font-size="20">≠ 随意示意图</text>
+            <text x="1388" y="318" text-anchor="middle" fill="#bbf7d0" font-size="24" font-weight="800">落地拼图</text>
+            <text x="1388" y="348" text-anchor="middle" fill="#6e7681" font-size="20">Agent 生产化</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#anthropic #agent #blueprint</span><span class="slide-number" data-current="1" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Trap">
+    <p class="kicker">narrative trap → technical map</p>
+    <h2 class="h2">别看标题党 · 看<span class="wa">图层</span>：托管 · WF↔Agent · 合规</h2>
+    <p class="trap-inline dim">传播话术把人引向八卦话题；蓝图正文是按<strong>托管执行 · Workflow↔Agent · 合规闭环</strong>拆层的工程地图。左为架构参考图，右为分层导读。</p>
+    <div class="trap-split-wrap">
+      <div class="trap-blueprint-pane">
+        <img class="trap-blueprint-photo" src="assets/blueprint-reference.png" alt="" onerror="this.remove();"/>
+        <svg class="trap-blueprint-fallback" viewBox="0 0 360 440" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="bp-fallback-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#312e81"/><stop offset="50%" stop-color="#1e1b4b"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+            <linearGradient id="bp-band-1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+            <linearGradient id="bp-band-2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f472b6"/><stop offset="100%" stop-color="#db2777"/></linearGradient>
+            <linearGradient id="bp-band-3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#0284c7"/></linearGradient>
+            <linearGradient id="bp-band-4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4ade80"/><stop offset="100%" stop-color="#16a34a"/></linearGradient>
+          </defs>
+          <rect width="360" height="440" rx="14" fill="url(#bp-fallback-g)" stroke="#475569" stroke-width="2"/>
+          <text x="180" y="28" text-anchor="middle" fill="#94a3b8" font-size="13" font-family="JetBrains Mono,monospace">BLUEPRINT · schematic</text>
+          <rect x="16" y="44" width="328" height="62" rx="10" fill="rgba(167,139,250,.25)" stroke="#a78bfa" stroke-width="1.5"/>
+          <text x="180" y="72" text-anchor="middle" fill="#ede9fe" font-size="14" font-weight="800">应用与用户触点层</text>
+          <text x="180" y="92" text-anchor="middle" fill="#c4b5fd" font-size="11">界面 · 协作入口</text>
+          <rect x="16" y="118" width="328" height="72" rx="10" fill="rgba(244,114,182,.2)" stroke="#f472b6" stroke-width="1.5"/>
+          <text x="180" y="148" text-anchor="middle" fill="#fce7f3" font-size="14" font-weight="800">Agent OS / 编排与决策</text>
+          <text x="180" y="172" text-anchor="middle" fill="#fbcfe8" font-size="11">Workflow ↔ Agent 分界</text>
+          <rect x="16" y="202" width="328" height="78" rx="10" fill="rgba(56,189,248,.18)" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="180" y="234" text-anchor="middle" fill="#e0f2fe" font-size="14" font-weight="800">托管执行 · runtime</text>
+          <text x="180" y="258" text-anchor="middle" fill="#bae6fd" font-size="11">沙箱 · 检查点 · 凭据 · 观测</text>
+          <rect x="16" y="292" width="328" height="62" rx="10" fill="rgba(74,222,128,.18)" stroke="#4ade80" stroke-width="1.5"/>
+          <text x="180" y="320" text-anchor="middle" fill="#dcfce7" font-size="14" font-weight="800">合规 · 审计 · 策略闭环</text>
+          <text x="180" y="340" text-anchor="middle" fill="#bbf7d0" font-size="11">云端可控 · 可审计</text>
+          <rect x="16" y="366" width="328" height="58" rx="10" fill="#1e293b" stroke="#64748b" stroke-width="1.2"/>
+          <text x="180" y="392" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="700">数据 · 工具 · 外部系统集成</text>
+        </svg>
+      </div>
+      <div class="trap-stack-pane">
+        <div class="figure-shell">
+          <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>噪声叙事 vs 分层阅读</span></div>
+          <div class="figure-shell__body">
+            <svg viewBox="0 0 1180 520" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <pattern id="tr2-dot" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.4" fill="#30363d"/></pattern>
+                <linearGradient id="tr2-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a78bfa"/><stop offset="34%" stop-color="#f472b6"/><stop offset="68%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#4ade80"/></linearGradient>
+                <marker id="tr2-ar" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><path d="M0,0 L14,5 L0,10 Z" fill="#cbd5e1"/></marker>
+                <filter id="tr2-sh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <rect width="1180" height="520" fill="url(#tr2-dot)" opacity=".36"/>
+              <rect x="20" y="36" width="160" height="448" rx="16" fill="#1c0a0a" stroke="#b91c1c" stroke-width="2" opacity=".92"/>
+              <text x="100" y="78" text-anchor="middle" fill="#fca5a5" font-size="20" font-weight="800" font-family="JetBrains Mono,monospace">NOISE</text>
+              <text x="100" y="118" text-anchor="middle" fill="#fecaca" font-size="18" font-weight="700">标题党</text>
+              <text x="100" y="158" text-anchor="middle" fill="#fff" font-size="21" font-weight="700">CEO 躺平</text>
+              <text x="100" y="194" text-anchor="middle" fill="#fff" font-size="21" font-weight="700">全员 Agent</text>
+              <text x="100" y="242" text-anchor="middle" fill="#94a3b8" font-size="17">≠ 主线</text>
+              <line x1="100" y1="268" x2="100" y2="410" stroke="#7f1d1d" stroke-width="2" stroke-dasharray="8 6"/>
+              <text x="100" y="436" text-anchor="middle" fill="#64748b" font-size="16">看不到分层</text>
+              <path d="M 188 260 L 228 260" stroke="#64748b" stroke-width="3" marker-end="url(#tr2-ar)"/>
+              <text x="208" y="248" text-anchor="middle" fill="#94a3b8" font-size="16">对照</text>
+              <rect x="240" y="36" width="920" height="448" rx="22" fill="#0b1224" stroke="url(#tr2-g)" stroke-width="4" filter="url(#tr2-sh)"/>
+              <text x="700" y="82" text-anchor="middle" fill="#e9d5ff" font-size="24" font-weight="900" font-family="JetBrains Mono,monospace">READ THE STACK</text>
+              <text x="700" y="112" text-anchor="middle" fill="#94a3b8" font-size="19">每层对应真实工程环节</text>
+              <rect x="272" y="132" width="856" height="52" rx="12" fill="rgba(167,139,250,.18)" stroke="#a78bfa" stroke-width="2"/>
+              <text x="700" y="166" text-anchor="middle" fill="#ede9fe" font-size="23" font-weight="800">① 托管执行 · runtime / 检查点 / 凭据 / 观测</text>
+              <rect x="272" y="194" width="856" height="52" rx="12" fill="rgba(244,114,182,.14)" stroke="#f472b6" stroke-width="2"/>
+              <text x="700" y="228" text-anchor="middle" fill="#fce7f3" font-size="23" font-weight="800">② Workflow 编排 ↔ Agent 决策</text>
+              <rect x="272" y="256" width="856" height="52" rx="12" fill="rgba(56,189,248,.14)" stroke="#38bdf8" stroke-width="2"/>
+              <text x="700" y="290" text-anchor="middle" fill="#e0f2fe" font-size="23" font-weight="800">③ 技术组件与操作流程 · 细致分层</text>
+              <rect x="272" y="318" width="856" height="52" rx="12" fill="rgba(74,222,128,.14)" stroke="#4ade80" stroke-width="2"/>
+              <text x="700" y="352" text-anchor="middle" fill="#bbf7d0" font-size="23" font-weight="800">④ 合规闭环 · 云端可控 · 可审计</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#layer-reading</span><span class="slide-number" data-current="2" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="TrapStory">
+    <p class="kicker">字幕 #41–#55 · Vaibhav 推文线</p>
+    <h2 class="h2"><span class="wa">零散更新 → 一条可读叙事</span></h2>
+    <p class="lede mt-m">先回答推文：**怎么把 Anthropic 一连串产品动作串成故事**（#41–#47）；再落到结论：核心不是无人工厂，而是 <strong>Demo → 商用生产</strong>（#51–#53），整张蓝图描绘的是这层<strong>愿景</strong>（#55）。</p>
+    <div class="diagram-band diagram-band--compact">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>对齐口播顺序：叙事 → 否定话术 → 跳跃 → 愿景</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 360" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <marker id="ts-ar" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#94a3b8"/></marker>
+              <linearGradient id="ts-flow" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a78bfa"/><stop offset="50%" stop-color="#f472b6"/><stop offset="100%" stop-color="#4ade80"/></linearGradient>
+            </defs>
+            <rect width="1760" height="360" fill="#020617"/>
+            <rect x="48" y="52" width="480" height="120" rx="18" fill="#1e1b4b" stroke="#a78bfa" stroke-width="2"/>
+            <text x="288" y="92" text-anchor="middle" fill="#e9d5ff" font-size="26" font-weight="900">① 推文手法</text>
+            <text x="288" y="128" text-anchor="middle" fill="#c4b5fd" font-size="22">零散产品更新 · <tspan font-weight="800">叙事串联</tspan></text>
+            <text x="288" y="158" text-anchor="middle" fill="#94a3b8" font-size="19">#41–#47</text>
+            <path d="M 536 112 L 588 112" stroke="#64748b" stroke-width="4" marker-end="url(#ts-ar)"/>
+            <rect x="604" y="52" width="520" height="120" rx="18" fill="#0f172a" stroke="#f87171" stroke-width="2"/>
+            <text x="864" y="92" text-anchor="middle" fill="#fecaca" font-size="26" font-weight="900">② 否定标题党</text>
+            <text x="864" y="128" text-anchor="middle" fill="#e2e8f0" font-size="22">核心突破 <tspan font-weight="900">≠</tspan> 建「无人工厂」</text>
+            <text x="864" y="158" text-anchor="middle" fill="#94a3b8" font-size="19">#51</text>
+            <path d="M 1138 112 L 1190 112" stroke="#64748b" stroke-width="4" marker-end="url(#ts-ar)"/>
+            <rect x="1206" y="52" width="506" height="120" rx="18" fill="#0c1912" stroke="#4ade80" stroke-width="3"/>
+            <text x="1459" y="90" text-anchor="middle" fill="#86efac" font-size="26" font-weight="900">③ 蓝图要说的跳跃</text>
+            <text x="1459" y="128" text-anchor="middle" fill="#fff" font-size="22">实验室 <tspan fill="#94a3b8">demo</tspan> → <tspan fill="#4ade80">大规模商用生产</tspan></text>
+            <text x="1459" y="158" text-anchor="middle" fill="#94a3b8" font-size="19">#52–#53</text>
+            <rect x="120" y="208" width="1520" height="112" rx="20" fill="#0f172a" stroke="url(#ts-flow)" stroke-width="3"/>
+            <text x="880" y="252" text-anchor="middle" fill="#e9d5ff" font-size="28" font-weight="900">④ 收束 · 这才是蓝图真正想描绘的愿景</text>
+            <text x="880" y="294" text-anchor="middle" fill="#94a3b8" font-size="22">#55｜推文是「翻译层」，工程主线仍以图层为准</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#vaibhav #narrative</span><span class="slide-number" data-current="3" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="AgendaFour">
+    <p class="kicker">字幕 #56–#58 · 仅 ~4s 切入</p>
+    <h2 class="h2"><span class="wa">四大核心技术拼图</span></h2>
+    <p class="lede mt-m">「我们来谈谈」→ 四块拼图 → <strong>第一个：managed agents</strong>。本页只承接这句<strong>切口</strong>；四块细则分别在后面各页展开。</p>
+    <div class="diagram-band diagram-band--compact diagram-band--teaser">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>① 即将展开 · ②③④ 随后</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1600 200" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="fq-bar" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a78bfa"/><stop offset="33%" stop-color="#f472b6"/><stop offset="66%" stop-color="#38bdf8"/><stop offset="100%" stop-color="#4ade80"/></linearGradient>
+            </defs>
+            <rect x="60" y="36" width="360" height="100" rx="16" fill="rgba(167,139,250,.35)" stroke="#a78bfa" stroke-width="4"/>
+            <text x="240" y="82" text-anchor="middle" fill="#fff" font-size="30" font-weight="900">① Managed Agents</text>
+            <text x="240" y="118" text-anchor="middle" fill="#ede9fe" font-size="22">此刻口播入口</text>
+            <text x="520" y="96" text-anchor="middle" fill="#475569" font-size="34">···</text>
+            <rect x="620" y="50" width="230" height="72" rx="12" fill="#1e293b" stroke="#64748b" stroke-width="2"/><text x="735" y="94" text-anchor="middle" fill="#94a3b8" font-size="22" font-weight="700">② WF/Agent</text>
+            <rect x="890" y="50" width="230" height="72" rx="12" fill="#1e293b" stroke="#64748b" stroke-width="2"/><text x="1005" y="94" text-anchor="middle" fill="#94a3b8" font-size="22" font-weight="700">③ 云闭环</text>
+            <rect x="1160" y="50" width="230" height="72" rx="12" fill="#1e293b" stroke="#64748b" stroke-width="2"/><text x="1275" y="94" text-anchor="middle" fill="#94a3b8" font-size="22" font-weight="700">④ 平台</text>
+            <rect x="60" y="156" width="1480" height="8" rx="4" fill="url(#fq-bar)" opacity=".45"/>
+            <text x="800" y="188" text-anchor="middle" fill="#64748b" font-size="20">全长路线图（冷水 / 变革 / 时间轴）仍在后文 — 与目录型口播不同步拆页</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#first-puzzle</span><span class="slide-number" data-current="4" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Managed">
+    <p class="kicker">infra · managed agents</p>
+    <h2 class="h2"><span class="wa">最后一公里</span>不是模型，是运维面</h2>
+    <p class="lede mt-m">自建数月级 → 标准化托管：执行环境 + 安全合规 + 观测熔断。</p>
+    <div class="diagram-band diagram-band--managed">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>运维五件套</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 460" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="mg-dot" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.4" fill="#30363d"/></pattern>
+              <filter id="mg-g" x="-25%" y="-25%" width="150%" height="150%"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="mg-ar" markerWidth="18" markerHeight="12" refX="15" refY="6" orient="auto"><path d="M0,0 L18,6 L0,12 Z" fill="#cbd5e1"/></marker>
+              <linearGradient id="mg-rail" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+            </defs>
+            <rect width="1760" height="460" fill="url(#mg-dot)" opacity=".42"/>
+            <rect x="48" y="320" width="1064" height="10" rx="5" fill="url(#mg-rail)" opacity=".55"/>
+            <polygon points="448,228 328,142 328,314" fill="#1e1b4b" stroke="#a78bfa" stroke-width="4"/><text x="368" y="236" text-anchor="middle" fill="#ddd6fe" font-size="34" font-weight="900">沙箱</text>
+            <polygon points="628,228 508,142 508,314" fill="#1e1b4b" stroke="#c084fc" stroke-width="4"/><text x="548" y="236" text-anchor="middle" fill="#ede9fe" font-size="34" font-weight="900">检查点</text>
+            <polygon points="808,228 688,142 688,314" fill="#1e1b4b" stroke="#e879f9" stroke-width="4"/><text x="728" y="236" text-anchor="middle" fill="#fae8ff" font-size="34" font-weight="900">凭据</text>
+            <polygon points="988,228 868,142 868,314" fill="#1e1b4b" stroke="#38bdf8" stroke-width="4"/><text x="908" y="236" text-anchor="middle" fill="#e0f2fe" font-size="34" font-weight="900">观测</text>
+            <polygon points="1168,228 1048,142 1048,314" fill="#1e1b4b" stroke="#f87171" stroke-width="4"/><text x="1088" y="236" text-anchor="middle" fill="#fee2e2" font-size="34" font-weight="900">熔断</text>
+            <path d="M 1188 228 L 1270 228" stroke="#94a3b8" stroke-width="6" marker-end="url(#mg-ar)"/>
+            <rect x="1288" y="118" width="424" height="220" rx="32" fill="#0f172a" stroke="#a78bfa" stroke-width="5" filter="url(#mg-g)"/>
+            <text x="1500" y="188" text-anchor="middle" fill="#e9d5ff" font-size="42" font-weight="900" font-family="JetBrains Mono,monospace">MANAGED AGENTS</text>
+            <text x="1500" y="258" text-anchor="middle" fill="#e2e8f0" font-size="36" font-weight="700">模型 API → <tspan fill="#86efac">Agent 运行环境</tspan></text>
+            <text x="880" y="418" text-anchor="middle" fill="#94a3b8" font-size="32" font-weight="700">托管层上线 = 工程叙事与商业叙事一起前移</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#managed-agents</span><span class="slide-number" data-current="5" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="WF-Agent">
+    <p class="kicker">decision logic</p>
+    <h2 class="h2">Workflow vs <span class="wa">Agent</span></h2>
+    <p class="lede mt-m">《Building Effective AI Agents》：名词之争背后是<strong>决策权归属</strong>。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>deterministic DAG · LLM hub</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 420" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="wa-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <marker id="wa-ar" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#94a3b8"/></marker>
+            </defs>
+            <rect width="1760" height="420" fill="url(#wa-dot)" opacity=".38"/>
+            <rect x="56" y="56" width="720" height="308" rx="22" fill="#0f172a" stroke="#64748b" stroke-width="3"/>
+            <text x="416" y="112" text-anchor="middle" fill="#94a3b8" font-size="30" font-weight="900">WORKFLOW</text>
+            <circle cx="200" cy="240" r="36" fill="#1e293b" stroke="#94a3b8" stroke-width="3"/><text x="200" y="248" text-anchor="middle" fill="#e2e8f0" font-size="22" font-weight="700">S1</text>
+            <circle cx="380" cy="240" r="36" fill="#1e293b" stroke="#94a3b8" stroke-width="3"/><text x="380" y="248" text-anchor="middle" fill="#e2e8f0" font-size="22" font-weight="700">S2</text>
+            <circle cx="560" cy="240" r="36" fill="#1e293b" stroke="#94a3b8" stroke-width="3"/><text x="560" y="248" text-anchor="middle" fill="#e2e8f0" font-size="22" font-weight="700">S3</text>
+            <line x1="236" y1="240" x2="344" y2="240" stroke="#64748b" stroke-width="4" marker-end="url(#wa-ar)"/>
+            <line x1="416" y1="240" x2="524" y2="240" stroke="#64748b" stroke-width="4" marker-end="url(#wa-ar)"/>
+            <text x="416" y="340" text-anchor="middle" fill="#64748b" font-size="26">分支写死 · 机械执行 · 无自主决策</text>
+            <rect x="984" y="56" width="720" height="308" rx="22" fill="#0c1222" stroke="#a78bfa" stroke-width="4"/>
+            <text x="1344" y="112" text-anchor="middle" fill="#e9d5ff" font-size="30" font-weight="900">AGENT</text>
+            <circle cx="1344" cy="230" r="72" fill="#312e81" stroke="#c084fc" stroke-width="4"/>
+            <text x="1344" y="242" text-anchor="middle" fill="#fff" font-size="28" font-weight="900">LLM</text>
+            <circle cx="1120" cy="160" r="28" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/><line x1="1148" y1="175" x2="1288" y2="210" stroke="#38bdf8" stroke-width="2"/>
+            <circle cx="1180" cy="320" r="28" fill="#1e293b" stroke="#f472b6" stroke-width="2"/><line x1="1205" y1="295" x2="1305" y2="250" stroke="#f472b6" stroke-width="2"/>
+            <circle cx="1568" cy="200" r="28" fill="#1e293b" stroke="#4ade80" stroke-width="2"/><line x1="1540" y1="205" x2="1416" y2="220" stroke="#4ade80" stroke-width="2"/>
+            <circle cx="1520" cy="300" r="28" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/><line x1="1495" y1="285" x2="1395" y2="250" stroke="#fbbf24" stroke-width="2"/>
+            <text x="1344" y="340" text-anchor="middle" fill="#94a3b8" font-size="26">实时反馈 → 动态选工具 / 改路径</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#workflow #agent</span><span class="slide-number" data-current="6" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Vertex">
+    <p class="kicker">enterprise stack</p>
+    <h2 class="h2">Claude × Google Cloud · <span class="wa">架构闭环</span></h2>
+    <p class="lede mt-m">单一厂商兜不住：弹性算力 + 合规审计 + 云原生调度 ↔ 模型与 Agent 托管。</p>
+    <div class="diagram-band diagram-band--compact">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>vertex ↔ anthropic · governance ring</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 360" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="vx-br" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1d4ed8"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <linearGradient id="vx-ant" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <marker id="vx-ar" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><path d="M0,0 L14,5 L0,10 Z" fill="#f472b6"/></marker>
+            </defs>
+            <ellipse cx="880" cy="180" rx="720" ry="150" fill="none" stroke="#334155" stroke-width="3" stroke-dasharray="16 10"/>
+            <text x="880" y="54" text-anchor="middle" fill="#64748b" font-size="26" font-family="JetBrains Mono,monospace">enterprise grade · compliance ring</text>
+            <rect x="96" y="118" width="520" height="180" rx="24" fill="url(#vx-br)" stroke="#60a5fa" stroke-width="4"/>
+            <text x="356" y="178" text-anchor="middle" fill="#bfdbfe" font-size="30" font-weight="900">Google Cloud · Vertex</text>
+            <text x="356" y="228" text-anchor="middle" fill="#e2e8f0" font-size="26">部署 / 调度 / 合规治理</text>
+            <text x="356" y="268" text-anchor="middle" fill="#93c5fd" font-size="22">弹性算力 · 审计轨迹</text>
+            <rect x="1144" y="118" width="520" height="180" rx="24" fill="url(#vx-ant)" stroke="#c084fc" stroke-width="4"/>
+            <text x="1404" y="178" text-anchor="middle" fill="#e9d5ff" font-size="30" font-weight="900">Anthropic</text>
+            <text x="1404" y="228" text-anchor="middle" fill="#e2e8f0" font-size="26">模型核心 · Agent 执行托管</text>
+            <text x="1404" y="268" text-anchor="middle" fill="#ddd6fe" font-size="22">运维封装 · 护栏一体化</text>
+            <path d="M 616 208 Q 880 280 1144 208" fill="none" stroke="#f472b6" stroke-width="5" marker-end="url(#vx-ar)"/>
+            <text x="880" y="312" text-anchor="middle" fill="#fbcfe8" font-size="28" font-weight="700">标准化开发接口 · 少做跨平台拼图</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#vertex #anthropic</span><span class="slide-number" data-current="7" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Platform">
+    <p class="kicker">strategy</p>
+    <h2 class="h2">从卖模型到卖<span class="wa">Agent 平台</span></h2>
+    <p class="lede mt-m">「企业不公平优势」= 平台上直接搭建 Agent 业务体系；竞争重心 → <strong>稳定进生产</strong>。</p>
+    <div class="grid g2 mt-l">
+      <div class="card"><h4>旧范式</h4><p class="dim">围绕模型自建一长串工程。</p></div>
+      <div class="card card-accent"><h4>新范式</h4><p class="dim">Agent 升格为核心入口 · <strong>/runtime/services</strong> 心智。</p></div>
+    </div>
+    <div class="diagram-band diagram-band--compact mt-l">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>pivot · scoreboard moves</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1600 140" preserveAspectRatio="xMidYMid meet">
+            <rect x="80" y="36" width="660" height="68" rx="14" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+            <text x="410" y="78" text-anchor="middle" fill="#94a3b8" font-size="28" font-weight="700">榜单：模型分数</text>
+            <text x="860" y="82" text-anchor="middle" fill="#f472b6" font-size="44" font-weight="900">⇒</text>
+            <rect x="920" y="36" width="600" height="68" rx="14" fill="#312e81" stroke="#a78bfa" stroke-width="3"/>
+            <text x="1220" y="78" text-anchor="middle" fill="#e9d5ff" font-size="28" font-weight="800">榜单：Agent 落地能力</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#platform-shift</span><span class="slide-number" data-current="8" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Cold">
+    <p class="kicker">hard truth</p>
+    <h2 class="h2">三盆冷水 · <span class="wa">HN 基调</span></h2>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>chaos · lock-in · correctness gap</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 380" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="cd1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0c4a6e"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <linearGradient id="cd2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4c1d95"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+              <linearGradient id="cd3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7f1d1d"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+            </defs>
+            <rect width="1760" height="380" fill="#020617"/>
+            <rect x="48" y="48" width="520" height="284" rx="22" fill="url(#cd1)" stroke="#38bdf8" stroke-width="3"/>
+            <text x="308" y="120" text-anchor="middle" fill="#7dd3fc" font-size="32" font-weight="900">① 蛮荒期</text>
+            <text x="308" y="188" text-anchor="middle" fill="#e2e8f0" font-size="26">框架周更 · 无统一规范</text>
+            <text x="308" y="238" text-anchor="middle" fill="#94a3b8" font-size="24">非确定性 × 死板编排</text>
+            <text x="308" y="292" text-anchor="middle" fill="#64748b" font-size="22">混搭栈 · 离规模化尚远</text>
+            <rect x="620" y="48" width="520" height="284" rx="22" fill="url(#cd2)" stroke="#c084fc" stroke-width="3"/>
+            <text x="880" y="120" text-anchor="middle" fill="#e9d5ff" font-size="32" font-weight="900">② 深度绑定</text>
+            <text x="880" y="188" text-anchor="middle" fill="#e2e8f0" font-size="26">编排 / 权限 / 运维 / 追踪</text>
+            <text x="880" y="238" text-anchor="middle" fill="#94a3b8" font-size="24">换模型 · 换云 · 换栈</text>
+            <text x="880" y="292" text-anchor="middle" fill="#64748b" font-size="22">调用量↑ → 锁定风险↑</text>
+            <rect x="1192" y="48" width="520" height="284" rx="22" fill="url(#cd3)" stroke="#f87171" stroke-width="3"/>
+            <text x="1452" y="120" text-anchor="middle" fill="#fecaca" font-size="32" font-weight="900">③ 可运行 ≠ 可商用</text>
+            <text x="1452" y="188" text-anchor="middle" fill="#e2e8f0" font-size="26">输出是否正确 · 是否贴合业务</text>
+            <text x="1452" y="238" text-anchor="middle" fill="#94a3b8" font-size="24">校验 · 兜底 · 回滚薄弱</text>
+            <text x="1452" y="292" text-anchor="middle" fill="#64748b" font-size="22">比「长期记忆」更致命的瓶颈</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#reality-check</span><span class="slide-number" data-current="9" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Memory">
+    <p class="kicker">footnote</p>
+    <h2 class="h2">「长期记忆」· <span class="wa">工程翻译</span></h2>
+    <p class="lede mt-m">向量库 + RAG：召回 / 清理 / 上下文关联仍早期——「CEO 躺平」纯属话术。</p>
+    <div class="diagram-band diagram-band--compact">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>rag · memory layer</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1600 220" preserveAspectRatio="xMidYMid meet">
+            <rect x="80" y="60" width="360" height="100" rx="16" fill="#1e1b4b" stroke="#a78bfa" stroke-width="2"/><text x="260" y="122" text-anchor="middle" fill="#e9d5ff" font-size="28" font-weight="800">向量索引</text>
+            <text x="480" y="125" text-anchor="middle" fill="#94a3b8" font-size="40">+</text>
+            <rect x="540" y="60" width="360" height="100" rx="16" fill="#0c4a6e" stroke="#38bdf8" stroke-width="2"/><text x="720" y="122" text-anchor="middle" fill="#bae6fd" font-size="28" font-weight="800">检索增强</text>
+            <text x="940" y="125" text-anchor="middle" fill="#94a3b8" font-size="40">⇒</text>
+            <rect x="1000" y="50" width="520" height="120" rx="18" fill="#0f172a" stroke="#f472b6" stroke-width="3"/>
+            <text x="1260" y="108" text-anchor="middle" fill="#fbcfe8" font-size="30" font-weight="900">≠ 已解决商用记忆</text>
+            <text x="1260" y="148" text-anchor="middle" fill="#94a3b8" font-size="24">质量 · 冗余 · 关联精度</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#rag #memory</span><span class="slide-number" data-current="10" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Shift">
+    <p class="kicker">strip marketing</p>
+    <h2 class="h2">演示级 Demo → <span class="wa">生产级基础设施</span></h2>
+    <p class="lede mt-m">托管封装底层 → <strong>中小团队</strong>也能装配 Agent 业务；抢的是 Agent 运行「水电煤」。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>dashed prototype → solid prod</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 320" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="sh-ln" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#64748b"/><stop offset="45%" stop-color="#64748b"/><stop offset="55%" stop-color="#4ade80"/><stop offset="100%" stop-color="#4ade80"/></linearGradient>
+            </defs>
+            <rect width="1760" height="320" fill="#020617"/>
+            <text x="320" y="100" text-anchor="middle" fill="#94a3b8" font-size="28" font-weight="800">大厂游乐场时代</text>
+            <text x="1440" y="100" text-anchor="middle" fill="#86efac" font-size="28" font-weight="800">平民化托管时代</text>
+            <path d="M 120 200 Q 440 120 880 200 T 1640 200" fill="none" stroke="url(#sh-ln)" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="200" cy="188" r="14" fill="#64748b"/><text x="200" y="248" text-anchor="middle" fill="#64748b" font-size="22">实验室 Demo</text>
+            <circle cx="880" cy="168" r="18" fill="#fbbf24"/><text x="880" y="268" text-anchor="middle" fill="#fde68a" font-size="24" font-weight="700">Managed Agents 拐点</text>
+            <circle cx="1560" cy="188" r="14" fill="#4ade80"/><text x="1560" y="248" text-anchor="middle" fill="#86efac" font-size="22">3–10 人团队覆盖多岗</text>
+            <text x="880" y="52" text-anchor="middle" fill="#64748b" font-size="26" font-family="JetBrains Mono,monospace">2026 · 拼工程化与人机协同效率</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#infra-shift</span><span class="slide-number" data-current="11" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="Timeline">
+    <p class="kicker">arc</p>
+    <h2 class="h2">2023 → 2026 · <span class="wa">重心迁移</span></h2>
+    <div class="diagram-band diagram-band--timeline">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>四年节拍 · 协作焦点</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 440" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="tl-z1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(71,85,105,.35)"/><stop offset="100%" stop-color="rgba(15,23,42,0)"/></linearGradient>
+              <linearGradient id="tl-z4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(167,139,250,.45)"/><stop offset="100%" stop-color="rgba(244,114,182,.08)"/></linearGradient>
+              <filter id="tl-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="tl-ar" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0,0 L12,5 L0,10 Z" fill="#64748b"/></marker>
+            </defs>
+            <rect width="1760" height="440" fill="#020617"/>
+            <rect x="100" y="56" width="340" height="328" rx="20" fill="url(#tl-z1)" stroke="#334155" stroke-width="2"/>
+            <rect x="460" y="56" width="340" height="328" rx="20" fill="url(#tl-z1)" stroke="#334155" stroke-width="2"/>
+            <rect x="820" y="56" width="340" height="328" rx="20" fill="url(#tl-z1)" stroke="#475569" stroke-width="2"/>
+            <rect x="1180" y="56" width="480" height="328" rx="24" fill="url(#tl-z4)" stroke="#a78bfa" stroke-width="3" filter="url(#tl-glow)"/>
+            <line x1="140" y1="220" x2="1620" y2="220" stroke="#1e293b" stroke-width="8" stroke-linecap="round"/>
+            <line x1="140" y1="220" x2="1320" y2="220" stroke="url(#fq-bar)" stroke-width="8" stroke-linecap="round" opacity=".85"/>
+            <path d="M 1320 220 L 1540 220" stroke="#f472b6" stroke-width="10" stroke-linecap="round" marker-end="url(#tl-ar)"/>
+            <circle cx="270" cy="220" r="22" fill="#0f172a" stroke="#64748b" stroke-width="4"/>
+            <text x="270" y="232" text-anchor="middle" fill="#e2e8f0" font-size="30" font-weight="900">'23</text>
+            <text x="270" y="118" text-anchor="middle" fill="#94a3b8" font-size="32" font-weight="800">生成</text>
+            <text x="270" y="332" text-anchor="middle" fill="#cbd5e1" font-size="30" font-weight="700">文案 / 代码辅助出现</text>
+            <circle cx="630" cy="220" r="22" fill="#0f172a" stroke="#64748b" stroke-width="4"/>
+            <text x="630" y="232" text-anchor="middle" fill="#e2e8f0" font-size="30" font-weight="900">'24</text>
+            <text x="630" y="118" text-anchor="middle" fill="#94a3b8" font-size="32" font-weight="800">工具链</text>
+            <text x="630" y="332" text-anchor="middle" fill="#cbd5e1" font-size="30" font-weight="700">IDE · CLI · 插件嵌入</text>
+            <circle cx="990" cy="220" r="24" fill="#1e293b" stroke="#94a3b8" stroke-width="4"/>
+            <text x="990" y="233" text-anchor="middle" fill="#f1f5f9" font-size="30" font-weight="900">'25</text>
+            <text x="990" y="118" text-anchor="middle" fill="#cbd5e1" font-size="32" font-weight="800">单体 Agent</text>
+            <text x="990" y="332" text-anchor="middle" fill="#e2e8f0" font-size="30" font-weight="700">能力评测 · 场景渗透</text>
+            <circle cx="1390" cy="220" r="34" fill="#312e81" stroke="#e879f9" stroke-width="5" filter="url(#tl-glow)"/>
+            <text x="1390" y="236" text-anchor="middle" fill="#fff" font-size="36" font-weight="900">'26</text>
+            <text x="1390" y="108" text-anchor="middle" fill="#e9d5ff" font-size="36" font-weight="900">生产化</text>
+            <text x="1390" y="348" text-anchor="middle" fill="#fce7f3" font-size="32" font-weight="800">人机协同 · Agent 集群 · 托管基建</text>
+            <text x="880" y="408" text-anchor="middle" fill="#64748b" font-size="28" font-weight="700">从未「无人公司」——啃的是基建、合规与风险边界</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#timeline</span><span class="slide-number" data-current="12" data-total="13"></span></div>
+  </section>
+
+  <section class="slide slide--spread" data-title="CTA">
+    <p class="kicker">closing</p>
+    <h2 class="h2">留给你的问题</h2>
+    <p class="lede mt-m">当 Agent 吃掉大量重复执行类技术工作时，<span class="wa">你的核心竞争力押在哪</span>？</p>
+    <div class="diagram-band mt-l">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>互动 · 收口</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 320" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <linearGradient id="cta-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e1b4b"/><stop offset="50%" stop-color="#0f172a"/><stop offset="100%" stop-color="#0c4a6e"/></linearGradient>
+              <linearGradient id="cta-ring" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#a78bfa"/><stop offset="50%" stop-color="#f472b6"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient>
+            </defs>
+            <rect width="1760" height="320" rx="28" fill="url(#cta-bg)" stroke="url(#cta-ring)" stroke-width="4"/>
+            <ellipse cx="880" cy="160" rx="720" ry="118" fill="none" stroke="rgba(167,139,250,.25)" stroke-width="2" stroke-dasharray="14 10"/>
+            <text x="880" y="118" text-anchor="middle" fill="#e9d5ff" font-size="40" font-weight="900">评论区见 · 对立观点与实战经验都欢迎</text>
+            <text x="880" y="188" text-anchor="middle" fill="#cbd5e1" font-size="34" font-weight="700">图层读懂蓝图 · 冷水对照现实 · 下一期继续拆工程</text>
+            <text x="880" y="258" text-anchor="middle" fill="#94a3b8" font-size="30" font-weight="700">感谢收听 · <tspan fill="#fbcfe8" font-weight="800">拜拜</tspan></text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="row mt-l" style="justify-content:center;flex-wrap:wrap;gap:16px">
+      <span class="tag">Anthropic 蓝图</span>
+      <span class="tag">Agent 生产化</span>
+      <span class="tag">老 K × 阿柚</span>
+    </div>
+    <div class="deck-footer"><span class="mono">anthropic-ai-blueprint-dialogue · #cta</span><span class="slide-number" data-current="13" data-total="13"></span></div>
+  </section>
+
+</div>
+<script src="html-ppt-assets/runtime.js"></script>
+<script>
+(function(){
+var slides=document.querySelectorAll('.deck .slide');
+window.go=function(n){
+  if(n<0||n>=slides.length)return;
+  slides.forEach(function(s,i){
+    s.classList.toggle('is-active',i===n);
+  });
+};
+})();
+</script>
+</body>
+</html>

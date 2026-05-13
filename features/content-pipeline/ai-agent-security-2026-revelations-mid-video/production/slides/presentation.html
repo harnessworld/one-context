@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1.0">
+<title>2026 AI Agent 安全启示录</title>
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
+<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/themes/mobile-dark.css">
+<style>
+/* Open Design 取向：杂志层级 + 风险叙事（猩红 / 火焰橙 /  hazard 纹理） */
+body.deck-od-risk{
+  --c-bg:#060403;
+  --c-surface:#120c0c;
+  --c-surface-2:#1c1212;
+  --c-text-1:#faf6f5;
+  --c-text-2:#b8a8a5;
+  --c-accent-a:#ef4444;
+  --c-accent-b:#f97316;
+  --c-accent-c:#fbbf24;
+  --c-border:rgba(239,68,68,0.18);
+}
+body.deck-od-risk{margin:0;background:radial-gradient(ellipse 120% 80% at 50% -20%,rgba(127,29,29,0.35),transparent 50%),var(--c-bg);min-height:100vh;overflow:hidden;}
+#P{
+  position:fixed;left:0;top:0;width:1920px;height:1080px;margin:0;z-index:1;overflow:hidden;
+  /* 暗角减弱：避免四角长期压在正文/卡片标签上 */
+  box-shadow:inset 0 0 100px rgba(0,0,0,0.38),inset 0 -72px 110px rgba(185,28,28,0.07);
+}
+.od-ember{
+  position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);width:118%;height:260px;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 55% 90% at 50% 100%,rgba(239,68,68,0.28) 0%,transparent 58%),
+    radial-gradient(ellipse 28% 70% at 22% 100%,rgba(249,115,22,0.22) 0%,transparent 52%),
+    radial-gradient(ellipse 28% 70% at 78% 100%,rgba(251,191,36,0.14) 0%,transparent 52%);
+  filter:blur(3px);
+  opacity:.52;
+  animation:od-ember-breathe 5.5s ease-in-out infinite;
+}
+#P::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0.045;z-index:0;
+  background-image:
+    repeating-linear-gradient(-45deg,rgba(239,68,68,0.06) 0 6px,transparent 6px 14px),
+    linear-gradient(180deg,rgba(0,0,0,0.12),transparent 28%);
+}
+body.deck-od-risk #P .s.slide{position:relative;z-index:2;}
+#prog{
+  position:fixed;top:0;left:0;height:6px;z-index:100;width:0;transition:width .35s cubic-bezier(.4,0,.2,1);
+  background:linear-gradient(90deg,#7f1d1d,#ef4444 40%,#f97316 72%,#fbbf24);
+  box-shadow:0 0 24px rgba(239,68,68,0.45);
+}
+/* 单一底栏（Open Design：一处编排信息，避免 #pn + slide-footer 双轨） */
+#deck-rail{
+  position:absolute;left:0;right:0;bottom:0;height:52px;z-index:8;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:0 40px 0 44px;box-sizing:border-box;
+  font-size:22px;font-weight:600;letter-spacing:0.04em;
+  color:#a18a88;
+  background:linear-gradient(180deg,transparent,rgba(6,4,3,0.92) 38%,rgba(12,8,8,0.98));
+  border-top:1px solid rgba(239,68,68,0.14);
+  font-family:var(--font-sans),system-ui,sans-serif;
+}
+#deck-rail #rail-left{
+  text-transform:none;letter-spacing:0.06em;font-size:19px;font-weight:800;color:#fca5a5;
+  max-width:72%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#deck-rail #rail-right{
+  flex-shrink:0;font-variant-numeric:tabular-nums;color:#78716c;font-weight:700;font-size:21px;
+}
+/* --slide-pad 为「上下 左右」双值，不能放进 calc；底栏 #deck-rail 占 52px，底部需额外让出 */
+body.deck-od-risk .s.slide{
+  padding:32px 48px calc(32px + 52px) 48px;
+  box-sizing:border-box;
+}
+body.deck-od-risk .slide-header{
+  border-left:5px solid transparent;border-image:linear-gradient(180deg,#ef4444,#f97316,#fbbf24) 1;
+  padding-left:22px;margin-bottom:12px;
+}
+body.deck-od-risk .slide-header h2{
+  font-family:Georgia,'Songti SC','Noto Serif SC','Times New Roman',serif;
+  font-weight:800;letter-spacing:-0.03em;line-height:1.08;
+  text-shadow:0 2px 28px rgba(239,68,68,0.15);
+}
+body.deck-od-risk .col.slide-main.v-center h1{
+  font-family:Georgia,'Songti SC','Noto Serif SC','Times New Roman',serif;
+  font-weight:800;letter-spacing:-0.03em;
+}
+.card-diagram{
+  border-radius:var(--r-md);
+  background:linear-gradient(165deg,rgba(239,68,68,0.06),transparent 42%),var(--c-surface);
+  padding:var(--card-pad);
+  border:1px solid var(--c-border);
+  box-shadow:0 12px 48px rgba(0,0,0,0.35),0 0 0 1px rgba(249,115,22,0.06) inset;
+}
+.deck-chapter-hint{
+  font-size:calc(var(--fs-pill) * 0.92);color:#fca5a5;font-weight:700;
+  letter-spacing:0.08em;margin:0 0 8px;text-transform:none;
+}
+.host-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+.host-pill{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:4px;
+  font-size:var(--fs-caption);font-weight:800;border:2px dashed rgba(251,191,36,0.55);
+  background:repeating-linear-gradient(90deg,rgba(15,15,15,0.9) 0 10px,rgba(30,10,10,0.95) 10px 20px);
+  color:#fde68a;
+  box-shadow:0 0 0 1px rgba(239,68,68,0.25),inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.host-pill.ac{border-color:rgba(239,68,68,0.65);color:#fecaca;background:linear-gradient(135deg,#1f0a0a,#120606);}
+.host-pill.xi{border-color:rgba(249,115,22,0.5);color:#fed7aa;background:linear-gradient(135deg,#1a1008,#100806);}
+.cover-hero-visual{width:min(500px,82%);margin:0 auto 14px;opacity:0.97;filter:drop-shadow(0 12px 36px rgba(239,68,68,0.28));}
+/* 封面：底栏同上，底部 padding 须含 52px rail */
+#s0.s.slide{padding:22px 44px calc(22px + 52px) 44px;box-sizing:border-box;}
+#s0 .col.slide-main.v-center{justify-content:center;min-height:0;padding-bottom:0;}
+#s0 .pull-line{margin-top:18px;padding-top:16px;border-top:1px solid rgba(239,68,68,0.22);max-width:880px;margin-left:auto;margin-right:auto;}
+body.deck-od-risk .slide-cards .g{
+  border-color:rgba(239,68,68,0.22)!important;
+  background:linear-gradient(160deg,rgba(239,68,68,0.07),rgba(0,0,0,0.15))!important;
+}
+body.deck-od-risk .badge{
+  background:linear-gradient(90deg,#450a0a,#7f1d1d)!important;color:#fecaca!important;border:1px solid rgba(248,113,113,0.45)!important;
+  box-shadow:0 0 20px rgba(239,68,68,0.25);
+}
+body.deck-od-risk .pill{
+  background:rgba(15,10,10,0.92)!important;color:#fcd34d!important;border:1px solid rgba(251,191,36,0.35)!important;
+}
+body.deck-od-risk .pill.active{
+  background:linear-gradient(90deg,#7f1d1d,#b91c1c)!important;color:#fff7ed!important;border-color:#f97316!important;
+}
+body.deck-od-risk .stat-value{color:#f87171!important;text-shadow:0 0 32px rgba(239,68,68,0.35);}
+body.deck-od-risk .stat-label{color:#fdba74!important;}
+body.deck-od-risk .emoji-xl{filter:drop-shadow(0 0 20px rgba(249,115,22,0.5));}
+body.deck-od-risk .diagram-hero{
+  flex:1 1 auto;min-height:0;max-height:320px;display:flex;align-items:center;justify-content:center;
+}
+body.deck-od-risk .diagram-hero svg{
+  width:100%;height:auto;max-height:300px;object-fit:contain;
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,0.45));
+}
+body.deck-od-risk .slide-main.fill-deck .slide-cards{flex:0 1 auto;min-height:0;}
+body.deck-od-risk .slide-main.fill-deck .slide-cards.grid-2x2{min-height:0;grid-template-rows:auto auto;align-content:start;}
+body.deck-od-risk .slide-main.fill-deck .slide-cards.split{flex:0 1 auto;}
+body.deck-od-risk .slide-main.fill-deck .process-flow{flex:0 1 auto;min-height:0;}
+body.deck-od-risk .slide-main.fill-deck > p:last-child{flex-shrink:0;margin-top:auto;}
+body.deck-od-risk .slide-cards.compact-grid .g{padding:var(--sp-md);min-width:0;}
+body.deck-od-risk .slide-cards.compact-grid .emoji-lg{font-size:clamp(36px,3vw,48px);}
+@keyframes od-ember-breathe{
+  0%,100%{opacity:.42;transform:translateX(-50%) scaleY(1);}
+  50%{opacity:.68;transform:translateX(-50%) scaleY(1.06) translateY(-4px);}
+}
+@media (prefers-reduced-motion:reduce){
+  #prog{transition:none;}
+  .od-ember{animation:none;opacity:.48;}
+}
+</style>
+</head>
+<body class="deck-od-risk">
+<div id="prog"></div>
+<div id="P">
+<div class="od-ember" aria-hidden="true"></div>
+<div id="deck-rail" aria-hidden="true"><span id="rail-left"></span><span id="rail-right"></span></div>
+
+<!-- s0 封面 · Open Design 扉页 + 风险图腾 -->
+<section class="s slide is-active" id="s0" data-rail="封面">
+  <div class="col slide-main v-center fill-deck">
+    <div style="text-align:center;max-width:1240px;margin:0 auto">
+      <p class="deck-chapter-hint" style="margin:0 0 6px">Agent 安全 · 风险叙事</p>
+      <div class="host-row" style="margin-bottom:12px">
+        <span class="host-pill ac">阿程 · 框架</span>
+        <span class="host-pill xi">小夏 · 落地</span>
+      </div>
+      <svg class="cover-hero-visual" viewBox="0 0 440 140" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg-fire" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#7f1d1d"/>
+            <stop offset="45%" style="stop-color:#ef4444"/>
+            <stop offset="100%" style="stop-color:#fbbf24"/>
+          </linearGradient>
+          <linearGradient id="lg-lock" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:#fca5a5"/>
+            <stop offset="100%" style="stop-color:#dc2626"/>
+          </linearGradient>
+        </defs>
+        <path d="M168 118 Q200 28 220 18 Q242 32 268 118 Q234 108 200 112 Q182 114 168 118Z" fill="url(#lg-fire)" opacity="0.92"/>
+        <path d="M188 118 Q208 52 220 48 Q232 56 252 118 Q226 108 202 110 Q194 111 188 118Z" fill="#f97316" opacity="0.85"/>
+        <path d="M205 118 Q218 78 222 76 Q228 82 238 118 Q222 112 212 114 Z" fill="#fef08a" opacity="0.9"/>
+        <path d="M285 48h72v52h-72V48zm28-22h36v22h-36V26z" fill="none" stroke="url(#lg-lock)" stroke-width="4.5" stroke-linejoin="round"/>
+        <circle cx="321" cy="72" r="11" fill="none" stroke="url(#lg-lock)" stroke-width="3.5"/>
+        <text x="220" y="134" text-anchor="middle" font-size="20" fill="#b91c1c" font-family="system-ui,sans-serif" font-weight="700">风险加剧 · 门禁要关</text>
+      </svg>
+      <h1 style="font-size:var(--fs-hero);font-weight:800;margin:4px 0 8px;line-height:1.05">2026 AI Agent<br><span style="background:linear-gradient(90deg,#fecaca,#f97316,#fbbf24);-webkit-background-clip:text;background-clip:text;color:transparent">安全启示录</span></h1>
+      <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 auto 14px;max-width:920px;line-height:1.42">复盘公开讨论中的事故 · 收紧权限与门禁</p>
+      <span class="pill">护栏 · 供应链 · 可信复盘</span>
+      <div class="pull-line"><p style="font-size:var(--fs-body);margin:0;line-height:1.48"><span class="wa">能力越强，失控代价越大——<br>门禁是人的责任。</span></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- s1 钩子 -->
+<section class="s slide" id="s1" data-rail="开篇">
+  <div class="slide-header">
+    <p class="deck-chapter-hint">开篇</p>
+    <span class="badge">追问</span>
+    <h2>你敢放手到什么程度？</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <div class="card-diagram diagram-hero" style="padding:8px var(--card-pad)">
+      <svg viewBox="0 0 720 340" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <radialGradient id="s1-rad" cx="50%" cy="52%" r="58%"><stop offset="0%" stop-color="#ef4444" stop-opacity="0.32"/><stop offset="55%" stop-color="#7f1d1d" stop-opacity="0.08"/><stop offset="100%" stop-color="#0c0a0a" stop-opacity="0"/></radialGradient>
+          <linearGradient id="s1-arc" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fbbf24"/><stop offset="50%" stop-color="#f97316"/><stop offset="100%" stop-color="#dc2626"/></linearGradient>
+          <filter id="s1-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <pattern id="s1-grid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="#292524" stroke-width="1" opacity="0.35"/></pattern>
+        </defs>
+        <rect width="720" height="340" fill="#0a0707"/>
+        <rect width="720" height="340" fill="url(#s1-grid)" opacity="0.45"/>
+        <rect width="720" height="340" fill="url(#s1-rad)"/>
+        <text x="360" y="42" text-anchor="middle" font-size="36" font-weight="800" fill="#fef2f2">权限半径 · 爆炸半径</text>
+        <text x="360" y="76" text-anchor="middle" font-size="22" fill="#d6d3d1">代价落在谁头上</text>
+        <ellipse cx="360" cy="188" rx="178" ry="178" fill="none" stroke="#292524" stroke-width="2" stroke-dasharray="14 10" opacity="0.85"/>
+        <ellipse cx="360" cy="188" rx="124" ry="124" fill="none" stroke="#57534e" stroke-width="3"/>
+        <path d="M360 66 A122 122 0 0 1 482 188" fill="rgba(251,191,36,0.06)" stroke="url(#s1-arc)" stroke-width="12" stroke-linecap="round" opacity="0.9" filter="url(#s1-blur)"/>
+        <path d="M482 188 A122 122 0 0 1 360 310" fill="none" stroke="#ef4444" stroke-width="10" stroke-linecap="round" opacity="0.82"/>
+        <path d="M360 310 A122 122 0 0 1 238 188" fill="none" stroke="#f97316" stroke-width="10" stroke-linecap="round" opacity="0.82"/>
+        <path d="M238 188 A122 122 0 0 1 360 66" fill="none" stroke="#fbbf24" stroke-width="10" stroke-linecap="round" opacity="0.82"/>
+        <circle cx="360" cy="188" r="58" fill="#1c0a0a" stroke="url(#s1-arc)" stroke-width="5"/>
+        <text x="360" y="182" text-anchor="middle" font-size="28" font-weight="800" fill="#fff">Agent</text>
+        <text x="360" y="212" text-anchor="middle" font-size="20" fill="#fca5a5">枢纽</text>
+        <text x="548" y="118" text-anchor="middle" font-size="24" font-weight="800" fill="#fecaca">不可逆</text>
+        <text x="548" y="278" text-anchor="middle" font-size="24" font-weight="800" fill="#fde68a">叙事</text>
+        <text x="172" y="278" text-anchor="middle" font-size="24" font-weight="800" fill="#fed7aa">复盘</text>
+        <text x="172" y="118" text-anchor="middle" font-size="24" font-weight="800" fill="#fca5a5">生产写</text>
+        <polygon points="360,52 378,82 342,82" fill="#ef4444"/>
+      </svg>
+    </div>
+    <div class="slide-cards grid-2x2 compact-grid">
+      <div class="g"><div class="emoji-lg">🔑</div><h3 class="g-title">生产权限</h3><p class="g-body">人不在屏幕前时，Agent 仍握着可写生产的路径吗？</p></div>
+      <div class="g"><div class="emoji-lg">⚠️</div><h3 class="g-title">不可逆命令</h3><p class="g-body">迁移 / destroy / 删容器——有没有强制二次确认闸？</p></div>
+      <div class="g"><div class="emoji-lg">📰</div><h3 class="g-title">公开复盘</h3><p class="g-body">2025 下–2026 春社群热帖串起同构事故。</p></div>
+      <div class="g"><div class="emoji-lg">🔗</div><h3 class="g-title">同一套结构</h3><p class="g-body">权限过高 × 删除类缺门禁——社群复盘里同类事故反复出现。</p></div>
+    </div>
+    <p style="font-size:var(--fs-caption);margin-top:8px"><span class="wa">问题多半不在模型偶发错答，而在把自动执行当成了省事。</span></p>
+  </div>
+</section>
+
+<!-- s2 第一部分延伸 · 事故带 -->
+<section class="s slide" id="s2" data-rail="事故链">
+  <div class="slide-header">
+    <p class="deck-chapter-hint">第一部分 · 真实事故</p>
+    <span class="badge">复盘</span>
+    <h2>反复出现的动作</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <div class="card-diagram diagram-hero" style="padding:8px var(--card-pad)">
+      <svg viewBox="0 0 940 300" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <marker id="mk-s2" markerWidth="14" markerHeight="10" refX="12" refY="4" orient="auto"><polygon points="0 0,14 4,0 8" fill="#f97316"/></marker>
+          <linearGradient id="s2-lane" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#44403c"/><stop offset="45%" stop-color="#dc2626"/><stop offset="100%" stop-color="#292524"/></linearGradient>
+          <linearGradient id="s2-floor" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#292524" stop-opacity="0.5"/><stop offset="100%" stop-color="#0c0a0a" stop-opacity="0"/></linearGradient>
+        </defs>
+        <rect width="940" height="300" fill="#080605"/>
+        <path d="M0 220 Q235 200 470 212 T940 218 V300 H0Z" fill="url(#s2-floor)"/>
+        <text x="470" y="40" text-anchor="middle" font-size="34" font-weight="800" fill="#fef2f2">事故链 · 四连撞</text>
+        <text x="470" y="72" text-anchor="middle" font-size="22" fill="#b8a8a5">权限 → 破坏型工具 → 无闸 → 生产</text>
+        <g transform="skewX(-8) translate(56,6)">
+        <rect x="28" y="88" width="196" height="102" rx="14" fill="#1c1414" stroke="#78716c" stroke-width="2.5"/>
+        <text x="126" y="132" text-anchor="middle" font-size="26" font-weight="800" fill="#e7e5e4">过高权限</text>
+        <text x="126" y="166" text-anchor="middle" font-size="20" fill="#a8a29e">人+Agent</text>
+        </g>
+        <line x1="268" y1="142" x2="318" y2="142" stroke="#f97316" stroke-width="5" marker-end="url(#mk-s2)"/>
+        <g transform="skewX(-8) translate(20,0)">
+        <rect x="318" y="88" width="214" height="102" rx="14" fill="#291010" stroke="#ef4444" stroke-width="2.5"/>
+        <text x="425" y="132" text-anchor="middle" font-size="26" font-weight="800" fill="#fecaca">删/迁工具</text>
+        <text x="425" y="166" text-anchor="middle" font-size="20" fill="#b8a8a5">TF·DB·容器</text>
+        </g>
+        <line x1="556" y1="142" x2="606" y2="142" stroke="#f97316" stroke-width="5" marker-end="url(#mk-s2)"/>
+        <g transform="skewX(-8) translate(-12,0)">
+        <rect x="612" y="88" width="168" height="102" rx="14" fill="#1c0c0c" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="8 5"/>
+        <text x="696" y="136" text-anchor="middle" font-size="28" font-weight="800" fill="#fde68a">无闸</text>
+        <text x="696" y="168" text-anchor="middle" font-size="20" fill="#a8a29e">缺确认</text>
+        </g>
+        <line x1="792" y1="142" x2="798" y2="142" stroke="#ef4444" stroke-width="6" marker-end="url(#mk-s2)"/>
+        <rect x="804" y="84" width="128" height="108" rx="16" fill="url(#s2-lane)" stroke="#dc2626" stroke-width="3"/>
+        <text x="868" y="138" text-anchor="middle" font-size="36" font-weight="900" fill="#fff">PROD</text>
+        <text x="868" y="176" text-anchor="middle" font-size="22" fill="#fecaca">受损面</text>
+        <path d="M110 232 Q470 196 830 232" fill="none" stroke="#7f1d1d" stroke-width="3" stroke-dasharray="6 8" opacity="0.95"/>
+        <text x="470" y="268" text-anchor="middle" font-size="22" fill="#fca5a5">防线应在进入生产前挡住</text>
+      </svg>
+    </div>
+    <div class="slide-cards split" style="align-items:stretch">
+      <div class="g" style="justify-content:flex-start">
+        <div class="emoji-lg">💥</div>
+        <h3 class="g-title">生产路径误触</h3>
+        <p class="g-body" style="flex:1">生产库迁移 / 同步不带确认 · Terraform 指向生产 state 后 destroy · <code style="font-size:0.88em">docker rm</code> 打掉带业务数据的容器……</p>
+        <span class="pill">案例细节见公开讨论原文</span>
+      </div>
+      <div class="g" style="justify-content:flex-start;border-color:rgba(239,68,68,0.35)!important">
+        <div class="emoji-lg">🧱</div>
+        <h3 class="g-title">共同机制</h3>
+        <p class="g-body" style="flex:1">智能体继承了操作员的过高权限；对<strong>删除类、迁移类</strong>缺少「对的人 × 对的时机 × 对的策略」三重对齐。</p>
+        <span class="pill">治理不是大厂专利</span>
+      </div>
+    </div>
+    <p style="font-size:var(--fs-caption);margin-top:8px"><span class="wa">只要 Agent 写代码、跑工具链，你就已在承担运维边界。</span></p>
+  </div>
+</section>
+
+<!-- s3 四类框架 -->
+<section class="s slide" id="s3" data-rail="四类风险">
+  <div class="slide-header">
+    <p class="deck-chapter-hint">第一部分 · 四类典型风险</p>
+    <span class="badge">分类</span>
+    <h2>每一类都能一夜清零</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <div class="card-diagram diagram-hero" style="padding:8px var(--card-pad)">
+      <svg viewBox="0 0 920 400" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <marker id="mk-s3" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><polygon points="0 0,12 4,0 8" fill="#f97316"/></marker>
+          <linearGradient id="s3-hub" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#450a0a"/><stop offset="100%" stop-color="#1c0a0a"/></linearGradient>
+          <filter id="s3-glow"><feGaussianBlur stdDeviation="4" result="x"/><feMerge><feMergeNode in="x"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <radialGradient id="s3-scan" cx="50%" cy="46%" r="50%"><stop offset="0%" stop-color="#ef4444" stop-opacity="0.12"/><stop offset="70%" stop-color="#0c0a0a" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect width="920" height="400" fill="#070504"/>
+        <circle cx="460" cy="228" r="210" fill="url(#s3-scan)"/>
+        <path d="M460 36 V72 M72 228 H108 M852 228 H812 M460 388 V348" stroke="#44403c" stroke-width="2" opacity="0.65"/>
+        <text x="460" y="42" text-anchor="middle" font-size="36" font-weight="800" fill="#fef2f2">四类翻车 · 同一缺口</text>
+        <text x="460" y="78" text-anchor="middle" font-size="22" fill="#b8a8a5">一角失守 · 一夜清零</text>
+        <polygon points="460,156 544,208 544,276 460,328 376,276 376,208" fill="url(#s3-hub)" stroke="#ef4444" stroke-width="4" filter="url(#s3-glow)"/>
+        <text x="460" y="236" text-anchor="middle" font-size="32" font-weight="900" fill="#fecaca">治理缺口</text>
+        <text x="460" y="272" text-anchor="middle" font-size="22" fill="#fde68a">中枢</text>
+        <rect x="372" y="96" width="176" height="62" rx="12" fill="#140808" stroke="#ef4444" stroke-width="3"/>
+        <text x="460" y="138" text-anchor="middle" font-size="26" font-weight="800" fill="#fecaca">① 注入</text>
+        <rect x="646" y="186" width="188" height="78" rx="14" fill="#140808" stroke="#fb923c" stroke-width="3"/>
+        <text x="740" y="224" text-anchor="middle" font-size="26" font-weight="800" fill="#fed7aa">② 漂移</text>
+        <text x="740" y="254" text-anchor="middle" font-size="20" fill="#a8a29e">上下文</text>
+        <rect x="366" y="334" width="188" height="58" rx="14" fill="#1c0505" stroke="#dc2626" stroke-width="3"/>
+        <text x="460" y="372" text-anchor="middle" font-size="26" font-weight="800" fill="#fca5a5">③ 越权</text>
+        <rect x="86" y="186" width="188" height="78" rx="14" fill="#140808" stroke="#78716c" stroke-width="3"/>
+        <text x="180" y="224" text-anchor="middle" font-size="26" font-weight="800" fill="#e7e5e4">④ 供应链</text>
+        <text x="180" y="254" text-anchor="middle" font-size="20" fill="#a8a29e">MCP/插件</text>
+        <line x1="460" y1="158" x2="460" y2="176" stroke="#f97316" stroke-width="4" marker-end="url(#mk-s3)"/>
+        <line x1="646" y1="225" x2="548" y2="218" stroke="#f97316" stroke-width="4" marker-end="url(#mk-s3)"/>
+        <line x1="274" y1="225" x2="372" y2="218" stroke="#f97316" stroke-width="4" marker-end="url(#mk-s3)"/>
+        <line x1="460" y1="328" x2="460" y2="334" stroke="#ef4444" stroke-width="4" marker-end="url(#mk-s3)"/>
+      </svg>
+    </div>
+    <div class="slide-cards grid-2x2 compact-grid">
+      <div class="g"><h3 class="g-title">① 注入与泄密</h3><p class="g-body">密钥 / token / 内网接口被诱导外送。</p></div>
+      <div class="g"><h3 class="g-title">② 目标漂移</h3><p class="g-body">长会话堆上下文；工具默认替你「省事」。</p></div>
+      <div class="g"><h3 class="g-title">③ 越权不可逆</h3><p class="g-body">destroy / 迁移 / 删容器——缺确认闸。</p></div>
+      <div class="g"><h3 class="g-title">④ 供应链</h3><p class="g-body">新 syscall、网络面随扩展进来。</p></div>
+    </div>
+    <p style="font-size:var(--fs-caption);margin-top:6px"><span class="wa">四类的根只有一个：能力往前跑，治理没跟上。</span></p>
+  </div>
+</section>
+
+<!-- s4 第二部分 · 拐点 -->
+<section class="s slide" id="s4" data-rail="范式变化">
+  <div class="slide-header">
+    <p class="deck-chapter-hint">第二部分 · 为何这两年格外刺眼</p>
+    <span class="badge">范式迁移</span>
+    <h2>从「建议」到「执行」</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <p style="font-size:var(--fs-body);margin:0;color:var(--c-text-2)">参谋只动嘴 → 副驾握方向盘：权限与爆炸半径同步放大。</p>
+    <div class="card-diagram diagram-hero" style="padding:8px var(--card-pad)">
+      <svg viewBox="0 0 900 360" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <marker id="mk-s4" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><polygon points="0 0,12 4,0 8" fill="#f97316"/></marker>
+          <linearGradient id="g-risk" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#fb923c"/><stop offset="100%" style="stop-color:#ef4444"/></linearGradient>
+          <radialGradient id="s4-burst" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="#ef4444" stop-opacity="0.22"/><stop offset="100%" stop-color="#0c0a0a" stop-opacity="0"/></radialGradient>
+          <linearGradient id="s4-beam" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#fbbf24" stop-opacity="0"/><stop offset="50%" stop-color="#f97316" stop-opacity="0.18"/><stop offset="100%" stop-color="#ef4444" stop-opacity="0"/></linearGradient>
+        </defs>
+        <rect width="900" height="360" fill="#060403"/>
+        <rect width="900" height="360" fill="url(#s4-burst)"/>
+        <rect x="412" y="88" width="76" height="220" fill="url(#s4-beam)" opacity="0.42"/>
+        <text x="450" y="40" text-anchor="middle" font-size="36" font-weight="800" fill="#fef2f2">范式迁移 · 执行节点承压</text>
+        <text x="450" y="76" text-anchor="middle" font-size="22" fill="#d6d3d1">演示顺滑 ≠ 生产可撤回</text>
+        <rect x="28" y="96" width="228" height="188" rx="18" fill="#141010" stroke="#57534e" stroke-width="2.5"/>
+        <rect x="48" y="114" width="188" height="100" rx="8" fill="#0c0a0a" stroke="#44403c"/>
+        <line x1="62" y1="134" x2="222" y2="134" stroke="#57534e" stroke-width="4"/><line x1="62" y1="158" x2="200" y2="158" stroke="#44403c" stroke-width="3"/><line x1="62" y1="182" x2="210" y2="182" stroke="#44403c" stroke-width="3"/>
+        <text x="142" y="248" text-anchor="middle" font-size="32" font-weight="900" fill="#d6d3d1">只建议</text>
+        <text x="142" y="282" text-anchor="middle" font-size="22" fill="#a8a29e">不动手</text>
+        <line x1="266" y1="188" x2="312" y2="188" stroke="#78716c" stroke-width="6" marker-end="url(#mk-s4)"/>
+        <rect x="322" y="88" width="256" height="204" rx="20" fill="rgba(127,29,29,0.5)" stroke="#f97316" stroke-width="4"/>
+        <path d="M344 112 L556 112 L556 124 L344 124 Z" fill="#fbbf24" opacity="0.4"/>
+        <text x="450" y="162" text-anchor="middle" font-size="38" font-weight="900" fill="#fed7aa">替你执行</text>
+        <text x="450" y="204" text-anchor="middle" font-size="26" fill="#fef2f2">Shell · IaC · DB · API</text>
+        <text x="450" y="246" text-anchor="middle" font-size="24" fill="#fde68a">权限在此放大</text>
+        <line x1="588" y1="188" x2="634" y2="188" stroke="url(#g-risk)" stroke-width="8" marker-end="url(#mk-s4)"/>
+        <rect x="644" y="96" width="228" height="188" rx="18" fill="#1a0505" stroke="#ef4444" stroke-width="4"/>
+        <path d="M672 128 L844 128 M758 114 L758 206 M718 168 L798 168" stroke="#7f1d1d" stroke-width="3" opacity="0.85"/>
+        <circle cx="758" cy="168" r="40" fill="none" stroke="#ef4444" stroke-width="4" stroke-dasharray="8 6"/>
+        <text x="758" y="258" text-anchor="middle" font-size="32" font-weight="900" fill="#fecaca">欠账显性</text>
+        <text x="758" y="294" text-anchor="middle" font-size="22" fill="#b8a8a5">难撤回</text>
+      </svg>
+    </div>
+    <p style="font-size:var(--fs-caption);margin:0"><span class="wa">迭代越快，欠账越多——和 OpenSSL / Log4j 同理，只是跑道换成 Agent。</span></p>
+  </div>
+</section>
+
+<!-- s5 第三部分 · 开源护栏 -->
+<section class="s slide" id="s5" data-rail="开源护栏">
+  <div class="slide-header">
+    <p class="deck-chapter-hint">第三部分 · 护栏已在开源生长</p>
+    <span class="badge">矩阵</span>
+    <h2>不必等「终极模型」</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <p style="font-size:var(--fs-body);margin:0;color:var(--c-text-2)">拦截 → 执行 → 观测；可参考 OWASP Agentic 等公开清单做映射。</p>
+    <div class="card-diagram diagram-hero" style="padding:8px var(--card-pad)">
+      <svg viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <marker id="mk-s5" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><polygon points="0 0,12 4,0 8" fill="#f97316"/></marker>
+          <linearGradient id="s5-stack" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ef4444" stop-opacity="0.35"/><stop offset="100%" stop-color="#0c0a0a" stop-opacity="0"/></linearGradient>
+          <linearGradient id="s5-glass" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#fff" stop-opacity="0.06"/><stop offset="100%" stop-color="#000" stop-opacity="0.25"/></linearGradient>
+        </defs>
+        <rect width="960" height="380" fill="#070504"/>
+        <rect x="36" y="56" width="258" height="288" rx="18" fill="#140808" stroke="#44403c" stroke-width="2.5"/>
+        <rect x="36" y="56" width="258" height="288" rx="18" fill="url(#s5-glass)"/>
+        <text x="165" y="92" text-anchor="middle" font-size="28" font-weight="900" fill="#fca5a5">纵深 · 三层</text>
+        <rect x="72" y="112" width="186" height="56" rx="10" fill="url(#s5-stack)" stroke="#ef4444" stroke-width="2.5"/><text x="165" y="150" text-anchor="middle" font-size="24" font-weight="800" fill="#fecaca">拦截</text>
+        <rect x="72" y="182" width="186" height="56" rx="10" fill="#1c1010" stroke="#f97316" stroke-width="2.5"/><text x="165" y="220" text-anchor="middle" font-size="24" font-weight="800" fill="#fed7aa">沙箱</text>
+        <rect x="72" y="252" width="186" height="56" rx="10" fill="#140808" stroke="#fb923c" stroke-width="2.5"/><text x="165" y="290" text-anchor="middle" font-size="24" font-weight="800" fill="#ffedd5">审计</text>
+        <path d="M165 314 L165 332" stroke="#78716c" stroke-width="3" marker-end="url(#mk-s5)"/>
+        <text x="165" y="362" text-anchor="middle" font-size="20" fill="#a8a29e">OWASP 映射</text>
+        <text x="642" y="44" text-anchor="middle" font-size="34" font-weight="900" fill="#fef2f2">开源护栏 · 串联</text>
+        <text x="642" y="78" text-anchor="middle" font-size="22" fill="#d6d3d1">先挡 · 再跑 · 可追责</text>
+        <rect x="334" y="104" width="190" height="128" rx="16" fill="rgba(185,28,28,0.28)" stroke="#f97316" stroke-width="3"/>
+        <text x="429" y="158" text-anchor="middle" font-size="28" font-weight="900" fill="#fed7aa">Armor</text>
+        <text x="429" y="196" text-anchor="middle" font-size="22" fill="#fde68a">策略管</text>
+        <line x1="532" y1="168" x2="566" y2="168" stroke="#f97316" stroke-width="4" marker-end="url(#mk-s5)"/>
+        <rect x="576" y="104" width="196" height="128" rx="16" fill="rgba(154,52,18,0.28)" stroke="#fb923c" stroke-width="3"/>
+        <text x="674" y="158" text-anchor="middle" font-size="26" font-weight="900" fill="#ffedd5">Gov Toolkit</text>
+        <text x="674" y="196" text-anchor="middle" font-size="22" fill="#fde68a">合规</text>
+        <line x1="780" y1="168" x2="814" y2="168" stroke="#f97316" stroke-width="4" marker-end="url(#mk-s5)"/>
+        <rect x="824" y="104" width="112" height="128" rx="16" fill="#140808" stroke="#78716c" stroke-width="3"/>
+        <text x="880" y="172" text-anchor="middle" font-size="28" font-weight="900" fill="#e7e5e4">Cordum</text>
+        <rect x="334" y="252" width="602" height="100" rx="16" fill="#1c0a0a" stroke="#ef4444" stroke-width="3"/>
+        <text x="635" y="298" text-anchor="middle" font-size="30" font-weight="900" fill="#fecaca">Governor</text>
+        <text x="635" y="334" text-anchor="middle" font-size="22" fill="#fde68a">长会话 · 痕迹可复盘</text>
+      </svg>
+    </div>
+    <p style="font-size:var(--fs-caption);margin:0"><span class="wa">治理是把钩子挂在对的执行路径上，不是买最贵的盒子。</span></p>
+  </div>
+</section>
+
+<!-- s6 供应链 -->
+<section class="s slide" id="s6" data-rail="供应链">
+  <div class="slide-header">
+    <p class="deck-chapter-hint">第三部分 · 扩展面</p>
+    <span class="badge">供应链</span>
+    <h2>装插件 = 新开 syscall / 网络面</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <div class="card-diagram diagram-hero" style="padding:8px var(--card-pad)">
+      <svg viewBox="0 0 880 340" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <marker id="mk-s6" markerWidth="11" markerHeight="8" refX="10" refY="4" orient="auto"><polygon points="0 0,11 4,0 8" fill="#f97316"/></marker>
+          <linearGradient id="s6-core" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#fb923c"/><stop offset="100%" stop-color="#ef4444"/></linearGradient>
+          <radialGradient id="s6-field" cx="50%" cy="48%" r="55%"><stop offset="0%" stop-color="#7f1d1d" stop-opacity="0.2"/><stop offset="100%" stop-color="#0a0606" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect width="880" height="340" fill="#060403"/>
+        <ellipse cx="440" cy="188" rx="340" ry="200" fill="url(#s6-field)"/>
+        <ellipse cx="440" cy="188" rx="142" ry="142" fill="none" stroke="#292524" stroke-width="2" stroke-dasharray="10 8"/>
+        <ellipse cx="440" cy="188" rx="98" ry="98" fill="none" stroke="#57534e" stroke-width="3"/>
+        <circle cx="440" cy="188" r="68" fill="#1c0a0a" stroke="url(#s6-core)" stroke-width="5"/>
+        <text x="440" y="182" text-anchor="middle" font-size="30" font-weight="900" fill="#fecaca">Agent</text>
+        <text x="440" y="216" text-anchor="middle" font-size="22" fill="#fde68a">宿主核</text>
+        <text x="440" y="42" text-anchor="middle" font-size="34" font-weight="900" fill="#fef2f2">扩展星图 · 新攻击面</text>
+        <text x="440" y="78" text-anchor="middle" font-size="22" fill="#d6d3d1">作者 · issue · 权限 ——审查半径要盖住</text>
+        <rect x="656" y="48" width="188" height="76" rx="14" fill="#140808" stroke="#ef4444" stroke-width="3"/>
+        <text x="750" y="88" text-anchor="middle" font-size="26" font-weight="900" fill="#fecaca">MCP</text>
+        <text x="750" y="114" text-anchor="middle" font-size="20" fill="#a8a29e">FS / 网络</text>
+        <line x1="656" y1="118" x2="528" y2="158" stroke="#f97316" stroke-width="3.5" marker-end="url(#mk-s6)"/>
+        <rect x="72" y="124" width="176" height="72" rx="14" fill="#140808" stroke="#fb923c" stroke-width="3"/>
+        <text x="160" y="164" text-anchor="middle" font-size="26" font-weight="900" fill="#fed7aa">Skill</text>
+        <text x="160" y="192" text-anchor="middle" font-size="20" fill="#a8a29e">隐式依赖</text>
+        <line x1="248" y1="158" x2="378" y2="172" stroke="#f97316" stroke-width="3.5" marker-end="url(#mk-s6)"/>
+        <rect x="612" y="232" width="196" height="72" rx="14" fill="#140808" stroke="#78716c" stroke-width="3"/>
+        <text x="710" y="268" text-anchor="middle" font-size="24" font-weight="900" fill="#e7e5e4">索引源</text>
+        <text x="710" y="294" text-anchor="middle" font-size="20" fill="#fca5a5">社区索引</text>
+        <line x1="612" y1="260" x2="518" y2="214" stroke="#94a3b8" stroke-width="3" stroke-dasharray="6 5" marker-end="url(#mk-s6)"/>
+        <rect x="56" y="236" width="196" height="68" rx="14" fill="#1a0505" stroke="#dc2626" stroke-width="3"/>
+        <text x="154" y="282" text-anchor="middle" font-size="24" font-weight="900" fill="#fca5a5">License</text>
+        <line x1="252" y1="268" x2="386" y2="206" stroke="#ef4444" stroke-width="3.5" marker-end="url(#mk-s6)"/>
+      </svg>
+    </div>
+    <div class="slide-cards split" style="align-items:stretch">
+      <div class="g">
+        <h3 class="g-title">装之前当代码审</h3>
+        <p class="g-body">作者、更新频率、issue 里权限争议——热门 MCP / Skill ≠ 威胁建模过。</p>
+      </div>
+      <div class="g" style="border-color:rgba(249,115,22,0.35)!important">
+        <h3 class="g-title">索引与讨论</h3>
+        <p class="g-body">社区里有 Agent Skills / MCP 等资源索引；装扩展前看出处、读 issue，与「审供应链」是同一件事。</p>
+      </div>
+    </div>
+    <p style="font-size:var(--fs-caption);margin-top:8px"><span class="wa">别只看 star——许可证与安全讨论更值得点开。</span></p>
+  </div>
+</section>
+
+<!-- s7 第四部分 · 三件事 -->
+<section class="s slide" id="s7" data-rail="落地行动">
+  <div class="slide-header">
+    <p class="deck-chapter-hint">第四部分 · 今天就能做</p>
+    <span class="badge">落地</span>
+    <h2>三件事养成肌肉记忆</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <div class="card-diagram diagram-hero" style="padding:8px var(--card-pad)">
+      <svg viewBox="0 0 860 340" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <marker id="mk-s7" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><polygon points="0 0,12 4,0 8" fill="#fbbf24"/></marker>
+          <linearGradient id="s7-wire" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ef4444"/><stop offset="50%" stop-color="#f97316"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+          <filter id="s7-glow"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect width="860" height="340" fill="#060403"/>
+        <ellipse cx="430" cy="178" rx="268" ry="132" fill="none" stroke="#292524" stroke-width="2" stroke-dasharray="16 14" opacity="0.55"/>
+        <ellipse cx="430" cy="178" rx="208" ry="102" fill="none" stroke="#44403c" stroke-width="2" opacity="0.75"/>
+        <polygon points="430,88 548,228 312,228" fill="#140808" stroke="url(#s7-wire)" stroke-width="5" filter="url(#s7-glow)"/>
+        <circle cx="430" cy="158" r="48" fill="#1c0a0a" stroke="#fbbf24" stroke-width="4"/>
+        <text x="430" y="152" text-anchor="middle" font-size="28" font-weight="900" fill="#fef2f2">肌肉记忆</text>
+        <text x="430" y="182" text-anchor="middle" font-size="22" fill="#fde68a">闭环</text>
+        <text x="430" y="44" text-anchor="middle" font-size="34" font-weight="900" fill="#fef2f2">每日三件事</text>
+        <text x="430" y="78" text-anchor="middle" font-size="22" fill="#d6d3d1">缺一就可能「顺手执行」</text>
+        <rect x="56" y="248" width="188" height="72" rx="16" fill="#1c0505" stroke="#ef4444" stroke-width="3"/>
+        <text x="150" y="284" text-anchor="middle" font-size="28" font-weight="900" fill="#fecaca">① 红线</text>
+        <text x="150" y="312" text-anchor="middle" font-size="20" fill="#b8a8a5">高危确认</text>
+        <rect x="618" y="248" width="188" height="72" rx="16" fill="#1a1008" stroke="#fb923c" stroke-width="3"/>
+        <text x="712" y="284" text-anchor="middle" font-size="28" font-weight="900" fill="#fed7aa">② 预算</text>
+        <text x="712" y="312" text-anchor="middle" font-size="20" fill="#b8a8a5">切段</text>
+        <rect x="336" y="252" width="188" height="72" rx="16" fill="#141210" stroke="#78716c" stroke-width="3"/>
+        <text x="430" y="286" text-anchor="middle" font-size="26" font-weight="900" fill="#e7e5e4">③ 供应链</text>
+        <text x="430" y="314" text-anchor="middle" font-size="20" fill="#a8a29e">审扩展</text>
+        <path d="M150 248 Q430 222 712 248" fill="none" stroke="#fbbf24" stroke-width="3" opacity="0.55"/>
+        <path d="M430 206 L150 248" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#mk-s7)" opacity="0.8"/>
+        <path d="M430 206 L430 252" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#mk-s7)" opacity="0.8"/>
+        <path d="M430 206 L712 248" fill="none" stroke="#fbbf24" stroke-width="2.5" marker-end="url(#mk-s7)" opacity="0.8"/>
+      </svg>
+    </div>
+    <div class="process-flow" style="flex-wrap:wrap;justify-content:center;gap:10px">
+      <span class="pill active">① 高危默认红色</span>
+      <span class="pill active">② 上下文预算</span>
+      <span class="pill active">③ 供应链审查</span>
+    </div>
+    <div class="slide-cards compact-grid" style="flex-direction:row;flex-wrap:nowrap;gap:var(--sp-sm)">
+      <div class="g" style="flex:1"><p class="g-body">删文件 / Shell / 生产 DB / IaC destroy → 二次确认或「仅预览」。</p></div>
+      <div class="g" style="flex:1"><p class="g-body">长对话压缩或分段；预算一到先归档小结再开新线程。</p></div>
+      <div class="g" style="flex:1"><p class="g-body">装链路前查作者、更新、可疑行为——高 star 不是背书。</p></div>
+    </div>
+    <p style="font-size:var(--fs-caption);margin-top:8px"><span class="wa">肌肉记忆比囤工具清单管用。</span></p>
+  </div>
+</section>
+
+<!-- s8 收束 -->
+<section class="s slide" id="s8" data-rail="收束">
+  <div class="slide-header">
+    <p class="deck-chapter-hint">结尾 · 不是否定 AI</p>
+    <span class="badge">态度</span>
+    <h2>老规律，新跑道</h2>
+  </div>
+  <div class="col slide-main fill-deck" style="gap:var(--sp-sm)">
+    <div class="card-diagram diagram-hero" style="padding:8px var(--card-pad)">
+      <svg viewBox="0 0 880 320" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs>
+          <linearGradient id="s8-rail" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#292524"/><stop offset="50%" stop-color="#7f1d1d"/><stop offset="100%" stop-color="#292524"/></linearGradient>
+        </defs>
+        <rect width="880" height="320" fill="#070504"/>
+        <text x="440" y="42" text-anchor="middle" font-size="34" font-weight="900" fill="#fef2f2">血泪史接力 · Agent 下一棒</text>
+        <rect x="72" y="76" width="176" height="104" rx="16" fill="#140808" stroke="#78716c" stroke-width="3"/>
+        <text x="160" y="118" text-anchor="middle" font-size="28" font-weight="900" fill="#d6d3d1">OpenSSL</text>
+        <text x="160" y="154" text-anchor="middle" font-size="22" fill="#a8a29e">Heartbleed</text>
+        <polygon points="262,128 286,116 286,140" fill="#f97316"/>
+        <rect x="352" y="76" width="176" height="104" rx="16" fill="#140808" stroke="#fb923c" stroke-width="3"/>
+        <text x="440" y="118" text-anchor="middle" font-size="28" font-weight="900" fill="#fed7aa">Log4j</text>
+        <text x="440" y="154" text-anchor="middle" font-size="22" fill="#fde68a">远程集中爆发</text>
+        <polygon points="528,128 552,116 552,140" fill="#ef4444"/>
+        <rect x="632" y="72" width="176" height="112" rx="18" fill="#1c0505" stroke="#ef4444" stroke-width="4"/>
+        <text x="720" y="118" text-anchor="middle" font-size="30" font-weight="900" fill="#fecaca">Agent 栈</text>
+        <text x="720" y="158" text-anchor="middle" font-size="22" fill="#fde68a">权限更近 · 个体更近</text>
+        <rect x="56" y="206" width="768" height="14" rx="7" fill="url(#s8-rail)" opacity="0.95"/>
+        <circle cx="160" cy="213" r="7" fill="#d6d3d1"/><circle cx="440" cy="213" r="7" fill="#fb923c"/><circle cx="720" cy="213" r="8" fill="#ef4444"/>
+        <text x="440" y="262" text-anchor="middle" font-size="24" fill="#fca5a5">狂奔 → 补课 → 治理变默认技能</text>
+        <path d="M440 188 L440 200" stroke="#fbbf24" stroke-width="4"/>
+      </svg>
+    </div>
+    <div class="slide-cards split" style="align-items:stretch">
+      <div class="g" style="text-align:center;justify-content:center">
+        <div class="stat-value" style="font-size:var(--fs-stat);color:var(--c-accent-a)">生态先狂奔</div>
+        <div class="stat-label">心脏滴血 · Log4j 同款叙事</div>
+        <p class="g-body">事故倒逼补课——这次责任主体离一线开发者更近。</p>
+      </div>
+      <div class="g" style="justify-content:center;border-color:rgba(239,68,68,0.35)!important">
+        <p class="g-body" style="font-size:var(--fs-body);margin:0">让 AI 在<strong>边界里</strong>交付价值。</p>
+        <p class="g-body" style="font-size:var(--fs-body);margin-top:var(--sp-md)"><strong>谁能执行 · 执行到哪 · 谁能撤回</strong>——仍是人的责任。</p>
+      </div>
+    </div>
+    <p style="font-size:var(--fs-caption);margin-top:16px;text-align:center"><span class="wa">先做安全的开发者，再做高效的开发者。</span></p>
+  </div>
+</section>
+
+<!-- s9 Thanks -->
+<section class="s slide" id="s9" data-rail="致谢">
+  <div class="col slide-main v-center fill-deck">
+    <div style="text-align:center">
+      <p class="deck-chapter-hint">致谢</p>
+      <div class="host-row">
+        <span class="host-pill ac">阿程：评论区见</span>
+        <span class="host-pill xi">小夏：转给「全开权限」同事</span>
+      </div>
+      <div class="emoji-xl">🔥</div>
+      <h1 style="font-size:var(--fs-hero);margin:16px 0 14px;line-height:1.06">把笼子焊牢<br><span style="background:linear-gradient(90deg,#fca5a5,#f97316);-webkit-background-clip:text;background-clip:text;color:transparent">再用好 AI</span></h1>
+      <p style="font-size:var(--fs-subtitle);color:var(--c-text-2);margin:0 0 26px">跑偏 / 误执行 · 欢迎留言讨论</p>
+      <span class="pill">Agent 安全 · 2026</span>
+      <p style="font-size:var(--fs-body);margin-top:26px"><span class="wa">治理是每个接 Agent 进工作流的人日常要扛的事。</span></p>
+    </div>
+  </div>
+</section>
+
+</div>
+<script>
+(function(){
+var PW=1920,PH=1080;
+function fit(){
+ var el=document.getElementById('P');
+ if(!el)return;
+ var r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;
+ el.style.transform='scale('+r+')';
+ el.style.transformOrigin='0 0';
+ el.style.left=x+'px';
+ el.style.top=y+'px';
+}
+window.addEventListener('resize',fit);
+requestAnimationFrame(fit);
+var slides=document.querySelectorAll('.s.slide'),total=slides.length,cur=0;
+function ui(){
+ var sh=slides[cur],rl=document.getElementById('rail-left'),rr=document.getElementById('rail-right');
+ if(rl)rl.textContent=sh.getAttribute('data-rail')||'';
+ if(rr)rr.textContent=String(cur+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+ var b=document.getElementById('prog');if(b)b.style.width=(total<=1?100:(cur/(total-1)*100))+'%';
+}
+function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('is-active');cur=i;slides[cur].classList.add('is-active');ui();}
+document.addEventListener('keydown',function(e){
+ if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1);}
+ else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1);}
+});
+document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1);});
+window.go=go;
+ui();
+})();
+</script>
+</body>
+</html>

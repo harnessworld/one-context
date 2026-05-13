@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>封面 · 2026 AI Agent 安全启示录</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #05050a;
+}
+
+#cover {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+}
+
+#bg {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+}
+
+#bg-fallback {
+    position: absolute;
+    inset: 0;
+}
+
+#overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+#noise {
+    position: absolute; inset: 0;
+    z-index: 5;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+/* 风险主视觉：加宽容器，非手机比例 */
+#phone-deco {
+    position: absolute;
+    left: 50%;
+    top: 54%;
+    width: 640px;
+    height: 980px;
+    margin-left: -320px;
+    margin-top: -490px;
+    z-index: 6;
+    pointer-events: none;
+}
+#phone-deco svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 76px 76px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#tagline {
+    font-size: 30px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 6px;
+}
+
+#brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#brand-name {
+    font-size: 30px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 3px;
+}
+
+#avatar {
+    width: 78px; height: 78px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.25);
+    display: block;
+}
+
+#avatar-fallback {
+    width: 78px; height: 78px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.20);
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+}
+
+#content {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 200px 72px 280px;
+    text-align: center;
+    z-index: 20;
+    gap: 0;
+}
+
+#tag {
+    display: inline-block;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 8px;
+    padding: 10px 32px;
+    border-radius: 100px;
+    margin-bottom: 52px;
+}
+
+#headline {
+    font-size: 200px;
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -4px;
+    color: #ffffff;
+    text-align: center;
+    word-break: keep-all;
+}
+
+#headline.len5  { font-size: 200px; }
+#headline.len6  { font-size: 180px; }
+#headline.len7  { font-size: 155px; letter-spacing: -2px; }
+#headline.len8  { font-size: 130px; letter-spacing: -1px; }
+#headline.len10 { font-size: 110px; letter-spacing: 0px; }
+#headline.len12 { font-size: 95px; }
+#headline.long  { font-size: 82px;  letter-spacing: 0px; }
+
+#headline em {
+    font-style: normal;
+}
+
+#divider {
+    width: 120px;
+    height: 3px;
+    border-radius: 2px;
+    margin: 44px auto 44px;
+}
+
+#subline {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 3px;
+    max-width: 900px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+
+#footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0 76px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.foot-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 27px;
+    color: rgba(255,255,255,0.38);
+    letter-spacing: 2px;
+}
+
+.foot-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+#watermark {
+    font-size: 24px;
+    color: rgba(255,255,255,0.22);
+    letter-spacing: 3px;
+}
+
+#accent-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 5px;
+}
+</style>
+</head>
+<body>
+<div id="cover">
+
+    <img id="bg" src="" alt="">
+    <div id="bg-fallback"></div>
+    <div id="overlay"></div>
+
+    <div id="phone-deco" aria-hidden="true"></div>
+
+    <div id="noise"></div>
+
+    <div id="header">
+        <div id="tagline"></div>
+        <div id="brand">
+            <div id="brand-name"></div>
+            <img id="avatar" src="" onerror="this.style.display='none'" alt="">
+            <div id="avatar-fallback"></div>
+        </div>
+    </div>
+
+    <div id="content">
+        <div id="tag"></div>
+        <div id="headline"></div>
+        <div id="divider"></div>
+        <div id="subline"></div>
+    </div>
+
+    <div id="footer">
+        <div id="footer-left"></div>
+        <div id="watermark"></div>
+    </div>
+    <div id="accent-bar"></div>
+</div>
+
+<script>
+const RISK_DECO_SVG = `<svg viewBox="0 0 480 920" xmlns="http://www.w3.org/2000/svg" fill="none">
+<defs>
+  <linearGradient id="cvSh" x1="0%" y1="0%" x2="100%" y2="100%">
+    <stop offset="0%" stop-color="#7f1d1d"/>
+    <stop offset="45%" stop-color="#991b1b"/>
+    <stop offset="100%" stop-color="#1c0a0a"/>
+  </linearGradient>
+  <linearGradient id="cvSt" x1="0%" y1="100%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="#f97316"/>
+    <stop offset="100%" stop-color="#ef4444"/>
+  </linearGradient>
+  <pattern id="cvHz" width="22" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-32)">
+    <rect width="11" height="22" fill="#b91c1c" opacity="0.5"/>
+    <rect x="11" width="11" height="22" fill="#0c0a0a" opacity="0.55"/>
+  </pattern>
+  <radialGradient id="cvBl" cx="50%" cy="44%" r="58%">
+    <stop offset="0%" stop-color="#ef4444" stop-opacity="0.42"/>
+    <stop offset="55%" stop-color="#7f1d1d" stop-opacity="0.12"/>
+    <stop offset="100%" stop-color="#0a0505" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<rect width="480" height="920" fill="url(#cvHz)" opacity="0.22"/>
+<rect width="480" height="920" fill="url(#cvBl)"/>
+<ellipse cx="240" cy="470" rx="218" ry="268" stroke="rgba(248,113,113,0.38)" stroke-width="3.5" fill="none"/>
+<ellipse cx="240" cy="470" rx="172" ry="212" stroke="rgba(249,115,22,0.32)" stroke-width="2.5" fill="none" stroke-dasharray="16 14"/>
+<ellipse cx="240" cy="470" rx="124" ry="154" stroke="rgba(254,226,226,0.22)" stroke-width="2" fill="none"/>
+<path d="M240 118 L352 168 V328 Q352 448 240 518 Q128 448 128 328 V168 Z" fill="url(#cvSh)" stroke="url(#cvSt)" stroke-width="4.5"/>
+<path d="M240 158 L318 198 V318 Q318 418 240 478 Q162 418 162 318 V198 Z" fill="#100808" stroke="rgba(254,202,202,0.32)" stroke-width="2"/>
+<path d="M240 228 L296 334 H184 Z" fill="#fbbf24" stroke="#c2410c" stroke-width="3"/>
+<path d="M240 262 V302 M240 316 V318" stroke="#78350f" stroke-width="5.5" stroke-linecap="round"/>
+<path d="M232 338 H248 V298 Q248 278 240 278 Q232 278 232 298 V338" fill="none" stroke="#fecaca" stroke-width="4"/>
+<rect x="214" y="336" width="52" height="44" rx="8" fill="#1c1917" stroke="#fca5a5" stroke-width="2"/>
+<circle cx="240" cy="358" r="7" fill="#44403c"/>
+<circle cx="88" cy="210" r="24" fill="#120808" stroke="#f97316" stroke-width="2.5"/>
+<circle cx="392" cy="235" r="24" fill="#120808" stroke="#ef4444" stroke-width="2.5"/>
+<circle cx="408" cy="560" r="22" fill="#120808" stroke="#fb923c" stroke-width="2.5"/>
+<path d="M112 222 L185 285" stroke="rgba(249,115,22,0.45)" stroke-width="2.5"/>
+<path d="M368 248 L298 295" stroke="rgba(239,68,68,0.42)" stroke-width="2.5"/>
+<path d="M392 542 L308 468" stroke="rgba(251,146,60,0.38)" stroke-width="2.5"/>
+<text x="240" y="620" text-anchor="middle" fill="rgba(254,202,202,0.35)" font-size="22" font-family="system-ui,sans-serif" font-weight="700" letter-spacing="0.12em">BLAST RADIUS · GOVERNANCE</text>
+</svg>`;
+
+const CONFIG = {
+    headline:    "2026 AI Agent\n安全启示录",
+    accentLine:  2,
+    subline:     "公开复盘 · 权限门禁 · 治理先行",
+    tag:         "Agent 安全 · 风险叙事",
+    bgImage:     "",
+    avatarImage: "",
+    avatarEmoji: "⚠️",
+    brandName:   "阿程 × 小夏",
+    tagline:     "硬核复盘",
+    footerItems: ["不可逆命令", "供应链与 MCP", "Governance"],
+    watermark:   "能力越强 · 门禁越要关",
+
+    theme:       "danger",
+
+    decoSVG:     RISK_DECO_SVG,
+    decoRotate:  -5,
+    decoOpacity: 0.74,
+    decoScale:   1.05,
+
+    overlayDirection: "center-out",
+
+    noiseEnabled: true,
+    noiseOpacity: 0.055,
+};
+
+const DEFAULT_PHONE_SVG = `<svg viewBox="0 0 210 400" xmlns="http://www.w3.org/2000/svg"></svg>`;
+
+const THEMES = {
+    danger: {
+        accent:     "#FF2A55",
+        accent2:    "#FF8C00",
+        tagBg:      "rgba(255,42,85,0.12)",
+        tagBorder:  "rgba(255,42,85,0.5)",
+        tagColor:   "#FF6B8A",
+        glowColor:  "rgba(255,42,85,0.25)",
+        glowColor2: "rgba(255,140,0,0.15)",
+        dotColor:   "#FF2A55",
+        bar:        "linear-gradient(90deg, transparent 2%, #FF2A55 35%, #FF8C00 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,42,85,0.35), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FF2A55 0%, #FF8C00 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 28%, #2a0a0c 0%, #120506 38%, #060305 100%)",
+        decoGlow:   "rgba(255,42,85,0.28)",
+        decoAccent: "rgba(255,140,0,0.35)",
+    },
+    growth: {
+        accent:     "#FFD700",
+        accent2:    "#00F0FF",
+        tagBg:      "rgba(255,215,0,0.10)",
+        tagBorder:  "rgba(255,215,0,0.45)",
+        tagColor:   "#FFD700",
+        glowColor:  "rgba(255,215,0,0.20)",
+        glowColor2: "rgba(0,240,255,0.12)",
+        dotColor:   "#FFD700",
+        bar:        "linear-gradient(90deg, transparent 2%, #FFD700 35%, #00F0FF 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,215,0,0.30), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FFD700 0%, #FFA500 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #150f00 0%, #0a0800 40%, #050505 100%)",
+        decoGlow:   "rgba(255,215,0,0.28)",
+        decoAccent: "rgba(0,240,255,0.22)",
+    },
+    tech: {
+        accent:     "#00F0FF",
+        accent2:    "#8B5CF6",
+        tagBg:      "rgba(0,240,255,0.08)",
+        tagBorder:  "rgba(0,240,255,0.40)",
+        tagColor:   "#00D4E8",
+        glowColor:  "rgba(0,240,255,0.18)",
+        glowColor2: "rgba(139,92,246,0.18)",
+        dotColor:   "#00F0FF",
+        bar:        "linear-gradient(90deg, transparent 2%, #00F0FF 35%, #8B5CF6 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(0,240,255,0.25), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #00F0FF 0%, #8B5CF6 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #03101a 0%, #020810 40%, #03050f 100%)",
+        decoGlow:   "rgba(0,240,255,0.28)",
+        decoAccent: "rgba(139,92,246,0.35)",
+    },
+    finance: {
+        accent:     "#FFD700",
+        accent2:    "#00FF88",
+        tagBg:      "rgba(255,215,0,0.10)",
+        tagBorder:  "rgba(255,215,0,0.45)",
+        tagColor:   "#FFD700",
+        glowColor:  "rgba(255,215,0,0.18)",
+        glowColor2: "rgba(0,255,136,0.15)",
+        dotColor:   "#00FF88",
+        bar:        "linear-gradient(90deg, transparent 2%, #FFD700 35%, #00FF88 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,215,0,0.28), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #FFD700 0%, #00FF88 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #0e0f00 0%, #070800 40%, #040505 100%)",
+        decoGlow:   "rgba(255,215,0,0.28)",
+        decoAccent: "rgba(0,255,136,0.22)",
+    },
+};
+
+const OVERLAYS = {
+    "to-bottom": `linear-gradient(to bottom,
+        rgba(3,3,8,0.82) 0%,
+        rgba(3,3,8,0.30) 18%,
+        rgba(3,3,8,0.08) 38%,
+        rgba(3,3,8,0.08) 52%,
+        rgba(3,3,8,0.45) 72%,
+        rgba(3,3,8,0.92) 100%)`,
+    "to-top": `linear-gradient(to top,
+        rgba(3,3,8,0.82) 0%,
+        rgba(3,3,8,0.30) 18%,
+        rgba(3,3,8,0.08) 38%,
+        rgba(3,3,8,0.08) 52%,
+        rgba(3,3,8,0.45) 72%,
+        rgba(3,3,8,0.92) 100%)`,
+    "center-out": `radial-gradient(ellipse 95% 85% at 50% 48%,
+        rgba(8,2,4,0.12) 0%,
+        rgba(3,3,8,0.38) 42%,
+        rgba(3,3,8,0.88) 100%)`,
+    "to-left": `linear-gradient(to left,
+        rgba(3,3,8,0.82) 0%,
+        rgba(3,3,8,0.30) 25%,
+        rgba(3,3,8,0.08) 50%,
+        rgba(3,3,8,0.30) 75%,
+        rgba(3,3,8,0.82) 100%)`,
+    "to-right": `linear-gradient(to right,
+        rgba(3,3,8,0.82) 0%,
+        rgba(3,3,8,0.30) 25%,
+        rgba(3,3,8,0.08) 50%,
+        rgba(3,3,8,0.30) 75%,
+        rgba(3,3,8,0.82) 100%)`,
+};
+
+(function render() {
+    const t = THEMES[CONFIG.theme] || THEMES.tech;
+
+    const bgEl = document.getElementById('bg');
+    if (CONFIG.bgImage) {
+        bgEl.src = CONFIG.bgImage;
+        bgEl.onerror = () => { bgEl.style.display = 'none'; };
+    } else {
+        bgEl.style.display = 'none';
+    }
+
+    document.getElementById('bg-fallback').style.background =
+        t.fallbackBg + `, radial-gradient(ellipse 85% 55% at 50% 78%, ${t.glowColor} 0%, transparent 58%), radial-gradient(ellipse 55% 50% at 85% 18%, ${t.glowColor2} 0%, transparent 55%)`;
+
+    const overlayDir = CONFIG.overlayDirection || 'to-bottom';
+    document.getElementById('overlay').style.background = OVERLAYS[overlayDir] || OVERLAYS['to-bottom'];
+
+    const noiseEl = document.getElementById('noise');
+    if (CONFIG.noiseEnabled === false) {
+        noiseEl.style.display = 'none';
+    } else {
+        const opacity = CONFIG.noiseOpacity != null ? CONFIG.noiseOpacity : 0.05;
+        noiseEl.style.opacity = opacity;
+    }
+
+    const decoEl = document.getElementById('phone-deco');
+    const svgContent = CONFIG.decoSVG || DEFAULT_PHONE_SVG;
+    decoEl.innerHTML = svgContent;
+    decoEl.style.opacity = CONFIG.decoOpacity != null ? CONFIG.decoOpacity : 0.82;
+    decoEl.style.transform = `rotate(${CONFIG.decoRotate != null ? CONFIG.decoRotate : -11}deg) scale(${CONFIG.decoScale || 1})`;
+    decoEl.style.filter = `drop-shadow(0 0 100px ${t.decoGlow}) drop-shadow(0 40px 100px rgba(0,0,0,0.45))`;
+
+    const avatarFallback = document.getElementById('avatar-fallback');
+    if (CONFIG.avatarImage) {
+        document.getElementById('avatar').src = CONFIG.avatarImage;
+        avatarFallback.style.display = 'none';
+    } else {
+        document.getElementById('avatar').style.display = 'none';
+        avatarFallback.textContent = CONFIG.avatarEmoji || '🐶';
+    }
+
+    document.getElementById('tagline').textContent = CONFIG.tagline;
+    document.getElementById('brand-name').textContent = CONFIG.brandName;
+
+    const tagEl = document.getElementById('tag');
+    tagEl.textContent = CONFIG.tag;
+    tagEl.style.cssText += `background:${t.tagBg}; border:1.5px solid ${t.tagBorder}; color:${t.tagColor};`;
+
+    const headEl = document.getElementById('headline');
+    const lines = CONFIG.headline.split('\n');
+
+    function cjkWidth(s) {
+        let w = 0;
+        for (const c of s) {
+            w += /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(c) ? 1 : 0.55;
+        }
+        return Math.round(w);
+    }
+    const maxLineW = Math.max(...lines.map(l => cjkWidth(l)));
+
+    const cls = maxLineW <= 4 ? 'len5'
+              : maxLineW <= 5 ? 'len6'
+              : maxLineW <= 6 ? 'len7'
+              : maxLineW <= 7 ? 'len8'
+              : maxLineW <= 9 ? 'len10'
+              : maxLineW <= 11 ? 'len12' : 'long';
+    headEl.classList.add(cls);
+    headEl.style.textShadow = t.textGlow;
+
+    headEl.innerHTML = lines.map((line, i) => {
+        if (CONFIG.accentLine === i + 1) {
+            return `<em style="background:${t.accentGrad}; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">${line}</em>`;
+        }
+        return `<span>${line}</span>`;
+    }).join('<br>');
+
+    document.getElementById('divider').style.background = t.accentGrad;
+
+    document.getElementById('subline').textContent = CONFIG.subline;
+
+    const footLeft = document.getElementById('footer-left');
+    (CONFIG.footerItems || []).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'foot-item';
+        div.innerHTML = `<div class="foot-dot" style="background:${t.dotColor};box-shadow:0 0 6px ${t.dotColor}"></div>${item}`;
+        footLeft.appendChild(div);
+    });
+
+    document.getElementById('watermark').textContent = CONFIG.watermark;
+    document.getElementById('accent-bar').style.background = t.bar;
+})();
+</script>
+</body>
+</html>

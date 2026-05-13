@@ -1,0 +1,29 @@
+{
+  "_comment": "wav-auto 可选配置。单个 .wav 建议路径 production/media/voiceover.wav（本地，勿提交）。",
+  "wavFile": "media/voiceover_volc.wav",
+  "whisperModel": "small",
+  "noSpeechThreshold": 0.85,
+  "vadFilter": false,
+  "strictSubtitles": false,
+  "maxSubtitleGapSec": 2.5,
+  "fillSrtGaps": true,
+  "whisperHotwords": "Jason Zhu Agent Armor Governor Cordum OWASP LangChain CrewAI Governance",
+  "srtReplacements": [],
+  "wrapSubtitles": true,
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "subtitle": {
+    "fontSize": 52,
+    "marginV": 14,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 32,
+    "primaryColour": "#FFFF00",
+    "primaryAlpha": 108,
+    "backAlpha": 255,
+    "shadow": 0,
+    "outline": 1,
+    "barHeight": 110,
+    "barAlpha": 0.65
+  }
+}

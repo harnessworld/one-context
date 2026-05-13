@@ -22,6 +22,7 @@
   "outputFile": "final_auto.mp4",
   "burnSubtitles": true,
   "subtitle": {
+    "_fontSize_help": "过小（如 <42）时 wav-auto 会提升到 42，除非 allowBelowRecommendedFontSize: true",
     "fontSize": 24,
     "marginV": 18,
     "fontName": "Microsoft YaHei",

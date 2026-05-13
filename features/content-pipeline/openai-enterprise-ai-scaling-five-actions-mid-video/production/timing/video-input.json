@@ -1,0 +1,48 @@
+{
+  "_comment": "火山播客 action=0：长文总结双人 WAV，文案会被服务端改写；定稿后 Whisper 出字幕。鉴权 VOLCENGINE_PODCAST_API_KEY。改口播后设 podcastTts.forceRegenerate=true 再合成。",
+  "wavFile": "media/voiceover.wav",
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "whisperModel": "small",
+  "noSpeechThreshold": 0.85,
+  "vadFilter": false,
+  "fillSrtGaps": true,
+  "srtReplacements": [
+    { "from": "OpenAI以Vels的这个思路", "to": "OpenAI Evals 的这个思路" },
+    { "from": "Ownership Overconsumption", "to": "Ownership over consumption" },
+    { "from": "Protecting Gentlemen's Work", "to": "Protecting judgment work" },
+    { "from": "Philipus", "to": "Philips" },
+    { "from": "Jet Prince", "to": "JetBrains" },
+    { "from": "Chris Kent", "to": "Kris Kang" },
+    { "from": "Miracle", "to": "Mirakl" },
+    { "from": "它在碧炉有", "to": "它在秘鲁有" },
+    { "from": "为什么治理要做了一个负能者", "to": "为什么要让治理成为赋能者" },
+    { "from": "靠的是文化 好奇心 感视", "to": "靠的是文化 好奇心 胆识" },
+    { "from": "识经时", "to": "试金石" },
+    { "from": "字检", "to": "自检" },
+    { "from": "感想的大一圈", "to": "敢想的大一圈" },
+    { "from": "生存出来的东西", "to": "生成出来的东西" },
+    { "from": "人的上线", "to": "人的上限" },
+    { "from": "反攻也会更少", "to": "返工也会更少" },
+    { "from": "反复和掩务", "to": "反复和延误" },
+    { "from": "上一个台积", "to": "上一个台阶" },
+    { "from": "7分半中", "to": "7分半钟" },
+    { "from": "用起来粘 真省事", "to": "用起来真顺手 真省事" }
+  ],
+  "subtitle": {
+    "fontSize": 42,
+    "charsPerLine": 36,
+    "fontName": "Microsoft YaHei",
+    "barHeight": 0
+  },
+  "podcastTts": {
+    "enabled": true,
+    "scriptPath": "content/01-script.md",
+    "action": 0,
+    "speakers": "zh_male_dayixiansheng_v2_saturn_bigtts,zh_female_mizaitongxue_v2_saturn_bigtts",
+    "timeoutSec": 1200,
+    "speechRate": 0,
+    "fixedSpeakerOrder": true,
+    "forceRegenerate": false
+  }
+}
