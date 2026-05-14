@@ -119,6 +119,7 @@ python skills/volc-podcast-tts/cli.py ... \
 - **建连非 200**：检查鉴权方式是否与新/旧控制台一致、播客是否开通、`X-Api-Resource-Id`。
 - **收不到音频 / 长时间卡住**：文档写明 **363 PodcastEnd 可不返回**，不能只靠单一事件收尾。客户端行为：**合成阶段**用「墙钟 `max_stream_sec`（默认 `--timeout`）」与 **`recv_idle_sec`** 合成单次 `recv` 超时（取二者剩余较短），避免永久阻塞；**action=3** 在收到与 `nlp_texts` 条数一致的 `ROUND_END` 后即 `FinishSession`；**FinishSession / FinishConnection** 各有 **`finish_phase_sec`** 上限，`finish_connection` 遇提前断连仅告警不写 fatal。**调试**：`--meta-out meta.json` 看 `completed_via`（如 `nlp_round_ends`、`podcast_end`、`recv_idle`、`wall_clock`）与 `warnings`。
 - **安全审核 50302102**：换素材或缩短输入，见文档错误码节。
+- **所谓 action=1**：本协议与仓库镜像文档 **`docs/文本语音转换官方说明.md`** 仅定义 **0 / 3 / 4**；`podcasttts` 请求里若写 `action: 1`，实测会很快收到 **363** 且 **无 PCM / 无有效 `audio_url`**。要「总结式双人播」用 **`--action 0`**；要「按轮念稿」用 **`--action 3`**。若你控制台有**新的** `action=1` 示例 JSON，可贴出以便对齐实现。
 
 ## 实现说明
 
