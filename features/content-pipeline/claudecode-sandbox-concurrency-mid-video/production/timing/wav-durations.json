@@ -1,0 +1,13 @@
+{
+  "wavFile": "media/voiceover.wav",
+  "slideDurationsSec": [82.84, 77.62, 92.28, 121.2, 102.98, 91.44, 57.16, 16.746917],
+  "outputFile": "final.mp4",
+  "burnSubtitles": true,
+  "srtFile": "subtitles/sub.srt",
+  "subtitle": {
+    "fontSize": 42,
+    "charsPerLine": 36,
+    "fontName": "Microsoft YaHei",
+    "barHeight": 80
+  }
+}

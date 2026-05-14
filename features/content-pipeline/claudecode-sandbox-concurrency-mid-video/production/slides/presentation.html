@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 沙箱与并发安全 · Security Layers Deep Dive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0b;
+    --bg-rgb:10,10,11;
+    --text:#f1efea;
+    --text-rgb:241,239,234;
+    --cyan:#06b6d4;
+    --cyan-rgb:6,182,212;
+    --amber:#f59e0b;
+    --amber-rgb:245,158,11;
+    --green:#22c55e;
+    --red:#ef4444;
+    --glass-bg:rgba(255,255,255,0.04);
+    --glass-border:rgba(255,255,255,0.25);
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  /* WebGL Background */
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block}
+  canvas#bg-cyber{opacity:1}
+
+  /* Deck Container */
+  #deck{position:fixed;inset:0;width:800vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:5vh 5vw 8vh 5vw;display:flex;flex-direction:column;overflow:hidden}
+
+  /* Slide Overlay for readability */
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:rgba(var(--bg-rgb),.72);backdrop-filter:blur(2px)}
+  .slide.hero::before{background:rgba(var(--bg-rgb),.45)}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(var(--bg-rgb),.55) 0%,rgba(var(--bg-rgb),0) 20%,rgba(var(--bg-rgb),0) 80%,rgba(var(--bg-rgb),.55) 100%)}
+
+  /* Chrome & Foot */
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:13px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+  .chrome .sep{width:30px;height:1px;background:var(--cyan);opacity:.5}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.45}
+
+  /* Typography */
+  .kicker{font-family:var(--mono);font-size:13px;letter-spacing:.35em;text-transform:uppercase;color:var(--cyan);margin-bottom:2vh;opacity:.85}
+  .kicker-amber{color:var(--amber)}
+  .h-hero{font-family:var(--serif);font-weight:900;font-size:6.5vw;line-height:1;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif);font-weight:700;font-size:4.8vw;line-height:1.1;letter-spacing:-.01em}
+  .h-lg{font-family:var(--serif);font-weight:700;font-size:3.5vw;line-height:1.15}
+  .h-md{font-family:var(--serif);font-weight:600;font-size:2.1vw;line-height:1.25}
+  .body{font-family:var(--sans);font-size:max(16px,1.3vw);line-height:1.75;opacity:.85}
+  .lead{font-family:var(--serif);font-size:1.85vw;line-height:1.55;opacity:.9}
+  .meta{font-family:var(--mono);font-size:max(12px,1vw);letter-spacing:.18em;text-transform:uppercase;opacity:.55}
+  .code{font-family:var(--mono);font-size:max(14px,1.1vw);line-height:1.5}
+
+  /* Glow effects */
+  .glow-cyan{filter:drop-shadow(0 0 6px rgba(var(--cyan-rgb),.4))}
+  .glow-amber{filter:drop-shadow(0 0 6px rgba(var(--amber-rgb),.4))}
+  .glow-green{filter:drop-shadow(0 0 6px rgba(34,197,94,.4))}
+  .glow-red{filter:drop-shadow(0 0 6px rgba(239,68,68,.4))}
+
+  /* Layout helpers */
+  .frame{flex:1;display:flex;flex-direction:column;min-height:0}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-40-60{display:grid;grid-template-columns:40fr 60fr;gap:3vw;flex:1;align-items:center}
+  .col{display:flex;flex-direction:column;gap:2vh}
+  .row{display:flex;align-items:center;gap:2vw}
+  .grid-2-2{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:3vh 3vw;flex:1;align-content:center}
+
+  /* Card styles */
+  .card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;padding:2vh 1.5vw;backdrop-filter:blur(8px)}
+  .card-cyan{border-color:rgba(var(--cyan-rgb),.4)}
+  .card-amber{border-color:rgba(var(--amber-rgb),.4)}
+
+  /* Pipeline diagram */
+  .pipeline{display:flex;align-items:center;gap:1vw;margin-top:3vh}
+  .pipe-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:1vh;padding:1.5vh 1vw;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;position:relative}
+  .pipe-step.active{border-color:var(--cyan);box-shadow:0 0 12px rgba(var(--cyan-rgb),.2)}
+  .pipe-step.warning{border-color:var(--amber);box-shadow:0 0 12px rgba(var(--amber-rgb),.2)}
+  .pipe-arrow{font-family:var(--mono);font-size:1.75vw;color:var(--cyan);opacity:.6}
+  .pipe-num{font-family:var(--mono);font-size:1.05vw;color:var(--cyan);opacity:.7}
+  .pipe-title{font-family:var(--serif);font-size:1.3vw;font-weight:600;text-align:center}
+
+  /* Code block in diagrams */
+  .code-node{background:rgba(0,0,0,.5);border:1px solid rgba(var(--cyan-rgb),.3);border-radius:6px;padding:1.2vh 1vw;font-family:var(--mono);font-size:1vw;line-height:1.4}
+  .code-node .kw{color:var(--cyan)} /* keyword */
+  .code-node .fn{color:#60a5fa} /* function */
+  .code-node .str{color:#a3e635} /* string */
+  .code-node .lit{color:var(--amber)} /* literal/number */
+  .code-node .cmt{color:#6b7280} /* comment */
+
+  /* Navigation */
+  #nav{position:fixed;left:50%;bottom:2.5vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.35);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.08)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.25);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(var(--cyan-rgb),.6);transform:scale(1.2)}
+  #nav .dot.active{background:var(--cyan);width:22px;border-radius:999px;box-shadow:0 0 10px rgba(var(--cyan-rgb),.5)}
+  #hint{position:fixed;bottom:2.8vh;right:3vw;z-index:30;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.35;color:#888}
+
+  /* Warning/Alert nodes */
+  .warning-node{background:rgba(var(--amber-rgb),.08);border:1px solid rgba(var(--amber-rgb),.35);border-radius:8px;padding:1.8vh 1.4vw}
+  .secure-node{background:rgba(var(--cyan-rgb),.08);border:1px solid rgba(var(--cyan-rgb),.35);border-radius:8px;padding:1.8vh 1.4vw}
+
+  /* Responsive */
+  @media (max-width:900px){
+    .h-hero{font-size:10vw}
+    .h-xl{font-size:6vw}
+    .split,.split-40-60{grid-template-columns:1fr}
+    .pipeline{flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-cyber" class="bg"></canvas>
+<div id="hint">← → 翻页 · ESC 索引</div>
+
+<div id="deck">
+
+<!-- ============================================================
+     SLIDE 0: Cover - 5层安全架构概览
+     ============================================================ -->
+<section class="slide hero" id="s0">
+  <div class="chrome">
+    <div><span style="color:var(--cyan)">SECURITY LAYERS</span><span class="sep"></span><span>Deep Dive</span></div>
+    <div>Vol · Agent 平台安全</div>
+  </div>
+  <div class="frame center" style="min-height:68vh">
+    <div class="kicker">Security Layers deep dive</div>
+    <h1 class="h-hero" style="margin-bottom:2vh">Claude Code 沙箱与并发安全</h1>
+    <p class="lead" style="max-width:60vw;opacity:.8;margin-bottom:4vh">从源码看 Agent 平台存储系统设计</p>
+
+    <!-- 5层管道图 -->
+    <div class="pipeline" style="max-width:85vw">
+      <div class="pipe-step active">
+        <span class="pipe-num">Layer 1</span>
+        <span class="pipe-title">Python 沙箱</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-step active">
+        <span class="pipe-num">Layer 2</span>
+        <span class="pipe-title">文件锁</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-step active">
+        <span class="pipe-num">Layer 3</span>
+        <span class="pipe-title">Session 锁</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-step active">
+        <span class="pipe-num">Layer 4</span>
+        <span class="pipe-title">任务 Claim</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-step active">
+        <span class="pipe-num">Layer 5</span>
+        <span class="pipe-title">Bridge 生命周期</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    <div>Claude Code 源码解析</div>
+    <div>Cover</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 1: Python REPL 沙箱
+     ============================================================ -->
+<section class="slide" id="s1">
+  <div class="chrome">
+    <div><span style="color:var(--cyan)">LAYER 01</span><span class="sep"></span><span>Python Sandbox</span></div>
+    <div>02 / 08</div>
+  </div>
+  <div class="frame split-40-60" style="padding-top:3vh">
+    <div class="col">
+      <div class="kicker">第一层防御</div>
+      <h2 class="h-xl" style="margin-bottom:2vh">Python REPL 沙箱</h2>
+      <div class="body" style="gap:2vh;display:flex;flex-direction:column">
+        <p><strong style="color:var(--amber)">黑名单机制</strong>：拦截 <code class="code">os</code>、<code class="code">subprocess</code>、<code class="code">socket</code> 等危险模块，以及 <code class="code">exec</code>、<code class="code">eval</code>、<code class="code">open</code> 等内置函数。</p>
+        <p><strong>实现落点</strong>：<code class="code">gyoshu_bridge.py</code> 替换 <code class="code">__builtins__.__import__</code>，在导入链路上做拦截。</p>
+        <p><strong>设计哲学</strong>（与源码自述一致）：黑名单<strong>不是</strong>安全边界；强烈建议配合<strong>操作系统级隔离</strong>。默认偏可用，用户可主动收紧策略。</p>
+        <div class="warning-node" style="margin-top:1vh">
+          <p class="meta" style="color:var(--amber);margin-bottom:.5vh">Trade-off</p>
+          <p class="body" style="font-size:1.1vw">白名单更安全，但会拖垮数据分析类工作流；黑名单是安全与可用性的折中，并需在文档里诚实写清能力边界。</p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center">
+      <svg viewBox="0 0 600 420" style="width:100%;max-height:45vh" class="glow-cyan">
+        <defs>
+          <marker id="arr-cyan" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="var(--cyan)"/>
+          </marker>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur"/>
+            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          </filter>
+        </defs>
+        <!-- Flow boxes -->
+        <rect x="20" y="40" width="180" height="70" rx="8" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="1.5"/>
+        <text x="110" y="82" text-anchor="middle" fill="var(--text)" font-size="16" font-family="var(--mono)">OMC_SECURITY=strict</text>
+
+        <line x1="200" y1="75" x2="250" y2="75" stroke="var(--cyan)" stroke-width="1.5" marker-end="url(#arr-cyan)" opacity=".7"/>
+
+        <rect x="250" y="20" width="320" height="110" rx="8" fill="rgba(0,0,0,.4)" stroke="rgba(var(--cyan-rgb),.4)" stroke-width="1.5"/>
+        <foreignObject x="260" y="28" width="300" height="95">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="border:none;background:transparent">
+            <span class="cmt"># 替换内置 import 钩子</span><br/>
+            <span class="kw">__builtins__</span>.<span class="kw">__import__</span> = <span class="fn">secure_import</span><br/>
+            <span class="cmt"># 危险模块 → ImportError</span>
+          </div>
+        </foreignObject>
+
+        <line x1="410" y1="130" x2="410" y2="170" stroke="var(--cyan)" stroke-width="1.5" marker-end="url(#arr-cyan)" opacity=".7"/>
+
+        <rect x="320" y="180" width="180" height="60" rx="8" fill="rgba(var(--green),.1)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="410" y="218" text-anchor="middle" fill="var(--green)" font-size="18" font-family="var(--serif)" font-weight="600">安全执行</text>
+
+        <rect x="150" y="260" width="420" height="120" rx="8" fill="rgba(var(--amber-rgb),.06)" stroke="rgba(var(--amber-rgb),.35)" stroke-width="1.5"/>
+        <text x="360" y="295" text-anchor="middle" fill="var(--amber)" font-size="15" font-family="var(--mono)" letter-spacing=".1em">WARNING</text>
+        <text x="360" y="330" text-anchor="middle" fill="var(--text)" font-size="16" font-family="var(--sans)">"黑名单不是安全边界"</text>
+        <text x="360" y="355" text-anchor="middle" fill="var(--text)" font-size="14" font-family="var(--sans)" opacity=".7">建议配合操作系统级别隔离</text>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><div>Security Layer 01</div><div>Blacklist Sandbox</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 2: 文件存在性锁 O_CREAT|O_EXCL
+     ============================================================ -->
+<section class="slide" id="s2">
+  <div class="chrome">
+    <div><span style="color:var(--cyan)">LAYER 02</span><span class="sep"></span><span>File Existence Lock</span></div>
+    <div>03 / 08</div>
+  </div>
+  <div class="frame" style="padding-top:2vh">
+    <div class="kicker">第二层防御</div>
+    <h2 class="h-xl" style="margin-bottom:2vh">文件存在性锁</h2>
+    <p class="lead" style="max-width:70vw;margin-bottom:2vh">使用 <code class="code">O_CREAT | O_EXCL</code> 原子操作，而非传统 flock。内核保证只有一个进程能成功创建文件。</p>
+
+    <div style="display:flex;gap:3vw;flex:1;align-items:center">
+      <!-- Race diagram -->
+      <svg viewBox="0 0 700 380" style="width:55vw" class="glow-cyan">
+        <defs>
+          <marker id="arr2" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="var(--cyan)"/>
+          </marker>
+        </defs>
+
+        <!-- Process A -->
+        <text x="50" y="40" fill="var(--cyan)" font-size="14" font-family="var(--mono)">Process A</text>
+        <line x1="50" y1="55" x2="50" y2="320" stroke="rgba(var(--cyan-rgb),.3)" stroke-width="1"/>
+        <rect x="20" y="80" width="200" height="70" rx="6" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="1.5"/>
+        <foreignObject x="25" y="85" width="190" height="60">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="font-size:.86vw;border:none;background:transparent;padding:0">
+            <span class="fn">open</span>(lockFile,<br/>
+            &nbsp;&nbsp;<span class="lit">O_CREAT</span>|<span class="lit">O_EXCL</span>)
+          </div>
+        </foreignObject>
+        <circle cx="50" cy="200" r="25" fill="rgba(var(--green),.15)" stroke="var(--green)" stroke-width="2"/>
+        <text x="50" y="206" text-anchor="middle" fill="var(--green)" font-size="20" font-family="var(--serif)" font-weight="700">OK</text>
+
+        <!-- Process B -->
+        <text x="300" y="40" fill="var(--amber)" font-size="14" font-family="var(--mono)">Process B</text>
+        <line x1="300" y1="55" x2="300" y2="320" stroke="rgba(var(--amber-rgb),.3)" stroke-width="1"/>
+        <rect x="270" y="80" width="200" height="70" rx="6" fill="var(--glass-bg)" stroke="var(--amber)" stroke-width="1.5"/>
+        <foreignObject x="275" y="85" width="190" height="60">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="font-size:.86vw;border:none;background:transparent;padding:0">
+            <span class="fn">open</span>(lockFile,<br/>
+            &nbsp;&nbsp;<span class="lit">O_CREAT</span>|<span class="lit">O_EXCL</span>)
+          </div>
+        </foreignObject>
+        <circle cx="300" cy="200" r="28" fill="rgba(var(--red),.15)" stroke="var(--red)" stroke-width="2"/>
+        <text x="300" y="208" text-anchor="middle" fill="var(--red)" font-size="26" font-family="var(--mono)">EEXIST</text>
+
+        <!-- Race arrows -->
+        <path d="M 80 145 L 280 145" stroke="var(--cyan)" stroke-width="2" fill="none" marker-end="url(#arr2)" opacity=".5"/>
+        <path d="M 280 165 L 80 165" stroke="var(--amber)" stroke-width="2" fill="none" marker-end="url(#arr2)" opacity=".5"/>
+        <text x="180" y="158" text-anchor="middle" fill="var(--text)" font-size="13" font-family="var(--mono)" opacity=".6">race condition</text>
+
+        <!-- Self-healing box -->
+        <rect x="400" y="60" width="280" height="260" rx="8" fill="rgba(0,0,0,.4)" stroke="rgba(var(--green),.35)" stroke-width="1.5"/>
+        <text x="540" y="95" text-anchor="middle" fill="var(--green)" font-size="15" font-family="var(--mono)" letter-spacing=".1em">SELF-HEALING</text>
+        <foreignObject x="415" y="110" width="250" height="200">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="font-size:.8vw">
+            <span class="cmt">// 锁文件内容: PID + timestamp</span><br/>
+            <span class="kw">read</span>(lockFile) <span class="cmt">→ pid, startTime</span><br/><br/>
+            <span class="cmt">// 检查进程是否存活</span><br/>
+            <span class="kw">if</span> <span class="fn">isAlive</span>(<span class="kw">/proc/</span>pid):<br/>
+            &nbsp;&nbsp;<span class="kw">return</span> <span class="lit">BUSY</span><br/>
+            <span class="kw">else</span>:<br/>
+            &nbsp;&nbsp;<span class="fn">unlink</span>(lockFile) <span class="cmt">// 清理</span><br/>
+            &nbsp;&nbsp;<span class="kw">retry</span> <span class="cmt">// 重新竞争</span>
+          </div>
+        </foreignObject>
+      </svg>
+
+      <!-- Why not flock -->
+      <div class="col" style="flex:0 0 22vw">
+        <div class="card card-amber">
+          <p class="meta" style="color:var(--amber);margin-bottom:1vh">为什么不使用 flock?</p>
+          <p class="body" style="font-size:1.15vw;line-height:1.7"><code class="code">flock</code> 是<strong style="color:var(--amber)">建议性锁</strong>——其他进程可以选择不遵守。恶意或不配合的进程完全可以忽略你的锁。</p>
+        </div>
+        <div class="card card-cyan" style="margin-top:2vh">
+          <p class="meta" style="color:var(--cyan);margin-bottom:1vh">核心原则</p>
+          <p class="body" style="font-size:1.15vw;line-height:1.7"><strong style="color:var(--cyan)">不依赖对端的自觉</strong>。利用文件系统存在性语义，即使对方不配合，也无法绕过。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>Security Layer 02</div><div>O_CREAT | O_EXCL</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 3: Session 锁 + PID 复用防御
+     ============================================================ -->
+<section class="slide" id="s3">
+  <div class="chrome">
+    <div><span style="color:var(--cyan)">LAYER 03</span><span class="sep"></span><span>Session Lock</span></div>
+    <div>04 / 08</div>
+  </div>
+  <div class="frame split" style="padding-top:2vh">
+    <div class="col">
+      <div class="kicker">第三层防御</div>
+      <h2 class="h-xl" style="margin-bottom:2vh">Session 锁</h2>
+      <div class="body" style="gap:1.5vh;display:flex;flex-direction:column">
+        <p><strong style="color:var(--amber)">PID 复用陷阱</strong>：操作系统回收 PID 的速度很快。进程A崩溃后，PID 12345 被分配给全新的进程B。</p>
+        <p><strong>双重验证机制</strong>：不仅检查 PID 是否存活，还比对进程启动时间戳。</p>
+        <div class="secure-node" style="margin-top:1vh">
+          <p class="meta" style="color:var(--cyan);margin-bottom:.8vh">DOUBLE CHECK</p>
+          <p class="body" style="font-size:1.13vw;line-height:1.6">
+            ① 读取锁文件 → 获取 PID + startTime<br/>
+            ② 验证 PID 存活<br/>
+            ③ 验证 startTime 匹配<br/>
+            ④ 任一失败 → 锁已过期
+          </p>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center">
+      <svg viewBox="0 0 560 500" style="width:100%;max-height:52vh">
+        <defs>
+          <marker id="arr3" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="var(--cyan)"/>
+          </marker>
+        </defs>
+
+        <!-- Main flow -->
+        <rect x="30" y="30" width="240" height="100" rx="8" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="1.5"/>
+        <foreignObject x="40" y="40" width="220" height="85">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="font-size:.86vw;border:none;background:transparent;padding:0">
+            <span class="cmt">// 锁文件格式</span><br/>
+            <span class="str">"session.lock"</span>:<br/>
+            &nbsp;&nbsp;pid: <span class="lit">12345</span><br/>
+            &nbsp;&nbsp;startTime: <span class="lit">1699123456</span>
+          </div>
+        </foreignObject>
+
+        <line x1="150" y1="130" x2="150" y2="170" stroke="var(--cyan)" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+        <rect x="30" y="180" width="240" height="90" rx="8" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="1.5"/>
+        <foreignObject x="40" y="188" width="220" height="80">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="font-size:.92vw;border:none;background:transparent;padding:0">
+            <span class="cmt">// Linux: /proc/PID</span><br/>
+            <span class="cmt">// macOS: ps command</span><br/>
+            <span class="cmt">// Windows: PowerShell</span><br/>
+            <span class="fn">verifyProcessAlive</span>(pid)
+          </div>
+        </foreignObject>
+
+        <line x1="150" y1="270" x2="150" y2="310" stroke="var(--cyan)" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+        <!-- Decision diamond -->
+        <polygon points="150,320 220,355 150,390 80,355" fill="rgba(var(--green),.1)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="150" y="360" text-anchor="middle" fill="var(--text)" font-size="13" font-family="var(--sans)">PID + startTime</text>
+        <text x="150" y="375" text-anchor="middle" fill="var(--text)" font-size="13" font-family="var(--sans)">都匹配?</text>
+
+        <!-- Yes/No paths -->
+        <line x1="220" y1="355" x2="300" y2="355" stroke="var(--green)" stroke-width="1.5" marker-end="url(#arr3)"/>
+        <text x="260" y="348" fill="var(--green)" font-size="13" font-family="var(--mono)">YES</text>
+        <rect x="310" y="330" width="120" height="50" rx="6" fill="rgba(var(--green),.1)" stroke="var(--green)" stroke-width="1.5"/>
+        <text x="370" y="360" text-anchor="middle" fill="var(--green)" font-size="16" font-family="var(--serif)">锁有效</text>
+
+        <line x1="150" y1="390" x2="150" y2="430" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <text x="170" y="425" fill="var(--red)" font-size="13" font-family="var(--mono)">NO</text>
+        <rect x="90" y="440" width="120" height="50" rx="6" fill="rgba(var(--red),.1)" stroke="var(--red)" stroke-width="1.5"/>
+        <text x="150" y="470" text-anchor="middle" fill="var(--red)" font-size="16" font-family="var(--serif)">锁过期</text>
+
+        <!-- Warning: O_NOFOLLOW -->
+        <rect x="310" y="60" width="230" height="140" rx="8" fill="rgba(var(--amber-rgb),.08)" stroke="rgba(var(--amber-rgb),.4)" stroke-width="1.5"/>
+        <text x="425" y="95" text-anchor="middle" fill="var(--amber)" font-size="14" font-family="var(--mono)" letter-spacing=".1em">SYMLINK ATTACK DEFENSE</text>
+        <foreignObject x="320" y="105" width="210" height="90">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="font-size:.8vw;border:none;background:transparent;padding:0">
+            <span class="fn">open</span>(path, <span class="lit">O_NOFOLLOW</span>)<br/>
+            <span class="cmt">// 路径是符号链接?</span><br/>
+            <span class="cmt">// 直接拒绝,防止劫持</span>
+          </div>
+        </foreignObject>
+      </svg>
+    </div>
+  </div>
+  <div class="foot"><div>Security Layer 03</div><div>PID Reuse Protection</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 4: 任务级并发 Claim
+     ============================================================ -->
+<section class="slide" id="s4">
+  <div class="chrome">
+    <div><span style="color:var(--cyan)">LAYER 04</span><span class="sep"></span><span>Task Claim</span></div>
+    <div>05 / 08</div>
+  </div>
+  <div class="frame" style="padding-top:2vh">
+    <div class="kicker">第四层防御</div>
+    <h2 class="h-xl" style="margin-bottom:1.5vh">任务级并发 Claim</h2>
+    <p class="lead" style="max-width:75vw;margin-bottom:2vh"><code class="code">findNextTask</code>：乐观预检 → 原子加锁 → 锁内重读验证</p>
+
+    <div style="display:flex;gap:4vw;flex:1;align-items:center">
+      <svg viewBox="0 0 800 400" style="width:65vw" class="glow-cyan">
+        <defs>
+          <marker id="arr4" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+            <polygon points="0 0,10 3.5,0 7" fill="var(--cyan)"/>
+          </marker>
+        </defs>
+
+        <!-- Step 1 -->
+        <rect x="20" y="80" width="220" height="140" rx="8" fill="var(--glass-bg)" stroke="rgba(255,255,255,.3)" stroke-width="1.5"/>
+        <text x="130" y="110" text-anchor="middle" fill="var(--text)" font-size="14" font-family="var(--mono)" opacity=".7">STEP 1</text>
+        <text x="130" y="140" text-anchor="middle" fill="var(--cyan)" font-size="18" font-family="var(--serif)" font-weight="600">乐观预检</text>
+        <foreignObject x="30" y="155" width="200" height="60">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:var(--mono);font-size:.92vw;color:#aaa;line-height:1.5">
+            无锁检查:<br/>
+            status==pending<br/>
+            owner==current<br/>
+            deps==completed
+          </div>
+        </foreignObject>
+
+        <!-- Arrow to step 2 -->
+        <line x1="240" y1="150" x2="280" y2="150" stroke="var(--cyan)" stroke-width="2" marker-end="url(#arr4)"/>
+        <text x="260" y="140" text-anchor="middle" fill="var(--amber)" font-size="12" font-family="var(--mono)">time window</text>
+        <text x="260" y="175" text-anchor="middle" fill="var(--red)" font-size="12" font-family="var(--mono)">race here!</text>
+
+        <!-- Step 2 -->
+        <rect x="290" y="80" width="220" height="140" rx="8" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="2" filter="drop-shadow(0 0 8px rgba(var(--cyan-rgb),.3))"/>
+        <text x="400" y="110" text-anchor="middle" fill="var(--text)" font-size="14" font-family="var(--mono)" opacity=".7">STEP 2</text>
+        <text x="400" y="140" text-anchor="middle" fill="var(--cyan)" font-size="18" font-family="var(--serif)" font-weight="600">原子加锁</text>
+        <foreignObject x="300" y="155" width="200" height="60">
+          <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="font-size:.86vw;border:none;background:transparent;padding:0">
+            <span class="fn">open</span>(lock,<br/>
+            &nbsp;&nbsp;<span class="lit">O_CREAT</span>|<span class="lit">O_EXCL</span>)
+          </div>
+        </foreignObject>
+
+        <!-- Arrow to step 3 -->
+        <line x1="510" y1="150" x2="550" y2="150" stroke="var(--cyan)" stroke-width="2" marker-end="url(#arr4)"/>
+
+        <!-- Step 3 -->
+        <rect x="560" y="80" width="220" height="140" rx="8" fill="var(--glass-bg)" stroke="var(--green)" stroke-width="2" filter="drop-shadow(0 0 8px rgba(34,197,94,.25))"/>
+        <text x="670" y="110" text-anchor="middle" fill="var(--text)" font-size="14" font-family="var(--mono)" opacity=".7">STEP 3</text>
+        <text x="670" y="140" text-anchor="middle" fill="var(--green)" font-size="18" font-family="var(--serif)" font-weight="600">锁内重读</text>
+        <foreignObject x="570" y="155" width="200" height="60">
+          <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:var(--mono);font-size:.92vw;color:#aaa;line-height:1.5">
+            重新读取验证:<br/>
+            if changed → abort<br/>
+            if unchanged → claim
+          </div>
+        </foreignObject>
+
+        <!-- Race window warning -->
+        <rect x="240" y="260" width="320" height="100" rx="8" fill="rgba(var(--amber-rgb),.06)" stroke="rgba(var(--amber-rgb),.35)" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <text x="400" y="290" text-anchor="middle" fill="var(--amber)" font-size="14" font-family="var(--mono)" letter-spacing=".1em">RACE CONDITION WARNING</text>
+        <text x="400" y="320" text-anchor="middle" fill="var(--text)" font-size="15" font-family="var(--sans)">预检与加锁之间存在时间窗口</text>
+        <text x="400" y="345" text-anchor="middle" fill="var(--text)" font-size="14" font-family="var(--sans)" opacity=".7">另一个 Worker 可能在此期间抢占了任务</text>
+      </svg>
+
+      <!-- Summary card -->
+      <div class="col" style="flex:0 0 18vw">
+        <div class="card card-cyan">
+          <p class="meta" style="color:var(--cyan);margin-bottom:1vh">设计价值</p>
+          <p class="body" style="font-size:1.1vw;line-height:1.8">
+            ① 预检减少锁竞争<br/>
+            ② 原子锁保证唯一<br/>
+            ③ 重读消除竞态
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>Security Layer 04</div><div>Optimistic → Pessimistic</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 5: Bridge 生命周期
+     ============================================================ -->
+<section class="slide" id="s5">
+  <div class="chrome">
+    <div><span style="color:var(--cyan)">LAYER 05</span><span class="sep"></span><span>Bridge Lifecycle</span></div>
+    <div>06 / 08</div>
+  </div>
+  <div class="frame" style="padding-top:2vh">
+    <div class="kicker">第五层防御</div>
+    <h2 class="h-xl" style="margin-bottom:2vh">Bridge 生命周期</h2>
+
+    <div style="display:flex;gap:3vw;flex:1">
+      <!-- 4层验证 -->
+      <div style="flex:1">
+        <p class="meta" style="margin-bottom:1.5vh;color:var(--cyan)">四层连接验证</p>
+        <svg viewBox="0 0 300 320" style="width:100%;max-height:40vh" class="glow-cyan">
+          <rect x="20" y="20" width="260" height="55" rx="6" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="1.5"/>
+          <text x="150" y="40" text-anchor="middle" fill="var(--cyan)" font-size="15" font-family="var(--mono)">① sessionId 匹配</text>
+          <text x="150" y="58" text-anchor="middle" fill="#888" font-size="13" font-family="var(--sans)">防止会话数据篡改</text>
+
+          <rect x="20" y="85" width="260" height="55" rx="6" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="1.5"/>
+          <text x="150" y="105" text-anchor="middle" fill="var(--cyan)" font-size="15" font-family="var(--mono)">② socketPath 预期</text>
+          <text x="150" y="123" text-anchor="middle" fill="#888" font-size="13" font-family="var(--sans)">防止路径劫持</text>
+
+          <rect x="20" y="150" width="260" height="55" rx="6" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="1.5"/>
+          <text x="150" y="170" text-anchor="middle" fill="var(--cyan)" font-size="15" font-family="var(--mono)">③ PID + startTime 一致</text>
+          <text x="150" y="188" text-anchor="middle" fill="#888" font-size="13" font-family="var(--sans)">防止 PID 复用/进程替换</text>
+
+          <rect x="20" y="215" width="260" height="55" rx="6" fill="var(--glass-bg)" stroke="var(--cyan)" stroke-width="1.5"/>
+          <text x="150" y="235" text-anchor="middle" fill="var(--cyan)" font-size="15" font-family="var(--mono)">④ socket 文件类型检查</text>
+          <text x="150" y="253" text-anchor="middle" fill="#888" font-size="13" font-family="var(--sans)">防止普通文件冒充 socket</text>
+
+          <path d="M 150 75 L 150 85" stroke="var(--cyan)" stroke-width="1.5" marker-end="url(#arr5)"/>
+          <path d="M 150 140 L 150 150" stroke="var(--cyan)" stroke-width="1.5" marker-end="url(#arr5)"/>
+          <path d="M 150 205 L 150 215" stroke="var(--cyan)" stroke-width="1.5" marker-end="url(#arr5)"/>
+          <defs><marker id="arr5" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="var(--cyan)"/></marker></defs>
+        </svg>
+      </div>
+
+      <!-- 信号升级 + 孤儿预防 -->
+      <div style="flex:1">
+        <p class="meta" style="margin-bottom:1.5vh;color:var(--amber)">信号逐级升级</p>
+        <svg viewBox="0 0 320 150" style="width:100%;margin-bottom:2vh" class="glow-amber">
+          <rect x="10" y="40" width="90" height="70" rx="6" fill="rgba(var(--amber-rgb),.08)" stroke="var(--amber)" stroke-width="1.5"/>
+          <text x="55" y="70" text-anchor="middle" fill="var(--amber)" font-size="16" font-family="var(--mono)">SIGINT</text>
+          <text x="55" y="90" text-anchor="middle" fill="#888" font-size="12" font-family="var(--mono)">5s</text>
+
+          <line x1="100" y1="75" x2="130" y2="75" stroke="var(--amber)" stroke-width="2" marker-end="url(#arr6)"/>
+
+          <rect x="130" y="40" width="90" height="70" rx="6" fill="rgba(var(--amber-rgb),.1)" stroke="var(--amber)" stroke-width="1.5"/>
+          <text x="175" y="70" text-anchor="middle" fill="var(--amber)" font-size="16" font-family="var(--mono)">SIGTERM</text>
+          <text x="175" y="90" text-anchor="middle" fill="#888" font-size="12" font-family="var(--mono)">2.5s</text>
+
+          <line x1="220" y1="75" x2="250" y2="75" stroke="var(--red)" stroke-width="2" marker-end="url(#arr6)"/>
+
+          <rect x="250" y="40" width="60" height="70" rx="6" fill="rgba(var(--red),.1)" stroke="var(--red)" stroke-width="1.5"/>
+          <text x="280" y="80" text-anchor="middle" fill="var(--red)" font-size="16" font-family="var(--mono)" font-weight="700">KILL</text>
+
+          <text x="160" y="20" text-anchor="middle" fill="var(--text)" font-size="13" font-family="var(--sans)" opacity=".7">优雅退出 → 强制终止</text>
+          <defs><marker id="arr6" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="var(--amber)"/></marker></defs>
+        </svg>
+
+        <p class="meta" style="margin-bottom:1vh;color:var(--green)">孤儿进程预防</p>
+        <div class="secure-node" style="padding:2vh">
+          <foreignObject x="0" y="0" width="100%" height="120">
+            <div xmlns="http://www.w3.org/1999/xhtml" class="code-node" style="border:none;background:transparent;padding:0;font-size:.92vw">
+              <span class="cmt">// Bridge 内部守护线程</span><br/>
+              <span class="kw">while</span> <span class="lit">True</span>:<br/>
+              &nbsp;&nbsp;<span class="kw">if</span> <span class="fn">getppid</span>() != parent_pid:<br/>
+              &nbsp;&nbsp;&nbsp;&nbsp;<span class="fn">os._exit</span>(<span class="lit">1</span>) <span class="cmt">// 父死子殉</span><br/>
+              &nbsp;&nbsp;<span class="fn">sleep</span>(<span class="lit">1</span>)
+            </div>
+          </foreignObject>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>Security Layer 05</div><div>4-Layer Verify + Signal Escalation</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 6: Summary - 4个设计原则
+     ============================================================ -->
+<section class="slide" id="s6">
+  <div class="chrome">
+    <div><span style="color:var(--cyan)">SUMMARY</span><span class="sep"></span><span>Design Principles</span></div>
+    <div>07 / 08</div>
+  </div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker">总结</div>
+    <h2 class="h-xl" style="margin-bottom:3vh">四个可落地的设计原则</h2>
+
+    <div class="grid-2-2" style="max-width:80vw;margin:0 auto">
+      <!-- Card 1 -->
+      <div class="card card-cyan" style="display:flex;flex-direction:column;gap:1.5vh;padding:3vh 2vw">
+        <div style="display:flex;align-items:center;gap:1vw">
+          <span style="font-family:var(--serif);font-size:2.9vw;color:var(--cyan);font-weight:700">①</span>
+          <span class="h-md" style="font-size:1.85vw">默认信任，可主动收紧</span>
+        </div>
+        <p class="body" style="font-size:1.2vw;line-height:1.7;opacity:.8">不要让安全机制变成体验的负累：用可收紧的策略旋钮，把信任等级交给用户，而不是一刀切。</p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card" style="border-color:rgba(255,255,255,.2);display:flex;flex-direction:column;gap:1.5vh;padding:3vh 2vw">
+        <div style="display:flex;align-items:center;gap:1vw">
+          <span style="font-family:var(--serif);font-size:2.9vw;color:var(--text);font-weight:700">②</span>
+          <span class="h-md" style="font-size:1.85vw">诚实声明能力边界</span>
+        </div>
+        <p class="body" style="font-size:1.2vw;line-height:1.7;opacity:.8">你的沙箱能防什么、不能防什么，在文档里说清楚。安全这件事，过度承诺比不承诺更危险。</p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card" style="border-color:rgba(255,255,255,.2);display:flex;flex-direction:column;gap:1.5vh;padding:3vh 2vw">
+        <div style="display:flex;align-items:center;gap:1vw">
+          <span style="font-family:var(--serif);font-size:2.9vw;color:var(--amber);font-weight:700">③</span>
+          <span class="h-md" style="font-size:1.85vw">不依赖合作方的诚实</span>
+        </div>
+        <p class="body" style="font-size:1.2vw;line-height:1.7;opacity:.8">跨进程协调尽量用内核原子语义（如 <code class="code">O_EXCL</code>）来实现强制约束，而不是靠协议层面的约定。</p>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="card card-cyan" style="display:flex;flex-direction:column;gap:1.5vh;padding:3vh 2vw">
+        <div style="display:flex;align-items:center;gap:1vw">
+          <span style="font-family:var(--serif);font-size:2.9vw;color:var(--cyan);font-weight:700">④</span>
+          <span class="h-md" style="font-size:1.85vw">分层防御</span>
+        </div>
+        <p class="body" style="font-size:1.2vw;line-height:1.7;opacity:.8">从 Python 命名空间到文件锁，从 PID 验证到 socket 类型检查，每层都在不同抽象层级堵一个特定漏洞。</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>Summary</div><div>4 Security Design Principles</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 7: End
+     ============================================================ -->
+<section class="slide hero" id="s7">
+  <div class="chrome">
+    <div><span style="color:var(--cyan)">EOF</span><span class="sep"></span><span>Thanks</span></div>
+    <div>08 / 08</div>
+  </div>
+  <div class="frame center" style="min-height:72vh">
+    <div class="kicker">下期再会</div>
+    <h1 class="h-hero" style="margin-bottom:3vh">感谢观看</h1>
+    <p class="lead" style="max-width:55vw;opacity:.75">如果你正在搭建自己的 Agent 系统，希望这些源码分析对你有用。</p>
+    <div style="margin-top:5vh;display:flex;gap:2vw;align-items:center;justify-content:center">
+      <div class="card" style="padding:2vh 2vw;text-align:center">
+        <p class="meta" style="color:var(--cyan);margin-bottom:1vh">SOURCE</p>
+        <p class="body" style="font-size:1.15vw">Claude Code Repository</p>
+      </div>
+      <div class="card" style="padding:2vh 2vw;text-align:center">
+        <p class="meta" style="color:var(--cyan);margin-bottom:1vh">TOPIC</p>
+        <p class="body" style="font-size:1.15vw">Sandbox & Concurrency</p>
+      </div>
+      <div class="card" style="padding:2vh 2vw;text-align:center">
+        <p class="meta" style="color:var(--cyan);margin-bottom:1vh">DEPTH</p>
+        <p class="body" style="font-size:1.15vw">Source Code Analysis</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><div>Claude Code 沙箱与并发安全</div><div>End</div></div>
+</section>
+
+</div>
+
+<div id="nav"></div>
+
+<script>
+/* =============== WebGL Cyber Grid Background ===============
+   Pure-dark hacker aesthetic: animated grid/wave data visualization
+*/
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_CYBER = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float grid(vec2 uv,float size){
+  vec2 grid=fract(uv*size);
+  return (step(.98,grid.x)+step(.98,grid.y))*.3;
+}
+float wave(vec2 uv,float t){
+  float y=sin(uv.x*8.+t)*.15+sin(uv.x*3.-t*1.5)*.1;
+  return smoothstep(.015,.0,abs(uv.y-y));
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.-1.;p.x*=u_resolution.x/u_resolution.y;
+  float t=u_time*.5;
+  vec3 col=vec3(.04,.04,.045);
+  float gd=grid(uv,20.+sin(t*.3)*5.);
+  col+=vec3(.06,.7,.82)*gd*.15;
+  float w1=wave(vec2(p.x*1.5,p.y+.3),t);
+  float w2=wave(vec2(p.x*2.,p.y-.2),t*1.3+2.);
+  col+=vec3(.06,.7,.82)*w1*.4;
+  col+=vec3(.96,.62,.04)*w2*.25;
+  vec2 mp=(u_mouse-.5)*2.;mp.x*=u_resolution.x/u_resolution.y;
+  float md=length(p-mp);
+  col+=vec3(.06,.7,.82)*smoothstep(.5,.0,md)*.1*exp(-md*2.+t);
+  float scan=sin(p.y*40.+t*3.)*.5+.5;
+  col+=vec3(.06,.7,.82)*scan*.03;
+  col+=vec3(.96,.62,.04)*pow(sin(t+p.x)*.5+.5,8.)*.05;
+  gl_FragColor=vec4(col,1.);
+}`;
+
+const mouse={x:.5,y:.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId,fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl)return()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return(tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+const drawCyber=bootGL('bg-cyber',FS_CYBER);
+const t0=Date.now();
+(function loop(){
+  const t=(Date.now()-t0)/1000;
+  drawCyber(t);
+  requestAnimationFrame(loop);
+})();
+
+// =============== Navigation ===============
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  idx=Math.max(0,Math.min(total-1,n));
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+}
+
+let overviewOn=false;
+const ov=document.createElement('div');
+ov.id='overview';
+ov.style.cssText='position:fixed;inset:0;z-index:100;background:rgba(var(--bg-rgb),.94);backdrop-filter:blur(14px);display:none;overflow-y:auto;padding:4vh 4vw';
+document.body.appendChild(ov);
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.5vw;max-width:90vw;margin:0 auto';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.style.cssText='cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid '+(i===idx?'var(--cyan)':'rgba(var(--text-rgb),.15)')+';transition:border-color .2s,box-shadow .2s';
+    card.onmouseenter=()=>{card.style.borderColor='var(--cyan)';card.style.boxShadow='0 0 15px rgba(var(--cyan-rgb),.3)'};
+    card.onmouseleave=()=>{card.style.borderColor=i===idx?'var(--cyan)':'rgba(var(--text-rgb),.15)';card.style.boxShadow='none'};
+    const wrap=document.createElement('div');
+    wrap.style.cssText='width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:var(--bg)';
+    const clone=s.cloneNode(true);
+    clone.style.cssText='width:100vw;height:100vh;transform:scale('+(1/4.5)+');transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.style.cssText='padding:8px 12px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--text);opacity:.7;background:rgba(0,0,0,.5)';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    card.onclick=()=>{toggleOverview();go(i)};
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown')go(idx+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){go(idx+(wheelAcc>0?1:-1));wheelAcc=0;}
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(idx+(dx<0?1:-1));
+},{passive:true});
+
+go(0);
+</script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
