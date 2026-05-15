@@ -1,0 +1,4 @@
+{
+  "_comment": "占位：运行 wav-auto / wav 步骤后写入各页时长（秒）。",
+  "slideDurationsSec": [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0]
+}

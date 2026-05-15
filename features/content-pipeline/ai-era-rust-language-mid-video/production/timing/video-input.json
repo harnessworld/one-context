@@ -1,0 +1,29 @@
+{
+  "_comment": "占位配置。口播 WAV 就绪后改为 production/media/voiceover.wav（本地，勿提交）。",
+  "wavFile": "media/voiceover.wav",
+  "whisperModel": "small",
+  "noSpeechThreshold": 0.85,
+  "vadFilter": false,
+  "strictSubtitles": false,
+  "maxSubtitleGapSec": 2.5,
+  "fillSrtGaps": true,
+  "whisperHotwords": "Rust Python inference tokenizers vLLM Firecracker Cloudflare Infire Dynamo MSRC CISA NSA memory safe",
+  "srtReplacements": [],
+  "wrapSubtitles": true,
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "subtitle": {
+    "fontSize": 52,
+    "marginV": 14,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "charsPerLine": 32,
+    "primaryColour": "#FFFF00",
+    "primaryAlpha": 108,
+    "backAlpha": 255,
+    "shadow": 0,
+    "outline": 1,
+    "barHeight": 110,
+    "barAlpha": 0.65
+  }
+}

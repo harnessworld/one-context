@@ -1,0 +1,353 @@
+/**
+ * Open Design — simple-deck visual seed (scoped for html-video-from-slides).
+ * Source: repos/reference/open-design/skills/simple-deck/assets/template.html
+ * Canvas: #P fixed 1920×1080; slides use .s.slide.od + .od-light | .od-dark
+ */
+
+:root {
+  --od-bg: #fafaf7;
+  --od-surface: #ffffff;
+  --od-fg: #1a1916;
+  --od-muted: #6b6964;
+  --od-border: #e8e5df;
+  --od-accent: #c96442;
+  --od-accent-soft: color-mix(in oklch, var(--od-accent) 14%, transparent);
+  --od-font-display: "Iowan Old Style", Charter, Georgia, serif;
+  --od-font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  --od-font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+  /* Bridge → html-deck-layout / SVG */
+  --c-bg: var(--od-bg);
+  --c-surface: var(--od-surface);
+  --c-text-1: var(--od-fg);
+  --c-text-2: var(--od-muted);
+  --c-accent-a: var(--od-accent);
+  --c-accent-b: var(--od-accent);
+  --c-accent-c: var(--od-accent);
+  --c-border: var(--od-border);
+  --font-sans: var(--od-font-body);
+  --font-display: var(--od-font-display);
+  --font-mono: var(--od-font-mono);
+}
+
+/* Dark slide: invert readable tokens for SVG + copy */
+#P .s.slide.od-dark {
+  --c-bg: var(--od-fg);
+  --c-surface: rgba(250, 250, 247, 0.08);
+  --c-surface-2: rgba(250, 250, 247, 0.14);
+  --c-text-1: var(--od-bg);
+  --c-text-2: rgba(250, 250, 247, 0.72);
+  --c-border: rgba(250, 250, 247, 0.18);
+}
+
+#P .s.slide.od {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  font-family: var(--od-font-body);
+  justify-content: flex-start;
+  padding: clamp(36px, 3.2vh, 64px) clamp(40px, 3.8vw, 88px);
+}
+
+#P .s.slide.od-light {
+  background: var(--od-bg);
+  color: var(--od-fg);
+}
+
+#P .s.slide.od-dark {
+  background: var(--od-fg);
+  color: var(--od-bg);
+}
+
+#P .s.slide.od-hero {
+  padding-block: clamp(44px, 4vh, 80px);
+}
+
+#P .s.slide.od-center {
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+#P .s.slide.od-center .lead {
+  margin-inline: auto;
+}
+
+.eyebrow {
+  font-family: var(--od-font-mono);
+  font-size: 26px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--od-accent);
+  margin: 0 0 18px;
+}
+
+.h-hero {
+  font-family: var(--od-font-display);
+  font-size: clamp(72px, 6.2vw, 118px);
+  line-height: 1.03;
+  letter-spacing: -0.025em;
+  margin: 0 0 18px;
+  max-width: 14ch;
+  font-weight: 600;
+  color: inherit;
+}
+
+.h-xl {
+  font-family: var(--od-font-display);
+  font-size: clamp(52px, 4.2vw, 84px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+  max-width: 22ch;
+  font-weight: 600;
+  color: inherit;
+}
+
+.lead {
+  font-size: clamp(38px, 2vw, 46px);
+  line-height: 1.45;
+  color: var(--od-muted);
+  margin: 0;
+  max-width: 54ch;
+}
+
+#P .s.slide.od-dark .lead {
+  color: rgba(250, 250, 247, 0.78);
+}
+
+.wa {
+  font-weight: 800;
+  color: var(--od-accent);
+  text-underline-offset: 6px;
+}
+
+#P .s.slide.od-dark .wa {
+  color: #e8a090;
+}
+
+/* Host chips (cover) */
+.od-chips {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 18px 0 10px;
+}
+
+#P .s.slide.od-center .od-chips {
+  justify-content: center;
+}
+
+.od-chips span {
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+#P .s.slide.od-dark .od-chips span {
+  border: 1px solid rgba(250, 250, 247, 0.22);
+  background: rgba(250, 250, 247, 0.08);
+  color: var(--od-bg);
+}
+
+#P .s.slide.od-light .od-chips span {
+  border: 1px solid var(--od-border);
+  background: var(--od-surface);
+  color: var(--od-fg);
+}
+
+/* 2×2 point grid — OD .pt pattern */
+.od-grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 24px;
+  flex: 1 1 0;
+  min-height: 0;
+  margin-top: 6px;
+}
+
+.od-grid-2x2 .pt {
+  border-top: 4px solid var(--od-accent);
+  padding: 22px 20px 24px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  background: color-mix(in oklch, var(--od-fg) 4%, var(--od-surface));
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+#P .s.slide.od-dark .od-grid-2x2 .pt {
+  background: rgba(250, 250, 247, 0.06);
+}
+
+.od-grid-2x2 .pt h3 {
+  font-family: var(--od-font-display);
+  font-size: 56px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: inherit;
+}
+
+.od-grid-2x2 .pt p {
+  margin: 0;
+  font-size: 48px;
+  line-height: 1.38;
+  color: var(--od-muted);
+  flex: 0 0 auto;
+}
+
+/* 纯文字网格页：更大标题区 + 更少頂部留白 */
+#P .s.slide.od-slide-grid .eyebrow {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+#P .s.slide.od-slide-grid .h-xl {
+  font-size: clamp(58px, 4.8vw, 92px);
+  margin-bottom: 10px;
+  max-width: none;
+}
+
+#P .s.slide.od-dark .od-grid-2x2 .pt p {
+  color: rgba(250, 250, 247, 0.72);
+}
+
+/* Photo slides — ph-img language from seed */
+.od-photo-top .eyebrow {
+  margin-bottom: 8px;
+}
+
+.od-photo-top .h-xl {
+  margin-bottom: 12px;
+}
+
+.od-photo-main {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.od-ph-frame {
+  flex: 1 1 0;
+  min-height: 560px;
+  border: 1px solid var(--od-border);
+  border-radius: 12px;
+  background: linear-gradient(
+      135deg,
+      var(--od-accent-soft),
+      color-mix(in oklch, var(--od-fg) 6%, transparent)
+    ),
+    var(--od-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+}
+
+#P .s.slide.od-dark .od-ph-frame {
+  border-color: rgba(250, 250, 247, 0.18);
+  background: rgba(250, 250, 247, 0.06);
+}
+
+.od-ph-frame img {
+  width: 100%;
+  height: 100%;
+  max-height: 930px;
+  object-fit: contain;
+}
+
+.od-ph-frame > svg {
+  width: 100%;
+  height: auto;
+  max-height: min(560px, 52vh);
+  display: block;
+}
+
+.od-cap {
+  font-size: 40px;
+  line-height: 1.38;
+  font-weight: 600;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 2px solid var(--od-accent);
+  color: inherit;
+}
+
+/* Split (before/after rhythm from seed) */
+.od-ba {
+  display: grid;
+  grid-template-columns: 1.28fr 1fr;
+  gap: 36px;
+  flex: 1 1 0;
+  min-height: 0;
+  align-items: stretch;
+  margin-top: 8px;
+}
+
+.od-ba-copy {
+  display: flex;
+  align-items: center;
+  padding: 20px 8px 20px 28px;
+  border-left: 3px solid var(--od-accent);
+}
+
+.od-ba-copy .lead {
+  font-size: clamp(44px, 2.5vw, 56px);
+  line-height: 1.38;
+  max-width: 36ch;
+}
+
+.od-ba .od-ph-frame {
+  min-height: 580px;
+}
+
+/* Diagram */
+.od-diagram-wrap {
+  flex: 1 1 0;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.od-diagram-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+.od-deck-lead {
+  flex-shrink: 0;
+  margin-top: 14px;
+  font-size: 50px !important;
+  line-height: 1.35 !important;
+  max-width: none !important;
+}
+
+/* Counter / progress — seed chrome */
+#prog {
+  height: 3px !important;
+  background: var(--od-accent) !important;
+}
+
+#pn {
+  font-family: var(--od-font-mono) !important;
+  font-size: 22px !important;
+  letter-spacing: 0.06em !important;
+  color: var(--od-muted) !important;
+  background: var(--od-surface);
+  padding: 8px 16px !important;
+  border-radius: 999px;
+  border: 1px solid var(--od-border);
+  bottom: 22px !important;
+  right: 28px !important;
+}
