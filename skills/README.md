@@ -15,5 +15,6 @@
 | [`project-audit/`](project-audit/) | **项目整理**；审计全量已追踪文件，识别错位/误提交文件，列出清单供确认后执行挪正/排除/清理；触发词：项目整理/审计/清理仓库；见 `SKILL.md` |
 | [`doubao-dialogue-tts/`](doubao-dialogue-tts/) | **豆包/火山 TTS**：对口播对白脚本（男：/女：）逐句合成 **WAV**；V3 合成接口纯念稿、不走 AI 播客自动生成；见 `SKILL.md` |
 | [`volc-podcast-tts/`](volc-podcast-tts/) | **火山播客 WebSocket v3**：长文本/URL/`nlp_texts` 双人播客流式音频（PCM/WAV/MP3）；与「逐句念稿」TTS 不同；见 `SKILL.md` |
+| [`gitsync/`](gitsync/) | **安全 Git 同步**：fetch → 分叉诊断 → ff-only/merge/rebase → 冲突处理；备份分支 + stash，避免本地丢失；触发 `/gitsync`、`git sync`；见 `SKILL.md` |
 
 各视频选题目录**不应**再复制一套 Node 脚本；应通过 `--project` 指向仅含素材的文件夹。
