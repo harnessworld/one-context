@@ -40,6 +40,8 @@
 | 软件中一切皆Worker | 软件中一切皆 Worker（口播视频） | content-pipeline | draft | `features/content-pipeline/软件中一切皆Worker/` | one-context |
 | claudecode-prompt-caching-mid-video | Prompt Caching Is Everything —— Claude Code 团队最新文章 | content-pipeline | planning | `features/content-pipeline/claudecode-prompt-caching-mid-video/` | one-context |
 | claudecode-sandbox-concurrency-mid-video | Claude Code 沙箱与并发机制解析 | content-pipeline | planning | `features/content-pipeline/claudecode-sandbox-concurrency-mid-video/` | one-context |
+| keycompute-ai-gateway-rust-mid-video | Rust 构建 AI 算力中枢：KeyCompute 架构解析（中视频） | content-pipeline | planning | `features/content-pipeline/keycompute-ai-gateway-rust-mid-video/` | one-context |
+| claude-code-large-codebase-mid-video | Claude Code 大型代码库最佳实践 —— Anthropic 博客深度解析 | content-pipeline | planning | `features/content-pipeline/claude-code-large-codebase-mid-video/` | one-context |
 
 
 **Columns**
