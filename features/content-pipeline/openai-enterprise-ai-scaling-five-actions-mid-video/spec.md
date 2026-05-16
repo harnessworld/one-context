@@ -1,7 +1,7 @@
----
+﻿---
 id: openai-enterprise-ai-scaling-five-actions-mid-video
 title: OpenAI 企业 AI 规模化落地五要点（中视频口播）
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

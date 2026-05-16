@@ -1,7 +1,7 @@
----
+﻿---
 id: one-context-intro-short-video
 title: one-context 中视频介绍（爆款口播框架）
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

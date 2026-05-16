@@ -1,7 +1,7 @@
----
+﻿---
 id: ai-agent-security-2026-revelations-mid-video
 title: 2026 AI Agent 安全启示录（对话口播）
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

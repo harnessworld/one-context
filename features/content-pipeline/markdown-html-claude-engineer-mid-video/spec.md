@@ -1,7 +1,7 @@
----
+﻿---
 id: markdown-html-claude-engineer-mid-video
 title: Markdown 要被淘汰？Claude 工程师弃用真相（阿哲 / 小夏 对话口播）
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

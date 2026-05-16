@@ -1,7 +1,7 @@
----
+﻿---
 id: "claude-code-large-codebase-mid-video"
 title: "Claude Code 大型代码库最佳实践 —— Anthropic 博客深度解析"
-status: planning
+status: 开发中
 category: content-pipeline
 primary_repo_id: one-context
 owner: "水猿"

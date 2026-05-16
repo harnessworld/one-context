@@ -1,7 +1,7 @@
----
+﻿---
 id: anthropic-boris-engineering-future-mid-video
 title: 当顶尖工程师不再写代码：AI 重写软件开发未来（对话口播）
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

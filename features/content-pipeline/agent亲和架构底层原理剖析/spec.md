@@ -1,7 +1,7 @@
----
+﻿---
 id: agent亲和架构底层原理剖析
 title: Agent 亲和架构底层原理剖析（口播 / 视频）
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""
