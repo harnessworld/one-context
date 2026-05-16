@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Claude Code 大型代码库最佳实践 — 七层扩展架构</title>
+<link rel="stylesheet" href="html-ppt-assets/fonts.css">
+<link rel="stylesheet" href="html-ppt-assets/base.css">
+<link rel="stylesheet" href="html-ppt-assets/animations/animations.css">
+<link rel="stylesheet" href="html-ppt-assets/od-tech-sharing.css">
+<link rel="stylesheet" href="html-ppt-assets/od-rich-figures.css">
+<style>
+:root{
+  --mv-fs-kicker:28px;
+  --mv-fs-h1:102px;
+  --mv-fs-h2:76px;
+  --mv-fs-lede:44px;
+  --mv-fs-card-title:52px;
+  --mv-fs-card-body:42px;
+  --mv-fs-tag:28px;
+  --mv-fs-code:26px;
+  --mv-fs-agenda:40px;
+  --mv-fs-agenda-meta:28px;
+  --mv-slide-pad-y:48px;
+  --mv-slide-pad-x:64px;
+}
+.tpl-tech-sharing .deck-footer{position:absolute;bottom:24px;left:var(--mv-slide-pad-x);right:var(--mv-slide-pad-x);display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:28px;color:var(--text-3);z-index:2}
+.tpl-tech-sharing .slide-number[data-current]::before{content:attr(data-current)" / "attr(data-total)}
+.wa{font-weight:700;color:var(--accent-2)}
+.tpl-tech-sharing .slide{padding:var(--mv-slide-pad-y) var(--mv-slide-pad-x)}
+.tpl-tech-sharing .h1{font-size:var(--mv-fs-h1)!important;line-height:1.06!important}
+.tpl-tech-sharing .h2{font-size:var(--mv-fs-h2)!important;line-height:1.12!important}
+.tpl-tech-sharing .kicker{font-size:var(--mv-fs-kicker)!important}
+.tpl-tech-sharing .lede{font-size:var(--mv-fs-lede)!important;line-height:1.48!important;font-weight:400}
+.tpl-tech-sharing .card{padding:28px 32px}
+.tpl-tech-sharing .card h4{font-size:var(--mv-fs-card-title)!important;line-height:1.15!important;margin:0 0 14px!important;font-weight:700!important}
+.tpl-tech-sharing .card p,.tpl-tech-sharing .card .dim{font-size:var(--mv-fs-card-body)!important;line-height:1.45!important}
+.tpl-tech-sharing .tag{font-size:var(--mv-fs-tag)!important;padding:10px 18px!important;border-radius:10px!important}
+.tpl-tech-sharing .agenda-row{padding:14px 0}
+.tpl-tech-sharing .agenda-row .t{font-size:var(--mv-fs-agenda)!important;line-height:1.25!important}
+.tpl-tech-sharing .agenda-row .d{font-size:var(--mv-fs-agenda-meta)!important}
+.tpl-tech-sharing .agenda-row .num{font-size:var(--mv-fs-agenda-meta)!important;width:56px}
+.tpl-tech-sharing .terminal{font-size:var(--mv-fs-code)!important}
+.tpl-tech-sharing .terminal .bar{font-size:24px!important;padding:14px 20px!important}
+.tpl-tech-sharing .terminal pre{font-size:var(--mv-fs-code)!important;padding:28px 32px!important;max-height:520px;line-height:1.55!important}
+.tpl-tech-sharing .slide.slide--spread{justify-content:flex-start!important;padding-top:40px}
+.tpl-tech-sharing .slide.slide--spread > .kicker{margin-bottom:8px}
+.tpl-tech-sharing .slide.slide--spread > .h2{margin-bottom:12px}
+.tpl-tech-sharing .diagram-band{margin:12px 0 8px}
+.tpl-tech-sharing .diagram-band--compact{margin:8px 0 4px!important}
+.tpl-tech-sharing .grid.g2.mt-l,.tpl-tech-sharing .grid.g3.mt-l{margin-top:18px!important}
+.tpl-tech-sharing .grid{align-items:stretch!important}
+.tpl-tech-sharing .grid .card{display:flex;flex-direction:column;justify-content:flex-start}
+.tpl-tech-sharing .slide.center .h2{font-size:84px!important}
+.tpl-tech-sharing .slide.center .lede{max-width:48ch!important}
+</style>
+</head>
+<body class="tpl-tech-sharing">
+<div class="deck">
+
+  <!-- 1. 封面 -->
+  <section class="slide is-active slide--spread" data-title="Cover">
+    <p class="kicker">tech-sharing · claude-code · large-codebase</p>
+    <h1 class="h1 anim-fade-up">Claude Code 大型代码库<span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">最佳实践</span></h1>
+    <p class="lede mt-m">核心观点：<span class="wa">配置比模型重要</span> — 七层扩展架构 + 三个部署模式</p>
+    <div class="diagram-band diagram-band--hero" aria-hidden="true">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>harness · 七层堆叠架构</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1920 460" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="cv-dot" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.8" fill="#30363d"/></pattern>
+              <linearGradient id="cv-line" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#7ee787"/><stop offset="50%" stop-color="#79c0ff"/><stop offset="100%" stop-color="#d2a8ff"/></linearGradient>
+              <linearGradient id="cv-fill-l7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#581c87"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="cv-fill-l6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0369a1"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="cv-fill-l5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#047857"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="cv-fill-l4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#b45309"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="cv-fill-l3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c2d12"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="cv-fill-l2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9f1239"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="cv-fill-l1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#be123c"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <filter id="cv-glow-a" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="14" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="cv-arr" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><path d="M0,0 L14,5 L0,10 Z" fill="#79c0ff"/></marker>
+            </defs>
+            <rect width="1920" height="460" fill="url(#cv-dot)" opacity=".45"/>
+            <!-- 七层堆叠金字塔 -->
+            <rect x="720" y="48" width="480" height="48" rx="10" fill="url(#cv-fill-l7)" stroke="#a855f7" stroke-width="3" filter="url(#cv-glow-a)"/>
+            <text x="960" y="82" text-anchor="middle" fill="#e9d5ff" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L7 · 子 Agent</text>
+            <rect x="680" y="104" width="560" height="48" rx="10" fill="url(#cv-fill-l6)" stroke="#38bdf8" stroke-width="3" filter="url(#cv-glow-a)"/>
+            <text x="960" y="138" text-anchor="middle" fill="#bae6fd" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L6 · MCP 服务器</text>
+            <rect x="640" y="160" width="640" height="48" rx="10" fill="url(#cv-fill-l5)" stroke="#34d399" stroke-width="3" filter="url(#cv-glow-a)"/>
+            <text x="960" y="194" text-anchor="middle" fill="#a7f3d0" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L5 · LSP 精准导航</text>
+            <rect x="600" y="216" width="720" height="48" rx="10" fill="url(#cv-fill-l4)" stroke="#fbbf24" stroke-width="3" filter="url(#cv-glow-a)"/>
+            <text x="960" y="250" text-anchor="middle" fill="#fef3c7" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L4 · Plugins</text>
+            <rect x="560" y="272" width="800" height="48" rx="10" fill="url(#cv-fill-l3)" stroke="#fb923c" stroke-width="3" filter="url(#cv-glow-a)"/>
+            <text x="960" y="306" text-anchor="middle" fill="#fed7aa" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L3 · Skills</text>
+            <rect x="520" y="328" width="880" height="48" rx="10" fill="url(#cv-fill-l2)" stroke="#f87171" stroke-width="3" filter="url(#cv-glow-a)"/>
+            <text x="960" y="362" text-anchor="middle" fill="#fecdd3" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L2 · Hooks</text>
+            <rect x="480" y="384" width="960" height="48" rx="10" fill="url(#cv-fill-l1)" stroke="#f43f5e" stroke-width="3" filter="url(#cv-glow-a)"/>
+            <text x="960" y="418" text-anchor="middle" fill="#fecdd3" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L1 · CLAUDE.md</text>
+            <!-- 马具隐喻标注 -->
+            <text x="1480" y="200" text-anchor="start" fill="#8b949e" font-size="28" font-family="JetBrains Mono,monospace">harness 马具隐喻</text>
+            <text x="1480" y="240" text-anchor="start" fill="#7ee787" font-size="24" font-family="JetBrains Mono,monospace">模型是地板</text>
+            <text x="1480" y="280" text-anchor="start" fill="#79c0ff" font-size="24" font-family="JetBrains Mono,monospace">配置是天花板</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="deck-footer"><span class="mono">#claude-code #large-codebase #ai-infra</span><span class="slide-number" data-current="1" data-total="12"></span></div>
+  </section>
+
+  <!-- 2. Agent 式搜索 vs RAG -->
+  <section class="slide slide--spread" data-title="Agent Search">
+    <p class="kicker">search · agent vs rag</p>
+    <h2 class="h2">不靠索引：<span class="wa">Agent 式搜索</span></h2>
+    <p class="lede mt-m">遍历文件、grep 搜索、追踪引用 — 没有 embedding 管道，<span class="wa">每个开发者实例直接对着最新代码工作</span>。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>comparison · RAG index vs Agent search</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 360" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="sr-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="sr-rag" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7f1d1d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="sr-agent" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="sr-flow" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff7b72"/><stop offset="100%" stop-color="#7ee787"/></linearGradient>
+              <filter id="sr-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="sr-arr" markerWidth="12" markerHeight="8" refX="11" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#8b949e"/></marker>
+            </defs>
+            <rect width="1760" height="360" fill="url(#sr-dot)" opacity=".38"/>
+            <!-- RAG 过期索引 -->
+            <rect x="48" y="48" width="680" height="264" rx="26" fill="url(#sr-rag)" stroke="#ff7b72" stroke-width="3" filter="url(#sr-glow)"/>
+            <text x="388" y="98" text-anchor="middle" fill="#fecaca" font-size="30" font-weight="800" font-family="JetBrains Mono,monospace">RAG · 过期索引</text>
+            <circle cx="140" cy="160" r="32" fill="#312e81" stroke="#6366f1" stroke-width="3"/>
+            <text x="140" y="168" text-anchor="middle" fill="#e0e7ff" font-size="20">代码库</text>
+            <line x1="185" y1="160" x2="280" y2="160" stroke="#8b949e" stroke-width="2" marker-end="url(#sr-arr)"/>
+            <rect x="290" y="128" width="160" height="64" rx="10" fill="#1e1b4b" stroke="#818cf8" stroke-width="2"/>
+            <text x="370" y="168" text-anchor="middle" fill="#c7d2fe" font-size="20">embedding</text>
+            <line x1="455" y1="160" x2="520" y2="160" stroke="#8b949e" stroke-width="2" marker-end="url(#sr-arr)"/>
+            <rect x="530" y="128" width="140" height="64" rx="10" fill="#312e81" stroke="#f87171" stroke-width="2"/>
+            <text x="600" y="168" text-anchor="middle" fill="#fecaca" font-size="18">索引 (延迟)</text>
+            <text x="388" y="240" text-anchor="middle" fill="#fca5a5" font-size="22">更新速度 < 提交速度</text>
+            <text x="388" y="280" text-anchor="middle" fill="#fca5a5" font-size="22">查到两周前的老代码</text>
+            <!-- Agent 实时搜索 -->
+            <rect x="832" y="48" width="680" height="264" rx="26" fill="url(#sr-agent)" stroke="#7ee787" stroke-width="3" filter="url(#sr-glow)"/>
+            <text x="1172" y="98" text-anchor="middle" fill="#bbf7d0" font-size="30" font-weight="800" font-family="JetBrains Mono,monospace">Agent · 实时搜索</text>
+            <rect x="900" y="128" width="120" height="64" rx="10" fill="#064e3b" stroke="#34d399" stroke-width="2"/>
+            <text x="960" y="168" text-anchor="middle" fill="#a7f3d0" font-size="20">遍历文件</text>
+            <rect x="1050" y="128" width="100" height="64" rx="10" fill="#064e3b" stroke="#34d399" stroke-width="2"/>
+            <text x="1100" y="168" text-anchor="middle" fill="#a7f3d0" font-size="20">grep</text>
+            <rect x="1180" y="128" width="120" height="64" rx="10" fill="#064e3b" stroke="#34d399" stroke-width="2"/>
+            <text x="1240" y="168" text-anchor="middle" fill="#a7f3d0" font-size="20">追踪引用</text>
+            <text x="1172" y="240" text-anchor="middle" fill="#d1fae5" font-size="22">无集中式索引</text>
+            <text x="1172" y="280" text-anchor="middle" fill="#d1fae5" font-size="22">下一秒读到最新代码</text>
+            <!-- 中央对比箭头 -->
+            <text x="780" y="180" text-anchor="middle" fill="#8b949e" font-size="48" font-weight="200">VS</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card"><h4>RAG 的致命缺陷</h4><p class="dim">索引更新永远跟不上提交速度，查到过期代码无任何提示。</p></div>
+      <div class="card card-accent"><h4>Agent 搜索的代价</h4><p class="dim">需要足够的起始上下文，否则十亿行代码盲搜会撑爆 context window。</p></div>
+    </div>
+  </section>
+
+  <!-- 3. 七层扩展架构概览 -->
+  <section class="slide slide--spread" data-title="Seven Layers">
+    <p class="kicker">architecture · 7-layer harness</p>
+    <h2 class="h2">七层扩展架构概览</h2>
+    <p class="lede mt-m">从底到顶逐级构建，<span class="wa">每一层都建立在前一层基础上</span>，顺序不可跳级。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>pyramid · 7 layers from bottom to top</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1680 420" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="lyr-dot" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.6" fill="#30363d"/></pattern>
+              <linearGradient id="lyr-g7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#3b0764"/></linearGradient>
+              <linearGradient id="lyr-g6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#082f49"/></linearGradient>
+              <linearGradient id="lyr-g5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#064e3b"/></linearGradient>
+              <linearGradient id="lyr-g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#78350f"/></linearGradient>
+              <linearGradient id="lyr-g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f97316"/><stop offset="100%" stop-color="#7c2d12"/></linearGradient>
+              <linearGradient id="lyr-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#7f1d1d"/></linearGradient>
+              <linearGradient id="lyr-g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e11d48"/><stop offset="100%" stop-color="#881337"/></linearGradient>
+              <filter id="lyr-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="lyr-arr" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#94a3b8"/></marker>
+            </defs>
+            <rect width="1680" height="420" fill="url(#lyr-dot)" opacity=".4"/>
+            <!-- 七层阶梯金字塔 -->
+            <rect x="740" y="48" width="200" height="40" rx="8" fill="url(#lyr-g7)" stroke="#d8b4fe" stroke-width="2" filter="url(#lyr-glow)"/>
+            <text x="840" y="76" text-anchor="middle" fill="#f3e8ff" font-size="18" font-weight="800" font-family="JetBrains Mono,monospace">L7 子 Agent</text>
+            <rect x="700" y="96" width="280" height="40" rx="8" fill="url(#lyr-g6)" stroke="#7dd3fc" stroke-width="2" filter="url(#lyr-glow)"/>
+            <text x="840" y="124" text-anchor="middle" fill="#e0f2fe" font-size="18" font-weight="800" font-family="JetBrains Mono,monospace">L6 MCP 服务器</text>
+            <rect x="660" y="144" width="360" height="40" rx="8" fill="url(#lyr-g5)" stroke="#6ee7b7" stroke-width="2" filter="url(#lyr-glow)"/>
+            <text x="840" y="172" text-anchor="middle" fill="#d1fae5" font-size="18" font-weight="800" font-family="JetBrains Mono,monospace">L5 LSP 精准导航</text>
+            <rect x="620" y="192" width="440" height="40" rx="8" fill="url(#lyr-g4)" stroke="#fcd34d" stroke-width="2" filter="url(#lyr-glow)"/>
+            <text x="840" y="220" text-anchor="middle" fill="#fef3c7" font-size="18" font-weight="800" font-family="JetBrains Mono,monospace">L4 Plugins</text>
+            <rect x="580" y="240" width="520" height="40" rx="8" fill="url(#lyr-g3)" stroke="#fdba74" stroke-width="2" filter="url(#lyr-glow)"/>
+            <text x="840" y="268" text-anchor="middle" fill="#ffedd5" font-size="18" font-weight="800" font-family="JetBrains Mono,monospace">L3 Skills</text>
+            <rect x="540" y="288" width="600" height="40" rx="8" fill="url(#lyr-g2)" stroke="#fca5a5" stroke-width="2" filter="url(#lyr-glow)"/>
+            <text x="840" y="316" text-anchor="middle" fill="#fee2e2" font-size="18" font-weight="800" font-family="JetBrains Mono,monospace">L2 Hooks</text>
+            <rect x="500" y="336" width="680" height="40" rx="8" fill="url(#lyr-g1)" stroke="#fda4af" stroke-width="2" filter="url(#lyr-glow)"/>
+            <text x="840" y="364" text-anchor="middle" fill="#ffe4e6" font-size="18" font-weight="800" font-family="JetBrains Mono,monospace">L1 CLAUDE.md</text>
+            <!-- 右侧说明 -->
+            <text x="1220" y="200" text-anchor="start" fill="#8b949e" font-size="22" font-family="JetBrains Mono,monospace">构建顺序：从底到顶</text>
+            <path d="M 1200 200 L 1190 180" stroke="#8b949e" stroke-width="2" marker-end="url(#lyr-arr)"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g3 mt-l">
+      <div class="card card-accent"><h4>L1-L2 · 基础上下文</h4><p class="dim">CLAUDE.md 分层加载 + Hooks 自我进化。</p></div>
+      <div class="card card-accent"><h4>L3-L5 · 能力扩展</h4><p class="dim">Skills 按需加载 + Plugins 打包 + LSP 精准导航。</p></div>
+      <div class="card card-accent"><h4>L6-L7 · 高级集成</h4><p class="dim">MCP 连接内部工具 + 子 Agent 探索分离。</p></div>
+    </div>
+  </section>
+
+  <!-- 4. 第 1-2 层：CLAUDE.md + Hooks -->
+  <section class="slide slide--spread" data-title="CLAUDE.md + Hooks">
+    <p class="kicker">layer 1-2 · context foundation</p>
+    <h2 class="h2">第 1-2 层：<span class="wa">CLAUDE.md + Hooks</span></h2>
+    <p class="lede mt-m">分层加载上下文，Hooks 让系统<span class="wa">自我进化</span> + 确定性检查。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>layered loading + hook lifecycle</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 380" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="ch-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="ch-root" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#be123c"/><stop offset="100%" stop-color="#881337"/></linearGradient>
+              <linearGradient id="ch-sub" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9f1239"/><stop offset="100%" stop-color="#881337"/></linearGradient>
+              <linearGradient id="ch-hook" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#047857"/><stop offset="100%" stop-color="#064e3b"/></linearGradient>
+              <filter id="ch-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="ch-arr" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#7ee787"/></marker>
+              <marker id="ch-arr2" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#79c0ff"/></marker>
+            </defs>
+            <rect width="1760" height="380" fill="url(#ch-dot)" opacity=".38"/>
+            <!-- CLAUDE.md 分层 -->
+            <rect x="48" y="48" width="600" height="140" rx="20" fill="url(#ch-root)" stroke="#fda4af" stroke-width="3" filter="url(#ch-glow)"/>
+            <text x="348" y="90" text-anchor="middle" fill="#ffe4e6" font-size="24" font-weight="800" font-family="JetBrains Mono,monospace">CLAUDE.md 分层</text>
+            <text x="348" y="130" text-anchor="middle" fill="#fecdd3" font-size="20">根目录：全局信息、框架、关键约定</text>
+            <text x="348" y="165" text-anchor="middle" fill="#fecdd3" font-size="20">子目录：逐层叠加局部约定</text>
+            <!-- Hooks 自我进化 -->
+            <rect x="680" y="48" width="600" height="140" rx="20" fill="url(#ch-hook)" stroke="#34d399" stroke-width="3" filter="url(#ch-glow)"/>
+            <text x="980" y="90" text-anchor="middle" fill="#d1fae5" font-size="24" font-weight="800" font-family="JetBrains Mono,monospace">Hooks 自我进化</text>
+            <text x="980" y="130" text-anchor="middle" fill="#a7f3d0" font-size="20">stop hook：会话结束反思，提议更新</text>
+            <text x="980" y="165" text-anchor="middle" fill="#a7f3d0" font-size="20">start hook：按模块动态加载团队配置</text>
+            <!-- 流程箭头 -->
+            <path d="M 350 200 L 350 250" stroke="#7ee787" stroke-width="2" marker-end="url(#ch-arr)"/>
+            <path d="M 980 200 L 980 250" stroke="#79c0ff" stroke-width="2" marker-end="url(#ch-arr2)"/>
+            <!-- 底部卡片 -->
+            <rect x="48" y="260" width="600" height="100" rx="16" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+            <text x="348" y="295" text-anchor="middle" fill="#e2e8f0" font-size="20" font-weight="700">简洁、可执行、不废话</text>
+            <text x="348" y="330" text-anchor="middle" fill="#94a3b8" font-size="18">支付服务 · Go + gRPC · 禁止改 generated</text>
+            <rect x="680" y="260" width="600" height="100" rx="16" fill="#0f172a" stroke="#475569" stroke-width="2"/>
+            <text x="980" y="295" text-anchor="middle" fill="#e2e8f0" font-size="20" font-weight="700">确定性检查交给脚本</text>
+            <text x="980" y="330" text-anchor="middle" fill="#94a3b8" font-size="18">lint、格式化 — 不确定的事情才交给 AI</text>
+            <!-- 右侧 tips -->
+            <rect x="1320" y="100" width="380" height="180" rx="16" fill="#1e293b" stroke="#60a5fa" stroke-width="2"/>
+            <text x="1510" y="150" text-anchor="middle" fill="#bfdbfe" font-size="24" font-weight="800">反模式</text>
+            <text x="1510" y="190" text-anchor="middle" fill="#e2e8f0" font-size="18">不要粘贴整本架构文档</text>
+            <text x="1510" y="225" text-anchor="middle" fill="#e2e8f0" font-size="18">可复用知识放 Skills</text>
+            <text x="1510" y="260" text-anchor="middle" fill="#fca5a5" font-size="18">需人工确认后才生效</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card"><h4>CLAUDE.md 精髓</h4><p class="dim">移动时自动向上遍历，逐层叠加；从子目录初始化限定工作范围。</p></div>
+      <div class="card card-accent"><h4>Hooks 高阶用法</h4><p class="dim">不只是防护栏，更是让系统自我进化的机制。</p></div>
+    </div>
+  </section>
+
+  <!-- 5. 第 3-4 层：Skills + Plugins -->
+  <section class="slide slide--spread" data-title="Skills + Plugins">
+    <p class="kicker">layer 3-4 · knowledge packaging</p>
+    <h2 class="h2">第 3-4 层：<span class="wa">Skills + Plugins</span></h2>
+    <p class="lede mt-m">按需加载专业知识 + <span class="wa">把部落知识打包</span> 防止丢失。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>on-demand skills + plugin packaging</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1680 340" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="sp-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="sp-skill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ea580c"/><stop offset="100%" stop-color="#7c2d12"/></linearGradient>
+              <linearGradient id="sp-plugin" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#78350f"/></linearGradient>
+              <filter id="sp-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="sp-arr" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#94a3b8"/></marker>
+            </defs>
+            <rect width="1680" height="340" fill="url(#sp-dot)" opacity=".38"/>
+            <!-- Skills 按需加载 -->
+            <rect x="48" y="48" width="720" height="120" rx="20" fill="url(#sp-skill)" stroke="#fdba74" stroke-width="3" filter="url(#sp-glow)"/>
+            <text x="408" y="90" text-anchor="middle" fill="#ffedd5" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L3 · Skills 按需加载</text>
+            <text x="408" y="130" text-anchor="middle" fill="#fed7aa" font-size="20">安全审查 Skill / 文档更新 Skill / 部署配置 Skill</text>
+            <text x="408" y="155" text-anchor="middle" fill="#fdba74" font-size="18">绑定到特定目录，monorepo 中按需激活</text>
+            <!-- Plugins 打包 -->
+            <rect x="912" y="48" width="720" height="120" rx="20" fill="url(#sp-plugin)" stroke="#fcd34d" stroke-width="3" filter="url(#sp-glow)"/>
+            <text x="1272" y="90" text-anchor="middle" fill="#fef3c7" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L4 · Plugins 部落知识打包</text>
+            <text x="1272" y="130" text-anchor="middle" fill="#fde68a" font-size="20">Skills + Hooks + MCP 配置 → 一键安装</text>
+            <text x="1272" y="155" text-anchor="middle" fill="#fcd34d" font-size="18">Marketplace 统一分发，新人第一天环境就绪</text>
+            <!-- 底部流程 -->
+            <rect x="48" y="200" width="360" height="100" rx="14" fill="#1e293b" stroke="#fb923c" stroke-width="2"/>
+            <text x="228" y="238" text-anchor="middle" fill="#ffedd5" font-size="20" font-weight="700">做安全审查时</text>
+            <text x="228" y="275" text-anchor="middle" fill="#fdba74" font-size="18">加载安全 Skill</text>
+            <rect x="432" y="200" width="360" height="100" rx="14" fill="#1e293b" stroke="#fb923c" stroke-width="2"/>
+            <text x="612" y="238" text-anchor="middle" fill="#ffedd5" font-size="20" font-weight="700">写文档时</text>
+            <text x="612" y="275" text-anchor="middle" fill="#fdba74" font-size="18">加载文档 Skill</text>
+            <rect x="912" y="200" width="720" height="100" rx="14" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+            <text x="1272" y="245" text-anchor="middle" fill="#fef3c7" font-size="22" font-weight="700">张三的配置 → Plugin → 李四第一天拥有同样环境</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card card-accent"><h4>Skills 按需加载</h4><p class="dim">几十种任务 ≠ 全部塞进每个会话；需要时才展开。</p></div>
+      <div class="card card-accent"><h4>Plugins 解决部落知识</h4><p class="dim">好配置随员工流失而消失 → 打包后统一分发。</p></div>
+    </div>
+  </section>
+
+  <!-- 6. 第 5 层：LSP 精准导航 -->
+  <section class="slide slide--spread" data-title="LSP Navigation">
+    <p class="kicker">layer 5 · precise navigation</p>
+    <h2 class="h2">第 5 层：<span class="wa">LSP 精准导航</span></h2>
+    <p class="lede mt-m">语言服务器协议 — grep 大海捞针 vs <span class="wa">符号精确导航</span>。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>grep chaos vs LSP precision</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1600 320" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="lsp-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="lsp-bad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7f1d1d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="lsp-good" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <filter id="lsp-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="lsp-arr" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#7ee787"/></marker>
+            </defs>
+            <rect width="1600" height="320" fill="url(#lsp-dot)" opacity=".38"/>
+            <!-- grep 大海捞针 -->
+            <rect x="48" y="48" width="720" height="224" rx="24" fill="url(#lsp-bad)" stroke="#ff7b72" stroke-width="3" filter="url(#lsp-glow)"/>
+            <text x="408" y="98" text-anchor="middle" fill="#fecaca" font-size="28" font-weight="800" font-family="JetBrains Mono,monospace">❌ grep 文本匹配</text>
+            <text x="408" y="150" text-anchor="middle" fill="#fff" font-size="22">搜索 handle() → 几千个结果</text>
+            <text x="408" y="185" text-anchor="middle" fill="#fca5a5" font-size="20">Claude 逐个打开判断 → context 烧完</text>
+            <text x="408" y="235" text-anchor="middle" fill="#fca5a5" font-size="20">百万行代码库里的常见函数名</text>
+            <!-- LSP 精准定位 -->
+            <rect x="832" y="48" width="720" height="224" rx="24" fill="url(#lsp-good)" stroke="#7ee787" stroke-width="3" filter="url(#lsp-glow)"/>
+            <text x="1192" y="98" text-anchor="middle" fill="#bbf7d0" font-size="28" font-weight="800" font-family="JetBrains Mono,monospace">✅ LSP 符号导航</text>
+            <text x="1192" y="150" text-anchor="middle" fill="#fff" font-size="22">跳转到定义 · 查找所有引用</text>
+            <text x="1192" y="185" text-anchor="middle" fill="#a7f3d0" font-size="20">区分同名函数的差异</text>
+            <text x="1192" y="235" text-anchor="middle" fill="#a7f3d0" font-size="20">C/C++ 多语言代码库回报最高</text>
+            <!-- 箭头 -->
+            <text x="800" y="170" text-anchor="middle" fill="#8b949e" font-size="48" font-weight="200">⇒</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card"><h4>无 LSP 的困境</h4><p class="dim">只能文本匹配，context window 被无关结果快速消耗。</p></div>
+      <div class="card card-accent"><h4>前置投资</h4><p class="dim">部署前全公司铺设 LSP 集成 — 不是开箱即用，需手动配置。</p></div>
+    </div>
+  </section>
+
+  <!-- 7. 第 6-7 层：MCP 服务器 + 子 Agent -->
+  <section class="slide slide--spread" data-title="MCP + Sub Agents">
+    <p class="kicker">layer 6-7 · advanced integration</p>
+    <h2 class="h2">第 6-7 层：<span class="wa">MCP 服务器 + 子 Agent</span></h2>
+    <p class="lede mt-m">连接内部工具 + <span class="wa">探索与编辑分离</span>。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>MCP connectors + sub-agent isolation</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0=" viewBox="0 0 1760 360" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="mcp-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="mcp-l6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0284c7"/><stop offset="100%" stop-color="#0c4a6e"/></linearGradient>
+              <linearGradient id="mcp-l7" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9333ea"/><stop offset="100%" stop-color="#4c1d95"/></linearGradient>
+              <filter id="mcp-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="mcp-arr" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#60a5fa"/></marker>
+            </defs>
+            <rect width="1760" height="360" fill="url(#mcp-dot)" opacity=".38"/>
+            <!-- L6 MCP -->
+            <rect x="48" y="48" width="660" height="264" rx="24" fill="url(#mcp-l6)" stroke="#38bdf8" stroke-width="3" filter="url(#mcp-glow)"/>
+            <text x="378" y="98" text-anchor="middle" fill="#e0f2fe" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L6 · MCP 服务器</text>
+            <rect x="88" y="130" width="140" height="60" rx="10" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="2"/>
+            <text x="158" y="168" text-anchor="middle" fill="#bae6fd" font-size="18">内部文档</text>
+            <rect x="248" y="130" width="140" height="60" rx="10" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="2"/>
+            <text x="318" y="168" text-anchor="middle" fill="#bae6fd" font-size="18">工单系统</text>
+            <rect x="408" y="130" width="140" height="60" rx="10" fill="#0c4a6e" stroke="#7dd3fc" stroke-width="2"/>
+            <text x="478" y="168" text-anchor="middle" fill="#bae6fd" font-size="18">数据分析</text>
+            <text x="378" y="240" text-anchor="middle" fill="#bae6fd" font-size="20">结构化搜索 → Claude 可直接调用</text>
+            <!-- L7 子 Agent -->
+            <rect x="758" y="48" width="660" height="264" rx="24" fill="url(#mcp-l7)" stroke="#c084fc" stroke-width="3" filter="url(#mcp-glow)"/>
+            <text x="1088" y="98" text-anchor="middle" fill="#f3e8ff" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">L7 · 子 Agent 隔离</text>
+            <rect x="820" y="130" width="180" height="70" rx="10" fill="#4c1d95" stroke="#d8b4fe" stroke-width="2"/>
+            <text x="910" y="172" text-anchor="middle" fill="#f3e8ff" font-size="18" font-weight="700">只读探索子 Agent</text>
+            <line x1="1005" y1="165" x2="1085" y2="165" stroke="#c084fc" stroke-width="2" marker-end="url(#mcp-arr)"/>
+            <rect x="1100" y="130" width="200" height="70" rx="10" fill="#581c87" stroke="#e9d5ff" stroke-width="2"/>
+            <text x="1200" y="172" text-anchor="middle" fill="#fff" font-size="18" font-weight="700">结果写入文件</text>
+            <text x="1088" y="240" text-anchor="middle" fill="#e9d5ff" font-size="18">独立 context window → 不污染主 Agent</text>
+            <text x="1088" y="275" text-anchor="middle" fill="#d8b4fe" font-size="18">探索与编辑分离</text>
+            <!-- 警告提示 -->
+            <rect x="1440" y="78" width="280" height="200" rx="14" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+            <text x="1580" y="128" text-anchor="middle" fill="#fef3c7" font-size="20" font-weight="800">⚠️ 建议</text>
+            <text x="1580" y="175" text-anchor="middle" fill="#fde68a" font-size="18">MCP 不急上</text>
+            <text x="1580" y="215" text-anchor="middle" fill="#fde68a" font-size="18">先打好 L1-L5</text>
+            <text x="1580" y="255" text-anchor="middle" fill="#fcd34d" font-size="16">地基没好装电梯=楼歪</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card card-accent"><h4>MCP：段位最高的团队</h4><p class="dim">连接内部数据分析平台，业务分析师不用切换工具。</p></div>
+      <div class="card card-accent"><h4>子 Agent：关键洞察</h4><p class="dim">同一会话又探索又编辑 → context 撑爆；分离后只返结果。</p></div>
+    </div>
+  </section>
+
+  <!-- 8. 模式一：让代码库可读 -->
+  <section class="slide slide--spread" data-title="Readable Codebase">
+    <p class="kicker">pattern 1 · readability</p>
+    <h2 class="h2">模式一：<span class="wa">让代码库可读</span></h2>
+    <p class="lede mt-m">代码能读是后面一切的前提 — <span class="wa">三条经验</span>。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>three practices for claude-readable codebase</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1680 300" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="r1-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="r1-p1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#be123c"/><stop offset="100%" stop-color="#881337"/></linearGradient>
+              <linearGradient id="r1-p2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9f1239"/><stop offset="100%" stop-color="#881337"/></linearGradient>
+              <linearGradient id="r1-p3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#047857"/><stop offset="100%" stop-color="#064e3b"/></linearGradient>
+              <filter id="r1-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="r1-arr" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><path d="M0,0 L14,5 L0,10 Z" fill="#7ee787"/></marker>
+            </defs>
+            <rect width="1680" height="300" fill="url(#r1-dot)" opacity=".38"/>
+            <!-- 递进箭头 -->
+            <path d="M 200 150 L 520 150" stroke="#334155" stroke-width="4" marker-end="url(#r1-arr)"/>
+            <path d="M 620 150 L 960 150" stroke="#334155" stroke-width="4" marker-end="url(#r1-arr)"/>
+            <!-- 经验 1 -->
+            <rect x="48" y="60" width="460" height="180" rx="18" fill="url(#r1-p1)" stroke="#fda4af" stroke-width="3" filter="url(#r1-glow)"/>
+            <text x="278" y="110" text-anchor="middle" fill="#ffe4e6" font-size="24" font-weight="800">经验一</text>
+            <text x="278" y="155" text-anchor="middle" fill="#fff" font-size="28" font-weight="700">CLAUDE.md</text>
+            <text x="278" y="190" text-anchor="middle" fill="#fecdd3" font-size="18">精简且分层</text>
+            <text x="278" y="220" text-anchor="middle" fill="#fda4af" font-size="16">从子目录初始化限定范围</text>
+            <!-- 经验 2 -->
+            <rect x="540" y="60" width="460" height="180" rx="18" fill="url(#r1-p2)" stroke="#fca5a5" stroke-width="3" filter="url(#r1-glow)"/>
+            <text x="770" y="110" text-anchor="middle" fill="#fee2e2" font-size="24" font-weight="800">经验二</text>
+            <text x="770" y="155" text-anchor="middle" fill="#fff" font-size="28" font-weight="700">测试和 lint</text>
+            <text x="770" y="190" text-anchor="middle" fill="#fecaca" font-size="18">按子目录配置</text>
+            <text x="770" y="220" text-anchor="middle" fill="#fca5a5" font-size="16">避免跑整个 monorepo 超时</text>
+            <!-- 经验 3 -->
+            <rect x="1032" y="60" width="600" height="180" rx="18" fill="url(#r1-p3)" stroke="#34d399" stroke-width="3" filter="url(#r1-glow)"/>
+            <text x="1332" y="110" text-anchor="middle" fill="#d1fae5" font-size="24" font-weight="800">经验三</text>
+            <text x="1332" y="155" text-anchor="middle" fill="#fff" font-size="28" font-weight="700">管好噪音</text>
+            <text x="1332" y="195" text-anchor="middle" fill="#a7f3d0" font-size="18">.claudeignore 排除生成文件</text>
+            <text x="1332" y="225" text-anchor="middle" fill="#6ee7b7" font-size="16">permissions.deny 提交共享 · REPO.md 画地图</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="terminal mt-l">
+      <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>CLAUDE.md best practice</span></div>
+<pre>本项目是支付服务，使用 Go + gRPC
+测试: go test ./...
+禁止: 直接修改 generated/ 目录</pre>
+    </div>
+  </section>
+
+  <!-- 9. 模式二：配置要迭代 -->
+  <section class="slide slide--spread" data-title="Iterate Config">
+    <p class="kicker">pattern 2 · continuous iteration</p>
+    <h2 class="h2">模式二：<span class="wa">配置要迭代</span></h2>
+    <p class="lede mt-m">随模型进化，<span class="wa">主动维护你的配置</span> — 旧配置拖累新模型。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>config lifecycle: old rules locking new models</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1600 300" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="r2-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="r2-old" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7f1d1d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="r2-new" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#0d1117"/></linearGradient>
+              <linearGradient id="r2-cycle" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#7ee787"/></linearGradient>
+              <filter id="r2-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="r2-arr" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#fbbf24"/></marker>
+            </defs>
+            <rect width="1600" height="300" fill="url(#r2-dot)" opacity=".38"/>
+            <!-- 旧配置枷锁 -->
+            <rect x="48" y="48" width="680" height="100" rx="18" fill="url(#r2-old)" stroke="#ff7b72" stroke-width="3" filter="url(#r2-glow)"/>
+            <text x="388" y="85" text-anchor="middle" fill="#fecaca" font-size="22" font-weight="800">❌ 旧规则示例</text>
+            <text x="388" y="120" text-anchor="middle" fill="#fff" font-size="18">"每次重构只改一个文件" → 老模型有效，新模型成枷锁</text>
+            <!-- 新模型能力 -->
+            <rect x="48" y="168" width="680" height="100" rx="18" fill="url(#r2-new)" stroke="#7ee787" stroke-width="3" filter="url(#r2-glow)"/>
+            <text x="388" y="205" text-anchor="middle" fill="#bbf7d0" font-size="22" font-weight="800">✅ 新模型能力</text>
+            <text x="388" y="240" text-anchor="middle" fill="#fff" font-size="18">新模型完全能做跨文件协调编辑</text>
+            <!-- 循环迭代 -->
+            <rect x="780" y="80" width="780" height="160" rx="20" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+            <text x="1170" y="125" text-anchor="middle" fill="#fef3c7" font-size="24" font-weight="800" font-family="JetBrains Mono,monospace">配置审查周期</text>
+            <circle cx="900" cy="190" r="30" fill="#7f1d1d" stroke="#ff7b72" stroke-width="2"/>
+            <text x="900" y="198" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">旧</text>
+            <line x1="935" y1="190" x2="1020" y2="190" stroke="#fbbf24" stroke-width="3" marker-end="url(#r2-arr)"/>
+            <circle cx="1060" cy="190" r="30" fill="#b45309" stroke="#fbbf24" stroke-width="2"/>
+            <text x="1060" y="198" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">审</text>
+            <line x1="1095" y1="190" x2="1180" y2="190" stroke="#fbbf24" stroke-width="3" marker-end="url(#r2-arr)"/>
+            <circle cx="1220" cy="190" r="30" fill="#047857" stroke="#34d399" stroke-width="2"/>
+            <text x="1220" y="198" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">新</text>
+            <line x1="1255" y1="190" x2="1340" y2="190" stroke="#34d399" stroke-width="3" marker-end="url(#r2-arr)"/>
+            <circle cx="1380" cy="190" r="30" fill="#14532d" stroke="#7ee787" stroke-width="2"/>
+            <text x="1380" y="198" text-anchor="middle" fill="#fff" font-size="16" font-weight="700">优</text>
+            <text x="1170" y="245" text-anchor="middle" fill="#fde68a" font-size="16" font-family="JetBrains Mono,monospace">每 3-6 个月审查 · 每次大模型发布后检查</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card"><h4>Perforce Hook 案例</h4><p class="dim">旧 Hook 自动执行 p4 edit → Claude Code 原生支持后完全没用。</p></div>
+      <div class="card card-accent"><h4>建议审查周期</h4><p class="dim">每 3-6 个月做一次完整审查；每次大模型发布后检查一轮。</p></div>
+    </div>
+  </section>
+
+  <!-- 10. 模式三：得有人管 -->
+  <section class="slide slide--spread" data-title="Dedicated Owner">
+    <p class="kicker">pattern 3 · ownership</p>
+    <h2 class="h2">模式三：<span class="wa">得有人管</span></h2>
+    <p class="lede mt-m">指定专人负责 Claude Code 的管理和推广 — <span class="wa">Agent Manager / DRI</span>。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>ownership model: agent manager / DRI</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1680 340" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="r3-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="r3-hub" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#4c1d95"/></linearGradient>
+              <linearGradient id="r3-team" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#0c4a6e"/></linearGradient>
+              <linearGradient id="r3-risk" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#7f1d1d"/></linearGradient>
+              <filter id="r3-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="r3-arr" markerWidth="12" markerHeight="8" refX="10" refY="4" orient="auto"><path d="M0,0 L12,4 L0,8 Z" fill="#c084fc"/></marker>
+            </defs>
+            <rect width="1680" height="340" fill="url(#r3-dot)" opacity=".38"/>
+            <!-- 中心 Agent Manager -->
+            <circle cx="840" cy="170" r="80" fill="url(#r3-hub)" stroke="#c084fc" stroke-width="4" filter="url(#r3-glow)"/>
+            <text x="840" y="155" text-anchor="middle" fill="#ede9fe" font-size="20" font-weight="800">Agent Manager</text>
+            <text x="840" y="185" text-anchor="middle" fill="#ddd6fe" font-size="16">半 PM 半工程师</text>
+            <!-- 职责 -->
+            <rect x="100" y="60" width="220" height="70" rx="12" fill="#1e293b" stroke="#a78bfa" stroke-width="2"/>
+            <text x="210" y="105" text-anchor="middle" fill="#e2e8f0" font-size="18">配置管理</text>
+            <rect x="100" y="150" width="220" height="70" rx="12" fill="#1e293b" stroke="#a78bfa" stroke-width="2"/>
+            <text x="210" y="195" text-anchor="middle" fill="#e2e8f0" font-size="18">权限策略</text>
+            <rect x="100" y="240" width="220" height="70" rx="12" fill="#1e293b" stroke="#a78bfa" stroke-width="2"/>
+            <text x="210" y="285" text-anchor="middle" fill="#e2e8f0" font-size="18">Plugin 管理</text>
+            <!-- 连接线 -->
+            <line x1="325" y1="95" x2="760" y2="140" stroke="#c084fc" stroke-width="2" marker-end="url(#r3-arr)"/>
+            <line x1="325" y1="185" x2="760" y2="170" stroke="#c084fc" stroke-width="2" marker-end="url(#r3-arr)"/>
+            <line x1="325" y1="275" x2="760" y2="200" stroke="#c084fc" stroke-width="2" marker-end="url(#r3-arr)"/>
+            <!-- 小团队先搭 -->
+            <rect x="1100" y="60" width="500" height="100" rx="16" fill="url(#r3-team)" stroke="#7dd3fc" stroke-width="3" filter="url(#r3-glow)"/>
+            <text x="1350" y="110" text-anchor="middle" fill="#e0f2fe" font-size="22" font-weight="800">小团队先搭基础设施</text>
+            <text x="1350" y="145" text-anchor="middle" fill="#bae6fd" font-size="18">CLAUDE.md · Hooks · Plugins</text>
+            <!-- 风险警告 -->
+            <rect x="1100" y="190" width="500" height="120" rx="16" fill="url(#r3-risk)" stroke="#f87171" stroke-width="3" filter="url(#r3-glow)"/>
+            <text x="1350" y="235" text-anchor="middle" fill="#fee2e2" font-size="22" font-weight="800">⚠️ 部落知识风险</text>
+            <text x="1350" y="270" text-anchor="middle" fill="#fecaca" font-size="16">专家离职 → 未分享的配置丢失</text>
+            <text x="1350" y="295" text-anchor="middle" fill="#fca5a5" font-size="16">不仅是效率问题，更是风险问题</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card card-accent"><h4>第一印象很关键</h4><p class="dim">开发者第一次接触就能跑通；第一印象不好后面难翻盘。</p></div>
+      <div class="card"><h4>DRI 最低配置</h4><p class="dim">配置 + 权限 + Plugin 管理 + CLAUDE.md 规范 + 拍板权。</p></div>
+    </div>
+  </section>
+
+  <!-- 11. 治理先行 + 三步部署 -->
+  <section class="slide slide--spread" data-title="Three-Stage Deploy">
+    <p class="kicker">governance · three-stage deployment</p>
+    <h2 class="h2">治理先行 + <span class="wa">三步部署</span></h2>
+    <p class="lede mt-m">基础设施 → 试点 → 规模，<span class="wa">从一开始就并行推进治理</span>。</p>
+    <div class="diagram-band">
+      <div class="figure-shell">
+        <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>three-stage rollout · infra → pilot → scale</span></div>
+        <div class="figure-shell__body">
+          <svg viewBox="0 0 1760 320" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <pattern id="dep-dot" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r="1.5" fill="#30363d"/></pattern>
+              <linearGradient id="dep-s1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0369a1"/><stop offset="100%" stop-color="#0c4a6e"/></linearGradient>
+              <linearGradient id="dep-s2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#064e3b"/></linearGradient>
+              <linearGradient id="dep-s3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#4c1d95"/></linearGradient>
+              <linearGradient id="dep-flow" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#38bdf8"/><stop offset="50%" stop-color="#34d399"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient>
+              <filter id="dep-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="12" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <marker id="dep-arr" markerWidth="14" markerHeight="10" refX="12" refY="5" orient="auto"><path d="M0,0 L14,5 L0,10 Z" fill="#94a3b8"/></marker>
+            </defs>
+            <rect width="1760" height="320" fill="url(#dep-dot)" opacity=".38"/>
+            <!-- 阶段一：基础设施 -->
+            <rect x="48" y="48" width="520" height="224" rx="20" fill="url(#dep-s1)" stroke="#7dd3fc" stroke-width="3" filter="url(#dep-glow)"/>
+            <text x="308" y="100" text-anchor="middle" fill="#e0f2fe" font-size="28" font-weight="800" font-family="JetBrains Mono,monospace">阶段一</text>
+            <text x="308" y="145" text-anchor="middle" fill="#fff" font-size="36" font-weight="900">基础设施</text>
+            <text x="308" y="190" text-anchor="middle" fill="#bae6fd" font-size="20">CLAUDE.md · Hooks · Skills</text>
+            <text x="308" y="240" text-anchor="middle" fill="#7dd3fc" font-size="18">小团队先搭好，不急于开放</text>
+            <!-- 箭头 -->
+            <line x1="575" y1="160" x2="655" y2="160" stroke="#94a3b8" stroke-width="4" marker-end="url(#dep-arr)"/>
+            <!-- 阶段二：试点 -->
+            <rect x="680" y="48" width="400" height="224" rx="20" fill="url(#dep-s2)" stroke="#6ee7b7" stroke-width="3" filter="url(#dep-glow)"/>
+            <text x="880" y="100" text-anchor="middle" fill="#d1fae5" font-size="28" font-weight="800" font-family="JetBrains Mono,monospace">阶段二</text>
+            <text x="880" y="145" text-anchor="middle" fill="#fff" font-size="36" font-weight="900">试点</text>
+            <text x="880" y="190" text-anchor="middle" fill="#a7f3d0" font-size="20">有限访问 · 定义审批流程</text>
+            <text x="880" y="240" text-anchor="middle" fill="#6ee7b7" font-size="18">选代表性团队试用，收集反馈</text>
+            <!-- 箭头 -->
+            <line x1="1085" y1="160" x2="1165" y2="160" stroke="#94a3b8" stroke-width="4" marker-end="url(#dep-arr)"/>
+            <!-- 阶段三：规模 -->
+            <rect x="1190" y="48" width="520" height="224" rx="20" fill="url(#dep-s3)" stroke="#c084fc" stroke-width="3" filter="url(#dep-glow)"/>
+            <text x="1450" y="100" text-anchor="middle" fill="#f3e8ff" font-size="28" font-weight="800" font-family="JetBrains Mono,monospace">阶段三</text>
+            <text x="1450" y="145" text-anchor="middle" fill="#fff" font-size="36" font-weight="900">规模</text>
+            <text x="1450" y="190" text-anchor="middle" fill="#e9d5ff" font-size="20">Plugin 成型 · MCP 稳定</text>
+            <text x="1450" y="240" text-anchor="middle" fill="#c084fc" font-size="18">治理流程跑通，复用 playbook</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="grid g2 mt-l">
+      <div class="card card-accent"><h4>跨职能工作组</h4><p class="dim">工程 + 信息安全 + 治理，共同定义需求，一起画路线图。</p></div>
+      <div class="card"><h4>MCP 不急上</h4><p class="dim">等 L1-L5 基本功扎实，地基没打好就装电梯 → 楼歪。</p></div>
+    </div>
+  </section>
+
+  <!-- 12. 收尾：适用边界 -->
+  <section class="slide center tc slide--spread" data-title="Closing" style="position:relative;overflow:hidden">
+    <svg class="thanks-mesh" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;opacity:.55;z-index:0">
+      <defs>
+        <radialGradient id="cls-r1" cx="22%" cy="18%" r="45%"><stop offset="0%" stop-color="#312e81"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+        <radialGradient id="cls-r2" cx="88%" cy="78%" r="40%"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+        <linearGradient id="cls-line" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#22c55e"/></linearGradient>
+      </defs>
+      <rect width="1920" height="1080" fill="#020617"/>
+      <rect width="1920" height="1080" fill="url(#cls-r1)"/>
+      <rect width="1920" height="1080" fill="url(#cls-r2)"/>
+      <path d="M0,540 Q480,380 960,540 T1920,540" fill="none" stroke="url(#cls-line)" stroke-width="2" opacity=".35"/>
+      <path d="M0,620 Q520,780 960,620 T1920,620" fill="none" stroke="url(#cls-line)" stroke-width="1.5" opacity=".22"/>
+    </svg>
+    <div style="position:relative;z-index:1">
+      <p class="kicker">closing · takeaways</p>
+      <h2 class="h2" style="font-size:72px!important">适用边界与总结</h2>
+      <div class="diagram-band diagram-band--compact" style="max-width:1280px;margin-left:auto;margin-right:auto">
+        <div class="figure-shell">
+          <div class="figure-shell__bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span>summary · core thesis + scope</span></div>
+          <div class="figure-shell__body">
+            <svg viewBox="0 0 1280 320" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="cls-core" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#be123c"/><stop offset="100%" stop-color="#4c1d95"/></linearGradient>
+                <linearGradient id="cls-scope" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e3a8a"/><stop offset="100%" stop-color="#0f172a"/></linearGradient>
+                <filter id="cls-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              </defs>
+              <rect width="1280" height="320" fill="url(#cls-scope)" opacity=".3"/>
+              <!-- 核心观点 -->
+              <rect x="48" y="48" width="560" height="224" rx="20" fill="url(#cls-core)" stroke="#f472b6" stroke-width="3" filter="url(#cls-glow)"/>
+              <text x="328" y="105" text-anchor="middle" fill="#fce7f3" font-size="26" font-weight="800" font-family="JetBrains Mono,monospace">核心观点</text>
+              <text x="328" y="160" text-anchor="middle" fill="#fff" font-size="36" font-weight="900">模型是地板</text>
+              <text x="328" y="210" text-anchor="middle" fill="#fbcfe8" font-size="32" font-weight="700">配置是天花板</text>
+              <!-- 适用边界 -->
+              <rect x="672" y="48" width="560" height="100" rx="16" fill="#064e3b" stroke="#34d399" stroke-width="2" filter="url(#cls-glow)"/>
+              <text x="952" y="85" text-anchor="middle" fill="#a7f3d0" font-size="20" font-weight="800">✅ 适用</text>
+              <text x="952" y="125" text-anchor="middle" fill="#d1fae5" font-size="18">常规软件工程：Git + 标准目录结构</text>
+              <rect x="672" y="172" width="560" height="100" rx="16" fill="#7f1d1d" stroke="#f87171" stroke-width="2" filter="url(#cls-glow)"/>
+              <text x="952" y="210" text-anchor="middle" fill="#fecaca" font-size="20" font-weight="800">⚠️ 需额外配置</text>
+              <text x="952" y="250" text-anchor="middle" fill="#fca5a5" font-size="18">大量二进制资产 · Perforce · 非工程师贡献</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <p class="lede" style="margin:20px auto 10px;max-width:64ch;font-size:40px!important;line-height:1.45!important">七层扩展，三个模式，三步部署 — <span class="wa">先搞基础再上规模，有人负责，定期翻新</span>。</p>
+      <div class="row mt-l" style="justify-content:center;flex-wrap:wrap;gap:16px">
+        <span class="tag">Claude Code</span>
+        <span class="tag">Large Codebase</span>
+        <span class="tag">AI Infrastructure</span>
+        <span class="tag">Enterprise Deployment</span>
+      </div>
+    </div>
+    <div class="deck-footer" style="position:relative;margin-top:24px"><span class="mono">#claude-code #enterprise-ai #agent-infrastructure</span><span class="slide-number" data-current="12" data-total="12"></span></div>
+  </section>
+
+</div>
+<script src="html-ppt-assets/runtime.js"></script>
+<script>
+(function(){
+var slides=document.querySelectorAll('.deck .slide');
+window.go=function(n){
+  if(n<0||n>=slides.length)return;
+  slides.forEach(function(s,i){
+    s.classList.toggle('is-active',i===n);
+  });
+};
+})();
+</script>
+</body>
+</html>
