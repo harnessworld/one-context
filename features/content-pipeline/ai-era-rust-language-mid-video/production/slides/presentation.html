@@ -2,104 +2,605 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1920,initial-scale=1.0">
-<title>AI 时代 × Rust</title>
-<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/base.css">
-<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/fonts.css">
-<link rel="stylesheet" href="../../../../../skills/html-deck-layout/assets/mobile-layout.css">
-<link rel="stylesheet" href="od-simple-deck.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 时代 Rust · 工程向吐槽</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
-#P{position:fixed;left:0;top:0;width:1920px;height:1080px;margin:0;z-index:1;overflow:hidden;background:var(--od-bg)}
-#prog{position:fixed;top:0;left:0;width:0;z-index:100;transition:width .2s ease}
+  :root{
+    --ink:#0a0a0b;
+    --ink-rgb:10,10,11;
+    --paper:#f1efea;
+    --paper-rgb:241,239,234;
+    --paper-tint:#e8e5de;
+    --ink-tint:#18181a;
+    --accent:#c9a96e;
+    --accent-rgb:201,169,110;
+
+    --mono:"IBM Plex Mono",ui-monospace,monospace;
+    --serif-en:"Playfair Display",Georgia,serif;
+    --serif-zh:"Noto Serif SC",source-han-serif-sc,serif;
+    --sans-zh:"Noto Sans SC",source-han-sans-sc,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ink);color:var(--paper);font-family:var(--sans-zh);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+
+  canvas.bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;display:block;transition:opacity 1.2s ease}
+  canvas#bg-light{opacity:0}
+  canvas#bg-dark{opacity:1}
+  body.light-bg canvas#bg-light{opacity:1}
+  body.light-bg canvas#bg-dark{opacity:0}
+
+  #deck{position:fixed;inset:0;width:700vw;height:100vh;display:flex;flex-wrap:nowrap;transition:transform .9s cubic-bezier(.77,0,.175,1);z-index:10;will-change:transform}
+  .slide{width:100vw;height:100vh;flex:0 0 100vw;position:relative;padding:6vh 6vw 10vh 6vw;display:flex;flex-direction:column;overflow:hidden}
+  .slide.light{color:var(--ink)}
+  .slide.dark{color:var(--paper)}
+
+  .slide::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;transition:background .7s ease}
+  .slide.light::before{background:rgba(var(--paper-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.dark::before{background:rgba(var(--ink-rgb),.78);backdrop-filter:blur(3px)}
+  .slide.hero.light::before{background:rgba(var(--paper-rgb),.16);backdrop-filter:none}
+  .slide.hero.dark::before{background:rgba(var(--ink-rgb),.12);backdrop-filter:none}
+  .slide.hero::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  .slide.hero.light::after{background:linear-gradient(180deg,rgba(var(--paper-rgb),.28) 0%,rgba(var(--paper-rgb),0) 14%,rgba(var(--paper-rgb),0) 86%,rgba(var(--paper-rgb),.28) 100%)}
+  .slide.hero.dark::after{background:linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%)}
+
+  .chrome{display:flex;justify-content:space-between;align-items:flex-start;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7}
+  .chrome .left,.chrome .right{display:flex;gap:2.4em;align-items:center}
+  .chrome .sep{width:40px;height:1px;background:currentColor;opacity:.4}
+  .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55}
+  .foot .title{font-family:var(--serif-zh);font-weight:400;letter-spacing:.05em;text-transform:none;opacity:.75;font-size:13px}
+
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.3em;text-transform:uppercase;opacity:.6;margin-bottom:2.6vh}
+  .h-hero{font-family:var(--serif-zh);font-weight:900;font-size:10vw;line-height:.96;letter-spacing:-.02em}
+  .h-xl{font-family:var(--serif-zh);font-weight:700;font-size:6.2vw;line-height:1.08;letter-spacing:-.01em}
+  .h-sub{font-family:var(--serif-zh);font-weight:500;font-size:3.1vw;line-height:1.25;opacity:.7}
+  .h-md{font-family:var(--serif-zh);font-weight:600;font-size:2.3vw;line-height:1.3}
+  .body-zh{font-family:var(--sans-zh);font-weight:400;font-size:max(15px,1.22vw);line-height:1.75;opacity:.82;letter-spacing:.01em}
+  .lead{font-family:var(--serif-zh);font-weight:400;font-size:1.75vw;line-height:1.5;opacity:.86}
+  .meta-row{font-family:var(--mono);font-size:max(12px,.92vw);letter-spacing:.16em;text-transform:uppercase;opacity:.6}
+
+  .col{display:flex;flex-direction:column;gap:2.4vh}
+  .row{display:flex;align-items:center;gap:3vw}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:4vw;flex:1;align-items:center}
+  .split-55{display:grid;grid-template-columns:55fr 45fr;gap:5vw;flex:1;align-items:stretch}
+  .fill{flex:1}
+  .center{align-items:center;justify-content:center;text-align:center}
+  .grid-4{display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(2,1fr);gap:4vh 6vw;flex:1;align-content:center}
+
+  .pillar{display:flex;flex-direction:column;gap:1.8vh;padding:2vh 0;border-top:1px solid rgba(127,127,127,.3)}
+  .pillar .ic{font-family:var(--serif-en);font-style:italic;font-size:2.6vw;opacity:.45;font-weight:400;color:var(--accent)}
+  .pillar .t{font-family:var(--serif-zh);font-weight:700;font-size:2.4vw;line-height:1.1}
+  .pillar .d{font-family:var(--sans-zh);font-weight:400;font-size:max(14px,1.1vw);opacity:.76;line-height:1.6}
+
+  .callout{padding:3vh 2.4vw;border-left:3px solid var(--accent);position:relative;font-family:var(--serif-zh);font-size:max(15px,1.2vw);line-height:1.55;opacity:.92}
+  .slide.light .callout{background:rgba(var(--ink-rgb),.05)}
+  .slide.dark .callout{background:rgba(var(--paper-rgb),.06)}
+  .callout .cite{display:block;margin-top:1.6vh;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
+
+  .hi{position:relative;display:inline}
+  .slide.dark .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--paper-rgb),.15);z-index:-1}
+  .slide.light .hi::after{content:"";position:absolute;left:-.1em;right:-.1em;bottom:-.05em;height:.28em;background:rgba(var(--ink-rgb),.08);z-index:-1}
+  .hi-gold{color:var(--accent)}
+
+  /* 封面：Rust 炫彩黄（渐变字 + 柔光，仅 hero 首屏） */
+  .rust-spectrum{
+    display:inline-block;
+    font-family:var(--serif-en);
+    font-style:italic;
+    font-weight:800;
+    letter-spacing:-.03em;
+    line-height:1;
+    padding-right:.06em;
+    background:linear-gradient(100deg,#fffde7 0%,#ffeb3b 16%,#ffc400 34%,#ffab00 52%,#ffd54f 72%,#fff8e1 100%);
+    background-size:160% 100%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 0 18px rgba(255,213,79,.55)) drop-shadow(0 0 42px rgba(255,193,7,.22));
+    animation:rust-shift 7s ease-in-out infinite;
+  }
+  .rust-spectrum.rust-spectrum-zh{
+    font-family:var(--serif-zh);
+    font-style:normal;
+    font-weight:800;
+    letter-spacing:.04em;
+    padding-right:0;
+  }
+  @keyframes rust-shift{
+    0%,100%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .rust-spectrum{animation:none}
+  }
+  #s0.slide.hero.dark .kicker{opacity:.88;background:linear-gradient(90deg,rgba(255,235,59,.95),rgba(255,193,7,.88),rgba(201,169,110,.9));-webkit-background-clip:text;background-clip:text;color:transparent}
+  #s0.slide.hero.dark .pipeline-section{border-top-color:rgba(255,213,79,.38)}
+  #s0.slide.hero.dark .step{border-top-color:rgba(255,213,79,.28)}
+
+  .pipeline-section{margin-top:4.4vh;padding-top:2.8vh;border-top:1px dashed rgba(127,127,127,.32)}
+  .pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2vw}
+  .pipeline-4{grid-template-columns:repeat(4,1fr)!important}
+  .step{display:flex;flex-direction:column;gap:.8vh;padding-top:1.4vh;border-top:1px solid rgba(127,127,127,.35)}
+  .step-nb{font-family:var(--serif-en);font-style:italic;font-weight:500;font-size:1.15vw;opacity:.45}
+  .step-title{font-family:var(--serif-zh);font-weight:700;font-size:1.55vw;letter-spacing:.01em;line-height:1.2}
+  .step-desc{font-family:var(--sans-zh);font-weight:400;font-size:max(12px,.95vw);line-height:1.45;opacity:.72}
+
+  .code-node{font-family:var(--mono);font-size:12px;line-height:1.5;padding:12px 16px;border-radius:6px;border:1px solid rgba(127,127,127,.35);background:rgba(127,127,127,.08);white-space:pre-wrap}
+  .slide.dark .code-node{background:rgba(var(--paper-rgb),.06)}
+  .slide.light .code-node{background:rgba(var(--ink-rgb),.05)}
+  .code-kw{color:var(--accent);font-weight:600}
+  .code-func{color:#8fa;opacity:.9}
+  .slide.light .code-func{color:#2a8}
+  .code-str{color:#ead;opacity:.9}
+  .slide.light .code-str{color:#967}
+  .code-hl{background:rgba(201,169,110,.2);padding:0 4px;border-radius:3px}
+
+  .diagram{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+  .diagram svg{width:100%;max-height:48vh}
+
+  #nav{position:fixed;left:50%;bottom:2.6vh;transform:translateX(-50%);z-index:30;display:flex;gap:10px;padding:8px 14px;border-radius:999px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  #nav .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:all .3s ease;border:0;padding:0}
+  #nav .dot:hover{background:rgba(255,255,255,.5);transform:scale(1.15)}
+  #nav .dot.active{background:rgba(255,255,255,.95);width:22px;border-radius:999px}
+  body.light-bg #nav{background:rgba(255,255,255,.25)}
+  body.light-bg #nav .dot{background:rgba(var(--ink-rgb),.25)}
+  body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
+  #hint{position:fixed;bottom:3vh;right:3vw;z-index:30;font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;mix-blend-mode:difference;color:#aaa}
+
+  #overview{position:fixed;inset:0;z-index:100;background:rgba(var(--ink-rgb),.92);backdrop-filter:blur(12px);display:none;overflow-y:auto;padding:4vh 4vw}
+  #overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2vh 1.6vw;max-width:90vw;margin:0 auto}
+  .overview-card{cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid rgba(var(--paper-rgb),.15);transition:border-color .2s}
+  .overview-card:hover{border-color:rgba(var(--paper-rgb),.6)}
+  .overview-card .thumb{width:100%;aspect-ratio:16/9;overflow:hidden;position:relative;pointer-events:none;background:var(--ink)}
+  .overview-card .slide-clone{width:100vw;height:100vh;transform:scale(0.222);transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none}
+  .overview-card.active{border-color:rgba(var(--paper-rgb),.85)}
+  .overview-card .label{padding:6px 10px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--paper);opacity:.7}
+
+  .wa-wrap{margin-top:auto;padding-top:1.2vh;opacity:.48;font-size:max(11px,.88vw);line-height:1.45}
+  .slide.light .wa{color:var(--ink);font-weight:500}
+  .slide.dark .wa{color:var(--paper);font-weight:500}
+
+  @media (max-width:900px){
+    .h-hero{font-size:14vw}
+    .h-xl{font-size:9vw}
+    .pipeline{grid-template-columns:repeat(2,1fr)}
+    .split{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
-<div id="prog"></div>
-<div id="P">
 
-<section class="s slide fill-deck od od-dark od-hero od-center is-active" id="s0" data-title="Cover">
-<p class="eyebrow">SYSTEMS × AI</p>
-<h1 class="h-hero">Rust<br/>香在哪</h1>
-<p class="lead">大模型落地后的推理、隔离与供应链 —— <span class="wa">用信源说话</span>，不炒语言战争。</p>
-<p class="lead" style="margin-top:18px">中视频口播 · 草案幻灯</p>
+<canvas id="bg-dark" class="bg"></canvas>
+<canvas id="bg-light" class="bg"></canvas>
+<div id="hint">← → 翻页 · ESC 索引</div>
+
+<div id="deck">
+
+<section class="slide hero dark" id="s0">
+  <div class="chrome"><div class="left"><span>AI Infra</span><span class="sep"></span><span>Rust · 中视频</span></div><div class="right">01 / 07</div></div>
+  <div class="frame" style="display:grid;gap:3vh;align-content:center;min-height:76vh">
+    <div class="kicker">AI Engineering Landscape</div>
+    <h1 class="h-hero"><span class="rust-spectrum" lang="en">Rust</span> 在工程里<br>香在哪</h1>
+    <h2 class="h-sub">大模型落地之后：<span class="rust-spectrum rust-spectrum-zh">隔离、性能、依赖链</span>——不是「谁更酷」的语言战争</h2>
+    <div class="pipeline-section" style="margin-top:2vh">
+      <div class="pipeline pipeline-4">
+        <div class="step">
+          <div class="step-nb">01</div>
+          <div class="step-title">场景地图</div>
+          <div class="step-desc">从 Firecracker 到 SDK / Tokenizer</div>
+        </div>
+        <div class="step">
+          <div class="step-nb">02</div>
+          <div class="step-title">权威背书</div>
+          <div class="step-desc">MSRC / NSA / CISA 怎么读</div>
+        </div>
+        <div class="step">
+          <div class="step-nb">03</div>
+          <div class="step-title">语言机制</div>
+          <div class="step-desc">所有权 · 类型 · 并发 · FFI</div>
+        </div>
+        <div class="step">
+          <div class="step-nb">04</div>
+          <div class="step-title">混合栈与学习</div>
+          <div class="step-desc">Python+Rust 渐进路径</div>
+        </div>
+      </div>
+    </div>
+    <p class="body-zh wa-wrap"><span class="wa">今天的话题是为什么 Rust 会在 AI 基础设施和工程化领域受到越来越多的关注</span></p>
+  </div>
+  <div class="foot"><div class="title">AI 时代 Rust</div><div>Cover</div></div>
 </section>
 
-<section class="s slide fill-deck od od-light od-slide-grid" id="s1" data-title="路线图">
-<p class="eyebrow">Tonight</p>
-<h2 class="h-xl">今夜路线图</h2>
-<div class="od-grid-2x2">
-<div class="pt"><h3>有什么用</h3><p>云底座 · 推理引擎 · 工具链</p></div>
-<div class="pt"><h3>为什么是 Rust</h3><p>内存安全 · 并发 · 可控成本</p></div>
-<div class="pt"><h3>混合栈</h3><p>Python 生态 + <span class="wa">Rust 热路径</span></p></div>
-<div class="pt"><h3>你该学什么</h3><p>研发与 Agent 工程映射</p></div>
+<section class="slide light" id="s1">
+  <div class="chrome"><div class="left"><span>路线图</span><span class="sep"></span></div><div class="right">02 / 07</div></div>
+  <div class="frame" style="padding-top:4vh;display:flex;flex-direction:column;flex:1;min-height:0">
+    <div class="split-55" style="flex:1;min-height:0">
+    <div class="col" style="justify-content:center;gap:3vh">
+      <div class="kicker">Tonight Route</div>
+      <h2 class="h-xl">四件事把话说透</h2>
+      <p class="lead"><span class="hi-gold">先地图，再信源，再机制，最后落到你怎么学。</span></p>
+      <p class="body-zh">云底座与 Agent 工作负载 → 把「谁说了什么」读成工程信号 → Rust 能帮编译器扛哪些活 → Python 编排 + Rust 核心库的混合栈。</p>
+      <div class="callout" style="margin-top:2vh">
+        <span class="cite">口播对齐锚</span>
+        这一页只定方向：后面每一节都回扣到<span class="rust-spectrum rust-spectrum-zh">「隔离、性能、依赖链」</span>三件事之一。
+      </div>
+    </div>
+    <div class="col" style="justify-content:center;align-items:center">
+      <svg viewBox="0 0 520 420" style="width:100%;max-width:520px">
+        <defs>
+          <marker id="arr1" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(10,10,11,.55)"/></marker>
+        </defs>
+        <rect x="30" y="30" width="460" height="56" rx="8" fill="rgba(10,10,11,.06)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="260" y="66" text-anchor="middle" fill="#0a0a0b" font-size="15" font-family="Noto Sans SC" font-weight="600">场景：云 / Agent / 推理服务</text>
+        <line x1="260" y1="86" x2="260" y2="130" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <rect x="30" y="140" width="460" height="56" rx="8" fill="rgba(201,169,110,.12)" stroke="rgba(201,169,110,.55)" stroke-width="1.5"/>
+        <text x="260" y="176" text-anchor="middle" fill="#8a6f3a" font-size="15" font-family="Noto Sans SC" font-weight="600">信源：MSRC · NSA · CISA</text>
+        <line x1="260" y1="196" x2="260" y2="238" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <rect x="30" y="248" width="460" height="56" rx="8" fill="rgba(10,10,11,.05)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="260" y="284" text-anchor="middle" fill="#0a0a0b" font-size="15" font-family="Noto Sans SC" font-weight="600">机制：所有权 / 类型 / 并发 / FFI</text>
+        <line x1="260" y1="304" x2="260" y2="346" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arr1)"/>
+        <rect x="30" y="356" width="460" height="52" rx="8" fill="rgba(10,10,11,.06)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="260" y="388" text-anchor="middle" fill="#333" font-size="14" font-family="Noto Sans SC">落地：Python 编排 + Rust 核心路径</text>
+      </svg>
+    </div>
+    </div>
+    <p class="body-zh wa-wrap" style="padding-left:0"><span class="wa">其实我们今天会按照这个路线图来好好的讲一讲</span></p>
+  </div>
+  <div class="foot"><div class="title">AI 时代 Rust</div><div>Route</div></div>
+</section>
+
+<section class="slide dark" id="s2">
+  <div class="chrome"><div class="left"><span>栈层</span><span class="sep"></span></div><div class="right">03 / 07</div></div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker">Where It Lands</div>
+    <h2 class="h-xl">工作负载上的 Rust</h2>
+    <div class="diagram">
+      <svg viewBox="0 0 920 400">
+        <defs>
+          <marker id="arrd" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(241,239,234,.55)"/></marker>
+        </defs>
+        <text x="460" y="28" text-anchor="middle" fill="rgba(241,239,234,.55)" font-size="13" font-family="IBM Plex Mono" letter-spacing=".2em">USER / CONTROL PLANE</text>
+        <rect x="40" y="50" width="180" height="72" rx="10" fill="rgba(241,239,234,.08)" stroke="rgba(241,239,234,.35)" stroke-width="1.5"/>
+        <text x="130" y="95" text-anchor="middle" fill="#f1efea" font-size="15" font-family="Noto Sans SC">FaaS / Agent</text>
+        <line x1="220" y1="86" x2="268" y2="86" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrd)"/>
+        <rect x="280" y="50" width="200" height="72" rx="10" fill="rgba(201,169,110,.14)" stroke="rgba(201,169,110,.55)" stroke-width="1.5"/>
+        <text x="380" y="88" text-anchor="middle" fill="#f1efea" font-size="14" font-family="Noto Sans SC" font-weight="600">Firecracker</text>
+        <text x="380" y="108" text-anchor="middle" fill="#c9c4bc" font-size="12" font-family="IBM Plex Mono">microVM</text>
+        <line x1="480" y1="86" x2="528" y2="86" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrd)"/>
+        <rect x="540" y="50" width="180" height="72" rx="10" fill="rgba(241,239,234,.07)" stroke="rgba(241,239,234,.32)" stroke-width="1.5"/>
+        <text x="630" y="88" text-anchor="middle" fill="#f1efea" font-size="14" font-family="Noto Sans SC">Hyperscaler</text>
+        <text x="630" y="108" text-anchor="middle" fill="#c9c4bc" font-size="12" font-family="IBM Plex Mono">S3 / core paths</text>
+        <line x1="720" y1="86" x2="768" y2="86" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrd)"/>
+        <rect x="780" y="50" width="100" height="72" rx="10" fill="rgba(241,239,234,.06)" stroke="rgba(241,239,234,.28)" stroke-width="1.5"/>
+        <text x="830" y="95" text-anchor="middle" fill="#f1efea" font-size="13" font-family="Noto Sans SC">更多层…</text>
+
+        <text x="460" y="170" text-anchor="middle" fill="rgba(241,239,234,.5)" font-size="13" font-family="IBM Plex Mono" letter-spacing=".18em">DATA / SDK PATH</text>
+        <rect x="80" y="190" width="760" height="88" rx="12" fill="rgba(241,239,234,.06)" stroke="rgba(241,239,234,.28)" stroke-width="1.2"/>
+        <text x="120" y="232" fill="#f1efea" font-size="14" font-family="Noto Sans SC">AWS SDK Rust 1.0</text>
+        <text x="120" y="256" fill="#c9c4bc" font-size="12" font-family="IBM Plex Mono">官方叙事</text>
+        <line x1="240" y1="234" x2="300" y2="234" stroke="rgba(241,239,234,.35)" stroke-width="1.2" marker-end="url(#arrd)"/>
+        <text x="340" y="232" fill="#f1efea" font-size="14" font-family="Noto Sans SC">Dynamo tokenizer in Rust</text>
+        <text x="340" y="256" fill="#c9c4bc" font-size="12" font-family="IBM Plex Mono">热点 workload</text>
+        <line x1="560" y1="234" x2="620" y2="234" stroke="rgba(241,239,234,.35)" stroke-width="1.2" marker-end="url(#arrd)"/>
+        <text x="700" y="232" fill="#f1efea" font-size="14" font-family="Noto Sans SC">SQL parsers / parsers</text>
+        <text x="700" y="256" fill="#c9c4bc" font-size="12" font-family="IBM Plex Mono">吞吐敏感</text>
+
+        <rect x="120" y="310" width="680" height="64" rx="10" fill="rgba(201,169,110,.1)" stroke="rgba(201,169,110,.45)" stroke-width="1.5"/>
+        <text x="460" y="348" text-anchor="middle" fill="#f1efea" font-size="14" font-family="Noto Serif SC">结论：Rust 出现在「隔离边界」和「解析 / 序列化热点」两条线上</text>
+      </svg>
+    </div>
+    <p class="body-zh wa-wrap"><span class="wa">那我们先来看一下第一个场景</span></p>
+  </div>
+  <div class="foot"><div class="title">AI 时代 Rust</div><div>Stack</div></div>
+</section>
+
+<section class="slide light" id="s3">
+  <div class="chrome"><div class="left"><span>权威信源</span><span class="sep"></span></div><div class="right">04 / 07</div></div>
+  <div class="frame" style="padding-top:4vh;display:flex;flex-direction:column;flex:1;min-height:0">
+    <div class="split-55" style="flex:1;min-height:0">
+    <div class="col" style="justify-content:center;gap:2.6vh">
+      <div class="kicker">Memory Safety Guidance</div>
+      <h2 class="h-xl">把公告读成工程信号</h2>
+      <div class="callout">
+        MSRC / NSA / CISA 的内存安全倡议，本质是「降低可利用攻击面」——落到你团队，就是语言、运行时、供应链与发布节奏的组合拳。
+        <span class="cite">读原文 + 看附录与适用范围</span>
+      </div>
+      <p class="body-zh">别停在标题党：对照你们的服务边界（多租户？解析链？FFI？）挑 1–2 条可执行清单。</p>
+    </div>
+    <div class="diagram">
+      <svg viewBox="0 0 440 420">
+        <defs><marker id="arrl" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(10,10,11,.55)"/></marker></defs>
+        <rect x="40" y="30" width="360" height="70" rx="10" fill="rgba(10,10,11,.05)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="220" y="58" text-anchor="middle" fill="#0a0a0b" font-size="15" font-family="Noto Sans SC" font-weight="600">MSRC · 技术公告 / 博客</text>
+        <text x="220" y="82" text-anchor="middle" fill="#555" font-size="12" font-family="IBM Plex Mono">memory-safe languages</text>
+        <line x1="220" y1="100" x2="220" y2="140" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arrl)"/>
+        <rect x="40" y="150" width="360" height="70" rx="10" fill="rgba(201,169,110,.12)" stroke="rgba(201,169,110,.5)" stroke-width="1.5"/>
+        <text x="220" y="178" text-anchor="middle" fill="#6a5428" font-size="15" font-family="Noto Sans SC" font-weight="600">NSA · 指南类 PDF</text>
+        <text x="220" y="202" text-anchor="middle" fill="#666" font-size="12" font-family="IBM Plex Mono">Software Memory Safety</text>
+        <line x1="220" y1="220" x2="220" y2="260" stroke="rgba(10,10,11,.4)" stroke-width="1.5" marker-end="url(#arrl)"/>
+        <rect x="40" y="270" width="360" height="70" rx="10" fill="rgba(10,10,11,.05)" stroke="rgba(10,10,11,.35)" stroke-width="1.5"/>
+        <text x="220" y="298" text-anchor="middle" fill="#0a0a0b" font-size="15" font-family="Noto Sans SC" font-weight="600">CISA · 倡议 / 路线图</text>
+        <text x="220" y="322" text-anchor="middle" fill="#555" font-size="12" font-family="IBM Plex Mono">reduce memory safety vulnerabilities</text>
+        <rect x="40" y="360" width="360" height="44" rx="8" fill="rgba(46,125,168,.08)" stroke="rgba(46,125,168,.4)" stroke-width="1.2"/>
+        <text x="220" y="388" text-anchor="middle" fill="#1a6a8a" font-size="13" font-family="Noto Sans SC">→ 映射：你们哪条链路最该先 Rust 化？</text>
+      </svg>
+    </div>
+    </div>
+    <p class="body-zh wa-wrap"><span class="wa">那我们接下来要聊的这个话题</span></p>
+  </div>
+  <div class="foot"><div class="title">AI 时代 Rust</div><div>Sources</div></div>
+</section>
+
+<section class="slide dark" id="s4">
+  <div class="chrome"><div class="left"><span>工程案例</span><span class="sep"></span></div><div class="right">05 / 07</div></div>
+  <div class="frame" style="padding-top:3vh;display:flex;flex-direction:column;flex:1;min-height:0">
+    <div class="split-55" style="flex:1;min-height:0">
+    <div class="col" style="justify-content:center;gap:2.4vh">
+      <div class="kicker">Public Narratives</div>
+      <h2 class="h-xl">Cloudflare / AWS<br>怎么读才不玄学</h2>
+      <p class="body-zh">把「用 Rust 重写了某某」还原成指标故事：延迟尾、吞吐、内存占用、构建时间、迁移成本——没有指标就当公关稿缓存。</p>
+      <div class="callout">
+        大公司博客是<strong>方向信号</strong>，不是你们团队的<strong>验收标准</strong>。
+        <span class="cite">工程判断</span>
+      </div>
+    </div>
+    <div class="diagram">
+      <svg viewBox="0 0 480 400">
+        <defs><marker id="arrc" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="rgba(241,239,234,.55)"/></marker></defs>
+        <rect x="40" y="40" width="400" height="86" rx="12" fill="rgba(241,239,234,.07)" stroke="rgba(241,239,234,.32)" stroke-width="1.5"/>
+        <text x="240" y="78" text-anchor="middle" fill="#f1efea" font-size="16" font-family="Noto Sans SC" font-weight="600">Cloudflare</text>
+        <text x="240" y="104" text-anchor="middle" fill="#c9c4bc" font-size="13" font-family="Noto Sans SC">边缘 / 代理 / 安全产品线</text>
+        <line x1="240" y1="136" x2="240" y2="176" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrc)"/>
+        <rect x="40" y="186" width="400" height="86" rx="12" fill="rgba(201,169,110,.12)" stroke="rgba(201,169,110,.5)" stroke-width="1.5"/>
+        <text x="240" y="224" text-anchor="middle" fill="#f1efea" font-size="16" font-family="Noto Sans SC" font-weight="600">AWS</text>
+        <text x="240" y="250" text-anchor="middle" fill="#c9c4bc" font-size="13" font-family="Noto Sans SC">官方 SDK / 数据面热点叙事</text>
+        <line x1="240" y1="272" x2="240" y2="312" stroke="rgba(241,239,234,.4)" stroke-width="1.5" marker-end="url(#arrc)"/>
+        <rect x="40" y="322" width="400" height="62" rx="10" fill="rgba(241,239,234,.06)" stroke="rgba(241,239,234,.28)" stroke-width="1.2"/>
+        <text x="240" y="358" text-anchor="middle" fill="#f1efea" font-size="14" font-family="Noto Serif SC">→ 你要抄的是「问题形状」，不是公司 Logo</text>
+      </svg>
+    </div>
+    </div>
+    <p class="body-zh wa-wrap"><span class="wa">那像 Cloudflare 和 AWS 这种大公司</span></p>
+  </div>
+  <div class="foot"><div class="title">AI 时代 Rust</div><div>Cases</div></div>
+</section>
+
+<section class="slide light" id="s5">
+  <div class="chrome"><div class="left"><span>语言机制</span><span class="sep"></span></div><div class="right">06 / 07</div></div>
+  <div class="frame" style="padding-top:3vh">
+    <div class="kicker">Why The Compiler Helps</div>
+    <h2 class="h-xl">其实核心就是三招</h2>
+    <div class="grid-4" style="margin-top:3vh">
+      <div class="pillar">
+        <span class="ic">①</span>
+        <div class="t">所有权 + 生命周期</div>
+        <div class="d">把「谁能借引用」写进类型系统，降低 UAF / 数据竞争面。</div>
+      </div>
+      <div class="pillar">
+        <span class="ic">②</span>
+        <div class="t">代数类型 + Result</div>
+        <div class="d">错误路径显式化，减少「吞掉异常」的隐形分支。</div>
+      </div>
+      <div class="pillar">
+        <span class="ic">③</span>
+        <div class="t">Send / Sync 并发边界</div>
+        <div class="d">跨线程共享前先过编译器门禁，适合高并发服务骨架。</div>
+      </div>
+      <div class="pillar">
+        <span class="ic">④</span>
+        <div class="t">unsafe → FFI 边界</div>
+        <div class="d">把 C ABI / SIMD 热点封进窄接口，外层仍保持可审计 Rust。</div>
+      </div>
+    </div>
+    <p class="body-zh wa-wrap"><span class="wa">再往深里挖一挖语言机制</span></p>
+  </div>
+  <div class="foot"><div class="title">AI 时代 Rust</div><div>Mechanics</div></div>
+</section>
+
+<section class="slide dark" id="s6">
+  <div class="chrome"><div class="left"><span>Takeaway</span><span class="sep"></span></div><div class="right">07 / 07</div></div>
+  <div class="frame" style="padding-top:3vh;display:flex;flex-direction:column;gap:3vh;min-height:72vh">
+    <div class="kicker">Closing</div>
+    <h2 class="h-xl">把隔离和权限<br>握在自己手里</h2>
+    <p class="lead" style="max-width:78vw">选型看场景；信源多看一级原文；混合栈用「Python 编排 + Rust 核心路径」渐进替换；编译器不是银弹，但是能 lever 的协同引擎。</p>
+    <div class="row" style="margin-top:2vh;flex-wrap:wrap;gap:2vw">
+      <div class="code-node" style="max-width:42vw">Agent：最小权限 · 审计日志 · 工具沙箱</div>
+      <div class="code-node" style="max-width:42vw">Rust：热点库优先 · FFI 边界收紧 · 可观测性对齐</div>
+    </div>
+    <p class="meta-row" style="margin-top:auto">下期可拆：PyO3 / maturin 工程化一页讲清</p>
+    <p class="body-zh wa-wrap"><span class="wa">那我们做 Agent 的开发最主要的就是要把隔离和权限管理放在自己的手里</span></p>
+  </div>
+  <div class="foot"><div class="title">AI 时代 Rust</div><div>End</div></div>
+</section>
+
 </div>
-</section>
 
-<section class="s slide fill-deck od od-dark od-slide-grid" id="s2" data-title="栈层">
-<p class="eyebrow">Stack</p>
-<h2 class="h-xl">AI workload 落点</h2>
-<div class="od-grid-2x2">
-<div class="pt"><h3>隔离底座</h3><p>AWS Firecracker · microVM</p></div>
-<div class="pt"><h3>推理服务</h3><p>Cloudflare Infire · Rust</p></div>
-<div class="pt"><h3>厂商栈</h3><p>NVIDIA Dynamo · Rust + Python</p></div>
-<div class="pt"><h3>Tokenizer</h3><p>Hugging Face <span class="wa">tokenizers</span></p></div>
-</div>
-</section>
+<div id="nav"></div>
+<div id="overview"></div>
 
-<section class="s slide fill-deck od od-light od-slide-grid" id="s3" data-title="权威信源">
-<p class="eyebrow">Evidence</p>
-<h2 class="h-xl">一级背书</h2>
-<div class="od-grid-2x2">
-<div class="pt"><h3>Microsoft MSRC</h3><p>内存安全与系统编程选型</p></div>
-<div class="pt"><h3>NSA / CISA CSI</h3><p>Memory safe languages · 2025</p></div>
-<div class="pt"><h3>云厂商工程博客</h3><p>可核对数字与场景前提</p></div>
-<div class="pt"><h3>内核媒体</h3><p>LWN / Ars · <span class="wa">语境优先</span></p></div>
-</div>
-</section>
-
-<section class="s slide fill-deck od od-dark od-slide-grid" id="s4" data-title="工程案例">
-<p class="eyebrow">Shipped</p>
-<h2 class="h-xl">公开工程叙事</h2>
-<div class="od-grid-2x2">
-<div class="pt"><h3>Cloudflare</h3><p>Infire：Rust LLM 推理引擎</p></div>
-<div class="pt"><h3>对比对象</h3><p>vLLM / 边缘沙箱成本</p></div>
-<div class="pt"><h3>AWS</h3><p>Firecracker → Lambda / Fargate</p></div>
-<div class="pt"><h3>口径</h3><p><span class="wa">数字带回原文</span></p></div>
-</div>
-</section>
-
-<section class="s slide fill-deck od od-light od-slide-grid" id="s5" data-title="语言机制">
-<p class="eyebrow">Why Rust</p>
-<h2 class="h-xl">机制三板斧</h2>
-<div class="od-grid-2x2">
-<div class="pt"><h3>所有权</h3><p>无 GC 的可预测资源</p></div>
-<div class="pt"><h3>类型化错误</h3><p>服务边界更可维护</p></div>
-<div class="pt"><h3>Fearless 并发</h3><p>CPU 热路径不吃 GIL</p></div>
-<div class="pt"><h3>边界</h3><p>unsafe 显式 · <span class="wa">审计有抓手</span></p></div>
-</div>
-</section>
-
-<section class="s slide fill-deck od od-dark od-center od-hero" id="s6" data-title="Takeaway">
-<p class="eyebrow">Learn</p>
-<h2 class="h-hero">别盲从<br/>先补地图</h2>
-<p class="lead">Agent：隔离与权限优先；性能热点再 Rust 服务化。</p>
-<p class="lead" style="margin-top:20px"><span class="wa">详见同目录 spec.md 信源清单。</span></p>
-</section>
-
-</div>
-<div id="pn"></div>
 <script>
-(function(){
-var PW=1920,PH=1080;
-function fit(){var el=document.getElementById('P'),r=Math.min(window.innerWidth/PW,window.innerHeight/PH),x=(window.innerWidth-PW*r)/2,y=(window.innerHeight-PH*r)/2;el.style.transform='scale('+r+')';el.style.transformOrigin='0 0';el.style.left=x+'px';el.style.top=y+'px'}
-window.addEventListener('resize',fit);fit();
-var slides=document.querySelectorAll('.s.slide'),total=slides.length,cur=0;
-function ui(){document.getElementById('pn').textContent=(cur+1)+' / '+total;var b=document.getElementById('prog');if(b)b.style.width=(total<=1?100:(cur/(total-1)*100))+'%';}
-function go(i){if(i<0||i>=total)return;slides[cur].classList.remove('is-active');cur=i;slides[cur].classList.add('is-active');ui()}
-document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(cur+1)}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(cur-1)}});
-document.addEventListener('click',function(e){if(e.clientX>window.innerWidth*0.3)go(cur+1);else go(cur-1)});
-ui();
+const VS = `attribute vec2 position;void main(){gl_Position=vec4(position,0.0,1.0);}`;
+
+const FS_DARK = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;uniform vec2 u_mouse;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<4;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv*2.0-1.0;p.x*=u_resolution.x/u_resolution.y;
+  float gold=fbm(p*3.0+u_time*0.02)*0.03;
+  vec3 base=vec3(0.041,0.041,0.043);
+  vec3 col=base+vec3(0.788,0.663,0.431)*gold;
+  float grain=hash(uv*u_resolution*0.01)*0.015;
+  col+=grain;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const FS_LIGHT = `precision highp float;
+uniform vec2 u_resolution;uniform float u_time;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){
+  vec2 i=floor(p),f=fract(p);
+  float a=hash(i),b=hash(i+vec2(1,0)),c=hash(i+vec2(0,1)),d=hash(i+vec2(1,1));
+  vec2 u=f*f*(3.0-2.0*f);
+  return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+}
+float fbm(vec2 p){
+  float v=0.0,a=0.5;mat2 m=mat2(0.80,0.60,-0.60,0.80);
+  for(int i=0;i<5;i++){v+=a*noise(p);p=m*p*2.02;a*=0.5;}
+  return v;
+}
+void main(){
+  vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+  vec2 p=uv;p.x*=u_resolution.x/u_resolution.y;
+  float f=fbm(p*1.5+u_time*0.01);
+  vec3 silver=vec3(0.95,0.94,0.92);
+  vec3 paper=vec3(0.945,0.937,0.918);
+  vec3 col=mix(paper,silver,f);
+  float grain=hash(uv*u_resolution*0.01)*0.01;
+  col-=grain;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+const mouse={x:0.5,y:0.5};
+addEventListener('mousemove',e=>{mouse.x=e.clientX/innerWidth;mouse.y=e.clientY/innerHeight});
+
+function bootGL(canvasId, fsSrc){
+  const canvas=document.getElementById(canvasId);
+  const gl=canvas.getContext('webgl',{alpha:false,antialias:true});
+  if(!gl) return ()=>false;
+  const mk=(t,s)=>{const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);return sh};
+  const prog=gl.createProgram();
+  gl.attachShader(prog,mk(gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,mk(gl.FRAGMENT_SHADER,fsSrc));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+  const pos=gl.getAttribLocation(prog,'position');
+  gl.enableVertexAttribArray(pos);gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+  const lRes=gl.getUniformLocation(prog,'u_resolution');
+  const lT=gl.getUniformLocation(prog,'u_time');
+  const lM=gl.getUniformLocation(prog,'u_mouse');
+  const resize=()=>{
+    const d=Math.min(window.devicePixelRatio||1,2);
+    canvas.width=innerWidth*d;canvas.height=innerHeight*d;
+    gl.viewport(0,0,canvas.width,canvas.height);
+  };
+  addEventListener('resize',resize);resize();
+  return (tSec)=>{
+    gl.uniform2f(lRes,canvas.width,canvas.height);
+    gl.uniform1f(lT,tSec);
+    if(lM) gl.uniform2f(lM,mouse.x,1-mouse.y);
+    gl.drawArrays(gl.TRIANGLES,0,6);
+    return true;
+  };
+}
+const drawDark=bootGL('bg-dark',FS_DARK);
+const drawLight=bootGL('bg-light',FS_LIGHT);
+const t0=Date.now();
+(function loop(){
+  const t=(Date.now()-t0)/1000;
+  drawDark(t);drawLight(t);
+  requestAnimationFrame(loop);
 })();
+
+const deck=document.getElementById('deck');
+const slides=deck.querySelectorAll('.slide');
+const nav=document.getElementById('nav');
+let idx=0,total=slides.length;
+
+deck.style.width=(total*100)+'vw';
+
+slides.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='dot';b.dataset.i=i;b.setAttribute('aria-label','Page '+(i+1));
+  b.onclick=()=>go(i);
+  nav.appendChild(b);
+});
+
+function go(n){
+  idx=Math.max(0,Math.min(total-1,n));
+  deck.style.transform=`translateX(${-idx*100}vw)`;
+  slides.forEach((s,i)=>s.classList.toggle('active',i===idx));
+  nav.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+  const el=slides[idx];
+  const th=el.dataset.theme || (el.classList.contains('light')?'light':(el.classList.contains('dark')?'dark':'dark'));
+  document.body.classList.toggle('light-bg',th==='light');
+}
+
+let overviewOn=false;
+const ov=document.getElementById('overview');
+
+function buildOverview(){
+  ov.innerHTML='';
+  const grid=document.createElement('div');
+  grid.id='overview-grid';
+  slides.forEach((s,i)=>{
+    const card=document.createElement('div');
+    card.className='overview-card'+(i===idx?' active':'');
+    card.onclick=()=>{toggleOverview();go(i)};
+    const wrap=document.createElement('div');
+    wrap.className='thumb';
+    const clone=s.cloneNode(true);
+    clone.className=clone.className.replace(/active/g,'')+' slide';
+    clone.className+=' '+(s.classList.contains('light')?'light':'dark');
+    clone.style.cssText='width:100vw;height:100vh;transform:scale(0.222);transform-origin:top left;position:absolute;top:0;left:0;pointer-events:none';
+    wrap.appendChild(clone);
+    const label=document.createElement('div');
+    label.className='label';
+    label.textContent=(i+1)+' / '+total;
+    card.appendChild(wrap);
+    card.appendChild(label);
+    grid.appendChild(card);
+  });
+  ov.appendChild(grid);
+}
+
+function toggleOverview(){
+  overviewOn=!overviewOn;
+  if(overviewOn){buildOverview();ov.style.display='block';}
+  else{ov.style.display='none';}
+}
+
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();toggleOverview();return;}
+  if(overviewOn)return;
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '||e.key==='ArrowDown')go(idx+1);
+  if(e.key==='ArrowLeft'||e.key==='PageUp'||e.key==='ArrowUp')go(idx-1);
+  if(e.key==='Home')go(0);
+  if(e.key==='End')go(total-1);
+});
+
+let wheelTO=null,wheelAcc=0;
+addEventListener('wheel',e=>{
+  wheelAcc+=e.deltaY+e.deltaX;
+  if(Math.abs(wheelAcc)>50){go(idx+(wheelAcc>0?1:-1));wheelAcc=0;}
+  clearTimeout(wheelTO);wheelTO=setTimeout(()=>wheelAcc=0,150);
+},{passive:true});
+
+let tx=0,ty=0;
+addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  const dx=(e.changedTouches[0].clientX-tx);
+  const dy=(e.changedTouches[0].clientY-ty);
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy))go(idx+(dx<0?1:-1));
+},{passive:true});
+
+go(0);
+if(typeof window!=='undefined')window.go=go;
 </script>
 </body>
 </html>

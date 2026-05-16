@@ -22,6 +22,17 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。Edg
 
 幻灯按 **1920×1080** 视口截图。
 
+## `presentation.html` 路径（避免「改了 slides 却没生效」）
+
+| 优先级 | 路径 | 说明 |
+|--------|------|------|
+| 1 | `<素材>/presentation.html` | **`wav` / `timing-check`** 若存在则**优先**用此文件 |
+| 2 | `<素材>/slides/presentation.html` | **标准布局**（`features/_template/content-production/`）推荐只维护这一份 |
+
+- **`wav-auto`**、**`srt-map`** 默认只读 **`slides/presentation.html`**（不经根目录）。
+- **不要在** `production/` 根再放第二份 `presentation.html`，否则容易改 `slides/` 却成片仍读旧根文件。
+- 日志里写 `presentation.html` 时，以磁盘上**实际打开的路径**为准。
+
 ## cli.js 子命令一览（单步成片）
 
 | 模式 | 命令 | 输入 | 质量要点 |
@@ -70,6 +81,18 @@ description: HTML 幻灯（presentation.html + go(n)）与口播合成 MP4。Edg
 **版式与防空白（字号、示意图、`fill-deck`、避免半屏空）**：见 **`skills/html-deck-layout/references/spec-cheatsheet.md`**。改 `presentation.html` 布局/密度时**先读该文件**，与本文（成片与口播流程）配合使用。如需从零生成移动端幻灯，使用 `skills/html-deck-layout/SKILL.md`（已升级为生成式 skill）。
 
 **收口页与栏目名**：最后一屏若含 chip、水印或「订阅/三连」旁的栏目标识，须与**实际发布账号名一致**，交付前去掉占位名；双栏页中间分隔条、pill 流程链等排版要点见 **`html-deck-layout/references/spec-cheatsheet.md`**。
+
+### 幻灯内容边界（只服务本期主题）
+
+`presentation.html` 的可见文案、图示、chip **必须全部服务于本期视频主题**（与 `00-structure.md` / 口播 / `sub.srt` 同一话题）。**禁止**把制作流程、工具链、仓库说明写进幻灯——观众在成片里看不到这些 meta 信息。
+
+| 禁止出现在幻灯上 | 应放在哪里 |
+|------------------|------------|
+| 「本视频如何制作」「用到的 skill / CLI」「one-context 工作流」 | 仓库 README、`review_record.md`、内部备忘 |
+| 「下一集预告」式占位、未定的栏目名 | `05-publish-kit.md` 或口播，非画面主文案 |
+| 与本期主题无关的科普岔题 | 新开一期 feature |
+
+收口页可写 **关注 / 三连 / 栏目名**，但仍是**面向观众**的发布信息，不是制片文档。生成或改版幻灯时，Agent 应先对照 **`spec.md` 标题 + `00-structure.md` 小节** 做逐页自检：**这一页是否在讲本期主题？** 详见 **`skills/html-deck-layout/SKILL.md`**「主题内内容」。
 
 ## 制作 presentation.html（核心工作流）
 
@@ -252,6 +275,27 @@ pip install opencc-python-reimplemented
 node path/to/one-context/skills/html-video-from-slides/cli.js wav-auto --project path/to/素材目录
 ```
 
+## 变更与重跑决策（`wav` ≠ 重录口播）
+
+子命令 **`wav`** 表示「用**已有**整段 WAV + 时长配置驱动成片」，**不是**重新生成口播文件。
+
+| 你改了什么 | 要不要动 `media/*.wav` / `slideDurationsSec` | 要跑什么 |
+|------------|-----------------------------------------------|----------|
+| 只改幻灯版式、配色、图上文字（页数、翻页秒数不变） | **不要** | `node cli.js wav --project <素材>`（**重新截图** + 原 WAV 切段） |
+| 改了口播、SRT 时间轴、翻页语义 | **要** | 先更新 `sub.srt` / `wav-durations.json` / `flip-boundaries.md`，再 `wav` |
+| 上次 `wav` 截图中断，已有 `tmp/part_*.mp4` 且 **未改 HTML** | **不要** | 见 **`references/resume-burn.md`**：`node scripts/finish-burn.js <素材>` |
+| 只改了字幕样式（`subtitle` 字段）且 part 画面仍有效 | 通常 **不要** | 可 `finish-burn`；若改了 `sub.srt` 文本建议全量 `wav` |
+
+**画面是像素缓存**：`tmp/part_*.mp4` 来自某次 Playwright 对 HTML 的截图。`finish-burn` / 只合并 **不会** 打开 `presentation.html`。若 `slides/presentation.html` 的修改时间 **晚于** `tmp/part_00.mp4`，必须删 **`production/tmp/`** 后全量 `wav`。
+
+一键全量（写 `video-build.log`）：
+
+```powershell
+skills/html-video-from-slides/scripts/run-wav-build.ps1 -Project "path/to/production"
+```
+
+**Agent / IDE 终端**：长任务（Playwright + FFmpeg）请在**非沙箱**本机终端执行，或让用户在系统 PowerShell 跑上述脚本；集成终端若长时间无输出，以 `video-build.log` / `build-result.txt` 为准。
+
 ## 输出与临时文件
 
 | 模式 | 默认成片 | 临时目录 |
@@ -260,7 +304,7 @@ node path/to/one-context/skills/html-video-from-slides/cli.js wav-auto --project
 | wav | `wav-durations.json` 内 `outputFile` | `<素材>/tmp/` |
 | wav-auto | `final_auto.mp4`（`video-input.json` 可改） | 同上 + 技能目录 `.cache/`（可删） |
 
-说明：`<素材>` 为 `…/production/`（遵循 `features/_template/content-production/` 标准布局）。中间帧、分段音视频、`concat.txt` 等均写入 **`production/tmp/`**，可整夹删除；勿把成片唯一信源只放在 `tmp/`。
+说明：`<素材>` 为 `…/production/`（遵循 `features/_template/content-production/` 标准布局）。中间帧、分段音视频、`concat.txt` 等均写入 **`production/tmp/`**，可整夹删除；勿把成片唯一信源只放在 `tmp/`。**交付成片**以 `outputFile`（常见 `production/final_auto.mp4`）为准，不要只交付 `tmp/merged.mp4`。
 
 ## 故障排除
 
@@ -270,6 +314,9 @@ node path/to/one-context/skills/html-video-from-slides/cli.js wav-auto --project
 - **`strict-subtitles` / `strictSubtitles` 中止**：表示存在超过 **`maxSubtitleGapSec`** 的无字幕区间。补全 `sub.srt`、关 **`vadFilter`**、或放宽 **`maxSubtitleGapSec`** / 关闭 **`strictSubtitles`** 后再跑。
 - **字幕和口播对不上**：几乎总是用了外部 `srtFile` 或手改了时间轴。按上文「与口播时间轴一致」处理：去掉 `srtFile` 或加 `--whisper-srt` 后重跑 `wav-auto`。
 - **找不到 go**：`presentation.html` 需 `function go(n){...}`。
+- **横向 `#deck` + `go(n)` 从第 2 页起黑屏/错页**：headless 下 strip 型 deck 若只改 `translateX` 不重绘，会把可见页移出视口。本技能在截图时会 `display:none` 非当前页并对 `#deck` 清零 `transform`；自定义 deck 须保留页级 **`go(n)`** 与 **`.slide`** 选择器兼容。版式细节见 **`html-deck-layout`**。
+- **改了 HTML 但成片画面没变**：多半只跑了 **`finish-burn`** 或复用了旧 `tmp/part_*.mp4`。对照文件时间戳，删 `tmp/` 后全量 **`wav`**（见上文「变更与重跑决策」）。
+- **有 `part_*.mp4` 无最终 MP4**：见 **`references/resume-burn.md`**、`node scripts/finish-burn.js <素材>`。
 - **多个 wav**：只留一个，或写 `video-input.json` 的 `wavFile`。
 - **align 失败 / faster-whisper**：`pip install faster-whisper huggingface_hub`，首次运行会从 hf-mirror.com 下载模型（已默认禁用不稳定的 Xet Storage，不会写坏缓存）。**字幕要统一简体**时再装：`pip install opencc-python-reimplemented`。
 - **Playwright**：在**技能目录**执行 `npx playwright install chromium`（与项目里 `node_modules` 绑定）。

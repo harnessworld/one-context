@@ -1,6 +1,7 @@
 {
   "_comment": "占位配置。口播 WAV 就绪后改为 production/media/voiceover.wav（本地，勿提交）。",
   "wavFile": "media/voiceover.wav",
+  "srtFile": "subtitles/sub.srt",
   "whisperModel": "small",
   "noSpeechThreshold": 0.85,
   "vadFilter": false,
@@ -8,7 +9,13 @@
   "maxSubtitleGapSec": 2.5,
   "fillSrtGaps": true,
   "whisperHotwords": "Rust Python inference tokenizers vLLM Firecracker Cloudflare Infire Dynamo MSRC CISA NSA memory safe",
-  "srtReplacements": [],
+  "srtReplacements": [
+    { "from": "Invidia", "to": "NVIDIA", "ignoreCase": true },
+    { "from": "边缘测", "to": "边缘侧" },
+    { "from": "词源化", "to": "词元化" },
+    { "from": "vLLLM", "to": "vLLM", "ignoreCase": true },
+    { "from": "adm的开发", "to": "Agent 的开发" }
+  ],
   "wrapSubtitles": true,
   "outputFile": "final_auto.mp4",
   "burnSubtitles": true,

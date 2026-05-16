@@ -7,6 +7,12 @@ title: Mobile Deck Layout Spec — 速查手册
 > 本文件从 `SKILL.md` 拆出，供 agent 在生成移动端 PPT 时快速查阅版式约束。
 > 硬约束以 `skills/html-video-from-slides/DESIGN-STANDARD.md` 为准；本文件为实操区间。
 
+## 内容边界（主题内 · 交付前必扫）
+
+- **只写观众该看的**：本期话题的事实、观点、结构、图示；与 `00-structure.md` / 当页口播时间窗内的 `sub.srt` 一致。
+- **禁止上屏**：「本视频如何制作」、Cursor/skill/CLI 名、`one-context` 工作流、素材目录说明、内部检查清单——这些不是幻灯内容。
+- **收口页**：可出现关注/三连/**真实栏目名**；不要写占位频道名或制片备忘。
+
 ## 根因（避免再犯）
 
 1. **`.slide-main` 占满高度 + `justify-content: flex-start`**

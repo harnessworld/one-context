@@ -1,4 +1,21 @@
 {
-  "_comment": "占位：运行 wav-auto / wav 步骤后写入各页时长（秒）。",
-  "slideDurationsSec": [4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0]
+  "wavFile": "media/voiceover.wav",
+  "slideDurationsSec": [79.0, 50.1, 97.3, 79.0, 51.0, 45.0, 72.0],
+  "outputFile": "final_auto.mp4",
+  "burnSubtitles": true,
+  "srtFile": "subtitles/sub.srt",
+  "subtitle": {
+    "charsPerLine": 32,
+    "fontSize": 52,
+    "marginV": 14,
+    "fontName": "Microsoft YaHei",
+    "bold": true,
+    "primaryColour": "#FFFF00",
+    "primaryAlpha": 108,
+    "backAlpha": 255,
+    "shadow": 0,
+    "outline": 1,
+    "barHeight": 110,
+    "barAlpha": 0.65
+  }
 }

@@ -25,7 +25,7 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 └── production/
     ├── content/                    # 内容创作资产 ✅ 跟踪
     │   ├── 00-structure.md         #   话题大纲
-    │   ├── 01-script.md            #   口播讲稿
+    │   ├── 01-script.md            #   口播讲稿（写法见 knowledge/standards/video-voiceover-script-conventions.md）
     │   └── 05-publish-kit.md       #   发布素材（标题/简介与话题同节/检查清单等）
     │
     ├── slides/                     # 幻灯片资产 ✅ 跟踪
@@ -75,6 +75,21 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | html-deck-layout | `presentation.html` | `production/slides/presentation.html` |
 | html-video-from-slides | `--project` 指向 | `production/`（读取各子目录） |
 
+### 幻灯内容（主题内）
+
+`production/slides/presentation.html` **只呈现本期视频主题**（对齐 `spec.md` / `00-structure.md` / 口播）。**不要**在幻灯里写「如何制作本视频」、skill 名、仓库路径等制片 meta；收口页用真实栏目名，不用占位。生成规范见 **`skills/html-deck-layout/SKILL.md`**、成片路径见 **`skills/html-video-from-slides/SKILL.md`**「幻灯内容边界」。
+
+### 成片构建
+
+| 场景 | 命令 |
+|------|------|
+| 全量（截图 + 切段 + 烧字幕） | `skills/html-video-from-slides/scripts/run-wav-build.ps1 -Project "…/production"` |
+| 仅续跑合并/烧字幕（**且未改 HTML**） | `node skills/html-video-from-slides/scripts/finish-burn.js "…/production"` |
+
+详见 **`skills/html-video-from-slides/references/resume-burn.md`**。改 `presentation.html` 后若 `tmp/part_*.mp4` 早于 HTML，须删 `tmp/` 再全量构建。**`wav` 不重录口播**，只重截图画面（见 skill「变更与重跑决策」）。
+
+交付成片：`timing/wav-durations.json` 的 `outputFile`（常见 `production/final_auto.mp4`），不要只交 `tmp/merged.mp4`。
+
 ### 口播选路：`tts` vs 火山播客 WAV
 
 | 目标 | 做法 |
@@ -115,3 +130,4 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | 9 | INDEX.md 一致 | `features/INDEX.md` 中该 feature 的 path 与实际目录一致 |
 | 10 | spec.md 路径自洽 | spec.md 内引用的路径前缀与实际 `features/content-pipeline/<id>/` 一致 |
 | 11 | wav 成片语义契约（建议） | `production/timing/flip-boundaries.md` 存在并与 `wav-durations.json` 同步 |
+| 12 | 幻灯无 meta 制片页 | `slides/presentation.html` 不含「如何制作视频」、skill/CLI 名等与 `spec.md` 主题无关的页面 |

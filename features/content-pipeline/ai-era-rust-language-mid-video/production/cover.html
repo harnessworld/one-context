@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>封面 · AI 时代 Rust</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    font-family: 'Helvetica Neue', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+    background: #05050a;
+}
+
+#cover {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+}
+
+#bg {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center 30%;
+    display: none;
+}
+
+#bg-fallback {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+/* 全屏：生锈的旧语言意象 */
+#rust-mega {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+#rust-mega svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+#phone-deco {
+    display: none !important;
+}
+
+#noise {
+    position: absolute; inset: 0;
+    z-index: 5;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+}
+
+#header {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 76px 76px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#tagline {
+    font-size: 30px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 6px;
+}
+
+#brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#brand-name {
+    font-size: 30px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.80);
+    letter-spacing: 3px;
+}
+
+#avatar { display: none; }
+
+#avatar-fallback {
+    width: 78px; height: 78px;
+    border-radius: 50%;
+    border: 2px solid rgba(206,66,43,0.45);
+    background: rgba(206,66,43,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+}
+
+#content {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 200px 72px 280px;
+    text-align: center;
+    z-index: 20;
+    gap: 0;
+}
+
+#tag {
+    display: inline-block;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 8px;
+    padding: 10px 32px;
+    border-radius: 100px;
+    margin-bottom: 52px;
+}
+
+#headline {
+    font-size: 200px;
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -4px;
+    color: #ffffff;
+    text-align: center;
+    word-break: keep-all;
+}
+
+#headline.len5  { font-size: 200px; }
+#headline.len6  { font-size: 180px; }
+#headline.len7  { font-size: 155px; letter-spacing: -2px; }
+#headline.len8  { font-size: 130px; letter-spacing: -1px; }
+#headline.len10 { font-size: 110px; letter-spacing: 0px; }
+#headline.len12 { font-size: 95px; }
+#headline.long  { font-size: 82px;  letter-spacing: 0px; }
+
+#headline em { font-style: normal; }
+
+#divider {
+    width: 120px;
+    height: 3px;
+    border-radius: 2px;
+    margin: 44px auto 44px;
+}
+
+#subline {
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 3px;
+    max-width: 900px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+
+#footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 0 76px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 20;
+}
+
+#footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.foot-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 27px;
+    color: rgba(255,255,255,0.38);
+    letter-spacing: 2px;
+}
+
+.foot-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+#watermark {
+    font-size: 24px;
+    color: rgba(255,255,255,0.22);
+    letter-spacing: 3px;
+}
+
+#accent-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 5px;
+    z-index: 21;
+}
+</style>
+</head>
+<body>
+<div id="cover">
+
+    <img id="bg" src="" alt="">
+    <div id="rust-mega" aria-hidden="true">
+<svg viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="rb" cx="50%" cy="38%" r="85%">
+      <stop offset="0%" stop-color="#2a1810"/>
+      <stop offset="40%" stop-color="#120c08"/>
+      <stop offset="100%" stop-color="#030205"/>
+    </radialGradient>
+    <radialGradient id="rglow" cx="50%" cy="42%" r="45%">
+      <stop offset="0%" stop-color="#ce422b" stop-opacity="0.55"/>
+      <stop offset="55%" stop-color="#b45309" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rfresh" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="45%" stop-color="#ce422b"/>
+      <stop offset="100%" stop-color="#00f0ff"/>
+    </linearGradient>
+    <linearGradient id="rusted" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#78716c"/>
+      <stop offset="50%" stop-color="#57534e"/>
+      <stop offset="100%" stop-color="#292524"/>
+    </linearGradient>
+    <filter id="rglowf" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="18" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="rcrack">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <pattern id="rgrain" width="120" height="120" patternUnits="userSpaceOnUse">
+      <circle cx="18" cy="22" r="1.2" fill="#a16207" opacity="0.25"/>
+      <circle cx="78" cy="44" r="0.9" fill="#78716c" opacity="0.2"/>
+      <circle cx="102" cy="88" r="1.4" fill="#b45309" opacity="0.18"/>
+    </pattern>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#rb)"/>
+  <rect width="1080" height="1920" fill="url(#rgrain)" opacity="0.9"/>
+  <ellipse cx="540" cy="760" rx="520" ry="480" fill="url(#rglow)" filter="url(#rglowf)"/>
+
+  <!-- 生锈的旧语言：大号褪色字 -->
+  <g opacity="0.22" filter="url(#rcrack)">
+    <text x="120" y="340" fill="url(#rusted)" font-size="118" font-weight="900" font-family="Georgia,serif" transform="rotate(-12 120 340)">Java</text>
+    <text x="720" y="420" fill="url(#rusted)" font-size="96" font-weight="800" font-family="Consolas,monospace" transform="rotate(8 720 420)">C++</text>
+    <text x="80" y="1280" fill="url(#rusted)" font-size="108" font-weight="800" font-family="Consolas,monospace" transform="rotate(-6 80 1280)">Python</text>
+    <text x="780" y="1380" fill="url(#rusted)" font-size="92" font-weight="700" font-family="system-ui,sans-serif" transform="rotate(14 780 1380)">Go</text>
+    <text x="200" y="1680" fill="#44403c" font-size="72" font-weight="700" font-family="Consolas,monospace" opacity="0.85" transform="rotate(-4 200 1680)">PHP</text>
+    <text x="640" y="260" fill="#57534e" font-size="64" font-weight="600" font-family="Consolas,monospace" transform="rotate(5 640 260)">Ruby</text>
+  </g>
+
+  <!-- 锈蚀代码碎片 -->
+  <g opacity="0.35" font-family="JetBrains Mono,Consolas,monospace" font-size="22" fill="#a8a29e">
+    <text x="60" y="620">public static void main()</text>
+    <text x="60" y="652">{ /* deprecated */ }</text>
+    <text x="620" y="1120">def train(): pass</text>
+    <text x="620" y="1152"># legacy stack</text>
+    <text x="140" y="1520">import legacy;</text>
+    <text x="140" y="1552">// memory unsafe</text>
+  </g>
+
+  <!-- 锈斑与剥落 -->
+  <g opacity="0.5">
+    <ellipse cx="280" cy="520" rx="140" ry="90" fill="#78350f" opacity="0.35"/>
+    <ellipse cx="820" cy="980" rx="180" ry="110" fill="#92400e" opacity="0.28"/>
+    <ellipse cx="420" cy="1450" rx="160" ry="85" fill="#57534e" opacity="0.32"/>
+    <path d="M180 880 Q240 820 320 860 T460 900" fill="none" stroke="#a16207" stroke-width="3" opacity="0.4"/>
+    <path d="M700 600 Q780 560 860 620 T980 680" fill="none" stroke="#78716c" stroke-width="2.5" opacity="0.35"/>
+  </g>
+
+  <!-- 中心：尚新的 Rust -->
+  <g filter="url(#rglowf)">
+    <circle cx="540" cy="820" r="200" fill="none" stroke="url(#rfresh)" stroke-width="4" opacity="0.45"/>
+    <circle cx="540" cy="820" r="168" fill="#1c0f0a" stroke="#ce422b" stroke-width="3" opacity="0.85"/>
+    <text x="540" y="845" text-anchor="middle" fill="url(#rfresh)" font-size="88" font-weight="900" font-family="Consolas,JetBrains Mono,monospace" letter-spacing="0.08em">Rust</text>
+    <!-- 简化齿轮 -->
+    <g transform="translate(540,820)" opacity="0.9">
+      <circle r="118" fill="none" stroke="#f97316" stroke-width="2" stroke-dasharray="14 10" opacity="0.5"/>
+      <path d="M0 -92 L12 -72 L0 -52 L-12 -72 Z M79 -46 L72 -24 L50 -30 L56 -52 Z M92 0 L72 12 L66 -10 L88 -16 Z M79 46 L56 52 L50 30 L72 24 Z M0 92 L-12 72 L0 52 L12 72 Z M-79 46 L-88 16 L-66 10 L-72 24 Z M-92 0 L-56 -52 L-50 -30 L-72 -12 Z M-79 -46 L-50 -30 L-56 -52 L-72 -24 Z" fill="#ce422b" opacity="0.75"/>
+    </g>
+  </g>
+
+  <!-- AI 推理栈光带（新语言仍在发光） -->
+  <path d="M80 1050 Q540 900 1000 1050" fill="none" stroke="#00f0ff" stroke-width="2" opacity="0.35"/>
+  <path d="M120 1180 Q540 1040 960 1180" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.28"/>
+  <text x="540" y="1088" text-anchor="middle" fill="rgba(0,240,255,0.45)" font-size="20" font-family="system-ui,sans-serif" letter-spacing="0.35em">INFERENCE · SANDBOX · TOKENIZER</text>
+</svg>
+    </div>
+    <div id="bg-fallback"></div>
+    <div id="overlay"></div>
+
+    <div id="phone-deco" aria-hidden="true"></div>
+
+    <div id="noise"></div>
+
+    <div id="header">
+        <div id="tagline"></div>
+        <div id="brand">
+            <div id="brand-name"></div>
+            <img id="avatar" src="" alt="">
+            <div id="avatar-fallback"></div>
+        </div>
+    </div>
+
+    <div id="content">
+        <div id="tag"></div>
+        <div id="headline"></div>
+        <div id="divider"></div>
+        <div id="subline"></div>
+    </div>
+
+    <div id="footer">
+        <div id="footer-left"></div>
+        <div id="watermark"></div>
+    </div>
+    <div id="accent-bar"></div>
+</div>
+
+<script>
+const CONFIG = {
+    headline:    "AI 时代\nRust 香在哪",
+    accentLine:  2,
+    subline:     "大厂推理栈 · 混合栈 · 用信源说话",
+    tag:         "2026 · 中视频深扒",
+    bgImage:     "",
+    avatarImage: "",
+    avatarEmoji: "🦀",
+    brandName:   "大厂吾师兄",
+    tagline:     "硬技术 · 推理栈",
+    footerItems: ["推理热路径", "内存安全", "混合栈"],
+    watermark:   "rust · inference",
+
+    theme:       "rust",
+    hideDeco:    true,
+
+    overlayDirection: "to-bottom",
+    noiseEnabled: true,
+    noiseOpacity: 0.06,
+};
+
+const THEMES = {
+    rust: {
+        accent:     "#F97316",
+        accent2:    "#00F0FF",
+        tagBg:      "rgba(206,66,43,0.14)",
+        tagBorder:  "rgba(249,115,22,0.55)",
+        tagColor:   "#FDBA74",
+        glowColor:  "rgba(206,66,43,0.22)",
+        glowColor2: "rgba(0,240,255,0.12)",
+        dotColor:   "#F97316",
+        bar:        "linear-gradient(90deg, transparent 2%, #CE422B 30%, #00F0FF 65%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(206,66,43,0.35), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #F97316 0%, #CE422B 45%, #00F0FF 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #1a0e08 0%, #0d0805 40%, #030205 100%)",
+        decoGlow:   "rgba(206,66,43,0.28)",
+        decoAccent: "rgba(0,240,255,0.22)",
+    },
+    tech: {
+        accent:     "#00F0FF",
+        accent2:    "#8B5CF6",
+        tagBg:      "rgba(0,240,255,0.08)",
+        tagBorder:  "rgba(0,240,255,0.40)",
+        tagColor:   "#00D4E8",
+        glowColor:  "rgba(0,240,255,0.18)",
+        glowColor2: "rgba(139,92,246,0.18)",
+        dotColor:   "#00F0FF",
+        bar:        "linear-gradient(90deg, transparent 2%, #00F0FF 35%, #8B5CF6 70%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(0,240,255,0.25), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(135deg, #00F0FF 0%, #8B5CF6 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #03101a 0%, #020810 40%, #03050f 100%)",
+        decoGlow:   "rgba(0,240,255,0.28)",
+        decoAccent: "rgba(139,92,246,0.35)",
+    },
+};
+
+const OVERLAYS = {
+    "to-bottom": `linear-gradient(to bottom,
+        rgba(8,5,3,0.88) 0%,
+        rgba(8,5,3,0.35) 16%,
+        rgba(8,5,3,0.12) 36%,
+        rgba(8,5,3,0.10) 50%,
+        rgba(8,5,3,0.42) 70%,
+        rgba(8,5,3,0.94) 100%)`,
+};
+
+(function render() {
+    const t = THEMES[CONFIG.theme] || THEMES.rust;
+
+    document.getElementById('bg-fallback').style.background =
+        t.fallbackBg + `, radial-gradient(ellipse 70% 50% at 50% 42%, ${t.glowColor} 0%, transparent 55%)`;
+
+    document.getElementById('overlay').style.background =
+        OVERLAYS[CONFIG.overlayDirection] || OVERLAYS['to-bottom'];
+
+    const noiseEl = document.getElementById('noise');
+    noiseEl.style.opacity = CONFIG.noiseOpacity != null ? CONFIG.noiseOpacity : 0.06;
+
+    document.getElementById('avatar-fallback').textContent = CONFIG.avatarEmoji || '🦀';
+    document.getElementById('tagline').textContent = CONFIG.tagline;
+    document.getElementById('brand-name').textContent = CONFIG.brandName;
+
+    const tagEl = document.getElementById('tag');
+    tagEl.textContent = CONFIG.tag;
+    tagEl.style.cssText += `background:${t.tagBg}; border:1.5px solid ${t.tagBorder}; color:${t.tagColor};`;
+
+    const headEl = document.getElementById('headline');
+    const lines = CONFIG.headline.split('\n');
+    function cjkWidth(s) {
+        let w = 0;
+        for (const c of s) {
+            w += /[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/.test(c) ? 1 : 0.55;
+        }
+        return Math.round(w);
+    }
+    const maxLineW = Math.max(...lines.map(l => cjkWidth(l)));
+    const cls = maxLineW <= 4 ? 'len5'
+              : maxLineW <= 5 ? 'len6'
+              : maxLineW <= 6 ? 'len7'
+              : maxLineW <= 7 ? 'len8'
+              : maxLineW <= 9 ? 'len10'
+              : maxLineW <= 11 ? 'len12' : 'long';
+    headEl.classList.add(cls);
+    headEl.style.textShadow = t.textGlow;
+    headEl.innerHTML = lines.map((line, i) => {
+        if (CONFIG.accentLine === i + 1) {
+            return `<em style="background:${t.accentGrad}; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">${line}</em>`;
+        }
+        return `<span>${line}</span>`;
+    }).join('<br>');
+
+    document.getElementById('divider').style.background = t.accentGrad;
+    document.getElementById('subline').textContent = CONFIG.subline;
+
+    const footLeft = document.getElementById('footer-left');
+    (CONFIG.footerItems || []).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'foot-item';
+        div.innerHTML = `<div class="foot-dot" style="background:${t.dotColor};box-shadow:0 0 6px ${t.dotColor}"></div>${item}`;
+        footLeft.appendChild(div);
+    });
+
+    document.getElementById('watermark').textContent = CONFIG.watermark;
+    document.getElementById('accent-bar').style.background = t.bar;
+})();
+</script>
+</body>
+</html>
