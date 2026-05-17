@@ -138,347 +138,255 @@ body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
   .split{grid-template-columns:1fr}
 }
 
-/* ===== Slide 0 (Cover) - Design A: Bento Grid + Mesh Gradient ===== */
+/* ========== Slide 0 — 3D Isometric Harness Styles ========== */
+#s0 {
+  --s0-l1-top: #F97316;
+  --s0-l1-front: #C2410C;
+  --s0-l1-side: #9A3412;
+  --s0-l2-top: #3B82F6;
+  --s0-l2-front: #2563EB;
+  --s0-l2-side: #1D4ED8;
+  --s0-l3-top: #10B981;
+  --s0-l3-front: #059669;
+  --s0-l3-side: #047857;
+  --s0-l4-top: #EAB308;
+  --s0-l4-front: #CA8A04;
+  --s0-l4-side: #A16207;
+  --s0-l5-top: #A855F7;
+  --s0-l5-front: #9333EA;
+  --s0-l5-side: #7E22CE;
+  --s0-l6-top: #EF4444;
+  --s0-l6-front: #DC2626;
+  --s0-l6-side: #B91C1C;
+  --s0-l7-top: #E2E8F0;
+  --s0-l7-front: #CBD5E1;
+  --s0-l7-side: #94A3B8;
+}
 
-/* Mesh Gradient Background - Deep Purple to Indigo with overlay gradients */
 #s0.hero.dark::before {
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.35) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 20%, rgba(14,165,233,0.28) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(249,115,22,0.2) 0%, transparent 45%),
-    radial-gradient(ellipse at 10% 80%, rgba(168,85,247,0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 90% 60%, rgba(16,185,129,0.15) 0%, transparent 40%),
-    linear-gradient(135deg, #0F0A1E 0%, #1A1145 50%, #0F0A1E 100%) !important;
-  opacity: 1;
+  background: radial-gradient(ellipse at 70% 60%, #1A1A2E 0%, #0D0D1A 70%) !important;
 }
 
 #s0.hero.dark::after {
-  background: none !important;
+  background:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(180deg,rgba(var(--ink-rgb),.32) 0%,rgba(var(--ink-rgb),0) 14%,rgba(var(--ink-rgb),0) 86%,rgba(var(--ink-rgb),.32) 100%) !important;
+  background-size: 60px 60px, 60px 60px, 100% 100% !important;
+  background-repeat: repeat, repeat, no-repeat !important;
 }
 
-/* Main Container Layout */
-.s0-frame {
+.s0-container {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  grid-template-rows: 1fr auto;
-  gap: 2vw 4vw;
+  grid-template-columns: 1fr 1fr;
+  gap: 4vw;
   flex: 1;
   min-height: 0;
-  padding: 2vh 0 4vh 0;
   position: relative;
 }
 
-/* Left Column - Main Title */
 .s0-left {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-right: 2vw;
+  gap: 4vh;
+  z-index: 10;
 }
 
-.s0-title {
+.s0-title-main {
   font-family: var(--serif-zh);
   font-weight: 900;
-  font-size: 7.5vw;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #0EA5E9 0%, #F97316 60%, #F97316 100%);
+  font-size: 6vw;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #F97316 0%, #3B82F6 100%);
   -webkit-background-clip: text;
-  background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 80px rgba(14,165,233,0.3);
-  margin-bottom: 2vh;
+  background-clip: text;
 }
 
 .s0-subtitle {
-  font-family: var(--sans-zh);
-  font-weight: 400;
-  font-size: 1.4vw;
-  letter-spacing: 0.08em;
-  opacity: 0.75;
-  color: rgba(255,255,255,0.8);
-  max-width: 80%;
-}
-
-/* Right Column - Bento Cards */
-.s0-right {
-  display: flex;
-  flex-direction: column;
-  gap: 2.2vh;
-  justify-content: center;
-}
-
-/* Glassmorphism Card Base */
-.s0-card {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 20px;
-  padding: 3vh 2vw;
-  display: flex;
-  align-items: center;
-  gap: 1.5vw;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: relative;
-  overflow: hidden;
-}
-
-.s0-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-}
-
-.s0-card:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.2);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
-.s0-number {
-  font-family: var(--serif-en);
-  font-weight: 900;
-  font-size: 5vw;
-  line-height: 1;
-  min-width: 5vw;
-  text-align: center;
-}
-
-.s0-card-content {
-  flex: 1;
-}
-
-.s0-card-label {
-  font-family: var(--sans-zh);
+  font-family: var(--serif-zh);
   font-weight: 500;
-  font-size: 1.3vw;
-  opacity: 0.9;
-}
-
-/* Card 1 - 7 Layers (Orange accent) */
-.s0-card-layers .s0-number {
-  background: linear-gradient(135deg, #F97316, #EAB308);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Seven Layer Bars Visualization */
-.s0-layer-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 1vh;
-  height: 5vh;
-}
-
-.s0-layer-bar {
-  height: 4px;
-  border-radius: 2px;
-  transition: all 0.3s ease;
-}
-
-.s0-card:hover .s0-layer-bar {
-  transform: scaleX(1.05);
-}
-
-.s0-layer-bar:nth-child(1) { width: 28%; background: #F97316; }
-.s0-layer-bar:nth-child(2) { width: 38%; background: #3B82F6; }
-.s0-layer-bar:nth-child(3) { width: 48%; background: #10B981; }
-.s0-layer-bar:nth-child(4) { width: 58%; background: #EAB308; }
-.s0-layer-bar:nth-child(5) { width: 68%; background: #A855F7; }
-.s0-layer-bar:nth-child(6) { width: 78%; background: #EF4444; }
-.s0-layer-bar:nth-child(7) { width: 88%; background: #F8FAFC; }
-
-/* Card 2 - 3 Patterns (Blue accent) */
-.s0-card-patterns .s0-number {
-  background: linear-gradient(135deg, #0EA5E9, #3B82F6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.s0-pattern-dots {
-  display: flex;
-  gap: 6px;
-  margin-top: 1vh;
-}
-
-.s0-pattern-dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(14,165,233,0.6);
-  transition: all 0.3s ease;
-}
-
-.s0-card:hover .s0-pattern-dots span {
-  transform: scale(1.3);
-  box-shadow: 0 0 10px rgba(14,165,233,0.5);
-}
-
-.s0-pattern-dots span:nth-child(2) {
-  background: rgba(59,130,246,0.5);
-}
-
-.s0-pattern-dots span:nth-child(3) {
-  background: rgba(14,165,233,0.4);
-}
-
-/* Card 3 - 3 Steps (Green accent) */
-.s0-card-steps .s0-number {
-  background: linear-gradient(135deg, #10B981, #34D399);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.s0-steps-flow {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 1vh;
-}
-
-.s0-step-item {
-  width: 20px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(16,185,129,0.4);
-  transition: all 0.3s ease;
-}
-
-.s0-step-item:nth-child(1) { width: 18px; background: rgba(16,185,129,0.8); }
-.s0-step-item:nth-child(2) { width: 22px; background: rgba(16,185,129,0.6); }
-.s0-step-item:nth-child(3) { width: 26px; background: rgba(16,185,129,0.4); }
-
-.s0-card:hover .s0-step-item {
-  background: rgba(16,185,129,0.8);
-}
-
-/* Bottom Region - Floor Quote */
-.s0-bottom {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2vh;
-  padding-top: 3vh;
-  position: relative;
+  font-size: 2vw;
+  line-height: 1.5;
+  opacity: 0.85;
+  max-width: 36vw;
 }
 
 .s0-floor-text {
   font-family: var(--serif-zh);
-  font-weight: 700;
-  font-size: 3.5vw;
-  opacity: 0.15;
-  letter-spacing: 0.1em;
-  color: #fff;
-  text-shadow: 0 0 40px rgba(255,255,255,0.2);
-}
-
-.s0-divider {
-  width: 40%;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(14,165,233,0.4) 20%,
-    rgba(249,115,22,0.6) 50%,
-    rgba(14,165,233,0.4) 80%,
-    transparent 100%
-  );
-}
-
-/* Center Visual Focus - Harness / Seven Layers Stack */
-.s0-visual-center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+  font-weight: 900;
+  font-size: 2.5vw;
   opacity: 0.12;
-  pointer-events: none;
-  z-index: -1;
+  position: absolute;
+  left: 5.5vw;
+  bottom: 10vh;
 }
 
-.s0-harness-bar {
-  height: 8px;
+.s0-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 3D Isometric Stack Container */
+.s0-isometric-harness {
+  position: absolute;
+  right: 8%;
+  top: 45%;
+  transform: rotateX(60deg) rotateZ(-45deg) translateY(0);
+  transform-style: preserve-3d;
+  animation: s0-float 6s ease-in-out infinite;
+}
+
+@keyframes s0-float {
+  0%, 100% { transform: rotateX(60deg) rotateZ(-45deg) translateY(0); }
+  50% { transform: rotateX(60deg) rotateZ(-45deg) translateY(-6px); }
+}
+
+/* Individual Layer Blocks */
+.s0-layer {
+  position: relative;
+  height: 38px;
+  margin-bottom: 8px;
+  transform-style: preserve-3d;
+}
+
+.s0-layer-face {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.s0-layer-top {
+  width: 100%;
+  height: 100%;
+  transform: translateZ(19px);
   border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  transition: all 0.5s ease;
 }
 
-.s0-harness-bar:nth-child(1) { width: 120px; background: #F97316; }
-.s0-harness-bar:nth-child(2) { width: 140px; background: #3B82F6; }
-.s0-harness-bar:nth-child(3) { width: 160px; background: #10B981; }
-.s0-harness-bar:nth-child(4) { width: 180px; background: #EAB308; }
-.s0-harness-bar:nth-child(5) { width: 200px; background: #A855F7; }
-.s0-harness-bar:nth-child(6) { width: 220px; background: #EF4444; }
-.s0-harness-bar:nth-child(7) { width: 240px; background: #F8FAFC; }
-
-/* Pulsing animation on the harness */
-@keyframes harnessPulse {
-  0%, 100% { opacity: 0.12; filter: blur(0px); }
-  50% { opacity: 0.18; filter: blur(1px); }
+.s0-layer-front {
+  width: 100%;
+  height: 38px;
+  transform: rotateX(-90deg) translateZ(19px);
+  transform-origin: bottom;
+  border-radius: 0 0 4px 4px;
 }
 
-.s0-visual-center {
-  animation: harnessPulse 4s ease-in-out infinite;
+.s0-layer-side {
+  width: 38px;
+  height: 38px;
+  position: absolute;
+  right: 0;
+  transform: rotateY(90deg) translateZ(19px);
+  transform-origin: right;
+  border-radius: 0 4px 4px 0;
 }
 
-/* Responsive Adjustments */
-@media(max-width:1200px) {
-  .s0-frame {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    gap: 3vh;
-  }
+/* Layer widths - decreasing from bottom to top */
+.s0-layer-1 { width: 280px; }
+.s0-layer-2 { width: 255px; margin-left: 12.5px; }
+.s0-layer-3 { width: 230px; margin-left: 25px; }
+.s0-layer-4 { width: 205px; margin-left: 37.5px; }
+.s0-layer-5 { width: 180px; margin-left: 50px; }
+.s0-layer-6 { width: 155px; margin-left: 62.5px; }
+.s0-layer-7 { width: 130px; margin-left: 75px; }
 
-  .s0-right {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
+/* Layer 1 - CLAUDE.md (Orange) */
+.s0-layer-1 .s0-layer-top { background: linear-gradient(135deg, var(--s0-l1-top) 0%, #FB923C 100%); }
+.s0-layer-1 .s0-layer-front { background: var(--s0-l1-front); }
+.s0-layer-1 .s0-layer-side { background: var(--s0-l1-side); }
 
-  .s0-card {
-    flex: 1;
-    min-width: 200px;
-  }
+/* Layer 2 - Hooks (Blue) */
+.s0-layer-2 .s0-layer-top { background: linear-gradient(135deg, var(--s0-l2-top) 0%, #60A5FA 100%); }
+.s0-layer-2 .s0-layer-front { background: var(--s0-l2-front); }
+.s0-layer-2 .s0-layer-side { background: var(--s0-l2-side); }
 
-  .s0-title {
-    font-size: 9vw;
-  }
+/* Layer 3 - Skills (Green) */
+.s0-layer-3 .s0-layer-top { background: linear-gradient(135deg, var(--s0-l3-top) 0%, #34D399 100%); }
+.s0-layer-3 .s0-layer-front { background: var(--s0-l3-front); }
+.s0-layer-3 .s0-layer-side { background: var(--s0-l3-side); }
 
-  .s0-subtitle {
-    font-size: 1.8vw;
-  }
+/* Layer 4 - Plugins (Yellow) */
+.s0-layer-4 .s0-layer-top { background: linear-gradient(135deg, var(--s0-l4-top) 0%, #FDE047 100%); }
+.s0-layer-4 .s0-layer-front { background: var(--s0-l4-front); }
+.s0-layer-4 .s0-layer-side { background: var(--s0-l4-side); }
+
+/* Layer 5 - LSP (Purple) */
+.s0-layer-5 .s0-layer-top { background: linear-gradient(135deg, var(--s0-l5-top) 0%, #C084FC 100%); }
+.s0-layer-5 .s0-layer-front { background: var(--s0-l5-front); }
+.s0-layer-5 .s0-layer-side { background: var(--s0-l5-side); }
+
+/* Layer 6 - MCP (Red) */
+.s0-layer-6 .s0-layer-top { background: linear-gradient(135deg, var(--s0-l6-top) 0%, #F87171 100%); }
+.s0-layer-6 .s0-layer-front { background: var(--s0-l6-front); }
+.s0-layer-6 .s0-layer-side { background: var(--s0-l6-side); }
+
+/* Layer 7 - Sub Agent (Gray/White) */
+.s0-layer-7 .s0-layer-top { background: linear-gradient(135deg, var(--s0-l7-top) 0%, #F8FAFC 100%); }
+.s0-layer-7 .s0-layer-front { background: var(--s0-l7-front); }
+.s0-layer-7 .s0-layer-side { background: var(--s0-l7-side); }
+
+/* Layer Labels */
+.s0-layer-label {
+  position: absolute;
+  right: -140px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.9;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-@media(max-width:900px) {
-  .s0-title {
-    font-size: 11vw;
-  }
+.s0-layer-1 .s0-layer-label { color: var(--s0-l1-top); }
+.s0-layer-2 .s0-layer-label { color: var(--s0-l2-top); }
+.s0-layer-3 .s0-layer-label { color: var(--s0-l3-top); }
+.s0-layer-4 .s0-layer-label { color: var(--s0-l4-top); }
+.s0-layer-5 .s0-layer-label { color: var(--s0-l5-top); }
+.s0-layer-6 .s0-layer-label { color: var(--s0-l6-top); }
+.s0-layer-7 .s0-layer-label { color: var(--s0-l7-top); }
 
-  .s0-subtitle {
-    font-size: 2.2vw;
-  }
-
-  .s0-number {
-    font-size: 7vw;
-  }
-
-  .s0-floor-text {
-    font-size: 5vw;
-  }
+/* Bottom Stats */
+.s0-stats {
+  position: absolute;
+  right: 5.5vw;
+  bottom: 11vh;
+  display: flex;
+  gap: 1.5vw;
+  z-index: 20;
 }
+
+.s0-capsule {
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow:
+    0 0 20px rgba(249,115,22,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.s0-capsule-num {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.s0-capsule-1 .s0-capsule-num { color: var(--s0-l1-top); }
+.s0-capsule-2 .s0-capsule-num { color: var(--s0-l3-top); }
+.s0-capsule-3 .s0-capsule-num { color: var(--s0-l2-top); }
+
 </style>
 </head>
 <body>
@@ -489,78 +397,95 @@ body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
 
 <div id="deck">
 
-<!-- ========== Slide 1: Cover (dark hero) - Design A: Bento Grid + Mesh Gradient ========== -->
+<!-- ========== Slide 1: Cover (dark hero) — 3D Isometric Harness ========== -->
 <section class="slide hero dark" id="s0">
   <div class="chrome"><div class="left"></div><div class="right">01 / 15</div></div>
 
-  <div class="s0-frame">
-    <!-- Visual Focus: Harness Stack (Center Background) -->
-    <div class="s0-visual-center">
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-    </div>
-
-    <!-- Left Column: Main Title -->
+  <div class="s0-container">
+    <!-- Left Column: Title & Subtitle -->
     <div class="s0-left">
-      <h1 class="s0-title">配置是天花板</h1>
+      <h1 class="s0-title-main">配置是<br>天花板</h1>
       <p class="s0-subtitle">Claude Code 大型代码库最佳实践</p>
     </div>
 
-    <!-- Right Column: Bento Grid Cards -->
+    <!-- Right Column: 3D Isometric Harness -->
     <div class="s0-right">
-      <!-- Card 1: 7 Layers -->
-      <div class="s0-card s0-card-layers">
-        <div class="s0-number">7</div>
-        <div class="s0-card-content">
-          <div class="s0-card-label">层扩展架构</div>
-          <div class="s0-layer-bars">
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-          </div>
+      <div class="s0-isometric-harness">
+        <!-- Layer 1: CLAUDE.md -->
+        <div class="s0-layer s0-layer-1">
+          <div class="s0-layer-face s0-layer-front"></div>
+          <div class="s0-layer-face s0-layer-top"></div>
+          <div class="s0-layer-face s0-layer-side"></div>
+          <span class="s0-layer-label">CLAUDE.md</span>
         </div>
-      </div>
 
-      <!-- Card 2: 3 Patterns -->
-      <div class="s0-card s0-card-patterns">
-        <div class="s0-number">3</div>
-        <div class="s0-card-content">
-          <div class="s0-card-label">个成功模式</div>
-          <div class="s0-pattern-dots">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
+        <!-- Layer 2: Hooks -->
+        <div class="s0-layer s0-layer-2">
+          <div class="s0-layer-face s0-layer-front"></div>
+          <div class="s0-layer-face s0-layer-top"></div>
+          <div class="s0-layer-face s0-layer-side"></div>
+          <span class="s0-layer-label">Hooks</span>
         </div>
-      </div>
 
-      <!-- Card 3: 3 Steps -->
-      <div class="s0-card s0-card-steps">
-        <div class="s0-number">3</div>
-        <div class="s0-card-content">
-          <div class="s0-card-label">步部署</div>
-          <div class="s0-steps-flow">
-            <div class="s0-step-item"></div>
-            <div class="s0-step-item"></div>
-            <div class="s0-step-item"></div>
-          </div>
+        <!-- Layer 3: Skills -->
+        <div class="s0-layer s0-layer-3">
+          <div class="s0-layer-face s0-layer-front"></div>
+          <div class="s0-layer-face s0-layer-top"></div>
+          <div class="s0-layer-face s0-layer-side"></div>
+          <span class="s0-layer-label">Skills</span>
+        </div>
+
+        <!-- Layer 4: Plugins -->
+        <div class="s0-layer s0-layer-4">
+          <div class="s0-layer-face s0-layer-front"></div>
+          <div class="s0-layer-face s0-layer-top"></div>
+          <div class="s0-layer-face s0-layer-side"></div>
+          <span class="s0-layer-label">Plugins</span>
+        </div>
+
+        <!-- Layer 5: LSP -->
+        <div class="s0-layer s0-layer-5">
+          <div class="s0-layer-face s0-layer-front"></div>
+          <div class="s0-layer-face s0-layer-top"></div>
+          <div class="s0-layer-face s0-layer-side"></div>
+          <span class="s0-layer-label">LSP</span>
+        </div>
+
+        <!-- Layer 6: MCP -->
+        <div class="s0-layer s0-layer-6">
+          <div class="s0-layer-face s0-layer-front"></div>
+          <div class="s0-layer-face s0-layer-top"></div>
+          <div class="s0-layer-face s0-layer-side"></div>
+          <span class="s0-layer-label">MCP</span>
+        </div>
+
+        <!-- Layer 7: Sub Agent -->
+        <div class="s0-layer s0-layer-7">
+          <div class="s0-layer-face s0-layer-front"></div>
+          <div class="s0-layer-face s0-layer-top"></div>
+          <div class="s0-layer-face s0-layer-side"></div>
+          <span class="s0-layer-label">子 Agent</span>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Bottom: Floor Quote -->
-    <div class="s0-bottom">
-      <div class="s0-floor-text">模型是地板</div>
-      <div class="s0-divider"></div>
+  <!-- Floor Text -->
+  <div class="s0-floor-text">模型是地板</div>
+
+  <!-- Bottom Stats Capsules -->
+  <div class="s0-stats">
+    <div class="s0-capsule s0-capsule-1">
+      <span class="s0-capsule-num">7</span>
+      <span>层架构</span>
+    </div>
+    <div class="s0-capsule s0-capsule-2">
+      <span class="s0-capsule-num">3</span>
+      <span>个成功模式</span>
+    </div>
+    <div class="s0-capsule s0-capsule-3">
+      <span class="s0-capsule-num">3</span>
+      <span>步部署</span>
     </div>
   </div>
 

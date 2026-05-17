@@ -138,346 +138,219 @@ body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
   .split{grid-template-columns:1fr}
 }
 
-/* ===== Slide 0 (Cover) - Design A: Bento Grid + Mesh Gradient ===== */
-
-/* Mesh Gradient Background - Deep Purple to Indigo with overlay gradients */
-#s0.hero.dark::before {
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.35) 0%, transparent 55%),
-    radial-gradient(ellipse at 80% 20%, rgba(14,165,233,0.28) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(249,115,22,0.2) 0%, transparent 45%),
-    radial-gradient(ellipse at 10% 80%, rgba(168,85,247,0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 90% 60%, rgba(16,185,129,0.15) 0%, transparent 40%),
-    linear-gradient(135deg, #0F0A1E 0%, #1A1145 50%, #0F0A1E 100%) !important;
-  opacity: 1;
-}
-
-#s0.hero.dark::after {
-  background: none !important;
-}
-
-/* Main Container Layout */
-.s0-frame {
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  grid-template-rows: 1fr auto;
-  gap: 2vw 4vw;
-  flex: 1;
-  min-height: 0;
-  padding: 2vh 0 4vh 0;
+/* ========== Slide 0 Terminal Stack Styles ========== */
+.s0-terminal-bg {
+  background-color: #0A0A0A;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(34,197,94,0.06) 0px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(90deg, rgba(34,197,94,0.06) 0px, transparent 1px, transparent 40px);
   position: relative;
 }
 
-/* Left Column - Main Title */
-.s0-left {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-right: 2vw;
+.s0-terminal-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px);
+  pointer-events: none;
+  z-index: 1;
 }
 
-.s0-title {
-  font-family: var(--serif-zh);
-  font-weight: 900;
-  font-size: 7.5vw;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  background: linear-gradient(135deg, #0EA5E9 0%, #F97316 60%, #F97316 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 80px rgba(14,165,233,0.3);
-  margin-bottom: 2vh;
+@keyframes s0-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-.s0-subtitle {
-  font-family: var(--sans-zh);
-  font-weight: 400;
-  font-size: 1.4vw;
-  letter-spacing: 0.08em;
-  opacity: 0.75;
-  color: rgba(255,255,255,0.8);
-  max-width: 80%;
+.s0-cursor {
+  display: inline-block;
+  width: 10px;
+  height: 18px;
+  background-color: #22C55E;
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: s0-blink 1s step-end infinite;
 }
 
-/* Right Column - Bento Cards */
-.s0-right {
-  display: flex;
-  flex-direction: column;
-  gap: 2.2vh;
-  justify-content: center;
-}
-
-/* Glassmorphism Card Base */
-.s0-card {
-  background: rgba(255,255,255,0.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 20px;
-  padding: 3vh 2vw;
-  display: flex;
-  align-items: center;
-  gap: 1.5vw;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: relative;
+.s0-terminal-window {
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(34, 197, 94, 0.1);
   overflow: hidden;
 }
 
-.s0-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-}
-
-.s0-card:hover {
-  background: rgba(255,255,255,0.1);
-  border-color: rgba(255,255,255,0.2);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-}
-
-.s0-number {
-  font-family: var(--serif-en);
-  font-weight: 900;
-  font-size: 5vw;
-  line-height: 1;
-  min-width: 5vw;
-  text-align: center;
-}
-
-.s0-card-content {
-  flex: 1;
-}
-
-.s0-card-label {
-  font-family: var(--sans-zh);
-  font-weight: 500;
-  font-size: 1.3vw;
-  opacity: 0.9;
-}
-
-/* Card 1 - 7 Layers (Orange accent) */
-.s0-card-layers .s0-number {
-  background: linear-gradient(135deg, #F97316, #EAB308);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Seven Layer Bars Visualization */
-.s0-layer-bars {
+.s0-terminal-header {
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0.08) 0%, rgba(34, 197, 94, 0.02) 100%);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+  padding: 12px 16px;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin-top: 1vh;
-  height: 5vh;
+  align-items: center;
+  gap: 12px;
+}
+
+.s0-window-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.s0-window-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.s0-dot-red { background-color: #FF5F56; }
+.s0-dot-yellow { background-color: #FFBD2E; }
+.s0-dot-green { background-color: #27C93F; }
+
+.s0-window-title {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: rgba(34, 197, 94, 0.7);
+  letter-spacing: 0.05em;
+}
+
+.s0-terminal-body {
+  padding: 20px 24px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #22C55E;
+}
+
+.s0-terminal-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.s0-prompt {
+  color: #22C55E;
+  font-weight: 600;
+}
+
+.s0-command {
+  color: #F59E0B;
+}
+
+.s0-output {
+  color: rgba(245, 241, 235, 0.85);
+  padding-left: 24px;
+}
+
+.s0-layer-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 20px;
 }
 
 .s0-layer-bar {
-  height: 4px;
-  border-radius: 2px;
-  transition: all 0.3s ease;
-}
-
-.s0-card:hover .s0-layer-bar {
-  transform: scaleX(1.05);
-}
-
-.s0-layer-bar:nth-child(1) { width: 28%; background: #F97316; }
-.s0-layer-bar:nth-child(2) { width: 38%; background: #3B82F6; }
-.s0-layer-bar:nth-child(3) { width: 48%; background: #10B981; }
-.s0-layer-bar:nth-child(4) { width: 58%; background: #EAB308; }
-.s0-layer-bar:nth-child(5) { width: 68%; background: #A855F7; }
-.s0-layer-bar:nth-child(6) { width: 78%; background: #EF4444; }
-.s0-layer-bar:nth-child(7) { width: 88%; background: #F8FAFC; }
-
-/* Card 2 - 3 Patterns (Blue accent) */
-.s0-card-patterns .s0-number {
-  background: linear-gradient(135deg, #0EA5E9, #3B82F6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.s0-pattern-dots {
-  display: flex;
-  gap: 6px;
-  margin-top: 1vh;
-}
-
-.s0-pattern-dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(14,165,233,0.6);
-  transition: all 0.3s ease;
-}
-
-.s0-card:hover .s0-pattern-dots span {
-  transform: scale(1.3);
-  box-shadow: 0 0 10px rgba(14,165,233,0.5);
-}
-
-.s0-pattern-dots span:nth-child(2) {
-  background: rgba(59,130,246,0.5);
-}
-
-.s0-pattern-dots span:nth-child(3) {
-  background: rgba(14,165,233,0.4);
-}
-
-/* Card 3 - 3 Steps (Green accent) */
-.s0-card-steps .s0-number {
-  background: linear-gradient(135deg, #10B981, #34D399);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.s0-steps-flow {
+  height: 32px;
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 1vh;
+  padding: 0 16px;
+  border-radius: 4px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0A0A0A;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.s0-step-item {
-  width: 20px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(16,185,129,0.4);
-  transition: all 0.3s ease;
+.s0-layer-bar:hover {
+  transform: translateX(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.s0-step-item:nth-child(1) { width: 18px; background: rgba(16,185,129,0.8); }
-.s0-step-item:nth-child(2) { width: 22px; background: rgba(16,185,129,0.6); }
-.s0-step-item:nth-child(3) { width: 26px; background: rgba(16,185,129,0.4); }
+.s0-layer-l1 { width: 200px; background: linear-gradient(90deg, #F97316, #EA580C); }
+.s0-layer-l2 { width: 180px; background: linear-gradient(90deg, #EAB308, #CA8A04); }
+.s0-layer-l3 { width: 160px; background: linear-gradient(90deg, #22C55E, #16A34A); }
+.s0-layer-l4 { width: 150px; background: linear-gradient(90deg, #14B8A6, #0D9488); }
+.s0-layer-l5 { width: 140px; background: linear-gradient(90deg, #3B82F6, #2563EB); }
+.s0-layer-l6 { width: 130px; background: linear-gradient(90deg, #6366F1, #4F46E5); }
+.s0-layer-l7 { width: 120px; background: linear-gradient(90deg, #A855F7, #9333EA); }
 
-.s0-card:hover .s0-step-item {
-  background: rgba(16,185,129,0.8);
+.s0-layer-label {
+  position: absolute;
+  left: -120px;
+  color: rgba(245, 241, 235, 0.7);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 12px;
+  text-align: right;
+  width: 110px;
 }
 
-/* Bottom Region - Floor Quote */
-.s0-bottom {
-  grid-column: 1 / -1;
+.s0-equality-text {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 4vw;
+  font-weight: 700;
+  color: #F59E0B;
+  text-align: center;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
+}
+
+.s0-stats-row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2vh;
-  padding-top: 3vh;
+  justify-content: center;
+  gap: 4vw;
+  margin-top: 2vh;
+}
+
+.s0-stat-card {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  text-align: center;
+  padding: 16px 24px;
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  background: rgba(10, 10, 10, 0.6);
   position: relative;
 }
 
-.s0-floor-text {
-  font-family: var(--serif-zh);
-  font-weight: 700;
-  font-size: 3.5vw;
-  opacity: 0.15;
-  letter-spacing: 0.1em;
-  color: #fff;
-  text-shadow: 0 0 40px rgba(255,255,255,0.2);
-}
-
-.s0-divider {
-  width: 40%;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(14,165,233,0.4) 20%,
-    rgba(249,115,22,0.6) 50%,
-    rgba(14,165,233,0.4) 80%,
-    transparent 100%
-  );
-}
-
-/* Center Visual Focus - Harness / Seven Layers Stack */
-.s0-visual-center {
+.s0-stat-card::before,
+.s0-stat-card::after {
+  content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  opacity: 0.12;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.s0-harness-bar {
+  width: 8px;
   height: 8px;
-  border-radius: 4px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-  transition: all 0.5s ease;
+  border: 2px solid rgba(34, 197, 94, 0.5);
 }
 
-.s0-harness-bar:nth-child(1) { width: 120px; background: #F97316; }
-.s0-harness-bar:nth-child(2) { width: 140px; background: #3B82F6; }
-.s0-harness-bar:nth-child(3) { width: 160px; background: #10B981; }
-.s0-harness-bar:nth-child(4) { width: 180px; background: #EAB308; }
-.s0-harness-bar:nth-child(5) { width: 200px; background: #A855F7; }
-.s0-harness-bar:nth-child(6) { width: 220px; background: #EF4444; }
-.s0-harness-bar:nth-child(7) { width: 240px; background: #F8FAFC; }
-
-/* Pulsing animation on the harness */
-@keyframes harnessPulse {
-  0%, 100% { opacity: 0.12; filter: blur(0px); }
-  50% { opacity: 0.18; filter: blur(1px); }
+.s0-stat-card::before {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
 }
 
-.s0-visual-center {
-  animation: harnessPulse 4s ease-in-out infinite;
+.s0-stat-card::after {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
 }
 
-/* Responsive Adjustments */
-@media(max-width:1200px) {
-  .s0-frame {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto auto;
-    gap: 3vh;
-  }
-
-  .s0-right {
-    flex-direction: row;
-    flex-wrap: wrap;
-  }
-
-  .s0-card {
-    flex: 1;
-    min-width: 200px;
-  }
-
-  .s0-title {
-    font-size: 9vw;
-  }
-
-  .s0-subtitle {
-    font-size: 1.8vw;
-  }
+.s0-stat-num {
+  font-size: 3vw;
+  font-weight: 700;
+  color: #22C55E;
+  line-height: 1;
 }
 
-@media(max-width:900px) {
-  .s0-title {
-    font-size: 11vw;
-  }
+.s0-stat-label {
+  font-size: 12px;
+  color: rgba(245, 241, 235, 0.6);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
 
-  .s0-subtitle {
-    font-size: 2.2vw;
-  }
-
-  .s0-number {
-    font-size: 7vw;
-  }
-
-  .s0-floor-text {
-    font-size: 5vw;
-  }
+/* Override hero slide for terminal style */
+#s0.hero.dark::before,
+#s0.hero.dark::after {
+  display: none;
 }
 </style>
 </head>
@@ -489,82 +362,109 @@ body.light-bg #nav .dot.active{background:rgba(var(--ink-rgb),.9)}
 
 <div id="deck">
 
-<!-- ========== Slide 1: Cover (dark hero) - Design A: Bento Grid + Mesh Gradient ========== -->
-<section class="slide hero dark" id="s0">
-  <div class="chrome"><div class="left"></div><div class="right">01 / 15</div></div>
+<!-- ========== Slide 1: Cover - Terminal Stack Style ========== -->
+<section class="slide hero dark s0-terminal-bg" id="s0">
+  <div class="chrome" style="position:relative;z-index:10;"><div class="left"></div><div class="right">01 / 15</div></div>
 
-  <div class="s0-frame">
-    <!-- Visual Focus: Harness Stack (Center Background) -->
-    <div class="s0-visual-center">
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-      <div class="s0-harness-bar"></div>
-    </div>
-
-    <!-- Left Column: Main Title -->
-    <div class="s0-left">
-      <h1 class="s0-title">配置是天花板</h1>
-      <p class="s0-subtitle">Claude Code 大型代码库最佳实践</p>
-    </div>
-
-    <!-- Right Column: Bento Grid Cards -->
-    <div class="s0-right">
-      <!-- Card 1: 7 Layers -->
-      <div class="s0-card s0-card-layers">
-        <div class="s0-number">7</div>
-        <div class="s0-card-content">
-          <div class="s0-card-label">层扩展架构</div>
-          <div class="s0-layer-bars">
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
-            <div class="s0-layer-bar"></div>
+  <div class="frame" style="position:relative;z-index:10;display:flex;flex-direction:column;flex:1;min-height:0;padding:4vh 0;">
+    <!-- Upper Area: Terminal Window + Layer Stack -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4vw;flex:1;">
+      <!-- Left: Terminal Window -->
+      <div style="flex:1;max-width:480px;">
+        <div class="s0-terminal-window">
+          <div class="s0-terminal-header">
+            <div class="s0-window-controls">
+              <span class="s0-window-dot s0-dot-red"></span>
+              <span class="s0-window-dot s0-dot-yellow"></span>
+              <span class="s0-window-dot s0-dot-green"></span>
+            </div>
+            <span class="s0-window-title">claude-code-harness.sh</span>
+          </div>
+          <div class="s0-terminal-body">
+            <div class="s0-terminal-line">
+              <span class="s0-prompt">&gt;</span>
+              <span class="s0-command">echo $FLOOR</span>
+            </div>
+            <div class="s0-output">model_capability</div>
+            <div class="s0-terminal-line" style="margin-top:12px;">
+              <span class="s0-prompt">&gt;</span>
+              <span class="s0-command">echo $CEILING</span>
+            </div>
+            <div class="s0-output">configuration_quality</div>
+            <div class="s0-terminal-line" style="margin-top:12px;">
+              <span class="s0-prompt">&gt;</span>
+              <span class="s0-command">echo "$FLOOR ≠ $CEILING"</span>
+            </div>
+            <div class="s0-output">
+              <span style="color:#F59E0B;font-weight:600;">true</span>
+              <span class="s0-cursor"></span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Card 2: 3 Patterns -->
-      <div class="s0-card s0-card-patterns">
-        <div class="s0-number">3</div>
-        <div class="s0-card-content">
-          <div class="s0-card-label">个成功模式</div>
-          <div class="s0-pattern-dots">
-            <span></span>
-            <span></span>
-            <span></span>
+      <!-- Right: 7-Layer Stack -->
+      <div style="flex:0 0 auto;padding-top:20px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(245,241,235,0.5);text-align:center;margin-bottom:12px;letter-spacing:0.2em;">SEVEN EXTENSION LAYERS</div>
+        <div class="s0-layer-stack">
+          <div class="s0-layer-bar s0-layer-l1">
+            <span class="s0-layer-label">L1 CLAUDE.md</span>
+            <span>CLAUDE.md</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Card 3: 3 Steps -->
-      <div class="s0-card s0-card-steps">
-        <div class="s0-number">3</div>
-        <div class="s0-card-content">
-          <div class="s0-card-label">步部署</div>
-          <div class="s0-steps-flow">
-            <div class="s0-step-item"></div>
-            <div class="s0-step-item"></div>
-            <div class="s0-step-item"></div>
+          <div class="s0-layer-bar s0-layer-l2">
+            <span class="s0-layer-label">L2 Hooks</span>
+            <span>Hooks</span>
+          </div>
+          <div class="s0-layer-bar s0-layer-l3">
+            <span class="s0-layer-label">L3 Skills</span>
+            <span>Skills</span>
+          </div>
+          <div class="s0-layer-bar s0-layer-l4">
+            <span class="s0-layer-label">L4 Plugins</span>
+            <span>Plugins</span>
+          </div>
+          <div class="s0-layer-bar s0-layer-l5">
+            <span class="s0-layer-label">L5 LSP</span>
+            <span>LSP</span>
+          </div>
+          <div class="s0-layer-bar s0-layer-l6">
+            <span class="s0-layer-label">L6 MCP</span>
+            <span>MCP</span>
+          </div>
+          <div class="s0-layer-bar s0-layer-l7">
+            <span class="s0-layer-label">L7 Sub-Agent</span>
+            <span>Sub-Agent</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Bottom: Floor Quote -->
-    <div class="s0-bottom">
-      <div class="s0-floor-text">模型是地板</div>
-      <div class="s0-divider"></div>
+    <!-- Middle: Equality Text -->
+    <div style="padding:3vh 0;text-align:center;">
+      <div class="s0-equality-text">floor ≠ ceiling</div>
+      <div style="font-family:'Noto Serif SC',serif;font-size:1.4vw;color:rgba(245,241,235,0.6);margin-top:1vh;letter-spacing:0.1em;">
+        模型能力是地板，配置质量才是天花板
+      </div>
+    </div>
+
+    <!-- Bottom: Stats Cards -->
+    <div class="s0-stats-row">
+      <div class="s0-stat-card">
+        <div class="s0-stat-num">7</div>
+        <div class="s0-stat-label">LAYERS</div>
+      </div>
+      <div class="s0-stat-card">
+        <div class="s0-stat-num">3</div>
+        <div class="s0-stat-label">MODES</div>
+      </div>
+      <div class="s0-stat-card">
+        <div class="s0-stat-num">3</div>
+        <div class="s0-stat-label">STEPS</div>
+      </div>
     </div>
   </div>
 
-  <div class="foot"><div class="title">Claude Code 大型代码库最佳实践</div><div>Cover</div></div>
+  <div class="foot" style="position:relative;z-index:10;"><div class="title">Claude Code 大型代码库最佳实践</div><div style="color:#22C55E;">Terminal Stack</div></div>
 </section>
 
 <!-- ========== Slide 2: Agent 式搜索 vs RAG (light split) ========== -->
