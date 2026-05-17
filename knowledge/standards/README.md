@@ -8,6 +8,7 @@ Tool-neutral engineering conventions and policies for `one-context`.
 |------|-------|
 | `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
 | `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
+| `video-voiceover-script-conventions.md` | 口播稿 — 开场钩子（含悬念/排比否定式）后紧接固定关注句（逐字）；与 `01-script.md` 配合 |
 
 ## What belongs here
 

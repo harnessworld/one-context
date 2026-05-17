@@ -776,6 +776,7 @@ Tool-neutral engineering conventions and policies for `one-context`.
 |------|-------|
 | `agent-framework.md` | 智能体定义规范 — Agent schema, role enum, adapter contract |
 | `one-context-conventions.md` | 项目约定 — Canonical sources, adapter model, validation |
+| `video-voiceover-script-conventions.md` | 口播稿 — 开场钩子（含悬念/排比否定式）后紧接固定关注句（逐字）；与 `01-script.md` 配合 |
 
 ## What belongs here
 
@@ -791,6 +792,64 @@ Tool-neutral engineering conventions and policies for `one-context`.
 - Step-by-step operating procedures → `playbooks/`
 
 Add links to new standards in the table above when creating a file.
+
+<!-- source: knowledge/standards/video-voiceover-script-conventions.md -->
+
+# 口播稿制作规范（钩子 + 固定句）
+
+> 来源：one-context 内部约定（内容向口播 / 短视频 / 中视频）  
+> 适用：`features/**/production/content/01-script.md` 及同目录讲稿类文件。
+
+本规范**只约定两件事**：**一开头用钩子抓住人**；**紧接着用固定一句关注引导（逐字）**。其余版式（如 `# 【页题】` 分块、男女对白、与 `html-video-from-slides` / `volc-podcast-tts` 的配合）由选题与 `skills/` 各 skill 另行约定，**不替代**下文两条。
+
+---
+
+## 1. 开头：钩子
+
+**位置**：放在**全片口播最前**（通常对应封面 / 第一页讲稿块的最前几句）。
+
+**目标**：让听众愿意听下去——觉得**和自己有关**或**想知道后文结论**；不靠骂战、不靠装疯卖傻换停留。
+
+**必须做到**
+
+- **具体**：一个问题、一个反常现象、一个正在发生的变化，或带前提的对比；避免空泛的「今天我们来聊聊」。
+- **可兑现**：开头抛出的张力，后文要能给清楚回应；不要为勾人而勾人。若使用**明知故问 / 排比否定 / 悬念揭晓**（见下），须在**封面块内或紧随其后的正文开头**，用一两句把「谜底」收成**本期能讲清的范围**（例如「叙事里谁在热路径上被反复点名」），而不是悬一个无法在后文定义的全局排行榜结论。
+- **语气**：不要夸张承诺（如「彻底改变」「99% 不知道」）、不要人身攻击、不要刻意挑动对立。**允许**竞猜感、排行榜式口吻作**开场钩子**——常见骨架如：「你知道……最 X 吗？不是 A，不是 B，居然是 C」——只要满足上条「可兑现」，不把「最香」「第一」等词留到全片结束仍无操作定义即可。
+
+**可选形态（可组合）**
+
+- **悬念排比**：先抛反差选项再揭晓，适合短视频/中视频拉停留；揭晓后若需路标，**仅允许极短一句**（如「今晚我们把它落到……」）且须**仍排在 §2 固定句之前**——时间轴上仍是 **钩子（含可选路标）→ 固定句 → 正文**。
+- **场景一刀**：一句值班/账单/事故类具体画面，再接矛盾句。
+- **反常半句**：直接给反常识判断，下一句马上收窄到可核查范围。
+
+**受众**（写钩子时自问一句即可）：一线研发侧重「省时间、避坑、可落地」；技术管理者侧重「成本、风险、节奏」；泛科技受众侧重「关我什么事、为什么现在值得听」。
+
+---
+
+## 2. 固定一句：紧跟在钩子之后（逐字）
+
+**位置**：**紧接在开头钩子之后**——即全片口播时间轴上，**先**完成 §1 的钩子，**下一段或下一轮对白**即接本固定句；通常仍写在**第一页 / 封面**讲稿块内（钩子 → 固定句 → 再衔接正文）。**不要求**放在片尾；若某 feature 另有片尾致谢，可与本固定句并存，但**不得改写**本句文字。
+
+**要求**：下面这句话必须**原样出现**——**不增不减、不拆句、不改写用词**。需要垫话时，**仅允许在固定句之前**用极短衔接（如「先插播一句」「下面这句我完整念」）；**不得**在句中插入语气词或第二人接话。男女对播时，仍须**同一人一口气念完**整句固定话。
+
+> 如果你想听更多的大厂和业界AI最新资讯，欢迎关注大厂吾师兄，点关注不迷路。
+
+若某平台禁止口播引导关注，在该 feature 的 `spec.md` 或 `05-publish-kit.md` 里声明**替代句或豁免**；**默认仍以本句为准**。
+
+---
+
+## 3. 起草自检
+
+- [ ] 开头是否已用**具体、可兑现**的钩子（含**悬念排比式**亦可），且大致落在全片**最前几秒～二十秒**内？若用了「最 X / 不是…居然…」，后文是否已**尽早**说清本期里「X」指什么？  
+- [ ] 固定句是否**逐字**出现在**钩子之后、正文展开之前**（或仍在封面块内紧邻位置）？
+
+---
+
+## 4. 可选参考（非本规范核心）
+
+- **讲稿分块与 Edge TTS**：`skills/html-video-from-slides/SKILL.md`（如每页 `# 【标题】`）。  
+- **男女对白、播客式 WAV**：`skills/volc-podcast-tts` 等。  
+- **字幕校对**：`skills/srt-proofread/SKILL.md`；固定句写入 `01-script.md` 便于与字幕对齐专名与标点。
 
 <!-- source: features/INDEX.md -->
 
@@ -812,6 +871,13 @@ Add links to new standards in the table above when creating a file.
 | one-context-intro-short-video | one-context 中视频介绍（爆款口播框架）                             | content-pipeline  | draft  | `features/content-pipeline/one-context-intro-short-video/` | one-context     |
 | hermes-agent-short-video      | Hermes Agent 短视频口播成片（wav-auto）                          | content-pipeline  | draft  | `features/content-pipeline/hermes-agent-short-video/`      | one-context     |
 | anthropic-agent-harness-narration | Anthropic Agent Harness 哲学 — 口播稿                         | content-pipeline  | draft  | `features/content-pipeline/anthropic-agent-harness-narration/` | one-context |
+| anthropic-ai-blueprint-dialogue-mid-video | Anthropic AI 公司蓝图对话拆解（中视频） | content-pipeline | draft | `features/content-pipeline/anthropic-ai-blueprint-dialogue-mid-video/` | one-context |
+| anthropic-boris-engineering-future-mid-video | 当顶尖工程师不再写代码：AI 重写软件开发未来（对话口播） | content-pipeline | draft | `features/content-pipeline/anthropic-boris-engineering-future-mid-video/` | one-context |
+| ai-agent-security-2026-revelations-mid-video | 2026 AI Agent 安全启示录（对话口播） | content-pipeline | draft | `features/content-pipeline/ai-agent-security-2026-revelations-mid-video/` | one-context |
+| claude-code-multi-agent-source-mid-video | Claude Code 多 Agent 机制源码解读（中视频口播） | content-pipeline | draft | `features/content-pipeline/claude-code-multi-agent-source-mid-video/` | one-context |
+| openai-enterprise-ai-scaling-five-actions-mid-video | OpenAI 企业 AI 规模化落地五要点（中视频口播） | content-pipeline | draft | `features/content-pipeline/openai-enterprise-ai-scaling-five-actions-mid-video/` | one-context |
+| markdown-html-claude-engineer-mid-video | Markdown 要被淘汰？Claude 工程师弃用真相（对话口播） | content-pipeline | draft | `features/content-pipeline/markdown-html-claude-engineer-mid-video/` | one-context |
+| markdown-html-claude-engineer-mid-video | Markdown 要被淘汰？Claude 工程师弃用真相（阿哲 / 小夏 对话口播） | content-pipeline | draft | `features/content-pipeline/markdown-html-claude-engineer-mid-video/` | one-context |
 | damai-ticket-bot              | 大麦抢票助手 — 浏览器插件 + CLI 集成 one-context skill                 | integrations | draft  | `features/integrations/damai-ticket-bot/`              | one-context     |
 | operator-spaces-paper-analysis | 算子空间论文深度分析 — 发现证明漏洞与改进机会 | research | in_progress | `features/research/operator-spaces-paper-analysis/` | paperwork |
 | skill-windows-c-drive-cleanup | Windows C 盘空间清理 — 仓库内 Agent Skill                     | core     | done   | `features/core/skill-windows-c-drive-cleanup/`    | one-context     |
@@ -828,6 +894,7 @@ Add links to new standards in the table above when creating a file.
 | agent亲和架构底层原理剖析 | Agent 亲和架构底层原理剖析（口播视频） | content-pipeline | draft | `features/content-pipeline/agent亲和架构底层原理剖析/` | one-context |
 | 软件中一切皆Worker | 软件中一切皆 Worker（口播视频） | content-pipeline | draft | `features/content-pipeline/软件中一切皆Worker/` | one-context |
 | claudecode-prompt-caching-mid-video | Prompt Caching Is Everything —— Claude Code 团队最新文章 | content-pipeline | planning | `features/content-pipeline/claudecode-prompt-caching-mid-video/` | one-context |
+| claudecode-sandbox-concurrency-mid-video | Claude Code 沙箱与并发机制解析 | content-pipeline | planning | `features/content-pipeline/claudecode-sandbox-concurrency-mid-video/` | one-context |
 
 
 **Columns**
@@ -936,9 +1003,25 @@ features/
 
 <!-- source: features/_template/content-production/production/content/01-script.md -->
 
-# 口播讲稿
+> **口播总规范**：`knowledge/standards/video-voiceover-script-conventions.md`  
+> **封面块内**：先写**钩子**，**紧接着下一段或下一轮对白**接规范中的**固定关注句（逐字，不默认片尾）**；再衔接后文。男女对播时固定句仍须**同一人一口气念完**，垫话仅在句前。  
+> **男女对白**（若采用）：块内用 `男：` / `女：` 分行；真双人 WAV 见 `volc-podcast-tts` 或人工对录；Edge `tts` 不能按句拆轨，见 `skills/html-video-from-slides/SKILL.md`。
 
-<!-- 完整口播文字稿，按话题段落组织 -->
+# 【封面】
+
+时长：约 40s
+
+（删本行括号说明后写口播。走 Edge `tts` 时页数须与 `presentation.html` 一致；真双人播客 WAV 见 `features/_template/content-production/README.md`「口播选路」。）
+
+---
+
+# 【第二页标题与幻灯一致】
+
+时长：约 40s
+
+（删说明后写口播。）
+
+---
 
 <!-- source: features/_template/content-production/production/content/05-publish-kit.md -->
 
@@ -946,11 +1029,14 @@ features/
 
 标题：
 
-简介：
+## 简介与话题
 
-话题：
+（直接按平台「简介」输入框效果写纯文本：不要 **粗体** / - 列表等 Markdown）
 
-<!-- 各平台标题、简介、话题标签、置顶评论、章节轴、检查清单 -->
+#话题1 #话题2 #话题3
+
+<!-- 简介与话题：正文纯文本 + 末行话题；# 开头、空格分隔、无逗号 -->
+<!-- 还可补充：置顶评论、章节轴、检查清单等 -->
 
 <!-- source: features/_template/content-production/README.md -->
 
@@ -981,8 +1067,8 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 └── production/
     ├── content/                    # 内容创作资产 ✅ 跟踪
     │   ├── 00-structure.md         #   话题大纲
-    │   ├── 01-script.md            #   口播讲稿
-    │   └── 05-publish-kit.md       #   发布素材（标题/简介/话题/检查清单）
+    │   ├── 01-script.md            #   口播讲稿（写法见 knowledge/standards/video-voiceover-script-conventions.md）
+    │   └── 05-publish-kit.md       #   发布素材（标题/简介与话题同节/检查清单等）
     │
     ├── slides/                     # 幻灯片资产 ✅ 跟踪
     │   └── presentation.html       #   主幻灯（核心资产）
@@ -992,6 +1078,7 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
     │
     ├── timing/                     # 时间轴与配置 ✅ 跟踪
     │   ├── wav-durations.json      #   精确翻页时长
+    │   ├── flip-boundaries.md      #   翻页语义契约（页 ↔ 时刻 ↔ SRT 锚；wav 前建议必有）
     │   └── video-input.json        #   配置 + srtReplacements 积累
     │
     ├── media/                      # 媒体文件 ❌ 不跟踪
@@ -1013,6 +1100,7 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | presentation.html | ✅ | 布局+SVG+精炼文字，不可无损重建 |
 | sub.srt（校对后） | ✅ | 校对是人工+推理过程，不可无损重建 |
 | wav-durations.json | ✅ | 精确翻页时长，不可无损重建 |
+| flip-boundaries.md | ✅（强烈建议） | 页↔口播锚点的人审契约；缺则易画面与语义错位 |
 | video-input.json | ✅ | 含 srtReplacements 积累，不可无损重建 |
 | cover.html | ✅ | 封面设计，不可无损重建 |
 | review_record / issue_checklist | ✅ | 评审产出，放 feature 根目录 |
@@ -1028,6 +1116,28 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | srt-to-deck | `wav-durations.json` | `production/timing/wav-durations.json` |
 | html-deck-layout | `presentation.html` | `production/slides/presentation.html` |
 | html-video-from-slides | `--project` 指向 | `production/`（读取各子目录） |
+
+### 幻灯内容（主题内）
+
+`production/slides/presentation.html` **只呈现本期视频主题**（对齐 `spec.md` / `00-structure.md` / 口播）。**不要**在幻灯里写「如何制作本视频」、skill 名、仓库路径等制片 meta；收口页用真实栏目名，不用占位。生成规范见 **`skills/html-deck-layout/SKILL.md`**、成片路径见 **`skills/html-video-from-slides/SKILL.md`**「幻灯内容边界」。
+
+### 成片构建
+
+| 场景 | 命令 |
+|------|------|
+| 全量（截图 + 切段 + 烧字幕） | `skills/html-video-from-slides/scripts/run-wav-build.ps1 -Project "…/production"` |
+| 仅续跑合并/烧字幕（**且未改 HTML**） | `node skills/html-video-from-slides/scripts/finish-burn.js "…/production"` |
+
+详见 **`skills/html-video-from-slides/references/resume-burn.md`**。改 `presentation.html` 后若 `tmp/part_*.mp4` 早于 HTML，须删 `tmp/` 再全量构建。**`wav` 不重录口播**，只重截图画面（见 skill「变更与重跑决策」）。
+
+交付成片：`timing/wav-durations.json` 的 `outputFile`（常见 `production/final_auto.mp4`），不要只交 `tmp/merged.mp4`。
+
+### 口播选路：`tts` vs 火山播客 WAV
+
+| 目标 | 做法 |
+|------|------|
+| Edge 机器念稿 + 直接出 **MP4** | `node cli.js tts --project production/`；讲稿 **`content/01-script.md`** 须按 **`# 【页题】` … `---`** 分页，与 `slides/presentation.html` 页数一致。详见 **`skills/html-video-from-slides/SKILL.md`**「Edge tts：讲稿分页与双人边界」。 |
+| 双人对话感、播客式 **WAV** | **`timing/video-input.json`** 配置 **`podcastTts`** + **`skills/volc-podcast-tts`**，见 **`skills/html-video-from-slides/references/VIDEO_PIPELINE.md`**；再用 **`wav-auto` / `wav`** 与幻灯合成。勿用 Edge **`tts`** 承担「同页双角色分轨」。 |
 
 ## 与标准 feature 模板的关系
 
@@ -1061,6 +1171,8 @@ Feature-id 格式：`{主题}-{类型}`，类型后缀统一为：
 | 8 | content/ 有讲稿 | `production/content/01-script.md` 存在 |
 | 9 | INDEX.md 一致 | `features/INDEX.md` 中该 feature 的 path 与实际目录一致 |
 | 10 | spec.md 路径自洽 | spec.md 内引用的路径前缀与实际 `features/content-pipeline/<id>/` 一致 |
+| 11 | wav 成片语义契约（建议） | `production/timing/flip-boundaries.md` 存在并与 `wav-durations.json` 同步 |
+| 12 | 幻灯无 meta 制片页 | `slides/presentation.html` 不含「如何制作视频」、skill/CLI 名等与 `spec.md` 主题无关的页面 |
 
 <!-- source: features/_template/deliver.md -->
 
