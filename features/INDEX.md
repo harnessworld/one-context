@@ -21,7 +21,6 @@
 | ai-agent-security-2026-revelations-mid-video | 2026 AI Agent 安全启示录（对话口播） | content-pipeline | 发布 | `features/content-pipeline/ai-agent-security-2026-revelations-mid-video/` | one-context |
 | claude-code-multi-agent-source-mid-video | Claude Code 多 Agent 机制源码解读（中视频口播） | content-pipeline | 发布 | `features/content-pipeline/claude-code-multi-agent-source-mid-video/` | one-context |
 | openai-enterprise-ai-scaling-five-actions-mid-video | OpenAI 企业 AI 规模化落地五要点（中视频口播） | content-pipeline | 发布 | `features/content-pipeline/openai-enterprise-ai-scaling-five-actions-mid-video/` | one-context |
-| markdown-html-claude-engineer-mid-video | Markdown 要被淘汰？Claude 工程师弃用真相（对话口播） | content-pipeline | 发布 | `features/content-pipeline/markdown-html-claude-engineer-mid-video/` | one-context |
 | markdown-html-claude-engineer-mid-video | Markdown 要被淘汰？Claude 工程师弃用真相（阿哲 / 小夏 对话口播） | content-pipeline | 发布 | `features/content-pipeline/markdown-html-claude-engineer-mid-video/` | one-context |
 | damai-ticket-bot              | 大麦抢票助手 — 浏览器插件 + CLI 集成 one-context skill                 | integrations | draft  | `features/integrations/damai-ticket-bot/`              | one-context     |
 | operator-spaces-paper-analysis | 算子空间论文深度分析 — 发现证明漏洞与改进机会 | research | in_progress | `features/research/operator-spaces-paper-analysis/` | paperwork |
@@ -33,7 +32,8 @@
 | gsd-integration               | GSD 集成 — one-context 上下文注入 GSD 工作流                              | core     | draft  | `features/core/gsd-integration/`                  | one-context     |
 | trend-radar-integration        | TrendRadar 趋势雷达集成 — 热点情报 + MCP + 微信推送                         | integrations | in_progress | `features/integrations/trend-radar/`      | trend-radar    |
 | short-video-reporting-paradigm | 短视频式汇报范式 — 用内容创作思路重塑职场汇报                             | content-pipeline | 发布 | `features/content-pipeline/short-video-reporting-paradigm/` | one-context |
-| hyperframes-video              | HyperFrames WAV-to-Video — HTML Native 动画视频制作技能（目录暂无已追踪文件）              | content-pipeline | 发布 | `features/content-pipeline/hyperframes-video/` | one-context |
+| hyperframes-video              | HyperFrames WAV-to-Video — HTML Native 动画视频制作技能（占位 feature）              | content-pipeline | draft | `features/content-pipeline/hyperframes-video/` | one-context |
+| ai-sme-opportunity             | 放下大厂滤镜：中小厂的 AI 机会（中视频）                                              | content-pipeline | 发布 | `features/content-pipeline/ai-sme-opportunity/` | one-context |
 | sandbox-agent-era-mid-video    | Agent时代下最被低估的技术——沙箱（中视频口播）                    | content-pipeline | 发布 | `features/content-pipeline/sandbox-agent-era-mid-video/` | one-context |
 | deepseek-v4-deploy-guide-mid-video | DeepSeek V4 部署与调用指南（中视频）                        | content-pipeline | 发布 | `features/content-pipeline/deepseek-v4-deploy-guide-mid-video/` | one-context |
 | agent亲和架构底层原理剖析 | Agent 亲和架构底层原理剖析（口播视频） | content-pipeline | 发布 | `features/content-pipeline/agent亲和架构底层原理剖析/` | one-context |
