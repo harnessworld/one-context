@@ -1,7 +1,7 @@
----
+﻿---
 id: deepseek-v4-deploy-guide-mid-video
 title: DeepSeek V4 部署与调用指南（中视频）
-status: planning
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: 水猿

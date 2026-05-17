@@ -1,7 +1,7 @@
----
+﻿---
 id: short-video-reporting-paradigm
 title: 短视频式汇报范式 — 用内容创作思路重塑职场汇报
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

@@ -1,7 +1,7 @@
----
+﻿---
 id: "claudecode-prompt-caching-mid-video"
 title: "Prompt Caching Is Everything —— Claude Code 团队最新文章"
-status: planning
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: "水猿"

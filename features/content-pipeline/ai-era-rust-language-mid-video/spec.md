@@ -1,7 +1,7 @@
----
+﻿---
 id: ai-era-rust-language-mid-video
 title: AI 时代下语言的「香饽饽」——Rust（中视频口播）
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

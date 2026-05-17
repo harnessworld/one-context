@@ -428,7 +428,7 @@
       <div class="kicker">流式传输设计</div>
       <h2 class="h-xl" style="margin-bottom:2vh">背压与死锁规避</h2>
       <div class="body" style="gap:1.5vh;display:flex;flex-direction:column">
-        <p><strong style="color:var(--orange)">核心设计</strong>：execute 方法<strong>立刻返回</strong>一个数据接收端，实际转发放在后台异步任务里。</p>
+        <p><strong style="color:var(--orange)">核心设计</strong>：execute 方法<strong>立刻返回</strong>一个数据接收端，实际转发放在后台异步任务里——底层用 <code class="code">tokio::spawn</code> + <code class="code">mpsc::channel(100)</code> 实现。</p>
         <p><strong>为什么</strong>：避免死锁——缓冲区 100 满了→发送端挂起→但 handler 要等 execute 返回才能消费→死锁。</p>
         <p><strong>解法</strong>：生产（后台任务）和消费（handler）并行运转。</p>
         <div class="card card-orange" style="margin-top:1vh">

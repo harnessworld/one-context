@@ -34,13 +34,14 @@ body {
     position: absolute;
     inset: 0;
     z-index: 0;
+    pointer-events: none;
 }
 
-/* 全屏：生锈的旧语言意象 */
+/* 全屏：生锈的旧语言意象（须在 bg-fallback 之上） */
 #rust-mega {
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 2;
     pointer-events: none;
 }
 #rust-mega svg {
@@ -116,8 +117,38 @@ body {
     align-items: center;
     padding: 200px 72px 280px;
     text-align: center;
-    z-index: 20;
     gap: 0;
+    z-index: 20;
+}
+#content::before {
+    content: "";
+    position: absolute;
+    inset: -40px -20px;
+    z-index: -1;
+    border-radius: 24px;
+    background: radial-gradient(ellipse 90% 70% at 50% 50%, rgba(10,10,11,0.42) 0%, rgba(10,10,11,0) 72%);
+    pointer-events: none;
+}
+
+#headline em.rust-accent {
+    font-style: normal;
+    display: inline-block;
+    background: linear-gradient(100deg, #fffde7 0%, #ffeb3b 16%, #ffc400 34%, #ffab00 52%, #ffd54f 72%, #fff8e1 100%);
+    background-size: 160% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 18px rgba(255,213,79,.55)) drop-shadow(0 0 42px rgba(255,193,7,.22));
+}
+
+#tag.tag-gold {
+    background: rgba(201,169,110,0.12) !important;
+    border-color: rgba(255,213,79,0.45) !important;
+    background-image: linear-gradient(90deg, rgba(255,235,59,.95), rgba(255,193,7,.88), rgba(201,169,110,.9)) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
 }
 
 #tag {
@@ -219,89 +250,83 @@ body {
     <div id="rust-mega" aria-hidden="true">
 <svg viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <radialGradient id="rb" cx="50%" cy="38%" r="85%">
-      <stop offset="0%" stop-color="#2a1810"/>
-      <stop offset="40%" stop-color="#120c08"/>
-      <stop offset="100%" stop-color="#030205"/>
+    <radialGradient id="ppt-base" cx="50%" cy="35%" r="95%">
+      <stop offset="0%" stop-color="#141310"/>
+      <stop offset="45%" stop-color="#0a0a0b"/>
+      <stop offset="100%" stop-color="#050506"/>
     </radialGradient>
-    <radialGradient id="rglow" cx="50%" cy="42%" r="45%">
-      <stop offset="0%" stop-color="#ce422b" stop-opacity="0.55"/>
-      <stop offset="55%" stop-color="#b45309" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    <radialGradient id="ppt-gold-a" cx="22%" cy="18%" r="42%">
+      <stop offset="0%" stop-color="#c9a96e" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#c9a96e" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="rfresh" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f97316"/>
-      <stop offset="45%" stop-color="#ce422b"/>
-      <stop offset="100%" stop-color="#00f0ff"/>
-    </linearGradient>
+    <radialGradient id="ppt-gold-b" cx="82%" cy="72%" r="48%">
+      <stop offset="0%" stop-color="#ffc400" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#ffc400" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="rusted" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#78716c"/>
-      <stop offset="50%" stop-color="#57534e"/>
-      <stop offset="100%" stop-color="#292524"/>
+      <stop offset="0%" stop-color="#a8a29e"/>
+      <stop offset="45%" stop-color="#6b5a4a"/>
+      <stop offset="100%" stop-color="#3f342c"/>
     </linearGradient>
-    <filter id="rglowf" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="18" result="b"/>
+    <linearGradient id="rust-flake" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#92400e"/>
+      <stop offset="50%" stop-color="#c9a96e"/>
+      <stop offset="100%" stop-color="#57534e"/>
+    </linearGradient>
+    <filter id="rcrack">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="metal">
+      <feGaussianBlur stdDeviation="1.2" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <filter id="rcrack">
-      <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-    <pattern id="rgrain" width="120" height="120" patternUnits="userSpaceOnUse">
-      <circle cx="18" cy="22" r="1.2" fill="#a16207" opacity="0.25"/>
-      <circle cx="78" cy="44" r="0.9" fill="#78716c" opacity="0.2"/>
-      <circle cx="102" cy="88" r="1.4" fill="#b45309" opacity="0.18"/>
+    <pattern id="ppt-grain" width="90" height="90" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="18" r="1.1" fill="#c9a96e" opacity="0.14"/>
+      <circle cx="48" cy="52" r="0.8" fill="#ffeb3b" opacity="0.1"/>
+      <circle cx="72" cy="28" r="1.3" fill="#78716c" opacity="0.12"/>
     </pattern>
   </defs>
-  <rect width="1080" height="1920" fill="url(#rb)"/>
-  <rect width="1080" height="1920" fill="url(#rgrain)" opacity="0.9"/>
-  <ellipse cx="540" cy="760" rx="520" ry="480" fill="url(#rglow)" filter="url(#rglowf)"/>
-
-  <!-- 生锈的旧语言：大号褪色字 -->
-  <g opacity="0.22" filter="url(#rcrack)">
-    <text x="120" y="340" fill="url(#rusted)" font-size="118" font-weight="900" font-family="Georgia,serif" transform="rotate(-12 120 340)">Java</text>
-    <text x="720" y="420" fill="url(#rusted)" font-size="96" font-weight="800" font-family="Consolas,monospace" transform="rotate(8 720 420)">C++</text>
-    <text x="80" y="1280" fill="url(#rusted)" font-size="108" font-weight="800" font-family="Consolas,monospace" transform="rotate(-6 80 1280)">Python</text>
-    <text x="780" y="1380" fill="url(#rusted)" font-size="92" font-weight="700" font-family="system-ui,sans-serif" transform="rotate(14 780 1380)">Go</text>
-    <text x="200" y="1680" fill="#44403c" font-size="72" font-weight="700" font-family="Consolas,monospace" opacity="0.85" transform="rotate(-4 200 1680)">PHP</text>
-    <text x="640" y="260" fill="#57534e" font-size="64" font-weight="600" font-family="Consolas,monospace" transform="rotate(5 640 260)">Ruby</text>
+  <rect width="1080" height="1920" fill="url(#ppt-base)"/>
+  <rect width="1080" height="1920" fill="url(#ppt-grain)"/>
+  <rect width="1080" height="1920" fill="url(#ppt-gold-a)"/>
+  <rect width="1080" height="1920" fill="url(#ppt-gold-b)"/>
+  <g opacity="0.55">
+    <rect x="-40" y="180" width="420" height="280" rx="8" fill="#292524" transform="rotate(-8 180 320)" opacity="0.7"/>
+    <rect x="700" y="120" width="380" height="240" rx="8" fill="#3f342c" transform="rotate(6 890 240)" opacity="0.65"/>
+    <rect x="40" y="1500" width="460" height="260" rx="8" fill="#44403c" transform="rotate(-5 270 1630)" opacity="0.6"/>
+    <rect x="620" y="1580" width="400" height="220" rx="8" fill="#292524" transform="rotate(10 820 1690)" opacity="0.55"/>
   </g>
-
-  <!-- 锈蚀代码碎片 -->
-  <g opacity="0.35" font-family="JetBrains Mono,Consolas,monospace" font-size="22" fill="#a8a29e">
-    <text x="60" y="620">public static void main()</text>
-    <text x="60" y="652">{ /* deprecated */ }</text>
-    <text x="620" y="1120">def train(): pass</text>
-    <text x="620" y="1152"># legacy stack</text>
-    <text x="140" y="1520">import legacy;</text>
-    <text x="140" y="1552">// memory unsafe</text>
+  <g opacity="0.52" filter="url(#rcrack)">
+    <text x="40" y="280" fill="url(#rusted)" font-size="148" font-weight="900" font-family="Georgia,serif" transform="rotate(-14 40 280)">Java</text>
+    <text x="620" y="360" fill="url(#rusted)" font-size="132" font-weight="800" font-family="Consolas,monospace" transform="rotate(10 620 360)">C++</text>
+    <text x="-20" y="1180" fill="url(#rusted)" font-size="156" font-weight="800" font-family="Consolas,monospace" transform="rotate(-8 -20 1180)">Python</text>
+    <text x="700" y="1320" fill="url(#rusted)" font-size="124" font-weight="700" font-family="system-ui,sans-serif" transform="rotate(12 700 1320)">Go</text>
+    <text x="120" y="1780" fill="url(#rusted)" font-size="96" font-weight="700" font-family="Consolas,monospace" transform="rotate(-5 120 1780)">PHP</text>
+    <text x="780" y="220" fill="url(#rusted)" font-size="88" font-weight="600" font-family="Consolas,monospace" transform="rotate(6 780 220)">Ruby</text>
+    <text x="360" y="1720" fill="url(#rusted)" font-size="76" font-weight="600" font-family="Consolas,monospace" transform="rotate(3 360 1720)">JavaScript</text>
   </g>
-
-  <!-- 锈斑与剥落 -->
-  <g opacity="0.5">
-    <ellipse cx="280" cy="520" rx="140" ry="90" fill="#78350f" opacity="0.35"/>
-    <ellipse cx="820" cy="980" rx="180" ry="110" fill="#92400e" opacity="0.28"/>
-    <ellipse cx="420" cy="1450" rx="160" ry="85" fill="#57534e" opacity="0.32"/>
-    <path d="M180 880 Q240 820 320 860 T460 900" fill="none" stroke="#a16207" stroke-width="3" opacity="0.4"/>
-    <path d="M700 600 Q780 560 860 620 T980 680" fill="none" stroke="#78716c" stroke-width="2.5" opacity="0.35"/>
+  <g opacity="0.65" filter="url(#metal)">
+    <text x="42" y="278" fill="none" stroke="url(#rust-flake)" stroke-width="2.5" font-size="148" font-weight="900" font-family="Georgia,serif" transform="rotate(-14 42 278)">Java</text>
+    <text x="618" y="358" fill="none" stroke="url(#rust-flake)" stroke-width="2" font-size="132" font-weight="800" font-family="Consolas,monospace" transform="rotate(10 618 358)">C++</text>
+    <text x="-18" y="1178" fill="none" stroke="url(#rust-flake)" stroke-width="2.5" font-size="156" font-weight="800" font-family="Consolas,monospace" transform="rotate(-8 -18 1178)">Python</text>
   </g>
-
-  <!-- 中心：尚新的 Rust -->
-  <g filter="url(#rglowf)">
-    <circle cx="540" cy="820" r="200" fill="none" stroke="url(#rfresh)" stroke-width="4" opacity="0.45"/>
-    <circle cx="540" cy="820" r="168" fill="#1c0f0a" stroke="#ce422b" stroke-width="3" opacity="0.85"/>
-    <text x="540" y="845" text-anchor="middle" fill="url(#rfresh)" font-size="88" font-weight="900" font-family="Consolas,JetBrains Mono,monospace" letter-spacing="0.08em">Rust</text>
-    <!-- 简化齿轮 -->
-    <g transform="translate(540,820)" opacity="0.9">
-      <circle r="118" fill="none" stroke="#f97316" stroke-width="2" stroke-dasharray="14 10" opacity="0.5"/>
-      <path d="M0 -92 L12 -72 L0 -52 L-12 -72 Z M79 -46 L72 -24 L50 -30 L56 -52 Z M92 0 L72 12 L66 -10 L88 -16 Z M79 46 L56 52 L50 30 L72 24 Z M0 92 L-12 72 L0 52 L12 72 Z M-79 46 L-88 16 L-66 10 L-72 24 Z M-92 0 L-56 -52 L-50 -30 L-72 -12 Z M-79 -46 L-50 -30 L-56 -52 L-72 -24 Z" fill="#ce422b" opacity="0.75"/>
-    </g>
+  <g opacity="0.48" font-family="IBM Plex Mono,Consolas,monospace" font-size="26" fill="#d6d3d1">
+    <text x="48" y="520">public static void main()</text>
+    <text x="48" y="556">{ /* legacy JVM */ }</text>
+    <text x="560" y="1080">def train(): pass</text>
+    <text x="560" y="1116"># deprecated stack</text>
+    <text x="88" y="1420">import legacy;</text>
+    <text x="88" y="1456">// memory unsafe</text>
+    <text x="520" y="1680">package main</text>
   </g>
-
-  <!-- AI 推理栈光带（新语言仍在发光） -->
-  <path d="M80 1050 Q540 900 1000 1050" fill="none" stroke="#00f0ff" stroke-width="2" opacity="0.35"/>
-  <path d="M120 1180 Q540 1040 960 1180" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.28"/>
-  <text x="540" y="1088" text-anchor="middle" fill="rgba(0,240,255,0.45)" font-size="20" font-family="system-ui,sans-serif" letter-spacing="0.35em">INFERENCE · SANDBOX · TOKENIZER</text>
+  <g opacity="0.7">
+    <ellipse cx="220" cy="440" rx="160" ry="100" fill="#78350f" opacity="0.45"/>
+    <ellipse cx="900" cy="900" rx="200" ry="120" fill="#92400e" opacity="0.38"/>
+    <ellipse cx="480" cy="1620" rx="180" ry="95" fill="#57534e" opacity="0.42"/>
+    <path d="M140 920 Q220 860 340 900 T500 940" fill="none" stroke="#c9a96e" stroke-width="4" opacity="0.35"/>
+    <path d="M760 640 Q840 600 940 660 T1040 720" fill="none" stroke="#a16207" stroke-width="3" opacity="0.4"/>
+  </g>
 </svg>
     </div>
     <div id="bg-fallback"></div>
@@ -348,7 +373,7 @@ const CONFIG = {
     footerItems: ["推理热路径", "内存安全", "混合栈"],
     watermark:   "rust · inference",
 
-    theme:       "rust",
+    theme:       "ppt",
     hideDeco:    true,
 
     overlayDirection: "to-bottom",
@@ -357,6 +382,23 @@ const CONFIG = {
 };
 
 const THEMES = {
+    ppt: {
+        accent:     "#c9a96e",
+        accent2:    "#ffc400",
+        tagGold:    true,
+        tagBg:      "rgba(201,169,110,0.12)",
+        tagBorder:  "rgba(255,213,79,0.45)",
+        tagColor:   "#ffd54f",
+        glowColor:  "rgba(201,169,110,0.28)",
+        glowColor2: "rgba(255,193,7,0.12)",
+        dotColor:   "#ffc400",
+        bar:        "linear-gradient(90deg, transparent 2%, #ffeb3b 25%, #ffc400 50%, #c9a96e 75%, transparent 98%)",
+        textGlow:   "0 0 80px rgba(255,193,7,0.28), 0 4px 30px rgba(0,0,0,0.9)",
+        accentGrad: "linear-gradient(100deg, #fffde7 0%, #ffeb3b 16%, #ffc400 34%, #ffab00 52%, #ffd54f 72%, #fff8e1 100%)",
+        fallbackBg: "radial-gradient(ellipse 120% 80% at 50% 30%, #141310 0%, #0a0a0b 45%, #050506 100%)",
+        decoGlow:   "rgba(201,169,110,0.28)",
+        decoAccent: "rgba(255,213,79,0.22)",
+    },
     rust: {
         accent:     "#F97316",
         accent2:    "#00F0FF",
@@ -393,19 +435,21 @@ const THEMES = {
 
 const OVERLAYS = {
     "to-bottom": `linear-gradient(to bottom,
-        rgba(8,5,3,0.88) 0%,
-        rgba(8,5,3,0.35) 16%,
-        rgba(8,5,3,0.12) 36%,
-        rgba(8,5,3,0.10) 50%,
-        rgba(8,5,3,0.42) 70%,
-        rgba(8,5,3,0.94) 100%)`,
+        rgba(10,10,11,0.72) 0%,
+        rgba(10,10,11,0.22) 14%,
+        rgba(10,10,11,0.05) 38%,
+        rgba(10,10,11,0.05) 55%,
+        rgba(10,10,11,0.28) 72%,
+        rgba(10,10,11,0.85) 100%)`,
 };
 
 (function render() {
-    const t = THEMES[CONFIG.theme] || THEMES.rust;
+    const t = THEMES[CONFIG.theme] || THEMES.ppt;
 
-    document.getElementById('bg-fallback').style.background =
-        t.fallbackBg + `, radial-gradient(ellipse 70% 50% at 50% 42%, ${t.glowColor} 0%, transparent 55%)`;
+    const megaSvg = document.querySelector('#rust-mega svg');
+    document.getElementById('bg-fallback').style.background = megaSvg
+        ? `radial-gradient(ellipse 70% 50% at 50% 42%, ${t.glowColor} 0%, transparent 55%)`
+        : t.fallbackBg + `, radial-gradient(ellipse 70% 50% at 50% 42%, ${t.glowColor} 0%, transparent 55%)`;
 
     document.getElementById('overlay').style.background =
         OVERLAYS[CONFIG.overlayDirection] || OVERLAYS['to-bottom'];
@@ -420,6 +464,7 @@ const OVERLAYS = {
     const tagEl = document.getElementById('tag');
     tagEl.textContent = CONFIG.tag;
     tagEl.style.cssText += `background:${t.tagBg}; border:1.5px solid ${t.tagBorder}; color:${t.tagColor};`;
+    if (t.tagGold) tagEl.classList.add('tag-gold');
 
     const headEl = document.getElementById('headline');
     const lines = CONFIG.headline.split('\n');
@@ -441,7 +486,7 @@ const OVERLAYS = {
     headEl.style.textShadow = t.textGlow;
     headEl.innerHTML = lines.map((line, i) => {
         if (CONFIG.accentLine === i + 1) {
-            return `<em style="background:${t.accentGrad}; -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">${line}</em>`;
+            return `<em class="rust-accent">${line}</em>`;
         }
         return `<span>${line}</span>`;
     }).join('<br>');

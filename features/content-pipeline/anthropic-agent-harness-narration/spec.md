@@ -1,7 +1,7 @@
----
+﻿---
 id: anthropic-agent-harness-narration
 title: Anthropic Agent Harness 哲学 — 口播稿
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

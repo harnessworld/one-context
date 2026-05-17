@@ -1,7 +1,7 @@
----
+﻿---
 id: "keycompute-ai-gateway-rust-mid-video"
 title: "Rust 构建 AI 算力中枢：KeyCompute 架构解析（中视频）"
-status: planning
+status: 开发中
 category: content-pipeline
 primary_repo_id: one-context
 owner: 水猿

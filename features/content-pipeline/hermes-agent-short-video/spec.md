@@ -1,7 +1,7 @@
----
+﻿---
 id: hermes-agent-short-video
 title: Hermes Agent 短视频口播成片
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""

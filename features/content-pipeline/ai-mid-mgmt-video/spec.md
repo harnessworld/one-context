@@ -1,7 +1,7 @@
----
+﻿---
 id: ai-mid-mgmt-video
 title: AI 中视频管理 — 素材与发布工具链
-status: draft
+status: 发布
 category: content-pipeline
 primary_repo_id: one-context
 owner: ""
